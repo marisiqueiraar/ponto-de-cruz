@@ -31,6 +31,13 @@ npm run dev
 - `src/components/` — UI (upload, controles, visualizador do padrão)
 - `src/state/useEditorStore.ts` — estado do editor (Zustand)
 
+## Fontes
+
+Além de dois alfabetos em blocos desenhados à mão, o app inclui uma galeria de tipografias
+convertidas automaticamente em pontos (`public/fonts/`): Press Start 2P, VT323, Silkscreen e
+Pixelify Sans, todas Google Fonts sob licença SIL Open Font License. É possível também enviar
+uma fonte própria (.ttf/.otf) pela aba Gerador — a conversão é feita localmente no navegador.
+
 ## Deploy
 
 Build estático sem variáveis de ambiente — funciona em qualquer host estático (Vercel, Netlify, etc.):
