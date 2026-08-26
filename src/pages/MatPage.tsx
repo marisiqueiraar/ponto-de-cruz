@@ -10,7 +10,7 @@ import { dmcCssColor, findClosestDmcColor } from '../lib/color/dmcMatch'
 import { itemOverflows, matGrid, stitchCountsByColor } from '../lib/mat/matGeometry'
 import { estimateSkeins } from '../lib/stitch/flossEstimate'
 import { useFontLibraryStore } from '../state/useFontLibraryStore'
-import { useMatStore } from '../state/useMatStore'
+import { roundCm, useMatStore } from '../state/useMatStore'
 import { MotifPreview } from '../components/mat/MotifPreview'
 import type { Rotation } from '../lib/motifs/gridDraw'
 
@@ -172,7 +172,7 @@ export function MatPage() {
                 min={1}
                 step={0.5}
                 value={project.photo.widthCm}
-                onChange={(e) => updateProject({ photo: { ...project.photo, widthCm: Number(e.target.value) } })}
+                onChange={(e) => updateProject({ photo: { ...project.photo, widthCm: roundCm(Number(e.target.value)) } })}
               />
             </label>
             <label className="field">
@@ -182,7 +182,7 @@ export function MatPage() {
                 min={1}
                 step={0.5}
                 value={project.photo.heightCm}
-                onChange={(e) => updateProject({ photo: { ...project.photo, heightCm: Number(e.target.value) } })}
+                onChange={(e) => updateProject({ photo: { ...project.photo, heightCm: roundCm(Number(e.target.value)) } })}
               />
             </label>
             <label className="field">
@@ -192,7 +192,7 @@ export function MatPage() {
                 min={0}
                 step={0.5}
                 value={project.photo.xCm}
-                onChange={(e) => updateProject({ photo: { ...project.photo, xCm: Number(e.target.value) } })}
+                onChange={(e) => updateProject({ photo: { ...project.photo, xCm: roundCm(Number(e.target.value)) } })}
               />
             </label>
             <label className="field">
@@ -202,7 +202,7 @@ export function MatPage() {
                 min={0}
                 step={0.5}
                 value={project.photo.yCm}
-                onChange={(e) => updateProject({ photo: { ...project.photo, yCm: Number(e.target.value) } })}
+                onChange={(e) => updateProject({ photo: { ...project.photo, yCm: roundCm(Number(e.target.value)) } })}
               />
             </label>
           </div>
@@ -214,8 +214,8 @@ export function MatPage() {
               updateProject({
                 photo: {
                   ...project.photo,
-                  xCm: Number(((project.widthCm - project.photo.widthCm) / 2).toFixed(1)),
-                  yCm: Number(((project.heightCm - project.photo.heightCm) / 2).toFixed(1)),
+                  xCm: roundCm((project.widthCm - project.photo.widthCm) / 2),
+                  yCm: roundCm((project.heightCm - project.photo.heightCm) / 2),
                 },
               })
             }

@@ -10,6 +10,11 @@ import type { MatItem, MatProject } from '../types/mat'
 const LAST_MAT_KEY = 'lastOpenMatId'
 const PERSIST_DEBOUNCE_MS = 500
 
+/** Centimetre values are edited in number inputs, so keep them at one decimal. */
+export function roundCm(value: number): number {
+  return Math.round(value * 10) / 10
+}
+
 function createDefaultProject(): MatProject {
   const now = Date.now()
   return {
@@ -92,11 +97,12 @@ export const useMatStore = create<MatState>((set) => ({
         widthCm,
         heightCm,
         // Re-centre a photo opening sized to leave a stitching border all around.
+        // Rounded to a tenth: these land in number inputs, where raw float noise shows up.
         photo: {
-          xCm: widthCm * 0.25,
-          yCm: heightCm * 0.22,
-          widthCm: widthCm * 0.5,
-          heightCm: heightCm * 0.56,
+          xCm: roundCm(widthCm * 0.25),
+          yCm: roundCm(heightCm * 0.22),
+          widthCm: roundCm(widthCm * 0.5),
+          heightCm: roundCm(heightCm * 0.56),
         },
       }),
     }))

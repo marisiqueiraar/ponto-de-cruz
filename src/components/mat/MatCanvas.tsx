@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react'
+import { useCallback, useEffect, useRef, type MouseEvent } from 'react'
 import { collectStitches, matGrid, photoRectInCells, resolveItemShape } from '../../lib/mat/matGeometry'
 import { useMatStore } from '../../state/useMatStore'
 import type { MatItem } from '../../types/mat'
 
 const PADDING = 26
+/** On-screen size of one hole. Constant, so the card's drawn size tracks its real size. */
+const CELL_PX = 10
 
 interface MatCanvasProps {
   /** Maps a DMC code to a CSS colour; supplied by the page which knows the thread palette. */
@@ -18,29 +20,19 @@ export function MatCanvas({ colorOf }: MatCanvasProps) {
 
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [size, setSize] = useState({ width: 800, height: 520 })
   const dragRef = useRef<{ itemId: string; startX: number; startY: number; originX: number; originY: number } | null>(null)
 
   const grid = matGrid(project)
 
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-    const observer = new ResizeObserver(() => {
-      const rect = container.getBoundingClientRect()
-      setSize({ width: rect.width, height: rect.height })
-    })
-    observer.observe(container)
-    return () => observer.disconnect()
-  }, [])
-
-  /** Cell size in px that fits the whole card in the viewport. */
-  const cellPx = Math.max(
-    2,
-    Math.min((size.width - PADDING * 2) / Math.max(1, grid.cols), (size.height - PADDING * 2) / Math.max(1, grid.rows)),
-  )
-  const originX = (size.width - grid.cols * cellPx) / 2
-  const originY = (size.height - grid.rows * cellPx) / 2
+  // Fixed scale: the card is drawn at a constant size per hole, so a bigger card really is
+  // bigger on screen. The frame scrolls when it does not fit, instead of zooming to fill.
+  const cellPx = CELL_PX
+  const size = {
+    width: grid.cols * cellPx + PADDING * 2,
+    height: grid.rows * cellPx + PADDING * 2,
+  }
+  const originX = PADDING
+  const originY = PADDING
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current
