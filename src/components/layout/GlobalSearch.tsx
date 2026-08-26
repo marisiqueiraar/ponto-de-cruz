@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon, type IconName } from '../common/Icon'
-import { LIBRARY_PROJECTS } from '../../data/library'
 import { MOTIFS } from '../../data/motifs'
 import { OBJECTIVES } from '../../data/objectives'
 import { STITCH_TYPES, TIPS } from '../../data/stitchGuide'
@@ -25,15 +24,7 @@ function buildIndex(): Array<SearchResult & { haystack: string }> {
       detail: `${o.widthCm}×${o.heightCm}cm · ${o.count}ct`,
       group: 'Objetivos',
       icon: 'bulb' as IconName,
-      tab: o.goTo,
-    })),
-    ...LIBRARY_PROJECTS.map((p) => ({
-      id: `projeto-${p.id}`,
-      label: p.name,
-      detail: `${p.widthStitches}×${p.heightStitches} pontos`,
-      group: 'Biblioteca',
-      icon: 'compass' as IconName,
-      tab: 'biblioteca' as TabId,
+      tab: 'criar' as TabId,
     })),
     ...SUBSTRATES.map((s) => ({
       id: `material-${s.id}`,
@@ -49,7 +40,7 @@ function buildIndex(): Array<SearchResult & { haystack: string }> {
       detail: `${m.shape.width}×${m.shape.height} pontos`,
       group: 'Motivos',
       icon: 'palette' as IconName,
-      tab: 'moldura' as TabId,
+      tab: 'criar' as TabId,
     })),
     ...STITCH_TYPES.map((s) => ({
       id: `ponto-${s.id}`,

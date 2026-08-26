@@ -1,5 +1,3 @@
-import type { TabId } from '../navigation'
-
 /** The two ways this app can build a piece. */
 export type Modality = 'moldura' | 'padrao'
 
@@ -26,7 +24,8 @@ export interface Objective {
   heightCm: number
   effort: 'Uma tarde' | 'Alguns dias' | 'Semanas'
   why: string
-  goTo: TabId
+  /** Which piece the application preview should open on, when one matches. */
+  applicationId?: string
 }
 
 /**
@@ -44,7 +43,6 @@ export const OBJECTIVES: Objective[] = [
     heightCm: 10,
     effort: 'Uma tarde',
     why: 'Foto impressa montada no cartão e bordado só nas laterais. É o formato de presente e de encomenda mais comum nesse estilo.',
-    goTo: 'moldura',
   },
   {
     id: 'quadro-casal',
@@ -56,7 +54,6 @@ export const OBJECTIVES: Objective[] = [
     heightCm: 13,
     effort: 'Alguns dias',
     why: 'Mesmo princípio do cartão, em tamanho de moldura de mesa: dá espaço para monograma dos dois lados e a data embaixo.',
-    goTo: 'moldura',
   },
   {
     id: 'convite',
@@ -68,7 +65,6 @@ export const OBJECTIVES: Objective[] = [
     heightCm: 15,
     effort: 'Uma tarde',
     why: 'Papel perfurado já vem com a grade pronta e não desfia na borda — ideal para fazer vários iguais sem furar cada um.',
-    goTo: 'moldura',
   },
   {
     id: 'marcador',
@@ -80,7 +76,6 @@ export const OBJECTIVES: Objective[] = [
     heightCm: 18,
     effort: 'Uma tarde',
     why: 'A borda recortada do papel perfurado dispensa acabamento, e o formato estreito pede motivo pequeno em vez de imagem cheia.',
-    goTo: 'moldura',
   },
   {
     id: 'retrato',
@@ -92,7 +87,7 @@ export const OBJECTIVES: Objective[] = [
     heightCm: 18,
     effort: 'Semanas',
     why: 'Aqui a foto vira o bordado inteiro. Contagem 16 dá detalhe suficiente para rosto sem virar um projeto interminável.',
-    goTo: 'gerador',
+    applicationId: 'quadro',
   },
   {
     id: 'almofada',
@@ -104,7 +99,7 @@ export const OBJECTIVES: Objective[] = [
     heightCm: 30,
     effort: 'Semanas',
     why: 'Área grande em contagem média: rende rápido e o resultado aguenta uso e lavagem.',
-    goTo: 'gerador',
+    applicationId: 'almofada',
   },
   {
     id: 'pano-prato',
@@ -116,7 +111,7 @@ export const OBJECTIVES: Objective[] = [
     heightCm: 10,
     effort: 'Alguns dias',
     why: 'Faixa larga e baixa na barra da peça — combina melhor com desenho gráfico e nome do que com foto.',
-    goTo: 'gerador',
+    applicationId: 'pano-de-prato',
   },
   {
     id: 'camiseta',
@@ -128,7 +123,7 @@ export const OBJECTIVES: Objective[] = [
     heightCm: 10,
     effort: 'Alguns dias',
     why: 'Malha não tem trama para contar: a grade solúvel é alinhavada por cima, serve de guia e depois sai.',
-    goTo: 'gerador',
+    applicationId: 'camiseta',
   },
 ]
 

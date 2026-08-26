@@ -1,14 +1,17 @@
-import { useRef, type ChangeEvent } from 'react'
+import { useState, useRef, type ChangeEvent } from 'react'
 import { Callout, SectionHead, SliderControl, ToggleRow } from '../components/common/controls'
 import { EngineStatusPanel } from '../components/common/EngineStatusPanel'
 import { Icon } from '../components/common/Icon'
 import { PaletteSection } from '../components/controls/PaletteSection'
 import { TextToolPanel } from '../components/controls/TextToolPanel'
+import { ApplicationPreview } from '../components/preview/ApplicationPreview'
 import { ColorCountTable } from '../components/viewer/ColorCountTable'
 import { PatternCanvas } from '../components/viewer/PatternCanvas'
 import { FABRIC_COUNTS, physicalFromStitches, stitchesFromPhysical } from '../lib/pattern/sizing'
+import { estimatePdfPages } from '../lib/pdf/pageLayout'
 import { recommendedStrands } from '../lib/stitch/flossEstimate'
 import { useEditorStore } from '../state/useEditorStore'
+import { currentObjective, useFlowStore } from '../state/useFlowStore'
 
 export function GeneratorPage() {
   const settings = useEditorStore((s) => s.settings)
@@ -20,7 +23,28 @@ export function GeneratorPage() {
   const setViewMode = useEditorStore((s) => s.setViewMode)
   const engineStatus = useEditorStore((s) => s.engineStatus)
   const engineMessage = useEditorStore((s) => s.engineMessage)
+  const objectiveId = useFlowStore((s) => s.objectiveId)
+  const objective = currentObjective(objectiveId)
   const inputRef = useRef<HTMLInputElement>(null)
+  const [exporting, setExporting] = useState(false)
+
+  const pdfLayout = estimatePdfPages(
+    pattern?.width ?? 0,
+    pattern?.height ?? 0,
+    pattern?.palette.length ?? 0,
+  )
+
+  const handleExport = async () => {
+    if (!pattern || !compositedCells) return
+    setExporting(true)
+    try {
+      // jsPDF is heavy; pull it in only when a PDF is actually requested.
+      const { exportPatternToPdf } = await import('../lib/pdf/exportPatternPdf')
+      exportPatternToPdf(pattern, compositedCells)
+    } finally {
+      setExporting(false)
+    }
+  }
 
   const handleFile = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -197,7 +221,52 @@ export function GeneratorPage() {
           </div>
         </div>
 
+        {pattern && (
+          <div className="card">
+            <div className="panel-head">
+              <span className="icon-tile icon-tile--sm">
+                <Icon name="shirt" size={17} />
+              </span>
+              <div className="panel-head__text">
+                <h2>Onde vai ser aplicado</h2>
+                <p>Posicione o bordado na peça e veja as medidas exatas</p>
+              </div>
+            </div>
+            <ApplicationPreview defaultTemplateId={objective?.applicationId} />
+          </div>
+        )}
+
         <ColorCountTable palette={pattern?.palette ?? []} />
+
+        {pattern && compositedCells && (
+          <div className="card">
+            <div className="panel-head">
+              <span className="icon-tile icon-tile--sm icon-tile--green">
+                <Icon name="printer" size={17} />
+              </span>
+              <div className="panel-head__text">
+                <h2>Imprimir</h2>
+                <p>
+                  {pdfLayout.totalPages} páginas A4 · mosaico {pdfLayout.cols}×{pdfLayout.rows} com{' '}
+                  {pdfLayout.overlapStitches} pontos de sobreposição
+                </p>
+              </div>
+            </div>
+            <p className="hint" style={{ marginTop: 0 }}>
+              Capa colorida, legenda com códigos DMC e o gráfico em símbolos. Imprima em escala 100%.
+            </p>
+            <button
+              type="button"
+              className="btn btn--primary btn--block"
+              style={{ marginTop: 14 }}
+              onClick={handleExport}
+              disabled={exporting}
+            >
+              <Icon name="printer" size={17} />
+              {exporting ? 'Gerando PDF…' : 'Baixar PDF do padrão'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
