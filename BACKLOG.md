@@ -90,7 +90,27 @@ O painel de preview nem sempre compõe frames, e nesse estado o `ResizeObserver`
 
 ---
 
-## 4. Ideias que surgiram mas não entraram
+## 4. Para testar
+
+### 4.1 Trocar a tipografia por uma sans geométrica
+A Mariana mandou uma referência ("Join the stitch club") com uma sans geométrica de que gostou e quer testar no site.
+
+**Identificação (não confirmada — veio de um print):** sans geométrica, `a` de andar único, `o`/`c`/`e` bem circulares, `g` com descendente reta sem laço, espaçamento generoso. Família Futura.
+
+| Candidata | Licença | Nota |
+|---|---|---|
+| Futura PT | paga | o desenho clássico |
+| Century Gothic | paga / vem com Office | mais larga e arredondada |
+| **Poppins** | livre (OFL) | equivalente livre mais próximo |
+| **Jost\*** | livre (OFL) | feita como alternativa livre à Futura |
+
+**Decisão em aberto:** hoje é Recoleta (títulos) + Manrope (corpo). A geométrica substituiria só a Manrope, ou as duas? A segunda opção muda bastante o tom — a serifada é o que dá o ar artesanal hoje.
+
+**Como testar:** baixar Poppins e Jost em `public/fonts/` (mesmo processo das outras) e alternar `--font-sans` / `--font-display` em `src/index.css`. Vale montar as duas hipóteses lado a lado antes de decidir.
+
+---
+
+## 5. Ideias que surgiram mas não entraram
 
 - Importar/exportar OXS (formato de intercâmbio, compatível com MacStitch/WinStitch) — o FlossCross tem.
 - Editar ponto a ponto no gráfico gerado (corrigir a paleta na mão).
