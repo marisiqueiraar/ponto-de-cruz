@@ -1,6 +1,7 @@
 import Dexie, { type EntityTable } from 'dexie'
 import type { Pattern } from '../../types/pattern'
 import type { CrossStitchFont } from '../../types/font'
+import type { MatProject } from '../../types/mat'
 
 interface StoredImage {
   id: string
@@ -19,6 +20,7 @@ const db = new Dexie('cross-stitch') as Dexie & {
   images: EntityTable<StoredImage, 'id'>
   settings: EntityTable<StoredSetting, 'key'>
   fonts: EntityTable<CrossStitchFont, 'id'>
+  mats: EntityTable<MatProject, 'id'>
 }
 
 db.version(1).stores({
@@ -29,6 +31,10 @@ db.version(1).stores({
 
 db.version(2).stores({
   fonts: 'id, name',
+})
+
+db.version(3).stores({
+  mats: 'id, name, updatedAt',
 })
 
 export type { StoredImage, StoredSetting }

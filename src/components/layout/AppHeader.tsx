@@ -14,7 +14,7 @@ export function AppHeader() {
       <div className="app-header__inner">
         <div className="brand">
           <span className="brand__mark">
-            <Icon name="grid" size={21} />
+            <Icon name="stitch" size={21} />
           </span>
           <span className="brand__name">Ponto de Cruz</span>
           <span className="badge-version">v1.0</span>

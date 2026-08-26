@@ -38,8 +38,9 @@ export const useFontLibraryStore = create<FontLibraryState>((set, get) => ({
         name: typeface.name,
         fontFamily: `builtin-${builtinId}`,
         fontUrl: typeface.url,
-        cellWidth: BUILTIN_CELL_WIDTH,
-        cellHeight: BUILTIN_CELL_HEIGHT,
+        cellWidth: typeface.cellWidth,
+        cellHeight: typeface.cellHeight,
+        threshold: typeface.threshold,
       })
       registerFont(font)
       set((state) => ({ rasterizedBuiltinIds: new Set(state.rasterizedBuiltinIds).add(builtinId) }))

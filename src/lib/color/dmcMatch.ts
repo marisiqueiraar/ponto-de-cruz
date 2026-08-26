@@ -15,6 +15,22 @@ function getIndex(): IndexedDmcColor[] {
   return indexCache
 }
 
+let byCode: Map<string, DmcColor> | null = null
+
+/** Looks up a color by its DMC code — the reverse of matching, for rendering a stored code. */
+export function findDmcByCode(code: string): DmcColor | undefined {
+  if (!byCode) {
+    byCode = new Map(DMC_COLORS.map((color) => [color.code, color]))
+  }
+  return byCode.get(code)
+}
+
+/** CSS color for a stored DMC code, falling back to a neutral red when the code is unknown. */
+export function dmcCssColor(code: string, fallback = '#b3122b'): string {
+  const found = findDmcByCode(code)
+  return found ? `rgb(${found.rgb.join(',')})` : fallback
+}
+
 /** Finds the closest DMC-style color to a given RGB triple using CIEDE2000 perceptual distance. */
 export function findClosestDmcColor(rgb: readonly [number, number, number]): DmcColor {
   const lab = rgbToLab(rgb)

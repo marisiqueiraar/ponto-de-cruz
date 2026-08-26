@@ -63,37 +63,48 @@
 :root {
   color-scheme: light;
 
-  --bg: #f6f6f8;
+  /* Warm cream paper with turquoise thread — the palette the app is built around. */
+  --cream-light: #fcf9d8;
+  --cream: #edebc9;
+  --sage: #9dbfaf;
+  --teal-bright: #00ccbe;
+  --teal: #09a6a3;
+
+  --bg: var(--cream-light);
   --surface: #ffffff;
-  --surface-sunken: #fafafb;
-  --border: #e8e8ee;
-  --border-strong: #d5d5df;
+  --surface-sunken: var(--cream);
+  --border: #e4e0bd;
+  --border-strong: var(--sage);
 
-  --text: #101426;
-  --text-muted: #6d7590;
-  --text-faint: #9aa0b4;
+  --text: #16332f;
+  --text-muted: #5b7a73;
+  --text-faint: #8ba79f;
 
-  --primary: #2743e0;
-  --primary-hover: #1c34c4;
-  --primary-soft: #eef0fe;
+  /* Deepened from --teal so white label text clears 4.5:1 contrast on filled buttons. */
+  --primary: #0b8380;
+  --primary-hover: #096a68;
+  --primary-soft: #ddf3f1;
   --primary-contrast: #ffffff;
 
-  --green: #0f9c74;
-  --green-soft: #e6f6f1;
-  --amber: #e0982d;
-  --amber-soft: #fdf3e3;
-  --danger: #c0392b;
+  --accent: var(--teal-bright);
+
+  --green: #4f9573;
+  --green-soft: #e4f0e8;
+  --amber: #b9822a;
+  --amber-soft: #f6eed6;
+  --danger: #b5453a;
 
   --font-display: 'Recoleta', 'Fraunces', 'Iowan Old Style', Georgia, serif;
   --font-sans: 'Manrope', 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
 
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 16px;
+  /* Softer than the reference tool: this is a craft app, not an engineering console. */
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 22px;
 
-  --shadow-sm: 0 1px 2px rgba(16, 20, 38, 0.05);
-  --shadow: 0 4px 16px rgba(16, 20, 38, 0.06);
+  --shadow-sm: 0 1px 2px rgba(22, 51, 47, 0.05);
+  --shadow: 0 6px 20px rgba(22, 51, 47, 0.07);
 
   --page-max: 1420px;
 }
@@ -166,14 +177,16 @@ textarea {
 }
 
 .brand__mark {
-  width: 38px;
-  height: 38px;
-  border-radius: 11px;
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
   background: var(--primary);
   color: var(--primary-contrast);
   display: grid;
   place-items: center;
   flex-shrink: 0;
+  /* Dashed ring reads as a line of stitches around the mark. */
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--sage);
 }
 
 .brand__name {
@@ -258,9 +271,14 @@ textarea {
 }
 
 .tab-nav__item.active {
-  color: var(--text);
-  border-color: var(--text);
-  background: var(--surface);
+  color: var(--primary-contrast);
+  border-color: transparent;
+  background: var(--primary);
+}
+
+.tab-nav__item.active:hover {
+  color: var(--primary-contrast);
+  background: var(--primary-hover);
 }
 
 /* ----------------------------------------------------------------- page -- */
@@ -1378,6 +1396,131 @@ input[type='range'] {
 .guide-item p + p {
   margin-top: 5px;
   color: var(--text);
+}
+
+/* ------------------------------------------------------------ mat board -- */
+.canvas-frame--mat {
+  min-height: 520px;
+  background: var(--cream);
+}
+
+.canvas-frame--mat canvas {
+  cursor: crosshair;
+}
+
+.motif-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+}
+
+.motif-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.motif-tile:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.motif-tile svg {
+  display: block;
+}
+
+.caution-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.caution-list li {
+  position: relative;
+  padding-left: 20px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.caution-list li::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--amber);
+}
+
+.modality-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+}
+
+.modality-card:hover {
+  border-color: var(--primary);
+}
+
+.modality-card.active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.objective-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.objective-row:last-child {
+  border-bottom: none;
+}
+
+.objective-row__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.objective-row__name {
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.objective-row__why {
+  font-size: 0.79rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-top: 2px;
+}
+
+.objective-row__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 7px;
 }
 
 /* --------------------------------------------------------------- footer -- */

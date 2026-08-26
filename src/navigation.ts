@@ -2,6 +2,7 @@ import type { IconName } from './components/common/Icon'
 
 export const TABS = [
   { id: 'dashboard', label: 'Início', icon: 'dashboard' },
+  { id: 'moldura', label: 'Moldura', icon: 'photo' },
   { id: 'gerador', label: 'Gerador', icon: 'layers' },
   { id: 'aplicacao', label: 'Aplicação', icon: 'shirt' },
   { id: 'biblioteca', label: 'Biblioteca', icon: 'compass' },
