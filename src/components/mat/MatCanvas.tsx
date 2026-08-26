@@ -54,21 +54,22 @@ export function MatCanvas({ colorOf }: MatCanvasProps) {
     canvas.style.height = `${size.height}px`
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
 
-    ctx.fillStyle = '#f0eee9'
+    ctx.fillStyle = '#e8e4c8'
     ctx.fillRect(0, 0, size.width, size.height)
 
-    // The card itself.
-    ctx.fillStyle = '#fffdf8'
+    // The card itself — flat, no shadow: this is a working layout, not a mockup.
+    ctx.fillStyle = '#fffef8'
     ctx.fillRect(originX, originY, grid.cols * cellPx, grid.rows * cellPx)
-    ctx.strokeStyle = '#d5d5df'
+    ctx.strokeStyle = '#9dbfaf'
     ctx.lineWidth = 1
     ctx.strokeRect(originX + 0.5, originY + 0.5, grid.cols * cellPx, grid.rows * cellPx)
 
-    // Hole grid, only when cells are big enough to read.
-    if (cellPx >= 5) {
-      ctx.strokeStyle = 'rgba(0,0,0,0.07)'
+    // Hole grid, with a heavier rule every tenth line so counting works.
+    if (cellPx >= 4) {
       for (let col = 0; col <= grid.cols; col++) {
         const x = originX + col * cellPx + 0.5
+        ctx.strokeStyle = col % 10 === 0 ? 'rgba(91,122,115,0.34)' : 'rgba(157,191,175,0.34)'
+        ctx.lineWidth = col % 10 === 0 ? 1 : 0.6
         ctx.beginPath()
         ctx.moveTo(x, originY)
         ctx.lineTo(x, originY + grid.rows * cellPx)
@@ -76,6 +77,8 @@ export function MatCanvas({ colorOf }: MatCanvasProps) {
       }
       for (let row = 0; row <= grid.rows; row++) {
         const y = originY + row * cellPx + 0.5
+        ctx.strokeStyle = row % 10 === 0 ? 'rgba(91,122,115,0.34)' : 'rgba(157,191,175,0.34)'
+        ctx.lineWidth = row % 10 === 0 ? 1 : 0.6
         ctx.beginPath()
         ctx.moveTo(originX, y)
         ctx.lineTo(originX + grid.cols * cellPx, y)
@@ -83,33 +86,51 @@ export function MatCanvas({ colorOf }: MatCanvasProps) {
       }
     }
 
-    // Photo opening.
+    // Photo opening: outline only, so it reads as a cut-out rather than a raised panel.
     const photo = photoRectInCells(project)
-    ctx.fillStyle = '#e6e3dc'
-    ctx.fillRect(originX + photo.x * cellPx, originY + photo.y * cellPx, photo.width * cellPx, photo.height * cellPx)
-    ctx.setLineDash([5, 4])
-    ctx.strokeStyle = '#8d8677'
-    ctx.strokeRect(originX + photo.x * cellPx, originY + photo.y * cellPx, photo.width * cellPx, photo.height * cellPx)
+    const px = originX + photo.x * cellPx
+    const py = originY + photo.y * cellPx
+    const pw = photo.width * cellPx
+    const ph = photo.height * cellPx
+    ctx.fillStyle = 'rgba(157,191,175,0.16)'
+    ctx.fillRect(px, py, pw, ph)
+    ctx.setLineDash([6, 4])
+    ctx.strokeStyle = '#5b7a73'
+    ctx.lineWidth = 1.2
+    ctx.strokeRect(px, py, pw, ph)
     ctx.setLineDash([])
-    if (photo.width * cellPx > 60) {
-      ctx.fillStyle = '#8d8677'
-      ctx.font = '11px Manrope, sans-serif'
+    if (pw > 60) {
+      ctx.fillStyle = '#5b7a73'
+      ctx.font = '600 10px Manrope, sans-serif'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.fillText(
-        'FOTO',
-        originX + (photo.x + photo.width / 2) * cellPx,
-        originY + (photo.y + photo.height / 2) * cellPx,
-      )
+      ctx.fillText('FOTO', px + pw / 2, py + ph / 2)
     }
 
-    // Stitches.
-    for (const cell of collectStitches(project)) {
-      ctx.fillStyle = colorOf(cell.dmcCode)
-      const x = originX + cell.x * cellPx
-      const y = originY + cell.y * cellPx
-      const inset = cellPx > 6 ? 0.5 : 0
-      ctx.fillRect(x + inset, y + inset, cellPx - inset * 2, cellPx - inset * 2)
+    // Stitches, drawn as actual crosses. Below ~5px a cross is illegible, so fall back to a
+    // solid cell — the same trade-off a printed chart makes at small scale.
+    const stitches = collectStitches(project)
+    if (cellPx >= 5) {
+      ctx.lineCap = 'round'
+      ctx.lineWidth = Math.max(1, cellPx * 0.22)
+      const inset = cellPx * 0.16
+      for (const cell of stitches) {
+        ctx.strokeStyle = colorOf(cell.dmcCode)
+        const x = originX + cell.x * cellPx
+        const y = originY + cell.y * cellPx
+        ctx.beginPath()
+        ctx.moveTo(x + inset, y + inset)
+        ctx.lineTo(x + cellPx - inset, y + cellPx - inset)
+        ctx.moveTo(x + cellPx - inset, y + inset)
+        ctx.lineTo(x + inset, y + cellPx - inset)
+        ctx.stroke()
+      }
+      ctx.lineCap = 'butt'
+    } else {
+      for (const cell of stitches) {
+        ctx.fillStyle = colorOf(cell.dmcCode)
+        ctx.fillRect(originX + cell.x * cellPx, originY + cell.y * cellPx, cellPx, cellPx)
+      }
     }
 
     // Selection outline around the active item.

@@ -1,13 +1,15 @@
-import { EngineStatusPanel } from '../common/EngineStatusPanel'
 import { Icon } from '../common/Icon'
+import { GlobalSearch } from './GlobalSearch'
 import { useEditorStore } from '../../state/useEditorStore'
+import type { TabId } from '../../navigation'
 
-export function AppHeader() {
+interface AppHeaderProps {
+  onNavigate: (tab: TabId) => void
+}
+
+export function AppHeader({ onNavigate }: AppHeaderProps) {
   const pattern = useEditorStore((s) => s.pattern)
   const renamePattern = useEditorStore((s) => s.renamePattern)
-  const settings = useEditorStore((s) => s.settings)
-  const engineStatus = useEditorStore((s) => s.engineStatus)
-  const engineMessage = useEditorStore((s) => s.engineMessage)
 
   return (
     <header className="app-header">
@@ -17,7 +19,6 @@ export function AppHeader() {
             <Icon name="stitch" size={21} />
           </span>
           <span className="brand__name">Ponto de Cruz</span>
-          <span className="badge-version">v1.0</span>
         </div>
 
         {pattern && (
@@ -29,12 +30,7 @@ export function AppHeader() {
           />
         )}
 
-        <div className="header-right">
-          <EngineStatusPanel status={engineStatus} message={engineMessage} />
-          <div className="header-chip">
-            TECIDO: <strong>AIDA {settings.fabricCount}</strong>
-          </div>
-        </div>
+        <GlobalSearch onNavigate={onNavigate} />
       </div>
     </header>
   )

@@ -1,5 +1,6 @@
 import { useRef, type ChangeEvent } from 'react'
 import { Callout, SectionHead, SliderControl, ToggleRow } from '../components/common/controls'
+import { EngineStatusPanel } from '../components/common/EngineStatusPanel'
 import { Icon } from '../components/common/Icon'
 import { PaletteSection } from '../components/controls/PaletteSection'
 import { TextToolPanel } from '../components/controls/TextToolPanel'
@@ -17,6 +18,8 @@ export function GeneratorPage() {
   const compositedCells = useEditorStore((s) => s.compositedCells)
   const viewMode = useEditorStore((s) => s.viewMode)
   const setViewMode = useEditorStore((s) => s.setViewMode)
+  const engineStatus = useEditorStore((s) => s.engineStatus)
+  const engineMessage = useEditorStore((s) => s.engineMessage)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleFile = (event: ChangeEvent<HTMLInputElement>) => {
@@ -152,7 +155,7 @@ export function GeneratorPage() {
             </span>
             <div className="panel-head__text">
               <h2>Gráfico do padrão</h2>
-              <p>Arraste para mover e use o scroll para dar zoom</p>
+              <EngineStatusPanel status={engineStatus} message={engineMessage} />
             </div>
             <div className="panel-head__actions">
               <button

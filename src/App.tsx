@@ -34,7 +34,7 @@ function App() {
 
   return (
     <div className="app-shell">
-      <AppHeader />
+      <AppHeader onNavigate={setActiveTab} />
       <TabNav active={activeTab} onChange={setActiveTab} />
 
       {activeTab === 'dashboard' && <DashboardPage onNavigate={setActiveTab} />}
