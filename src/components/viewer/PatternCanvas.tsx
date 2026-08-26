@@ -46,7 +46,7 @@ export function PatternCanvas({ cells, width, height, palette, viewMode }: Patte
     canvas.style.width = `${rect.width}px`
     canvas.style.height = `${rect.height}px`
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-    ctx.fillStyle = '#eeece7'
+    ctx.fillStyle = '#fafafb'
     ctx.fillRect(0, 0, rect.width, rect.height)
 
     if (!cells) return
@@ -109,11 +109,19 @@ export function PatternCanvas({ cells, width, height, palette, viewMode }: Patte
     ctx.restore()
 
     // Rulers, drawn over the reserved margins so they stay put while the grid scrolls beneath them.
-    ctx.fillStyle = '#e2ded5'
+    ctx.fillStyle = '#f0f0f4'
     ctx.fillRect(0, 0, rect.width, RULER_PX)
     ctx.fillRect(0, 0, RULER_PX, rect.height)
-    ctx.fillStyle = '#4a463e'
-    ctx.font = '10px sans-serif'
+    ctx.strokeStyle = '#e8e8ee'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.moveTo(0, RULER_PX + 0.5)
+    ctx.lineTo(rect.width, RULER_PX + 0.5)
+    ctx.moveTo(RULER_PX + 0.5, 0)
+    ctx.lineTo(RULER_PX + 0.5, rect.height)
+    ctx.stroke()
+    ctx.fillStyle = '#6d7590'
+    ctx.font = '10px "JetBrains Mono", monospace'
     ctx.textBaseline = 'middle'
 
     if (cellPx >= 5) {
@@ -176,7 +184,7 @@ export function PatternCanvas({ cells, width, height, palette, viewMode }: Patte
   }
 
   return (
-    <div ref={containerRef} className="pattern-canvas-container">
+    <div ref={containerRef} className="canvas-frame">
       <canvas
         ref={canvasRef}
         onWheel={handleWheel}
@@ -185,7 +193,7 @@ export function PatternCanvas({ cells, width, height, palette, viewMode }: Patte
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       />
-      {!cells && <div className="pattern-canvas-empty">Envie uma foto para começar</div>}
+      {!cells && <div className="canvas-empty">Envie uma foto para gerar o gráfico</div>}
     </div>
   )
 }

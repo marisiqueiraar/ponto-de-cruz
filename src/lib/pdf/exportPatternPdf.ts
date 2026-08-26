@@ -2,27 +2,19 @@ import { jsPDF } from 'jspdf'
 import { physicalFromStitches } from '../pattern/sizing'
 import { renderPatternPreviewDataUrl } from '../pattern/renderPreviewImage'
 import type { Pattern } from '../../types/pattern'
+import {
+  CELL_MM,
+  CHART_HEADER_MM,
+  computePageStarts,
+  LABEL_MARGIN_MM,
+  LEGEND_ROW_MM,
+  legendRowsPerPage,
+  MARGIN_MM,
+  OVERLAP_STITCHES,
+  PAGE_WIDTH_MM,
+  stitchesPerChartPage,
+} from './pageLayout'
 import { getSymbolTileDataUrl, renderLegendSwatchDataUrl } from './renderSwatch'
-
-const PAGE_WIDTH_MM = 210
-const PAGE_HEIGHT_MM = 297
-const MARGIN_MM = 12
-const LABEL_MARGIN_MM = 6
-const CHART_HEADER_MM = 10
-const CELL_MM = 5
-const OVERLAP_STITCHES = 2
-const LEGEND_ROW_MM = 8
-
-function computePageStarts(total: number, perPage: number, overlap: number): number[] {
-  if (total <= perPage) return [0]
-  const step = Math.max(1, perPage - overlap)
-  const starts: number[] = []
-  for (let start = 0; start < total; start += step) {
-    starts.push(start)
-    if (start + perPage >= total) break
-  }
-  return starts
-}
 
 function addCoverPage(doc: jsPDF, pattern: Pattern, cells: Uint16Array): void {
   doc.setFontSize(20)
@@ -58,8 +50,7 @@ function addCoverPage(doc: jsPDF, pattern: Pattern, cells: Uint16Array): void {
 
 function addLegendPages(doc: jsPDF, pattern: Pattern): void {
   const sorted = [...pattern.palette].sort((a, b) => b.count - a.count)
-  const usableHeightMm = PAGE_HEIGHT_MM - 2 * MARGIN_MM - 14
-  const rowsPerPage = Math.max(1, Math.floor(usableHeightMm / LEGEND_ROW_MM))
+  const rowsPerPage = legendRowsPerPage()
 
   for (let pageStart = 0; pageStart < sorted.length; pageStart += rowsPerPage) {
     doc.addPage()
@@ -85,10 +76,7 @@ function addLegendPages(doc: jsPDF, pattern: Pattern): void {
 }
 
 function addChartPages(doc: jsPDF, pattern: Pattern, cells: Uint16Array): void {
-  const usableWidthMm = PAGE_WIDTH_MM - 2 * MARGIN_MM - LABEL_MARGIN_MM
-  const usableHeightMm = PAGE_HEIGHT_MM - 2 * MARGIN_MM - LABEL_MARGIN_MM - CHART_HEADER_MM
-  const stitchesPerPageCol = Math.max(1, Math.floor(usableWidthMm / CELL_MM))
-  const stitchesPerPageRow = Math.max(1, Math.floor(usableHeightMm / CELL_MM))
+  const { cols: stitchesPerPageCol, rows: stitchesPerPageRow } = stitchesPerChartPage()
 
   const colStarts = computePageStarts(pattern.width, stitchesPerPageCol, OVERLAP_STITCHES)
   const rowStarts = computePageStarts(pattern.height, stitchesPerPageRow, OVERLAP_STITCHES)

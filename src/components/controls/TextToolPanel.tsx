@@ -4,6 +4,8 @@ import { FONTS } from '../../data/fonts'
 import { findClosestDmcColor } from '../../lib/color/dmcMatch'
 import { useEditorStore } from '../../state/useEditorStore'
 import { useFontLibraryStore } from '../../state/useFontLibraryStore'
+import { SectionHead } from '../common/controls'
+import { Icon } from '../common/Icon'
 
 export function TextToolPanel() {
   const pattern = useEditorStore((s) => s.pattern)
@@ -29,8 +31,7 @@ export function TextToolPanel() {
   const handleAdd = async () => {
     if (!text.trim()) return
     if (isBuiltin(fontId)) await ensureBuiltinRasterized(fontId)
-    const rgb = hexToRgb(hexColor)
-    const dmc = findClosestDmcColor(rgb)
+    const dmc = findClosestDmcColor(hexToRgb(hexColor))
     addTextLayer(text, fontId, dmc.code, dmc.name, dmc.rgb)
     setText('')
   }
@@ -55,74 +56,77 @@ export function TextToolPanel() {
   }
 
   return (
-    <div className="panel">
-      <h2>Letras</h2>
+    <div className="card">
+      <div className="panel-head">
+        <span className="icon-tile icon-tile--sm">
+          <Icon name="type" size={17} />
+        </span>
+        <div className="panel-head__text">
+          <h2>Letras e nomes</h2>
+          <p>Texto vira pontos numa camada por cima do padrão</p>
+        </div>
+      </div>
 
       <label className="field">
         <span>Texto</span>
         <input type="text" value={text} onChange={(e) => setText(e.target.value)} placeholder="Ex: MARIA" />
       </label>
 
-      <label className="field">
-        <span>Fonte</span>
-        <select value={fontId} onChange={(e) => setFontId(e.target.value)}>
-          <optgroup label="Blocos (desenhados)">
-            {FONTS.map((font) => (
-              <option key={font.id} value={font.id}>
-                {font.name}
-              </option>
-            ))}
-          </optgroup>
-          <optgroup label="Galeria">
-            {BUILTIN_TYPEFACES.map((typeface) => (
-              <option key={typeface.id} value={typeface.id}>
-                {typeface.name}
-              </option>
-            ))}
-          </optgroup>
-          {customFonts.length > 0 && (
-            <optgroup label="Minhas fontes">
-              {customFonts.map((font) => (
+      <div className="control-row">
+        <label className="field">
+          <span>Fonte</span>
+          <select value={fontId} onChange={(e) => setFontId(e.target.value)}>
+            <optgroup label="Blocos desenhados">
+              {FONTS.map((font) => (
                 <option key={font.id} value={font.id}>
                   {font.name}
                 </option>
               ))}
             </optgroup>
-          )}
-        </select>
-      </label>
+            <optgroup label="Galeria de tipografias">
+              {BUILTIN_TYPEFACES.map((typeface) => (
+                <option key={typeface.id} value={typeface.id}>
+                  {typeface.name}
+                </option>
+              ))}
+            </optgroup>
+            {customFonts.length > 0 && (
+              <optgroup label="Minhas fontes">
+                {customFonts.map((font) => (
+                  <option key={font.id} value={font.id}>
+                    {font.name}
+                  </option>
+                ))}
+              </optgroup>
+            )}
+          </select>
+        </label>
 
-      <label className="field">
-        <span>Cor</span>
-        <input type="color" value={hexColor} onChange={(e) => setHexColor(e.target.value)} />
-      </label>
+        <label className="field">
+          <span>Cor da linha</span>
+          <input type="color" value={hexColor} onChange={(e) => setHexColor(e.target.value)} />
+        </label>
+      </div>
 
-      <button type="button" className="button-primary" onClick={handleAdd} disabled={loadingBuiltinId === fontId}>
+      <button type="button" className="btn btn--primary btn--block" onClick={handleAdd} disabled={loadingBuiltinId === fontId}>
+        <Icon name="plus" size={16} />
         {loadingBuiltinId === fontId ? 'Convertendo fonte…' : 'Adicionar texto'}
       </button>
 
       {pattern && pattern.textLayers.length > 0 && (
-        <ul className="text-layer-list">
+        <ul className="list-reset layer-list">
           {pattern.textLayers.map((layer) => (
             <li key={layer.id}>
-              <span className="text-layer-list__label">{layer.text}</span>
+              <span className="layer-list__name">{layer.text}</span>
               <label>
                 X
-                <input
-                  type="number"
-                  value={layer.x}
-                  onChange={(e) => updateTextLayer(layer.id, { x: Number(e.target.value) })}
-                />
+                <input type="number" value={layer.x} onChange={(e) => updateTextLayer(layer.id, { x: Number(e.target.value) })} />
               </label>
               <label>
                 Y
-                <input
-                  type="number"
-                  value={layer.y}
-                  onChange={(e) => updateTextLayer(layer.id, { y: Number(e.target.value) })}
-                />
+                <input type="number" value={layer.y} onChange={(e) => updateTextLayer(layer.id, { y: Number(e.target.value) })} />
               </label>
-              <button type="button" onClick={() => removeTextLayer(layer.id)} aria-label="Remover texto">
+              <button type="button" className="icon-btn" onClick={() => removeTextLayer(layer.id)} aria-label={`Remover texto ${layer.text}`}>
                 ×
               </button>
             </li>
@@ -130,28 +134,30 @@ export function TextToolPanel() {
         </ul>
       )}
 
-      <div className="text-tool-divider" />
+      <SectionHead accent="green">Adicionar fonte própria</SectionHead>
+      <p className="hint" style={{ marginTop: 0 }}>
+        Baixe uma fonte (.ttf/.otf) de um site de fontes e envie aqui — cada letra é convertida em pontos numa grade 8×10,
+        sem sair do seu navegador.
+      </p>
 
-      <h3>Adicionar fonte própria</h3>
-      <p className="hint">Envie um arquivo .ttf/.otf baixado de um site de fontes — cada letra é convertida em pontos automaticamente (grade 8×10).</p>
       <label className="field">
-        <span>Arquivo (.ttf/.otf)</span>
+        <span>Arquivo</span>
         <input ref={fileInputRef} type="file" accept=".ttf,.otf,font/ttf,font/otf" onChange={handleFileChange} />
       </label>
       <label className="field">
-        <span>Nome da fonte</span>
+        <span>Nome</span>
         <input type="text" value={uploadName} onChange={(e) => setUploadName(e.target.value)} placeholder="Ex: Minha fonte" />
       </label>
-      <button type="button" className="button-primary" onClick={handleUpload} disabled={uploading}>
+      <button type="button" className="btn btn--outline btn--block" onClick={handleUpload} disabled={uploading}>
         {uploading ? 'Convertendo…' : 'Adicionar fonte'}
       </button>
 
       {customFonts.length > 0 && (
-        <ul className="custom-font-list">
+        <ul className="list-reset layer-list">
           {customFonts.map((font) => (
             <li key={font.id}>
-              <span>{font.name}</span>
-              <button type="button" onClick={() => removeCustomFont(font.id)} aria-label="Remover fonte">
+              <span className="layer-list__name">{font.name}</span>
+              <button type="button" className="icon-btn" onClick={() => removeCustomFont(font.id)} aria-label={`Remover fonte ${font.name}`}>
                 ×
               </button>
             </li>

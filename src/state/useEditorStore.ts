@@ -45,6 +45,7 @@ interface EditorState {
 
   loadImageFile: (file: File) => Promise<void>
   updateSettings: (partial: Partial<PatternSettings>) => void
+  applyPreset: (widthStitches: number, heightStitches: number, fabricCount: number) => void
   setViewMode: (mode: PatternViewMode) => void
   addTextLayer: (text: string, fontId: string, dmcCode: string, dmcName: string, rgb: [number, number, number]) => void
   updateTextLayer: (id: string, partial: Partial<Omit<TextLayer, 'id'>>) => void
@@ -114,6 +115,14 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       }
       return { settings: next }
     })
+    scheduleRegenerate(set, get)
+  },
+
+  applyPreset(widthStitches, heightStitches, fabricCount) {
+    // Presets set an exact target size, so aspect lock is turned off to keep both dimensions.
+    set((state) => ({
+      settings: { ...state.settings, widthStitches, heightStitches, fabricCount, lockAspectRatio: false },
+    }))
     scheduleRegenerate(set, get)
   },
 
