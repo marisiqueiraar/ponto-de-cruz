@@ -3,6 +3,7 @@ import { getMotif } from '../data/motifs'
 import { getSubstrate } from '../data/substrates'
 import { db } from '../lib/persistence/db'
 import { getSetting, setSetting } from '../lib/persistence/settingsRepo'
+import { DEFAULT_MAT_NAME } from '../lib/project/projectName'
 import { matGrid, resolveItemShape } from '../lib/mat/matGeometry'
 import type { Rotation } from '../lib/motifs/gridDraw'
 import type { MatItem, MatProject } from '../types/mat'
@@ -19,7 +20,7 @@ function createDefaultProject(): MatProject {
   const now = Date.now()
   return {
     id: crypto.randomUUID(),
-    name: 'Nova moldura',
+    name: DEFAULT_MAT_NAME,
     substrateId: 'cartolina-texturizada',
     count: 12,
     widthCm: 15,

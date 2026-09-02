@@ -23,6 +23,7 @@ export type IconName =
   | 'ruler'
   | 'thread'
   | 'stitch'
+  | 'pencil'
 
 const PATHS: Record<IconName, React.ReactNode> = {
   dashboard: (
@@ -170,6 +171,12 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <circle cx="12" cy="12" r="3" />
       <path d="M12 3v6M12 15v6M3 12h6M15 12h6" />
+    </>
+  ),
+  pencil: (
+    <>
+      <path d="M4 20h4l10-10a2.5 2.5 0 0 0-3.5-3.5L4.5 16.5 4 20Z" />
+      <path d="m14 7 3 3" />
     </>
   ),
   // The brand glyph: a cross stitch sitting in its fabric square.

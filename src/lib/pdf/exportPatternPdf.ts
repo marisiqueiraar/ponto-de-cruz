@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf'
 import { physicalFromStitches } from '../pattern/sizing'
+import { toFileName } from '../project/projectName'
 import { renderPatternPreviewDataUrl } from '../pattern/renderPreviewImage'
 import type { Pattern } from '../../types/pattern'
 import {
@@ -144,5 +145,5 @@ export function exportPatternToPdf(pattern: Pattern, cells: Uint16Array): void {
   addCoverPage(doc, pattern, cells)
   addLegendPages(doc, pattern)
   addChartPages(doc, pattern, cells)
-  doc.save(`${pattern.name || 'padrao'}.pdf`)
+  doc.save(`${toFileName(pattern.name, 'padrao')}.pdf`)
 }

@@ -4,6 +4,7 @@ import { compositePattern, recomputePaletteCounts } from '../lib/pattern/composi
 import { assignSymbols } from '../lib/pattern/symbols'
 import { saveImage, loadImage } from '../lib/persistence/imagesRepo'
 import { loadPattern, savePattern } from '../lib/persistence/patternsRepo'
+import { DEFAULT_PATTERN_NAME } from '../lib/project/projectName'
 import { getSetting, setSetting } from '../lib/persistence/settingsRepo'
 import { createPatternWorkerClient } from '../lib/workers/workerClient'
 import type { Pattern, PatternViewMode, TextLayer } from '../types/pattern'
@@ -37,6 +38,11 @@ interface EditorState {
   currentImageId: string | null
   imageAspectRatio: number | null
   settings: PatternSettings
+  /**
+   * Kept beside the pattern so a name typed before the photo is uploaded is not
+   * lost: `regenerate` reads it when it builds the pattern for the first time.
+   */
+  projectName: string
   pattern: Pattern | null
   compositedCells: Uint16Array | null
   viewMode: PatternViewMode
@@ -50,7 +56,7 @@ interface EditorState {
   addTextLayer: (text: string, fontId: string, dmcCode: string, dmcName: string, rgb: [number, number, number]) => void
   updateTextLayer: (id: string, partial: Partial<Omit<TextLayer, 'id'>>) => void
   removeTextLayer: (id: string) => void
-  renamePattern: (name: string) => void
+  renameProject: (name: string) => void
   restoreLastSession: () => Promise<void>
 }
 
@@ -78,6 +84,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   currentImageId: null,
   imageAspectRatio: null,
   settings: DEFAULT_SETTINGS,
+  projectName: DEFAULT_PATTERN_NAME,
   pattern: null,
   compositedCells: null,
   viewMode: 'color',
@@ -135,7 +142,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       const basePattern: Pattern =
         state.pattern ?? {
           id: crypto.randomUUID(),
-          name: 'Sem título',
+          name: state.projectName,
           width: state.settings.widthStitches,
           height: state.settings.heightStitches,
           fabricCount: state.settings.fabricCount,
@@ -183,12 +190,13 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     })
   },
 
-  renamePattern(name) {
+  renameProject(name) {
     set((state) => {
-      if (!state.pattern) return state
+      if (state.projectName === name) return state
+      if (!state.pattern) return { projectName: name }
       const pattern: Pattern = { ...state.pattern, name, updatedAt: Date.now() }
       schedulePersist(pattern)
-      return { pattern }
+      return { projectName: name, pattern }
     })
   },
 
@@ -211,6 +219,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const cells = compositePattern(pattern)
     set({
       pattern,
+      projectName: pattern.name || DEFAULT_PATTERN_NAME,
       compositedCells: cells,
       imageBitmap,
       currentImageId: pattern.sourceImageId ?? null,
@@ -236,7 +245,7 @@ function scheduleRegenerate(set: (partial: Partial<EditorState>) => void, get: (
 }
 
 async function regenerate(set: (partial: Partial<EditorState>) => void, get: () => EditorState): Promise<void> {
-  const { imageBitmap, settings, pattern, currentImageId } = get()
+  const { imageBitmap, settings, pattern, currentImageId, projectName } = get()
   if (!imageBitmap) return
 
   set({ engineStatus: 'computing', engineMessage: 'Gerando padrão...' })
@@ -254,7 +263,7 @@ async function regenerate(set: (partial: Partial<EditorState>) => void, get: () 
       height: settings.heightStitches,
       colorCount: settings.colorCount,
       fabricCount: settings.fabricCount,
-      name: pattern?.name ?? 'Sem título',
+      name: projectName,
     })
 
     rebuilt.id = pattern?.id ?? rebuilt.id

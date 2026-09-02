@@ -1,6 +1,6 @@
 # Backlog
 
-Pendências e pontos de atenção conhecidos, em 26/08/2026.
+Pendências e pontos de atenção conhecidos, em 02/09/2026.
 
 ---
 
@@ -22,32 +22,19 @@ Há base pronta para isso: `labDistance` (CIEDE2000) em `src/lib/color/colorSpac
 
 ## 2. Pendências funcionais
 
-### 2.1 Não dá para renomear o projeto
-O campo de nome foi removido do cabeçalho (estava solto e sem rótulo). Consequência: os PDFs saem com o nome padrão.
-
-- Padrão da imagem → `Sem título.pdf`
-- Moldura → `Nova moldura-guia.pdf`
-
-Lugar natural para reintroduzir: dentro do chip do projeto (`.project-bar`), onde a identidade do projeto já aparece.
-
-### 2.2 Arabescos são gerados por algoritmo
-Os motivos de `arabesco` em `src/data/motifs.ts` são construídos com espirais de Arquimedes e curvas de Bézier (`src/lib/motifs/gridDraw.ts`), não desenhados à mão. Foram validados como traço contínuo (sem falhas na linha), mas **não** foram validados como "parecidos com as referências". É o ponto mais provável de precisar refazer.
-
-Se precisarem virar desenho manual, `fromAscii()` já aceita arte em texto.
-
-### 2.3 Texto só gira em 90°
+### 2.1 Texto só gira em 90°
 `MatItem.rotation` aceita `0 | 90 | 180 | 270`. As referências têm frases na diagonal (ex.: "where love grows"). Suportar ângulo livre exige rotacionar a forma em grade com reamostragem, não só transpor células.
 
-### 2.4 Motivos podem invadir a janela da foto
-`itemOverflows()` só valida a borda do cartão. Nada impede posicionar um arabesco por cima da área onde a foto será colada — acontece com facilidade e não há aviso.
+### 2.2 Cacho de laços ainda não desenhado
+Das formas das referências, a única que ficou de fora é o cacho de laços entrelaçados (a moldura do "d+w", em cima da foto). Duas tentativas: laços sobrepostos emendam num borrão, e afastados o suficiente para não emendar deixam de ler como cacho. Precisa de um traço mais fino que 2 células ou de cruzamentos aceitos de propósito.
 
-### 2.5 Sem desfazer
+### 2.3 Sem desfazer
 Nenhum dos dois editores tem undo/redo. Remover um elemento ou trocar de projeto é irreversível.
 
-### 2.6 Só ponto cheio
+### 2.4 Só ponto cheio
 O guia explica meio ponto, ¼, ¾, pesponto e nó francês, mas o editor e os PDFs só produzem ponto cheio. O pesponto (contorno) é o que mais faria falta no estilo das referências.
 
-### 2.7 Referências não buscam de verdade
+### 2.5 Referências não buscam de verdade
 A aba Referências monta a query e abre no Pinterest / Google Imagens / Etsy / Instagram. Não mostra resultado dentro do app.
 
 Motivo: o navegador não consegue raspar buscas (CORS). Resultados embutidos exigiriam uma serverless function na Vercel + chave de API paga (Google Custom Search, SerpAPI ou similar), e o app deixaria de ser 100% offline e sem conta. **Decisão consciente, não esquecimento.**
@@ -56,7 +43,10 @@ Motivo: o navegador não consegue raspar buscas (CORS). Resultados embutidos exi
 
 ## 3. Pontos de atenção técnicos
 
-### 3.1 Fonte Recoleta: arquivo DEMO
+### 3.1 Bordar por cima da foto é recurso, não bug
+Uma versão anterior deste backlog tratava "motivo invade a janela da foto" como risco a avisar. As referências mostram o contrário: a data bordada por cima da foto e o monograma invadindo o canto são deliberados. `collectStitches()` não bloqueia, e o `MatCanvas` desenha os pontos depois da janela — ou seja, por cima. Está correto como está; não adicionar aviso.
+
+### 3.2 Fonte Recoleta: arquivo DEMO
 Dois problemas no arquivo atual (`public/fonts/recoleta-regular.woff2`):
 
 1. **Não tem nenhum caractere acentuado.** Verificado glifo a glifo: `ã ç é õ ê á Ç` renderizam como `.notdef` (caixa vazia). Contornado limitando o `@font-face` a `unicode-range: U+0020-007E` e deixando a **Fraunces** cobrir os acentos — mas palavras como "Padrões" ficam com duas fontes misturadas, o que dá para notar de perto.
@@ -64,28 +54,28 @@ Dois problemas no arquivo atual (`public/fonts/recoleta-regular.woff2`):
 
 **Correção:** obter a Recoleta licenciada (Latin completo), substituir o `.woff2` e ampliar o range para `U+0000-00FF` em `src/index.css`. Nenhuma outra mudança é necessária.
 
-### 3.2 DMC é marca de terceiros
+### 3.3 DMC é marca de terceiros
 As cores em `src/data/dmcColors.ts` foram compiladas de dados abertos da comunidade e são **aproximações não-oficiais**. Já há aviso na interface. Manter esse aviso se a paleta aparecer em material impresso ou comercial.
 
-### 3.3 Peso do bundle
+### 3.4 Peso do bundle
 `jspdf` puxa `html2canvas` e `dompurify` (~600 KB somados). Já está em code-splitting — só carrega ao clicar em exportar — mas se houver mais um consumidor de PDF, vale avaliar um gerador mais leve (ex.: `pdf-lib`).
 
-### 3.4 Dois canvas com comportamentos diferentes
+### 3.5 Dois canvas com comportamentos diferentes
 - `PatternCanvas` (gerador): zoom por scroll + pan por arraste.
 - `MatCanvas` (moldura): escala fixa, quadro rola.
 
 Foi intencional (a moldura precisa de escala real), mas é uma inconsistência que o usuário sente ao alternar entre os dois.
 
-### 3.5 Estimativas são estimativas
+### 3.6 Estimativas são estimativas
 - **Meadas:** `stitchesPerSkein` está ancorado na faixa citada de ~1.500–1.800 pontos por meada em Aida 14 com 2 fios, com folga de 15%. Consumo real varia com tensão do ponto e desperdício.
 - **Cores DMC:** o match por CIEDE2000 acerta o tom mais próximo do catálogo, que nem sempre é o tom que a pessoa escolheria.
 
-### 3.6 Mobile não foi testado de verdade
+### 3.7 Mobile não foi testado de verdade
 O layout usa grid responsivo e não estoura horizontalmente, mas nunca foi validado em aparelho real. O cabeçalho fica alto em tela estreita, e arrastar motivos no canvas usa eventos de mouse (`onMouseDown/Move/Up`) — **não** de ponteiro/toque. Provavelmente não funciona no celular.
 
 > A `ApplicationPreview` já usa Pointer Events e deve funcionar no toque. O `MatCanvas` não.
 
-### 3.7 Cuidado ao verificar no preview
+### 3.8 Cuidado ao verificar no preview
 O painel de preview nem sempre compõe frames, e nesse estado o `ResizeObserver` **não dispara** e screenshots dão timeout. Isso já causou um falso positivo de bug. Para inspecionar visualmente, o caminho que funciona é extrair o canvas com `toDataURL()`, decodificar em arquivo e abrir a imagem.
 
 ---

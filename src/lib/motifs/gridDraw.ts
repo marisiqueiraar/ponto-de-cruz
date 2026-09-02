@@ -35,69 +35,6 @@ class CellSet {
   }
 }
 
-/** Samples a parametric curve densely enough that consecutive samples land on adjacent cells. */
-function traceCurve(set: CellSet, at: (t: number) => Point, samples: number): void {
-  for (let i = 0; i <= samples; i++) {
-    const [x, y] = at(i / samples)
-    set.add(x, y)
-  }
-}
-
-export interface SpiralOptions {
-  /** Outer radius in cells. */
-  radius: number
-  /** How many times the curve winds inward. */
-  turns?: number
-  /** Radians the spiral starts at. */
-  startAngle?: number
-  /** true winds clockwise. */
-  clockwise?: boolean
-}
-
-/** Archimedean spiral — the base shape of the scroll flourishes in the reference pieces. */
-export function spiral({ radius, turns = 1.6, startAngle = 0, clockwise = false }: SpiralOptions): GridShape {
-  const set = new CellSet()
-  const totalAngle = turns * Math.PI * 2
-  const direction = clockwise ? -1 : 1
-  traceCurve(
-    set,
-    (t) => {
-      const angle = startAngle + direction * totalAngle * t
-      // Radius shrinks toward the centre as t advances, leaving a small eye rather than a point.
-      const r = radius * (1 - 0.88 * t)
-      return [Math.cos(angle) * r, Math.sin(angle) * r]
-    },
-    Math.ceil(radius * turns * 14),
-  )
-  return set.toShape()
-}
-
-/** Cubic Bézier stroke, used to join spirals into a flowing vine. */
-export function bezier(p0: Point, p1: Point, p2: Point, p3: Point): GridShape {
-  const set = new CellSet()
-  const approxLength = Math.hypot(p3[0] - p0[0], p3[1] - p0[1]) + Math.hypot(p1[0] - p0[0], p1[1] - p0[1])
-  traceCurve(
-    set,
-    (t) => {
-      const u = 1 - t
-      const x = u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0]
-      const y = u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1]
-      return [x, y]
-    },
-    Math.ceil(approxLength * 4),
-  )
-  return set.toShape()
-}
-
-/** Places several shapes at offsets and merges them into one motif. */
-export function combine(parts: Array<{ shape: GridShape; dx: number; dy: number }>): GridShape {
-  const set = new CellSet()
-  for (const { shape, dx, dy } of parts) {
-    for (const [x, y] of shape.cells) set.add(x + dx, y + dy)
-  }
-  return set.toShape()
-}
-
 /** Builds a shape from an ASCII drawing, where '#' marks a stitch. */
 export function fromAscii(rows: string[]): GridShape {
   const set = new CellSet()

@@ -1639,16 +1639,75 @@ input[type='range'] {
 .project-bar__text {
   display: flex;
   flex-direction: column;
+  flex: 1;
   min-width: 0;
-}
-
-.project-bar__text strong {
-  font-size: 0.92rem;
 }
 
 .project-bar__text span {
   font-size: 0.76rem;
   color: var(--text-muted);
+}
+
+/* The project's identity is its name, so that is the editable line in the chip;
+   the objective moved down into the metadata line beneath it. */
+.project-name {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  max-width: 30ch;
+}
+
+.project-name__label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.project-name__field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  /* Pulled back so the name lines up with the metadata line below it. */
+  margin-left: -7px;
+}
+
+.project-name__input {
+  min-width: 0;
+  flex: 1;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 2px 6px;
+}
+
+.project-name__input:hover {
+  border-color: var(--border);
+}
+
+.project-name__input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--bg);
+}
+
+/* A quiet affordance: the chip is a status line until you reach for the name. */
+.project-name__pencil {
+  flex: none;
+  color: var(--text-faint);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.project-name__field:hover .project-name__pencil,
+.project-name__field:focus-within .project-name__pencil {
+  opacity: 1;
 }
 
 .project-bar__inner .btn {
