@@ -1,6 +1,6 @@
 # Backlog
 
-Pendências e pontos de atenção conhecidos, em 26/08/2026.
+Pendências e pontos de atenção conhecidos, em 02/09/2026.
 
 ---
 
@@ -22,32 +22,24 @@ Há base pronta para isso: `labDistance` (CIEDE2000) em `src/lib/color/colorSpac
 
 ## 2. Pendências funcionais
 
-### 2.1 Não dá para renomear o projeto
-O campo de nome foi removido do cabeçalho (estava solto e sem rótulo). Consequência: os PDFs saem com o nome padrão.
-
-- Padrão da imagem → `Sem título.pdf`
-- Moldura → `Nova moldura-guia.pdf`
-
-Lugar natural para reintroduzir: dentro do chip do projeto (`.project-bar`), onde a identidade do projeto já aparece.
-
-### 2.2 Arabescos são gerados por algoritmo
+### 2.1 Arabescos são gerados por algoritmo
 Os motivos de `arabesco` em `src/data/motifs.ts` são construídos com espirais de Arquimedes e curvas de Bézier (`src/lib/motifs/gridDraw.ts`), não desenhados à mão. Foram validados como traço contínuo (sem falhas na linha), mas **não** foram validados como "parecidos com as referências". É o ponto mais provável de precisar refazer.
 
 Se precisarem virar desenho manual, `fromAscii()` já aceita arte em texto.
 
-### 2.3 Texto só gira em 90°
+### 2.2 Texto só gira em 90°
 `MatItem.rotation` aceita `0 | 90 | 180 | 270`. As referências têm frases na diagonal (ex.: "where love grows"). Suportar ângulo livre exige rotacionar a forma em grade com reamostragem, não só transpor células.
 
-### 2.4 Motivos podem invadir a janela da foto
+### 2.3 Motivos podem invadir a janela da foto
 `itemOverflows()` só valida a borda do cartão. Nada impede posicionar um arabesco por cima da área onde a foto será colada — acontece com facilidade e não há aviso.
 
-### 2.5 Sem desfazer
+### 2.4 Sem desfazer
 Nenhum dos dois editores tem undo/redo. Remover um elemento ou trocar de projeto é irreversível.
 
-### 2.6 Só ponto cheio
+### 2.5 Só ponto cheio
 O guia explica meio ponto, ¼, ¾, pesponto e nó francês, mas o editor e os PDFs só produzem ponto cheio. O pesponto (contorno) é o que mais faria falta no estilo das referências.
 
-### 2.7 Referências não buscam de verdade
+### 2.6 Referências não buscam de verdade
 A aba Referências monta a query e abre no Pinterest / Google Imagens / Etsy / Instagram. Não mostra resultado dentro do app.
 
 Motivo: o navegador não consegue raspar buscas (CORS). Resultados embutidos exigiriam uma serverless function na Vercel + chave de API paga (Google Custom Search, SerpAPI ou similar), e o app deixaria de ser 100% offline e sem conta. **Decisão consciente, não esquecimento.**

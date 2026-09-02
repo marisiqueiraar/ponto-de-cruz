@@ -2,6 +2,7 @@ import { jsPDF } from 'jspdf'
 import { getSubstrate } from '../../data/substrates'
 import { findDmcByCode } from '../color/dmcMatch'
 import { collectStitches, matGrid, photoRectInCells, stitchCountsByColor } from '../mat/matGeometry'
+import { toFileName } from '../project/projectName'
 import { estimateSkeins } from '../stitch/flossEstimate'
 import type { MatProject } from '../../types/mat'
 
@@ -193,6 +194,6 @@ export function exportMatToPdf(project: MatProject): void {
     }
   }
 
-  doc.save(`${project.name || 'moldura'}-guia.pdf`)
+  doc.save(`${toFileName(project.name, 'moldura')}-guia.pdf`)
 }
 
