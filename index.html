@@ -1,13 +1,346 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>cross-stitch</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gerador de gráfico — letras cursivas em ponto cruz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Sacramento&family=Parisienne&family=Caveat:wght@400;700&family=Cormorant+Garamond:ital,wght@1,400;1,600&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FBF9F3;
+  --ink:#1E2A26;
+  --ink-soft:#5C6B65;
+  --mat:#16544A;
+  --mat-soft:#DCE9E5;
+  --thread:#C42A2A;
+  --line:#D8D4C8;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Segoe UI",Roboto,-apple-system,system-ui,sans-serif;
+  font-size:16px;
+  line-height:1.55;
+}
+.wrap{max-width:640px;margin:0 auto;padding:20px 16px 64px}
+header{margin:8px 0 24px}
+h1{
+  font-family:"Pinyon Script","Great Vibes",cursive;
+  font-size:44px;
+  font-weight:400;
+  line-height:1;
+  margin:0 0 6px;
+  color:var(--thread);
+}
+header p{margin:0;color:var(--ink-soft);font-size:15px;max-width:46ch}
+fieldset{border:0;margin:0;padding:0}
+.field{margin-bottom:16px}
+label{display:block;font-size:14px;color:var(--ink-soft);margin-bottom:6px}
+label b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=text],select{
+  width:100%;height:44px;padding:0 12px;
+  border:1px solid var(--line);border-radius:6px;
+  background:#fff;color:var(--ink);font-size:16px;font-family:inherit;
+}
+input[type=text]:focus,select:focus{outline:2px solid var(--mat);outline-offset:1px;border-color:var(--mat)}
+input[type=range]{width:100%;accent-color:var(--mat);height:32px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.stats{
+  display:flex;flex-wrap:wrap;gap:0;
+  border:1px solid var(--line);border-radius:8px;background:#fff;
+  margin:20px 0 14px;overflow:hidden;
+}
+.stat{flex:1 1 33%;padding:12px 14px;border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
+.stat span{display:block;font-size:13px;color:var(--ink-soft)}
+.stat strong{display:block;font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:2px}
+.board{
+  border:1px solid var(--line);border-radius:8px;background:#fff;
+  padding:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+}
+canvas{display:block;touch-action:manipulation}
+.hint{font-size:14px;color:var(--ink-soft);margin:10px 0 20px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+button{
+  flex:1 1 auto;min-height:46px;padding:0 16px;
+  border:1px solid var(--mat);border-radius:6px;
+  background:var(--mat);color:#fff;
+  font-family:inherit;font-size:15px;cursor:pointer;
+}
+button.ghost{background:#fff;color:var(--mat)}
+button:active{transform:scale(.99)}
+.notes{margin-top:36px;border-top:1px solid var(--line);padding-top:20px;font-size:15px;color:var(--ink-soft)}
+.notes h2{font-size:16px;font-weight:600;color:var(--ink);margin:0 0 10px}
+.notes li{margin-bottom:8px}
+.notes ul{padding-left:20px;margin:0}
+@media print{
+  header,.notes,.actions,.hint,fieldset{display:none}
+  body{background:#fff}
+  .board{border:0;overflow:visible}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>ponto &amp; letra</h1>
+  <p>Digita a palavra, escolhe a cursiva e sai o gráfico quadriculado pronto pra furar o papel ou bordar na aida.</p>
+</header>
+
+<fieldset>
+  <div class="field">
+    <label for="txt">Texto</label>
+    <input id="txt" type="text" value="andai" autocomplete="off" spellcheck="false">
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label for="font">Fonte</label>
+      <select id="font">
+        <option value="Great Vibes">Great Vibes</option>
+        <option value="Pinyon Script">Pinyon Script</option>
+        <option value="Dancing Script">Dancing Script</option>
+        <option value="Sacramento">Sacramento</option>
+        <option value="Parisienne">Parisienne</option>
+        <option value="Caveat">Caveat</option>
+        <option value="Cormorant Garamond">Serif itálica</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="rows">Altura <b id="rowsOut">22</b> pontos</label>
+      <input id="rows" type="range" min="10" max="50" step="1" value="22">
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label for="thick">Espessura do traço <b id="thickOut">2</b></label>
+      <input id="thick" type="range" min="0" max="12" step="1" value="2">
+    </div>
+    <div class="field">
+      <label for="thr">Sensibilidade <b id="thrOut">35</b>%</label>
+      <input id="thr" type="range" min="10" max="80" step="5" value="35">
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="mm">Espaçamento entre furos <b id="mmOut">2,5</b> mm</label>
+    <input id="mm" type="range" min="1" max="6" step="0.5" value="2.5">
+  </div>
+</fieldset>
+
+<div class="stats">
+  <div class="stat"><span>Grade</span><strong id="dims">—</strong></div>
+  <div class="stat"><span>Pontos</span><strong id="count">—</strong></div>
+  <div class="stat"><span>Tamanho real</span><strong id="size">—</strong></div>
+</div>
+
+<div class="board"><canvas id="grid" width="10" height="10"></canvas></div>
+<p class="hint">Toque num quadradinho para acender ou apagar. Nas curvas das cursivas sempre sobra um ponto solto pra ajustar.</p>
+
+<div class="actions">
+  <button id="dl">Baixar PNG</button>
+  <button id="print" class="ghost">Imprimir</button>
+  <button id="reset" class="ghost">Recalcular</button>
+</div>
+
+<div class="notes">
+  <h2>Como usar no papel</h2>
+  <ul>
+    <li>Imprima o gráfico no tamanho real ou marque os pontos no papel quadriculado, contando pelas linhas grossas de 10 em 10.</li>
+    <li>Prenda o gráfico atrás do cartão com fita crepe e fure ponto a ponto com agulha grossa ou alfinete, apoiando sobre EVA ou espuma.</li>
+    <li>Tire o papel do gráfico e borde nos furos com 2 ou 3 fios de meada. Não puxe forte: furo alargado no papel não volta.</li>
+    <li>Altura abaixo de 18 pontos apaga o detalhe das cursivas finas. Se precisar de letra pequena, aumente a espessura do traço.</li>
+  </ul>
+</div>
+
+</div>
+
+<script>
+(function(){
+  var S = 6;
+  var cells = [], cols = 0;
+  var $ = function(id){ return document.getElementById(id); };
+
+  function build(){
+    var text = $("txt").value || " ";
+    var fam = $("font").value;
+    var targetRows = parseInt($("rows").value, 10);
+    var thick = parseInt($("thick").value, 10);
+    var thr = parseInt($("thr").value, 10) / 100;
+
+    var c = document.createElement("canvas");
+    var x = c.getContext("2d");
+    x.font = '100px "' + fam + '", cursive';
+    var m = x.measureText(text);
+    var asc = m.actualBoundingBoxAscent || 72;
+    var dsc = m.actualBoundingBoxDescent || 28;
+    var left = m.actualBoundingBoxLeft || 0;
+    var right = m.actualBoundingBoxRight || m.width;
+    var h = asc + dsc, w = left + right;
+    if (h <= 0 || w <= 0) return;
+
+    var k = (targetRows * S) / h;
+    var pad = S * 2;
+    c.width = Math.ceil(w * k) + pad * 2;
+    c.height = Math.ceil(targetRows * S) + pad;
+
+    x = c.getContext("2d");
+    x.font = (100 * k) + 'px "' + fam + '", cursive';
+    x.textBaseline = "alphabetic";
+    x.fillStyle = "#000";
+    x.strokeStyle = "#000";
+    x.lineJoin = "round";
+    x.lineCap = "round";
+    var bx = pad + left * k, by = pad / 2 + asc * k;
+    if (thick > 0){ x.lineWidth = thick * k * 0.55; x.strokeText(text, bx, by); }
+    x.fillText(text, bx, by);
+
+    cols = Math.floor(c.width / S);
+    var rowsN = Math.floor(c.height / S);
+    var data = x.getImageData(0, 0, c.width, c.height).data;
+
+    cells = [];
+    for (var r = 0; r < rowsN; r++){
+      var line = [];
+      for (var q = 0; q < cols; q++){
+        var on = 0;
+        for (var yy = 0; yy < S; yy++){
+          for (var xx = 0; xx < S; xx++){
+            var i = (((r * S + yy) * c.width) + (q * S + xx)) * 4 + 3;
+            if (data[i] > 90) on++;
+          }
+        }
+        line.push(on / (S * S) > thr ? 1 : 0);
+      }
+      cells.push(line);
+    }
+    trim();
+    draw();
+  }
+
+  function trim(){
+    var loX = cols, hiX = -1, loY = cells.length, hiY = -1;
+    for (var r = 0; r < cells.length; r++){
+      for (var q = 0; q < cols; q++){
+        if (!cells[r][q]) continue;
+        if (q < loX) loX = q;
+        if (q > hiX) hiX = q;
+        if (r < loY) loY = r;
+        if (r > hiY) hiY = r;
+      }
+    }
+    if (hiX < 0) return;
+    loX = Math.max(0, loX - 1); hiX = Math.min(cols - 1, hiX + 1);
+    loY = Math.max(0, loY - 1); hiY = Math.min(cells.length - 1, hiY + 1);
+    var out = [];
+    for (var r2 = loY; r2 <= hiY; r2++) out.push(cells[r2].slice(loX, hiX + 1));
+    cells = out;
+    cols = hiX - loX + 1;
+  }
+
+  function draw(){
+    var cv = $("grid"), ctx = cv.getContext("2d");
+    var board = cv.parentNode;
+    var avail = board.clientWidth - 20;
+    var cp = Math.max(10, Math.min(18, Math.floor(avail / cols)));
+    var dpr = window.devicePixelRatio || 1;
+    var W = cols * cp, H = cells.length * cp;
+
+    cv.width = Math.round(W * dpr);
+    cv.height = Math.round(H * dpr);
+    cv.style.width = W + "px";
+    cv.style.height = H + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = "#E2DED2";
+    ctx.lineWidth = 1;
+    for (var q = 0; q <= cols; q++){ ctx.beginPath(); ctx.moveTo(q * cp + .5, 0); ctx.lineTo(q * cp + .5, H); ctx.stroke(); }
+    for (var r = 0; r <= cells.length; r++){ ctx.beginPath(); ctx.moveTo(0, r * cp + .5); ctx.lineTo(W, r * cp + .5); ctx.stroke(); }
+
+    ctx.strokeStyle = "#9AA8A2";
+    ctx.lineWidth = 1.4;
+    for (var q2 = 0; q2 <= cols; q2 += 10){ ctx.beginPath(); ctx.moveTo(q2 * cp + .5, 0); ctx.lineTo(q2 * cp + .5, H); ctx.stroke(); }
+    for (var r2 = 0; r2 <= cells.length; r2 += 10){ ctx.beginPath(); ctx.moveTo(0, r2 * cp + .5); ctx.lineTo(W, r2 * cp + .5); ctx.stroke(); }
+
+    ctx.strokeStyle = "#C42A2A";
+    ctx.lineWidth = Math.max(1.5, cp * 0.15);
+    ctx.lineCap = "round";
+    var n = 0, p = cp * 0.24;
+    for (var r3 = 0; r3 < cells.length; r3++){
+      for (var q3 = 0; q3 < cols; q3++){
+        if (!cells[r3][q3]) continue;
+        n++;
+        var X = q3 * cp, Y = r3 * cp;
+        ctx.beginPath();
+        ctx.moveTo(X + p, Y + p); ctx.lineTo(X + cp - p, Y + cp - p);
+        ctx.moveTo(X + cp - p, Y + p); ctx.lineTo(X + p, Y + cp - p);
+        ctx.stroke();
+      }
+    }
+
+    var mm = parseFloat($("mm").value);
+    $("dims").textContent = cols + "×" + cells.length;
+    $("count").textContent = n.toLocaleString("pt-BR");
+    $("size").textContent = (cols * mm / 10).toFixed(1).replace(".", ",") + " × " +
+                            (cells.length * mm / 10).toFixed(1).replace(".", ",") + " cm";
+  }
+
+  $("grid").addEventListener("click", function(e){
+    var b = this.getBoundingClientRect();
+    var cp = b.width / cols;
+    var q = Math.floor((e.clientX - b.left) / cp);
+    var r = Math.floor((e.clientY - b.top) / cp);
+    if (cells[r] && cells[r][q] !== undefined){
+      cells[r][q] = cells[r][q] ? 0 : 1;
+      draw();
+    }
+  });
+
+  $("dl").addEventListener("click", function(){
+    var a = document.createElement("a");
+    a.download = "grafico-" + ($("txt").value || "ponto-cruz").trim().replace(/\s+/g, "-") + ".png";
+    a.href = $("grid").toDataURL("image/png");
+    a.click();
+  });
+  $("print").addEventListener("click", function(){ window.print(); });
+  $("reset").addEventListener("click", go);
+
+  ["txt","font","rows","thick","thr"].forEach(function(id){
+    $(id).addEventListener("input", function(){
+      $("rowsOut").textContent = $("rows").value;
+      $("thickOut").textContent = $("thick").value;
+      $("thrOut").textContent = $("thr").value;
+      go();
+    });
+  });
+  $("mm").addEventListener("input", function(){
+    $("mmOut").textContent = parseFloat($("mm").value).toFixed(1).replace(".", ",");
+    draw();
+  });
+  window.addEventListener("resize", function(){ if (cells.length) draw(); });
+
+  function go(){
+    var f = $("font").value;
+    if (document.fonts && document.fonts.load){
+      document.fonts.load('100px "' + f + '"').then(build).catch(build);
+    } else {
+      build();
+    }
+  }
+
+  if (document.fonts && document.fonts.ready){ document.fonts.ready.then(go); } else { go(); }
+  setTimeout(go, 1200);
+})();
+</script>
+</body>
 </html>
