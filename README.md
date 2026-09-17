@@ -7,7 +7,10 @@ posiciona as peças bordadas por cima, e baixa um PDF com o molde de furos na es
 material.
 
 A aplicação é o arquivo `index.html`: HTML, CSS e JavaScript em um único arquivo, sem build e
-sem backend.
+sem backend. A tela é um editor: trilho de ícones à esquerda que abre um painel, barra de cima
+que muda conforme o que está selecionado, e o papel no centro sobre uma mesa com réguas em
+centímetros. O `layout.html` na raiz é a maquete dessa arrumação, com os controles inertes —
+serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
 
 ## O que ele faz
 
