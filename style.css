@@ -1,0 +1,123 @@
+/* ponto & letra — folha de estilo única */
+
+/* cursivas hospedadas aqui mesmo: o app funciona sem rede.
+   todas sob SIL Open Font License 1.1 — ver fonts/OFL.txt */
+@font-face{font-family:"Great Vibes";src:url("fonts/great-vibes.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Pinyon Script";src:url("fonts/pinyon-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Dancing Script";src:url("fonts/dancing-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Sacramento";src:url("fonts/sacramento.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Parisienne";src:url("fonts/parisienne.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Caveat";src:url("fonts/caveat.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Cormorant Garamond";font-style:italic;src:url("fonts/cormorant-garamond.woff2") format("woff2");font-display:swap}
+
+:root{
+  --paper:#FBF9F3;
+  --ink:#1E2A26;
+  --ink-soft:#5C6B65;
+  --mat:#16544A;
+  --mat-soft:#DCE9E5;
+  --thread:#C42A2A;
+  --line:#D8D4C8;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Segoe UI",Roboto,-apple-system,system-ui,sans-serif;
+  font-size:16px;
+  line-height:1.55;
+}
+.wrap{max-width:640px;margin:0 auto;padding:20px 16px 64px}
+header{margin:8px 0 24px}
+h1{
+  font-family:"Pinyon Script","Great Vibes",cursive;
+  font-size:44px;
+  font-weight:400;
+  line-height:1;
+  margin:0 0 6px;
+  color:var(--thread);
+}
+header p{margin:0;color:var(--ink-soft);font-size:15px;max-width:46ch}
+fieldset{border:0;margin:0;padding:0}
+legend{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.field{margin-bottom:16px}
+label{display:block;font-size:14px;color:var(--ink-soft);margin-bottom:6px}
+label b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=text],select{
+  width:100%;height:44px;padding:0 12px;
+  border:1px solid var(--line);border-radius:6px;
+  background:#fff;color:var(--ink);font-size:16px;font-family:inherit;
+}
+input[type=text]:focus,select:focus{outline:2px solid var(--mat);outline-offset:1px;border-color:var(--mat)}
+input[type=range]{width:100%;accent-color:var(--mat);height:32px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:420px){
+  .row{grid-template-columns:1fr;gap:0}
+  h1{font-size:38px}
+}
+.stats{
+  display:flex;flex-wrap:wrap;gap:0;
+  border:1px solid var(--line);border-radius:8px;background:#fff;
+  margin:20px 0 14px;overflow:hidden;
+}
+.stat{flex:1 1 33%;padding:12px 14px;border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
+.stat span{display:block;font-size:13px;color:var(--ink-soft)}
+.stat strong{display:block;font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:2px}
+.board{
+  border:1px solid var(--line);border-radius:8px;background:#fff;
+  padding:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+}
+canvas{display:block;touch-action:manipulation}
+canvas:focus{outline:2px solid var(--mat);outline-offset:2px}
+canvas:focus:not(:focus-visible){outline:none}
+.hint{font-size:14px;color:var(--ink-soft);margin:10px 0 20px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.notice{
+  margin:12px 0 0;padding:10px 12px;
+  border:1px solid #E3CBCB;border-radius:6px;
+  background:#FBF1F1;color:#8A2B2B;font-size:14px;
+}
+.notice.soft{border-color:var(--mat-soft);background:var(--mat-soft);color:var(--mat)}
+.notice[hidden]{display:none}
+.editbar{
+  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  margin:12px 0 0;font-size:14px;color:var(--ink-soft);
+}
+.editbar[hidden]{display:none}
+.editbar span{flex:1 1 auto;min-width:12ch}
+.linkbtn{
+  flex:0 0 auto;min-height:0;padding:0;
+  border:0;background:none;color:var(--mat);
+  font-family:inherit;font-size:14px;text-decoration:underline;cursor:pointer;
+}
+.linkbtn[disabled]{color:var(--ink-soft);text-decoration:none;cursor:default}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+button{
+  flex:1 1 auto;min-height:46px;padding:0 16px;
+  border:1px solid var(--mat);border-radius:6px;
+  background:var(--mat);color:#fff;
+  font-family:inherit;font-size:15px;cursor:pointer;
+}
+button.ghost{background:#fff;color:var(--mat)}
+button:active{transform:scale(.99)}
+.notes{margin-top:36px;border-top:1px solid var(--line);padding-top:20px;font-size:15px;color:var(--ink-soft)}
+.notes h2{font-size:16px;font-weight:600;color:var(--ink);margin:0 0 10px}
+.notes li{margin-bottom:8px}
+.notes ul{padding-left:20px;margin:0}
+
+/* folha de impressão: montada sob demanda, em milímetros reais */
+#sheet{display:none}
+@page{size:A4 portrait;margin:10mm}
+@media print{
+  .wrap{display:none}
+  body{background:#fff}
+  #sheet{display:block}
+  .page{break-after:page;page-break-after:always}
+  .page:last-child{break-after:auto;page-break-after:auto}
+  .cap{margin:0 0 3mm;font-size:8.5pt;line-height:1.3;color:#333}
+  .cap em{font-style:normal;color:#777}
+  .page svg{display:block}
+}
