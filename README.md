@@ -7,7 +7,10 @@ posiciona as peças bordadas por cima, e baixa um PDF com o molde de furos na es
 material.
 
 A aplicação é o arquivo `index.html`: HTML, CSS e JavaScript em um único arquivo, sem build e
-sem backend.
+sem backend. A tela é um editor: trilho de ícones à esquerda que abre um painel, barra de cima
+que muda conforme o que está selecionado, e o papel no centro sobre uma mesa com réguas em
+centímetros. O `layout.html` na raiz é a maquete dessa arrumação, com os controles inertes —
+serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
 
 ## O que ele faz
 
@@ -16,19 +19,39 @@ sem backend.
   medida própria, arrastável sobre o papel, com imagem opcional só para visualizar.
 - **Peças bordadas**: quantas quiser, cada uma sendo uma palavra ou um símbolo (coração cheio,
   coração vazado, estrela, seta). Arraste para posicionar, incline de -45° a 45°, redimensione
-  com dois dedos, e ajuste ponto a ponto no modo de edição.
+  com dois dedos, e ajuste ponto a ponto no modo de edição. Duplicar copia a peça com as
+  células como estão, então a cópia nasce com os ajustes manuais da original e segue a vida
+  dela própria a partir dali.
 - **Fontes**: 40 famílias do Google Fonts agrupadas por caráter — caligrafia fina, cursiva
-  encorpada, letra de mão, serifada itálica, gótica, pixel e bloco.
+  encorpada, letra de mão, serifada itálica, gótica, pixel e bloco. A escolha é por amostra,
+  não por nome: cada linha mostra a sua palavra escrita naquela fonte e, ao lado, a mesma
+  palavra já em quadradinhos, que é o que vira furo. Com busca e filtro por grupo. Os cartões
+  pedem a fonte só quando chegam à vista, então abrir a lista não baixa as 40 famílias.
 - **Linhas**: oito paletas de quatro cores cada.
 - **Contagem**: pontos e furos, com o tamanho da peça selecionada em centímetros.
 - **PDF do molde**: em tamanho real, recortado na área do bordado, com a moldura de recorte, o
   retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
   distância exata para colar a foto no papel.
 - **PNG** da prévia, para conferir o arranjo.
+- **Zoom e deslocamento**: o papel cresce dentro da mesa, que rola. Botões no canto, Ctrl (ou ⌘)
+  com a roda do mouse aproximando no ponto sob o cursor, e uma mãozinha que troca o arraste de
+  "posicionar a peça" para "mover a vista" — no toque, com ela ligada, a pinça muda o zoom. A
+  porcentagem é relativa ao encaixe do papel na tela: **100% é o papel inteiro visível**, não
+  tamanho físico. Tamanho real é promessa do PDF, que a tela não tem como garantir.
+- **Modo ponto a ponto**: enquanto se acende e apaga quadradinho, a barra fica amarela e os
+  campos da peça saem dela — no celular eles roubam a altura de que a grade precisa, e em
+  qualquer tela mexer na altura ou na sensibilidade refaz a peça e joga fora justamente o que
+  se está ajustando à mão. No celular o painel e as abas recolhem: a grade passa de 164 × 232
+  para 328 × 464 px.
+- **Desfazer e refazer**: cada passo guarda o arranjo inteiro, células incluídas, então voltar
+  atrás devolve também o que foi aceso ou apagado à mão. Botões na barra de cima, Ctrl+Z e
+  Ctrl+Shift+Z. Um arraste de controle deslizante vira um passo só, não dezenas.
 - **Memória local**: papel, foto, peças, posições, inclinações, paleta e os ajustes feitos ponto
   a ponto ficam guardados no navegador e voltam ao reabrir. As células são gravadas como estão,
   e não recalculadas na volta — é isso que preserva o que você acendeu ou apagou à mão. Para
-  refazer tudo a partir dos controles, o botão **Recalcular**.
+  refazer tudo a partir dos controles, o botão **Recalcular** — que pergunta antes quando há
+  ajustes manuais a perder, dizendo quantos são, e oferece refazer só a peça selecionada. O
+  rodapé mostra a conta o tempo todo.
 
 ## Rodando
 

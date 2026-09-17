@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ponto &amp; letra — maquete de layout</title>
+<!--
+  MAQUETE DE LAYOUT. Não é o aplicativo.
+
+  Serve para julgar a arrumação da tela antes de mexer no index.html: onde ficam
+  o trilho, o painel, a barra contextual e a mesa, e quanto espaço sobra para o
+  papel. Os controles não fazem nada — mudam de estado, não desenham molde nem
+  geram PDF.
+
+  Sem rede, como o app: as fontes saem de fonts/, não há CSS nem script de fora.
+-->
+<style>
+@font-face{font-family:"Silkscreen";src:url("fonts/silkscreen.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Great Vibes";src:url("fonts/great-vibes.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Dancing Script";src:url("fonts/dancing-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Parisienne";src:url("fonts/parisienne.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Caveat";src:url("fonts/caveat.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Pacifico";src:url("fonts/pacifico.woff2") format("woff2");font-display:swap}
+
+:root{
+  --display:"CS Norman Mono","Silkscreen","Courier New",monospace;
+  --paper:#EDF4FB;
+  --ink:#384959;
+  --ink-soft:#6A89A7;
+  --mat:#384959;
+  --accent:#88BDF2;
+  --lemon:#FFE566;
+  --lemon-deep:#B3B347;
+  --danger:#BE5103;
+  --line:#C9DCEF;
+  --mesa:#DCE9F6;
+  --rail:72px;
+  --panel:300px;
+  --top:56px;
+  --foot:40px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Segoe UI",Roboto,-apple-system,system-ui,sans-serif;
+  font-size:15px;line-height:1.5;overflow:hidden;
+}
+button{font-family:inherit;color:inherit;cursor:pointer}
+
+/* ---- esqueleto ---------------------------------------------------- */
+.app{
+  height:100vh;display:grid;
+  grid-template-columns:var(--rail) var(--panel) 1fr;
+  grid-template-rows:var(--top) 1fr var(--foot);
+  grid-template-areas:"top top top" "rail panel mesa" "foot foot foot";
+}
+
+/* ---- barra superior ----------------------------------------------- */
+.top{
+  grid-area:top;display:flex;align-items:center;gap:14px;
+  background:#fff;border-bottom:1px solid var(--line);padding-right:14px;
+}
+.brand{
+  width:calc(var(--rail) + var(--panel));flex:0 0 auto;padding-left:16px;
+  border-right:1px solid var(--line);height:100%;display:flex;flex-direction:column;
+  justify-content:center;
+}
+.brand b{font-family:var(--display);font-weight:400;font-size:15px;letter-spacing:.02em}
+.brand i{display:block;width:74px;height:5px;background:var(--lemon);margin-top:3px}
+
+.tools{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;overflow:hidden}
+.tools .sep{width:1px;height:26px;background:var(--line);flex:0 0 auto}
+.tools .empty{font-family:var(--display);font-size:13px;color:var(--ink-soft)}
+
+.tool{
+  display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 11px;
+  background:#fff;border:1px solid var(--line);border-radius:6px;
+  font-family:var(--display);font-size:12px;letter-spacing:.02em;white-space:nowrap;
+}
+.tool:hover{border-color:var(--ink-soft)}
+.tool .v{color:var(--ink-soft)}
+.tool.icon{padding:0;width:36px;justify-content:center}
+.tool.fontbtn{font-family:"Dancing Script",cursive;font-size:19px;padding:0 14px}
+
+.right{margin-left:auto;display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.fit{
+  display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;
+  border:1px solid var(--line);border-radius:6px;background:#fff;
+  font-size:13px;color:var(--ink-soft);white-space:nowrap;
+}
+.fit .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:0 0 auto}
+.fit.tight{border-color:var(--lemon-deep);border-left-width:4px}
+.fit.tight .dot{background:var(--lemon-deep)}
+.fit.over{background:var(--danger);border-color:var(--danger);color:#fff}
+.fit.over .dot{background:#fff}
+.pdf{
+  height:36px;padding:0 16px;border:1px solid var(--lemon-deep);border-radius:6px;
+  background:var(--lemon);font-family:var(--display);font-size:12px;letter-spacing:.02em;
+}
+.pdf[disabled]{opacity:.4;cursor:not-allowed}
+
+/* ---- trilho -------------------------------------------------------- */
+.rail{
+  grid-area:rail;background:#fff;border-right:1px solid var(--line);
+  padding:8px 6px;display:flex;flex-direction:column;gap:2px;
+}
+.rail button{
+  width:100%;padding:9px 0 7px;border:0;border-radius:7px;background:transparent;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  font-family:var(--display);font-size:10px;letter-spacing:.02em;color:var(--ink-soft);
+}
+.rail button svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.6}
+.rail button:hover{background:var(--paper)}
+.rail button.on{background:var(--lemon);color:var(--ink)}
+
+/* ---- painel -------------------------------------------------------- */
+.panel{
+  grid-area:panel;background:#fff;border-right:1px solid var(--line);
+  overflow-y:auto;padding:16px 14px 24px;
+}
+.panel h2{
+  font-family:var(--display);font-size:13px;font-weight:400;letter-spacing:.03em;
+  margin:0 0 14px;
+}
+.pane{display:none}
+.pane.on{display:block}
+.f{margin-bottom:14px}
+.f label{display:block;font-size:13px;color:var(--ink-soft);margin-bottom:5px}
+.f label b{font-family:var(--display);font-weight:400;color:var(--ink)}
+select,input[type=text],input[type=number]{
+  width:100%;height:40px;padding:0 10px;border:1px solid var(--line);border-radius:6px;
+  background:#fff;color:var(--ink);font-size:15px;font-family:inherit;
+}
+input[type=range]{width:100%;accent-color:var(--mat);height:28px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.seg button{
+  height:38px;border:1px solid var(--line);border-radius:6px;background:#fff;
+  font-family:var(--display);font-size:11px;
+}
+.seg button.on{background:var(--mat);border-color:var(--mat);color:#fff}
+.wide{
+  width:100%;height:40px;border:1px solid var(--mat);border-radius:6px;background:#fff;
+  font-family:var(--display);font-size:12px;letter-spacing:.02em;margin-bottom:12px;
+}
+.note{font-size:12.5px;color:var(--ink-soft);margin:6px 0 0;line-height:1.4}
+.rule{height:1px;background:var(--line);margin:16px 0}
+.num{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0}
+.num span{font-size:13px;color:var(--ink-soft)}
+.num b{font-family:var(--display);font-weight:400;font-size:14px}
+.disabled{opacity:.45;pointer-events:none}
+
+/* cartões de fonte */
+.fonts{display:flex;flex-direction:column;gap:7px}
+.fcard{
+  display:flex;align-items:center;gap:10px;padding:8px 10px;width:100%;
+  border:1px solid var(--line);border-radius:7px;background:#fff;text-align:left;
+}
+.fcard:hover{border-color:var(--ink-soft)}
+.fcard.on{border-color:var(--mat);box-shadow:inset 4px 0 0 var(--lemon)}
+.fcard .word{font-size:25px;line-height:1.1;flex:1 1 auto;min-width:0;overflow:hidden}
+.fcard .name{
+  font-family:var(--display);font-size:10px;color:var(--ink-soft);
+  flex:0 0 auto;text-align:right;max-width:88px;line-height:1.3;
+}
+.fcard svg{flex:0 0 auto}
+
+/* paletas */
+.pals{display:flex;flex-direction:column;gap:8px}
+.pal{
+  display:flex;align-items:center;gap:9px;width:100%;padding:7px 9px;
+  border:1px solid var(--line);border-radius:7px;background:#fff;
+  font-family:var(--display);font-size:11px;text-align:left;
+}
+.pal.on{border-color:var(--mat);box-shadow:inset 4px 0 0 var(--lemon)}
+.pal .cc{display:flex;gap:3px;margin-left:auto;flex:0 0 auto}
+.pal .cc i{width:15px;height:15px;border-radius:50%;border:1px solid rgba(56,73,89,.2)}
+
+/* símbolos */
+.syms{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sym{
+  border:1px solid var(--line);border-radius:7px;background:#fff;padding:10px 6px 7px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  font-family:var(--display);font-size:10px;color:var(--ink-soft);
+}
+.sym.on{border-color:var(--mat);box-shadow:inset 0 -3px 0 var(--lemon)}
+
+/* ---- mesa ---------------------------------------------------------- */
+.mesa{grid-area:mesa;position:relative;background:var(--mesa);overflow:hidden}
+.ruler{position:absolute;background:#fff;color:var(--ink-soft);font-size:9px;z-index:2}
+.ruler.h{top:0;left:22px;right:0;height:22px;border-bottom:1px solid var(--line)}
+.ruler.v{top:22px;left:0;bottom:0;width:22px;border-right:1px solid var(--line)}
+.ruler .t{position:absolute;background:var(--line)}
+.ruler.h .t{bottom:0;width:1px;height:5px}
+.ruler.h .t.big{height:9px}
+.ruler.h .l{position:absolute;bottom:8px;transform:translateX(2px);font-family:var(--display)}
+.ruler.v .t{right:0;height:1px;width:5px}
+.ruler.v .t.big{width:9px}
+.ruler.v .l{position:absolute;right:9px;font-family:var(--display);transform:translateY(-1px)}
+.corner{position:absolute;top:0;left:0;width:22px;height:22px;background:#fff;
+  border-right:1px solid var(--line);border-bottom:1px solid var(--line);z-index:3}
+
+.stage{position:absolute;top:22px;left:22px;right:0;bottom:0;display:flex;
+  align-items:center;justify-content:center;padding:26px}
+.sheet{
+  position:relative;background:#fff;box-shadow:0 2px 10px rgba(56,73,89,.25);
+  width:420px;height:594px;
+}
+.photo{
+  position:absolute;left:52px;top:64px;width:168px;height:252px;
+  border:1px dashed var(--ink-soft);background:rgba(106,137,167,.07);
+}
+.piece{position:absolute;left:44px;top:300px}
+.selbox{outline:1.5px solid var(--accent);outline-offset:5px}
+.handles i{
+  position:absolute;width:8px;height:8px;background:#fff;border:1.5px solid var(--accent);
+  border-radius:1px;
+}
+.handles i:nth-child(1){left:-9px;top:-9px}
+.handles i:nth-child(2){right:-9px;top:-9px}
+.handles i:nth-child(3){left:-9px;bottom:-9px}
+.handles i:nth-child(4){right:-9px;bottom:-9px}
+.over-mark{
+  position:absolute;left:-14px;top:286px;width:300px;height:72px;
+  border:1.5px dashed var(--danger);display:none;
+}
+.zoom{
+  position:absolute;right:16px;bottom:16px;z-index:4;display:flex;align-items:center;gap:2px;
+  background:#fff;border:1px solid var(--line);border-radius:7px;padding:3px;
+}
+.zoom button{
+  width:30px;height:28px;border:0;background:transparent;border-radius:5px;
+  font-family:var(--display);font-size:13px;
+}
+.zoom button:hover{background:var(--paper)}
+.zoom .val{font-family:var(--display);font-size:11px;padding:0 7px;color:var(--ink-soft)}
+
+/* ---- rodapé -------------------------------------------------------- */
+.foot{
+  grid-area:foot;background:#fff;border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:12px;padding:0 14px;font-size:12.5px;color:var(--ink-soft);
+}
+.foot .maq{
+  margin-left:auto;display:flex;align-items:center;gap:6px;
+  font-family:var(--display);font-size:10px;
+}
+.foot .maq span{color:var(--lemon-deep)}
+.foot .maq button{
+  height:24px;padding:0 9px;border:1px dashed var(--lemon-deep);border-radius:5px;
+  background:#fff;font-family:var(--display);font-size:10px;
+}
+.foot .maq button.on{background:var(--lemon)}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ===================== barra superior ===================== -->
+  <div class="top">
+    <div class="brand"><b>ponto &amp; letra</b><i></i></div>
+
+    <div class="tools" id="tools"><!-- preenchida conforme a seleção --></div>
+
+    <div class="right">
+      <div class="fit" id="fit"><span class="dot"></span><span id="fitTxt">cabe em A4 · tamanho real</span></div>
+      <button class="pdf" id="pdfBtn">baixar molde pdf</button>
+    </div>
+  </div>
+
+  <!-- ===================== trilho ===================== -->
+  <nav class="rail" id="rail">
+    <button data-pane="papel"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1"/></svg>papel</button>
+    <button data-pane="foto"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1"/><circle cx="9" cy="10" r="1.6"/><path d="M3 17l5-5 4 4 3-3 6 6"/></svg>foto</button>
+    <button data-pane="texto" class="on"><svg viewBox="0 0 24 24"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></svg>texto</button>
+    <button data-pane="simbolos"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-9a3.8 3.8 0 017-2 3.8 3.8 0 017 2c0 4.5-7 9-7 9z"/></svg>símbolos</button>
+    <button data-pane="linha"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3.4"/><circle cx="16" cy="16" r="3.4"/></svg>linha</button>
+    <button data-pane="molde"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1"/><circle cx="9" cy="9" r=".9" fill="currentColor"/><circle cx="15" cy="9" r=".9" fill="currentColor"/><circle cx="9" cy="15" r=".9" fill="currentColor"/><circle cx="15" cy="15" r=".9" fill="currentColor"/></svg>molde</button>
+  </nav>
+
+  <!-- ===================== painel ===================== -->
+  <div class="panel">
+
+    <section class="pane" data-pane="papel">
+      <h2>papel</h2>
+      <div class="f">
+        <label for="ps">Tamanho</label>
+        <select id="ps">
+          <option>A4 — 21 × 29,7 cm</option><option>A5 — 14,8 × 21 cm</option>
+          <option>A3 — 29,7 × 42 cm</option><option>Quadrado — 20 × 20 cm</option>
+          <option>20 × 30 cm</option><option>15 × 20 cm</option><option>Personalizado</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Orientação</label>
+        <div class="seg"><button class="on">retrato</button><button>paisagem</button></div>
+      </div>
+      <div class="rule"></div>
+      <div class="disabled">
+        <div class="pair">
+          <div class="f"><label>Largura em mm</label><input type="number" value="210"></div>
+          <div class="f"><label>Altura em mm</label><input type="number" value="297"></div>
+        </div>
+      </div>
+      <p class="note">As medidas próprias só valem com o tamanho <b>Personalizado</b>.</p>
+    </section>
+
+    <section class="pane" data-pane="foto">
+      <h2>foto</h2>
+      <div class="f">
+        <label for="fs">Tamanho impresso</label>
+        <select id="fs">
+          <option>10 × 15 cm</option><option>9 × 13 cm</option><option>13 × 18 cm</option>
+          <option>15 × 21 cm</option><option>Quadrado — 10 × 10 cm</option>
+          <option>Polaroid — 8,8 × 10,7 cm</option><option>Personalizado</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Orientação</label>
+        <div class="seg"><button class="on">retrato</button><button>paisagem</button></div>
+      </div>
+      <div class="rule"></div>
+      <button class="wide">escolher imagem</button>
+      <p class="note">A imagem serve só para você visualizar o encaixe. Ela aparece apagada na
+      tela e no PDF, e não vira furo.</p>
+    </section>
+
+    <section class="pane on" data-pane="texto">
+      <h2>texto</h2>
+      <button class="wide">nova palavra</button>
+      <div class="f"><label for="tx">Texto da peça</label><input id="tx" type="text" value="amor"></div>
+      <div class="rule"></div>
+      <div class="fonts" id="fonts"></div>
+      <p class="note">À direita de cada fonte, a mesma palavra como ela vira furos.</p>
+    </section>
+
+    <section class="pane" data-pane="simbolos">
+      <h2>símbolos</h2>
+      <div class="syms">
+        <button class="sym on"><svg width="40" height="34" viewBox="0 0 9 8" shape-rendering="crispEdges"></svg>coração cheio</button>
+        <button class="sym"><svg width="40" height="34" viewBox="0 0 9 8" shape-rendering="crispEdges"></svg>coração vazado</button>
+        <button class="sym"><svg width="40" height="38" viewBox="0 0 9 9" shape-rendering="crispEdges"></svg>estrela</button>
+        <button class="sym"><svg width="40" height="38" viewBox="0 0 9 9" shape-rendering="crispEdges"></svg>seta</button>
+      </div>
+    </section>
+
+    <section class="pane" data-pane="linha">
+      <h2>linha</h2>
+      <div class="pals" id="pals"></div>
+      <p class="note">A cor vale só para a tela e a prévia. O molde em PDF sai sempre em preto.</p>
+    </section>
+
+    <section class="pane" data-pane="molde">
+      <h2>molde</h2>
+      <div class="f">
+        <label for="mm">Espaçamento entre furos <b>2,5</b> mm</label>
+        <input id="mm" type="range" min="1" max="6" step="0.5" value="2.5">
+        <p class="note">Vale para o molde inteiro, não só para a peça selecionada.</p>
+      </div>
+      <div class="rule"></div>
+      <div class="num"><span>Pontos</span><b>612</b></div>
+      <div class="num"><span>Furos</span><b>1.284</b></div>
+      <div class="num"><span>Área do molde</span><b>12,4 × 9,1 cm</b></div>
+      <div class="rule"></div>
+      <button class="wide">recalcular</button>
+      <p class="note">Refaz as peças a partir dos controles e descarta os ajustes feitos ponto
+      a ponto.</p>
+    </section>
+
+  </div>
+
+  <!-- ===================== mesa ===================== -->
+  <div class="mesa">
+    <div class="corner"></div>
+    <div class="ruler h" id="rh"></div>
+    <div class="ruler v" id="rv"></div>
+
+    <div class="stage" id="stage">
+      <div class="sheet" id="sheet">
+        <div class="photo" id="photo"></div>
+        <div class="piece selbox" id="piece">
+          <svg id="word" shape-rendering="crispEdges"></svg>
+          <div class="handles"><i></i><i></i><i></i><i></i></div>
+        </div>
+        <div class="over-mark" id="overMark"></div>
+      </div>
+    </div>
+
+    <div class="zoom">
+      <button>−</button><span class="val">100%</span><button>+</button>
+    </div>
+  </div>
+
+  <!-- ===================== rodapé ===================== -->
+  <div class="foot">
+    <span>salvo neste navegador às 14:32</span>
+    <div class="maq">
+      <span>só nesta maquete:</span>
+      <button data-sel="none">nada</button>
+      <button data-sel="word" class="on">palavra</button>
+      <button data-sel="sym">símbolo</button>
+      <button data-sel="photo">foto</button>
+      <span style="margin-left:8px">escala:</span>
+      <button data-fit="ok" class="on">cabe</button>
+      <button data-fit="tight">justo</button>
+      <button data-fit="over">não cabe</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* Maquete: só troca estados para você julgar a arrumação. Nada aqui desenha
+   molde de verdade nem gera PDF — isso continua no index.html. */
+(function(){
+  var $ = function(s){ return document.querySelector(s); };
+  var $$ = function(s){ return [].slice.call(document.querySelectorAll(s)); };
+
+  /* ---- desenhos de quadradinhos ------------------------------------ */
+  var GLYPHS = {
+    A:[".###.","#...#","#####","#...#","#...#"],
+    M:["#...#","##.##","#.#.#","#...#","#...#"],
+    O:[".###.","#...#","#...#","#...#",".###."],
+    R:["####.","#...#","####.","#..#.","#...#"]
+  };
+  var SYMS = {
+    0:[".##...##.","#########","#########",".#######.","..#####..","...###...","....#....","........."],
+    1:[".##...##.","#..#.#..#","#...#...#",".#.....#.","..#...#..","...#.#...","....#....","........."],
+    2:["....#....","...###...","#########",".#######.","..#####..",".##...##.","#.......#","........."],
+    3:["....#....","...##....","..#.#....","#########","..#.#....","...##....","....#....","........."]
+  };
+
+  function cells(rows, cell, color){
+    var w = rows[0].length, h = rows.length, out = "";
+    for (var r = 0; r < h; r++)
+      for (var c = 0; c < w; c++)
+        if (rows[r][c] === "#")
+          out += '<rect x="'+(c*cell)+'" y="'+(r*cell)+'" width="'+(cell-0.6)+
+                 '" height="'+(cell-0.6)+'" fill="'+color+'"/>';
+    return { markup: out, w: w * cell, h: h * cell };
+  }
+
+  function wordRows(txt){
+    var g = txt.toUpperCase().split("").map(function(ch){ return GLYPHS[ch]; }).filter(Boolean);
+    if (!g.length) return ["#"];
+    var rows = [];
+    for (var r = 0; r < 5; r++)
+      rows.push(g.map(function(x){ return x[r]; }).join("."));
+    return rows;
+  }
+
+  function drawWord(txt){
+    var d = cells(wordRows(txt), 7, "#384959");
+    var el = $("#word");
+    el.setAttribute("width", d.w); el.setAttribute("height", d.h);
+    el.setAttribute("viewBox", "0 0 " + d.w + " " + d.h);
+    el.innerHTML = d.markup;
+  }
+
+  $$(".sym svg").forEach(function(svg, i){
+    svg.innerHTML = cells(SYMS[i], 1, "#384959").markup;
+  });
+
+  /* ---- cartões de fonte -------------------------------------------- */
+  var FONTS = [
+    ["Great Vibes","caligrafia fina"],
+    ["Dancing Script","cursiva encorpada"],
+    ["Parisienne","cursiva encorpada"],
+    ["Caveat","letra de mão"],
+    ["Pacifico","cursiva encorpada"]
+  ];
+  var mini = cells(wordRows("amor"), 3, "#6A89A7");
+  $("#fonts").innerHTML = FONTS.map(function(f, i){
+    return '<button class="fcard' + (i === 1 ? ' on' : '') + '">' +
+      '<span class="word" style="font-family:\'' + f[0] + '\',cursive">amor</span>' +
+      '<svg width="' + mini.w + '" height="' + mini.h + '" viewBox="0 0 ' + mini.w + ' ' + mini.h +
+      '" shape-rendering="crispEdges">' + mini.markup + '</svg>' +
+      '<span class="name">' + f[0] + '</span></button>';
+  }).join("");
+  $$(".fcard").forEach(function(b){
+    b.addEventListener("click", function(){
+      $$(".fcard").forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on");
+    });
+  });
+
+  /* ---- paletas ------------------------------------------------------ */
+  var PALETTES = [
+    ["Zesty lemon",["#FFFF66","#FFE566","#D6D58B","#B3B347"]],
+    ["Golden taupe",["#D4AF37","#BDB76B","#FDFBD4","#CE8946"]],
+    ["Retro sunset",["#BE5103","#FFCE1B","#069494","#B7410E"]],
+    ["Stormy morning",["#384959","#6A89A7","#88BDF2","#BDDDFC"]],
+    ["Mossy hollow",["#636B2F","#BAC095","#D4DE95","#3D4127"]],
+    ["Blue eclipse",["#272757","#8686AC","#505081","#0F0E47"]],
+    ["Chili spice",["#CD1C18","#FFA896","#9B1313","#38000A"]],
+    ["Chocolate truffle",["#713600","#C05800","#FDFBD4","#38240D"]]
+  ];
+  $("#pals").innerHTML = PALETTES.map(function(p, i){
+    return '<button class="pal' + (i === 0 ? ' on' : '') + '">' + p[0] +
+      '<span class="cc">' + p[1].map(function(c){
+        return '<i style="background:' + c + '"></i>'; }).join("") + '</span></button>';
+  }).join("");
+  $$(".pal").forEach(function(b){
+    b.addEventListener("click", function(){
+      $$(".pal").forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on");
+    });
+  });
+
+  /* ---- réguas: o zero fica na borda da folha, não na borda da mesa ---- */
+  function rulers(){
+    var sheet = $("#sheet").getBoundingClientRect();
+    var mesa  = $(".mesa").getBoundingClientRect();
+    var pxcm  = sheet.width / 21;                 /* a folha representa 21 cm */
+    var ox = sheet.left - mesa.left - 22;         /* 22 = faixa da régua vertical */
+    var oy = sheet.top  - mesa.top  - 22;
+    var a = "", b = "", i, x, y;
+    for (i = 0; (x = ox + i * pxcm) < mesa.width; i++){
+      if (x < 0) continue;
+      var big = i % 2 === 0;
+      a += '<span class="t' + (big ? " big" : "") + '" style="left:' + x + 'px"></span>';
+      if (big) a += '<span class="l" style="left:' + x + 'px">' + i + '</span>';
+    }
+    for (i = 0; (y = oy + i * pxcm) < mesa.height; i++){
+      if (y < 0) continue;
+      var bg = i % 2 === 0;
+      b += '<span class="t' + (bg ? " big" : "") + '" style="top:' + y + 'px"></span>';
+      if (bg) b += '<span class="l" style="top:' + y + 'px">' + i + '</span>';
+    }
+    $("#rh").innerHTML = a; $("#rv").innerHTML = b;
+  }
+  window.addEventListener("resize", rulers);
+
+  /* ---- trilho e painéis --------------------------------------------- */
+  $$(".rail button").forEach(function(b){
+    b.addEventListener("click", function(){
+      $$(".rail button").forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on");
+      $$(".pane").forEach(function(p){
+        p.classList.toggle("on", p.dataset.pane === b.dataset.pane);
+      });
+    });
+  });
+
+  /* ---- barra contextual: o coração da maquete ------------------------ */
+  var T = {
+    none: '<span class="empty">A4 · retrato</span>',
+
+    word: '<button class="tool fontbtn">amor</button>' +
+          '<span class="sep"></span>' +
+          '<button class="tool">altura <span class="v">18</span></button>' +
+          '<button class="tool">espessura <span class="v">2</span></button>' +
+          '<button class="tool">sensibilidade <span class="v">35%</span></button>' +
+          '<button class="tool">inclinação <span class="v">0°</span></button>' +
+          '<span class="sep"></span>' +
+          '<button class="tool">ajustar ponto a ponto</button>' +
+          '<button class="tool icon" title="duplicar">' + icon("dup") + '</button>' +
+          '<button class="tool icon" title="excluir">' + icon("del") + '</button>',
+
+    sym:  '<button class="tool">desenho <span class="v">coração cheio</span></button>' +
+          '<button class="tool">tamanho <span class="v">2×</span></button>' +
+          '<button class="tool">inclinação <span class="v">0°</span></button>' +
+          '<span class="sep"></span>' +
+          '<button class="tool">ajustar ponto a ponto</button>' +
+          '<button class="tool icon" title="duplicar">' + icon("dup") + '</button>' +
+          '<button class="tool icon" title="excluir">' + icon("del") + '</button>',
+
+    photo:'<button class="tool">girar foto</button>' +
+          '<button class="tool">centralizar foto</button>' +
+          '<button class="tool">centralizar em cima</button>'
+  };
+
+  function icon(k){
+    if (k === "dup") return '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="8" y="8" width="12" height="12" rx="1"/><path d="M16 5H5v11"/></svg>';
+    return '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13"/></svg>';
+  }
+
+  function select(kind){
+    $("#tools").innerHTML = T[kind];
+    $("#piece").classList.toggle("selbox", kind === "word" || kind === "sym");
+    $$("#piece .handles i").forEach(function(h){
+      h.style.display = (kind === "word" || kind === "sym") ? "" : "none";
+    });
+    $("#photo").style.borderStyle = kind === "photo" ? "solid" : "dashed";
+    $("#photo").style.borderColor = kind === "photo" ? "var(--accent)" : "var(--ink-soft)";
+    $("#photo").style.borderWidth = kind === "photo" ? "1.5px" : "1px";
+    drawWord(kind === "sym" ? "" : "amor");
+    if (kind === "sym"){
+      var d = cells(SYMS[0], 9, "#384959");
+      var el = $("#word");
+      el.setAttribute("width", d.w); el.setAttribute("height", d.h);
+      el.setAttribute("viewBox", "0 0 " + d.w + " " + d.h);
+      el.innerHTML = d.markup;
+    }
+  }
+
+  function fit(state){
+    var box = $("#fit"), txt = $("#fitTxt"), btn = $("#pdfBtn");
+    box.className = "fit" + (state === "ok" ? "" : " " + state);
+    txt.textContent = state === "ok"   ? "cabe em A4 · tamanho real"
+                    : state === "tight" ? "cabe em A4 · 4 mm de folga"
+                    : "não cabe em A4 — o PDF sairia a 78%";
+    btn.disabled = state === "over";
+    $("#overMark").style.display = state === "over" ? "block" : "none";
+  }
+
+  $$('.maq button[data-sel]').forEach(function(b){
+    b.addEventListener("click", function(){
+      $$('.maq button[data-sel]').forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on"); select(b.dataset.sel);
+    });
+  });
+  $$('.maq button[data-fit]').forEach(function(b){
+    b.addEventListener("click", function(){
+      $$('.maq button[data-fit]').forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on"); fit(b.dataset.fit);
+    });
+  });
+
+  /* clicar na mesa também seleciona, como no app de verdade */
+  $("#photo").addEventListener("click", function(e){ e.stopPropagation(); pick("photo"); });
+  $("#piece").addEventListener("click", function(e){ e.stopPropagation(); pick("word"); });
+  $("#sheet").addEventListener("click", function(){ pick("none"); });
+  function pick(k){
+    $$('.maq button[data-sel]').forEach(function(x){ x.classList.toggle("on", x.dataset.sel === k); });
+    select(k);
+  }
+
+  select("word"); fit("ok"); rulers();
+})();
+</script>
+</body>
+</html>
