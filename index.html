@@ -28,11 +28,20 @@
     <div class="field">
       <label for="font">Fonte</label>
       <select id="font"></select>
+      <button type="button" class="linkbtn findbtn" id="more" aria-expanded="false" aria-controls="panel">Buscar mais fontes</button>
     </div>
     <div class="field">
       <label for="rows">Altura <b id="rowsOut">22</b> pontos</label>
       <input id="rows" type="range" min="10" max="50" step="1" value="22">
     </div>
+  </div>
+
+  <div class="panel" id="panel" hidden>
+    <p id="panelnote">Catálogo do Google Fonts. As sete de cima ficam no próprio site e funcionam sem rede; as daqui são baixadas da internet na hora.</p>
+    <label class="sr" for="search">Buscar fonte pelo nome</label>
+    <input id="search" type="text" placeholder="Buscar pelo nome…" autocomplete="off" spellcheck="false">
+    <div class="results" id="results"></div>
+    <p class="count" id="rcount"></p>
   </div>
 
   <div class="row">
@@ -88,6 +97,7 @@
 <div id="say" class="sr" role="status" aria-live="polite"></div>
 <div id="sheet" aria-hidden="true"></div>
 
+<script src="catalog.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
