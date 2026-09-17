@@ -48,6 +48,15 @@ Site estático: publique a raiz do repositório em qualquer host. Na Vercel, o `
 raiz declara que não há build — sem ele, um projeto criado com o preset Vite tenta rodar
 `vite build` e falha com `vite: command not found`.
 
+## `sw.js`
+
+Este domínio já hospedou o app React, que usava `vite-plugin-pwa` e registrava um
+service worker guardando o HTML em cache. Service worker é por origem e sobrevive a
+deploy: navegadores que abriram aquela versão continuavam vendo ela, por mais correto
+que estivesse o deploy. O `sw.js` na raiz existe só para desfazer isso — ocupa o mesmo
+caminho do antigo, apaga os caches, se desregistra e recarrega a aba. Não é um service
+worker de verdade e o app não depende dele.
+
 ## Histórico
 
 Este repositório já teve duas aplicações diferentes antes desta, ambas preservadas no histórico
