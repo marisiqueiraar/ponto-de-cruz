@@ -33,11 +33,15 @@
   --lemon-deep:#B3B347;
   --danger:#BE5103;
   --line:#C9DCEF;
+  --gut:16px;
+}
+@supports (padding:max(0px)){
+  :root{--gut:max(16px,env(safe-area-inset-left),env(safe-area-inset-right))}
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:"Segoe UI",Roboto,-apple-system,system-ui,sans-serif;font-size:16px;line-height:1.55}
-.wrap{max-width:660px;margin:0 auto;padding:20px 16px 72px}
+.wrap{max-width:660px;margin:0 auto;padding:20px var(--gut) calc(56px + env(safe-area-inset-bottom))}
 header{margin:8px 0 22px}
 h1{font-family:var(--display);font-size:26px;font-weight:400;line-height:1.15;letter-spacing:.02em;margin:0 0 6px;color:var(--mat)}
 h1::after{content:"";display:block;width:120px;height:6px;margin-top:8px;background:var(--lemon)}
@@ -85,6 +89,64 @@ button:active{transform:scale(.99)}
 .hacts{display:flex;gap:8px;flex:0 0 auto}
 .hitem button{flex:0 0 auto;min-height:38px;padding:0 12px;font-size:12px}
 .hide{display:none!important}
+button:disabled{opacity:.55;cursor:default}
+button:focus-visible,.chip:focus-visible,.sw:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkish{flex:0 0 auto;min-height:0;padding:0;border:0;background:none;color:var(--mat);font:inherit;text-decoration:underline;cursor:pointer}
+.below{margin-top:6px}
+#histTitle{scroll-margin-top:14px}
+
+/* celular: os números e a tela ficam presos no topo enquanto se mexe nos controles.
+   a seção da prévia não vira caixa aqui de propósito — sticky só anda dentro do pai,
+   e o pai precisa ser o .layout, que vai até o fim dos controles. */
+.preview{display:contents}
+.stage{position:sticky;top:0;z-index:5;background:var(--paper);
+  margin-left:calc(-1 * var(--gut));margin-right:calc(-1 * var(--gut));
+  padding:8px var(--gut) 10px;border-bottom:1px solid var(--line)}
+.stage .stats{margin-top:0}
+.stat .wonly{display:none}
+@media (max-width:899px){
+  /* o palco é o que fica na dobra: cada pixel dele conta */
+  .stage .stat{padding:8px 10px;flex:0 0 27%}
+  .stage .stat:last-child{flex:1 1 auto}
+  .stage .stat strong{white-space:nowrap}
+  .stage .stat span{font-size:11px}
+  .stage .stat strong{font-size:14px;margin-top:2px}
+  .stage .board{padding:8px}
+}
+@media (max-width:599px){
+  .actions #pdf{flex:1 0 100%}
+}
+
+/* computador e tablet deitado: controles à esquerda, prévia fixa à direita */
+@media (min-width:900px),(min-width:680px) and (orientation:landscape){
+  .wrap{max-width:1180px;padding-bottom:48px}
+  /* a prévia fica à esquerda, na mesma ordem em que está no HTML: quem navega
+     por teclado ou leitor de tela percorre a tela na ordem em que ela aparece. */
+  .layout{display:grid;grid-template-columns:minmax(330px,1fr) minmax(360px,1.02fr);gap:34px;align-items:start}
+  .preview{display:block;grid-column:1;grid-row:1;min-width:0;position:sticky;top:20px}
+  .controls{grid-column:2;grid-row:1;min-width:0}
+  .controls > h2:first-child{margin-top:0}
+  .stage{position:static;margin:0;padding:0;border-bottom:0}
+  .below{max-width:780px;margin-top:10px}
+  .stat .wonly{display:inline}
+}
+/* tela deitada de celular: o cabeçalho não pode comer a dobra inteira */
+@media (max-height:560px){
+  .wrap{padding-top:10px}
+  header{margin:2px 0 12px}
+  h1{font-size:20px}
+  h1::after{width:90px;height:4px;margin-top:5px}
+  header p{display:none}
+  h2{margin:14px 0 8px}
+}
+/* janela baixa demais para prender a prévia inteira: melhor deixar rolar */
+@media (max-height:620px){
+  .preview{position:static}
+}
+@media (prefers-reduced-motion:reduce){
+  button:active{transform:none}
+  html{scroll-behavior:auto}
+}
 </style>
 </head>
 <body>
@@ -95,6 +157,35 @@ button:active{transform:scale(.99)}
   <p>Define o papel, encaixa a foto, escreve por cima e imprime o molde de furos no tamanho exato do material.</p>
 </header>
 
+<div class="layout">
+
+<section class="preview">
+<div class="stage">
+<div class="stats" aria-live="polite">
+  <div class="stat"><span>Pontos</span><strong id="count">—</strong></div>
+  <div class="stat"><span>Furos</span><strong id="holes">—</strong></div>
+  <div class="stat"><span>Peça<span class="wonly"> selecionada</span></span><strong id="size">—</strong></div>
+</div>
+
+<div class="board"><canvas id="grid" width="10" height="10"></canvas></div>
+</div>
+<p class="hint" id="modeHint">Arraste a palavra ou a foto para posicionar. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.</p>
+
+<div class="actions">
+  <button id="edit" class="ghost">Ajustar ponto a ponto</button>
+</div>
+<div class="actions">
+  <button id="pdf">Baixar molde PDF</button>
+  <button id="dl" class="ghost">Baixar prévia PNG</button>
+  <button id="reset" class="ghost">Recalcular</button>
+</div>
+<p class="hint" id="fitHint" aria-live="polite">O molde sai em tamanho real, recortado na área do bordado, com as medidas exatas até as bordas do papel.</p>
+
+<div id="out"></div>
+<p class="hint hide" id="saved" aria-live="polite"></p>
+</section>
+
+<section class="controls" aria-label="Ajustes do molde">
 <h2>Papel de fundo</h2>
 <div class="row">
   <div class="field">
@@ -286,29 +377,13 @@ button:active{transform:scale(.99)}
     <div class="swrow" id="swatches"></div>
   </div>
 </div>
+</section>
 
-<div class="stats">
-  <div class="stat"><span>Pontos</span><strong id="count">—</strong></div>
-  <div class="stat"><span>Furos</span><strong id="holes">—</strong></div>
-  <div class="stat"><span>Peça selecionada</span><strong id="size">—</strong></div>
 </div>
 
-<div class="board"><canvas id="grid" width="10" height="10"></canvas></div>
-<p class="hint" id="modeHint">Arraste a palavra ou a foto para posicionar. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.</p>
+<div class="below">
 
-<div class="actions">
-  <button id="edit" class="ghost">Ajustar ponto a ponto</button>
-</div>
-<div class="actions">
-  <button id="pdf">Baixar molde PDF</button>
-  <button id="dl" class="ghost">Baixar prévia PNG</button>
-  <button id="reset" class="ghost">Recalcular</button>
-</div>
-<p class="hint" id="fitHint">O molde sai em tamanho real, recortado na área do bordado, com as medidas exatas até as bordas do papel.</p>
-
-<div id="out"></div>
-
-<h2>Histórico de moldes</h2>
+<h2 id="histTitle">Histórico de moldes</h2>
 <p class="hint" id="histHint">Cada PDF gerado fica guardado aqui, neste navegador e neste aparelho. Os 20 mais recentes.</p>
 <div class="hist" id="hist"></div>
 <div class="actions hide" id="histActions">
@@ -324,6 +399,8 @@ button:active{transform:scale(.99)}
     <li>Borde com 2 ou 3 fios de meada. Em furo que atravessa foto e papel, puxe devagar: papel fotográfico não fecha depois de rasgar.</li>
     <li>Espaçamento entre 2,5 e 3 mm é o mais seguro nesse material. Abaixo de 2 mm a tira de papel entre dois furos vira pó.</li>
   </ul>
+</div>
+
 </div>
 
 </div>
@@ -407,7 +484,9 @@ button:active{transform:scale(.99)}
     box.innerHTML = "";
     PALETTES[curPal].colors.forEach(function(c){
       var b = document.createElement("button");
+      b.type = "button";
       b.className = "sw" + (c[0] === thread ? " on" : "");
+      b.setAttribute("aria-pressed", c[0] === thread ? "true" : "false");
       b.style.background = c[0];
       b.title = c[1] + " " + c[0];
       b.setAttribute("aria-label", "Linha " + c[1]);
@@ -707,12 +786,20 @@ button:active{transform:scale(.99)}
     });
   }
 
+  var WIDE = "(min-width:900px),(min-width:680px) and (orientation:landscape)";
+  function wideLayout(){
+    return !!(window.matchMedia && window.matchMedia(WIDE).matches);
+  }
+
   function draw(){
     var cv = $("grid"), ctx = cv.getContext("2d");
     var pa = paperMM();
     var box = cv.parentNode;
     var availW = box.clientWidth - 24;
-    var availH = Math.min(520, Math.max(300, window.innerHeight * 0.55));
+    // no celular o palco é fixo no topo: a tela fica baixa para sobrar controle na dobra.
+    var availH = wideLayout()
+      ? Math.max(240, Math.min(620, window.innerHeight - 360))
+      : Math.max(200, Math.min(440, window.innerHeight * 0.35));
     var k = Math.min(availW / pa.w, availH / pa.h);
     var dpr = window.devicePixelRatio || 1;
     cv.width = Math.round(pa.w * k * dpr);
@@ -725,6 +812,9 @@ button:active{transform:scale(.99)}
 
     $("count").textContent = totalCount.toLocaleString("pt-BR");
     $("holes").textContent = totalHoles.toLocaleString("pt-BR");
+    cv.setAttribute("aria-label", "Prévia do molde: " + totalCount.toLocaleString("pt-BR") +
+      " pontos e " + totalHoles.toLocaleString("pt-BR") + " furos sobre papel de " +
+      fmt(pa.w) + " por " + fmt(pa.h) + " milímetros.");
     var el = els[sel];
     if (el){
       var b = bboxMM(el);
@@ -746,7 +836,9 @@ button:active{transform:scale(.99)}
     box.innerHTML = "";
     els.forEach(function(el, i){
       var b = document.createElement("button");
+      b.type = "button";
       b.className = "chip" + (i === sel ? " on" : "");
+      b.setAttribute("aria-pressed", i === sel ? "true" : "false");
       b.textContent = el.kind === "text" ? (el.text || "texto")
         : ({heart:"coração", heartOutline:"coração vazado", star:"estrela", arrow:"seta"})[el.sym];
       b.addEventListener("click", function(){ sel = i; syncControls(); draw(); renderChips(); });
@@ -1287,12 +1379,38 @@ button:active{transform:scale(.99)}
     histWrite(function(st){ st.clear(); }, histRender, histRender);
   });
 
+  function saved(){
+    var p = $("saved");
+    p.innerHTML = "";
+    p.classList.remove("hide");
+    if (histOff){
+      p.textContent = "Molde gerado. Este navegador não guarda histórico.";
+      return;
+    }
+    p.appendChild(document.createTextNode("Molde gerado e guardado no histórico. "));
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "linkish"; b.textContent = "Ver histórico";
+    b.addEventListener("click", function(){
+      $("histTitle").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    p.appendChild(b);
+  }
+
   $("pdf").addEventListener("click", function(){
     if (!window.jspdf || !window.jspdf.jsPDF){
       alert("O gerador de PDF não carregou. Conecte à internet e recarregue a página.");
       return;
     }
     if (!els.length) return;
+    // um molde cheio segura a thread por um segundo: o botão avisa antes de travar.
+    var btn = this, rotulo = btn.textContent;
+    btn.disabled = true; btn.textContent = "Gerando…";
+    setTimeout(function(){
+      try { buildPDF(); } finally { btn.disabled = false; btn.textContent = rotulo; }
+    }, 30);
+  });
+
+  function buildPDF(){
     var pa = paperMM();
     var R = cropArea();
     var fit = pdfFit(R);
@@ -1382,9 +1500,18 @@ button:active{transform:scale(.99)}
     histSave(blob, name, "Papel " + fmt(pa.w) + " × " + fmt(pa.h) + " mm · foto " + fmt(photo.w) + " × " +
              fmt(photo.h) + " mm · " + totalCount.toLocaleString("pt-BR") + " pontos", histThumb(R));
     deliver(blob, name, null);
-  });
+    saved();
+  }
 
-  window.addEventListener("resize", draw);
+  // redesenhar a cada pixel de resize trava no celular, onde a barra do navegador
+  // aparece e some o tempo todo; um respiro basta.
+  var reTimer = null;
+  function redrawSoon(ms){
+    if (reTimer) clearTimeout(reTimer);
+    reTimer = setTimeout(function(){ reTimer = null; draw(); }, ms || 120);
+  }
+  window.addEventListener("resize", function(){ redrawSoon(120); });
+  window.addEventListener("orientationchange", function(){ redrawSoon(320); });
 
   function boot(){
     syncPhotoSize();
