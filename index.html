@@ -419,6 +419,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     </span>
     <span class="grp hide" id="ctlActs">
       <button id="edit" class="tbtn" title="ajustar ponto a ponto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18V3H3zm8 16H5v-6h6v6zm0-8H5V5h6v6zm8 8h-6v-6h6v6zm0-8h-6V5h6v6z"/></svg><span id="editLabel">ajustar</span></button>
+      <button id="dupEl" class="tbtn icon" title="duplicar peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 1H4a2 2 0 00-2 2v12h2V3h11V1zm4 4H8a2 2 0 00-2 2v14a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2zm0 16H8V7h11v14z"/></svg></button>
       <button id="delEl" class="tbtn danger"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg title="excluir peça"><span class="hide">excluir</span></button>
     </span>
     <span class="fit" id="fitHint"><span class="dot"></span><span id="fitTxt">&nbsp;</span></span>
@@ -1362,6 +1363,23 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     els.splice(sel, 1);
     sel = Math.max(0, sel - 1);
     if (!els.length) focus = "none";
+    renderChips(); syncControls(); draw(); pushHist();
+  });
+
+  $("dupEl").addEventListener("click", function(){
+    var el = els[sel];
+    if (!el) return;
+    // packEl/unpackEl já é a cópia profunda do app: leva as células como estão,
+    // e com elas os ajustes feitos ponto a ponto
+    var copia = unpackEl(packEl(el));
+    if (!copia) return;
+    var pa = paperMM();
+    var b = bboxMM(el);
+    copia.x = Math.min(el.x + 4, Math.max(0, pa.w - b.w));
+    copia.y = Math.min(el.y + 4, Math.max(0, pa.h - b.h));
+    els.splice(sel + 1, 0, copia);
+    sel = sel + 1;
+    focus = "el";
     renderChips(); syncControls(); draw(); pushHist();
   });
 

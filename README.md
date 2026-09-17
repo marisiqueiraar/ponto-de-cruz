@@ -19,7 +19,9 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
   medida própria, arrastável sobre o papel, com imagem opcional só para visualizar.
 - **Peças bordadas**: quantas quiser, cada uma sendo uma palavra ou um símbolo (coração cheio,
   coração vazado, estrela, seta). Arraste para posicionar, incline de -45° a 45°, redimensione
-  com dois dedos, e ajuste ponto a ponto no modo de edição.
+  com dois dedos, e ajuste ponto a ponto no modo de edição. Duplicar copia a peça com as
+  células como estão, então a cópia nasce com os ajustes manuais da original e segue a vida
+  dela própria a partir dali.
 - **Fontes**: 40 famílias do Google Fonts agrupadas por caráter — caligrafia fina, cursiva
   encorpada, letra de mão, serifada itálica, gótica, pixel e bloco.
 - **Linhas**: oito paletas de quatro cores cada.
