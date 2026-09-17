@@ -1,10 +1,44 @@
 # Prompts para o Google Stitch — ponto & letra
 
-Uma tela por mensagem. Cada prompt abaixo é curto de propósito: o Stitch desenha tudo que
-lê, então descrever o produto inteiro numa mensagem só produz uma tela empilhada.
+A referência de layout é o **Canva**: a tela de trabalho no centro, um trilho de ícones à
+esquerda que abre um painel, e uma barra no topo que muda conforme o que está selecionado.
+Nada do lado direito.
 
-**Como usar:** cole um prompt da seção 2 ou 3, e **sempre cole o bloco de REGRAS (seção 1)
-logo abaixo dele, na mesma mensagem**. As regras não são lembradas entre mensagens.
+Uma tela por mensagem. Cole o prompt e, **na mesma mensagem, o bloco de REGRAS da seção 1** —
+o Stitch não lembra regra entre mensagens.
+
+---
+
+## 0. A estrutura, em uma página
+
+Por que o modelo do Canva resolve o problema deste app: são cerca de 20 controles, mas eles
+nunca se aplicam ao mesmo tempo. Os da palavra (fonte, altura, espessura, sensibilidade) não
+existem para um símbolo; os da foto (girar, centralizar) não existem para uma palavra. Na
+barra contextual, cada seleção mostra só os seus — cinco ou seis por vez, nunca vinte.
+
+**Barra superior, muda conforme a seleção:**
+
+| Selecionado | O que aparece na barra |
+|---|---|
+| nada | nome do papel ("A4 · retrato") |
+| uma palavra | botão da fonte · altura · espessura do traço · sensibilidade · inclinação · ajustar ponto a ponto · duplicar · excluir |
+| um símbolo | desenho · tamanho · inclinação · ajustar ponto a ponto · duplicar · excluir |
+| a foto | girar · centralizar · centralizar em cima |
+
+À direita da barra, sempre fixos: o aviso de escala e o botão de baixar o PDF. Os dois ficam
+juntos de propósito — o aviso é sobre o que vai acontecer quando o botão for apertado.
+
+**Trilho de ícones à esquerda (72px), abre um painel de 300px:**
+
+papel · foto · texto · símbolos · linha · molde
+
+**Painel "molde"** guarda o que vale para o trabalho inteiro, não para a peça selecionada:
+espaçamento entre furos, a contagem de pontos e furos, e o botão Recalcular. No código, o
+espaçamento é lido uma vez e aplicado a todas as peças e ao PDF — se ele aparecesse na barra
+contextual, a interface estaria mentindo que é ajuste daquela palavra.
+
+**Centro:** o papel sobre fundo #DCE9F6, com réguas em centímetros. **Rodapé:** zoom à
+direita, "salvo neste navegador" à esquerda.
 
 ---
 
@@ -13,21 +47,27 @@ logo abaixo dele, na mesma mensagem**. As regras não são lembradas entre mensa
 ```
 REGRAS DESTA TELA
 
-Cores, e só estas: fundo #EDF4FB · texto #384959 · texto secundário #6A89A7 ·
-bordas #C9DCEF · fundo do quadro de trabalho #DCE9F6 · destaque e estado ativo #FFE566
-com borda #B3B347 · alerta #BE5103. Sem verde, sem âmbar, sem gradiente.
+Layout de editor no estilo Canva: trilho estreito de ícones à esquerda, um painel ao lado
+dele, a tela de trabalho centralizada ocupando o resto, barra de ferramentas no topo, zoom no
+rodapé. Nunca coloque painel do lado direito. Nunca desenhe duas barras superiores nem duas
+colunas de navegação.
 
-Tipografia: títulos e botões numa mono pixelada, caixa baixa, 13 a 16px. Texto corrido em
-sans-serif do sistema, 14 ou 15px. No máximo três tamanhos de texto na tela inteira. Nada
-abaixo de 12px.
+Não copie cores, logo, ícones nem tipografia do Canva. Só a arrumação dos espaços.
+
+Cores, e só estas: fundo #EDF4FB · texto #384959 · texto secundário #6A89A7 · bordas #C9DCEF ·
+fundo da mesa de trabalho #DCE9F6 · destaque e estado ativo #FFE566 com borda #B3B347 ·
+alerta #BE5103. Sem verde, sem âmbar, sem gradiente.
+
+Tipografia: títulos, botões e rótulos numa mono pixelada, caixa baixa, 13 a 16px. Texto
+corrido em sans-serif do sistema, 14 ou 15px. No máximo três tamanhos de texto na tela
+inteira. Nada abaixo de 12px.
 
 Não desenhe: avatar, perfil, login, conta, ícone ou palavra ligada a nuvem, selo, badge,
 etiqueta colorida, barra de progresso de etapas, botão "Avançar", botão de teste ou
-simulação, código de linha DMC, número de agulha, gramatura de papel, tipo de fio, marca
-d'água, ilustração decorativa.
+simulação, código de linha DMC, número de agulha, gramatura de papel, tipo de fio.
 
-Não invente campo, número, unidade ou texto que não esteja escrito neste prompt. Se faltar
-um dado, deixe o espaço vazio em vez de preencher.
+Não invente campo, número, unidade ou texto que não esteja escrito neste prompt. Faltando um
+dado, deixe vazio em vez de preencher.
 
 Não repita a mesma informação em dois lugares da tela.
 
@@ -38,184 +78,197 @@ Português do Brasil em tudo.
 
 ## 2. Desktop (modo Web)
 
-### D1 — Editor principal
+### D1 — Editor, com uma palavra selecionada
 
 ```
-Tela de um editor de molde de bordado para desktop, largura total.
+Editor de design para desktop, arrumado como o Canva.
 
-Uma única barra superior, de 56px: à esquerda a marca "ponto & letra" em mono pixelada com
-um traço amarelo #FFE566 embaixo; no centro a frase "Área do molde: 12,4 × 9,1 cm. Cabe numa
-folha A4 em tamanho real."; à direita o botão sólido amarelo "baixar molde pdf".
+TRILHO À ESQUERDA, 72px, fundo branco: seis ícones empilhados, cada um com um rótulo de 11px
+embaixo em mono pixelada caixa baixa — papel, foto, texto, símbolos, linha, molde. O terceiro,
+"texto", está ativo: fundo #FFE566 e cantos arredondados.
 
-Abaixo da barra, só duas áreas:
+PAINEL, 300px, colado no trilho, fundo branco: título "texto". Um botão largo de contorno
+escrito "nova palavra" e, abaixo, uma lista vertical de cartões de fonte. Cada cartão mostra a
+palavra "amor" escrita grande naquela fonte, com o nome da fonte pequeno embaixo. Mostre cinco
+cartões; o segundo está selecionado, com borda escura e um traço #FFE566 na lateral esquerda.
 
-1. O centro, ocupando no mínimo 65% da largura: um quadro de fundo #DCE9F6 com uma folha de
-papel branca em pé no meio, sombra suave. Dentro da folha, um retângulo tracejado
-representando uma foto e, sobre ele, a palavra "amor" desenhada como uma grade de
-quadradinhos pequenos em azul-escuro. Réguas em centímetros nas bordas de cima e da
-esquerda do quadro. No canto inferior direito do quadro, um controle de zoom discreto.
+BARRA SUPERIOR, 56px, atravessando só a área à direita do painel, fundo branco: à esquerda,
+em sequência e separados por divisórias finas, os controles da palavra selecionada — um botão
+mostrando "amor" na fonte atual, depois "altura 18", "espessura 2", "sensibilidade 35%",
+"inclinação 0°", e os ícones de ajustar ponto a ponto, duplicar e excluir. À direita da mesma
+barra, a frase "cabe em A4 · tamanho real" e o botão sólido #FFE566 "baixar molde pdf".
 
-2. Um painel à direita de 320px, fundo branco, com exatamente estes campos, nesta ordem, um
-por linha: Texto (campo de texto com "amor") · Fonte (um botão largo que mostra a palavra
-"amor" desenhada na própria fonte) · Altura 18 pontos (controle deslizante) · Espessura do
-traço 2 (deslizante) · Sensibilidade 35% (deslizante) · Inclinação 0° (deslizante) ·
-Espaçamento entre furos 2,5 mm (deslizante).
+CENTRO: mesa de fundo #DCE9F6 com uma folha de papel branca em pé, centralizada, sombra suave.
+Réguas em centímetros nas bordas de cima e da esquerda da mesa. Dentro da folha, um retângulo
+tracejado de foto e, sobre ele, a palavra "amor" desenhada como grade de quadradinhos
+azul-escuros, com alças de seleção nos cantos.
 
-Rodapé de 32px: à esquerda "salvo neste navegador às 14:32"; à direita os links discretos
-"prévia png" e "recalcular".
-
-Nada mais na tela. Sem segunda barra, sem painel à esquerda, sem lista de etapas.
+RODAPÉ, 40px: à esquerda "salvo neste navegador"; à direita um controle de zoom com "100%".
 ```
 
-### D2 — Editor com o painel do papel e da foto aberto
+### D2 — A mesma tela com a foto selecionada e o painel do papel aberto
 
 ```
-Mesma tela do editor de molde de bordado para desktop, agora com o painel lateral mostrando
-os ajustes do papel e da foto em vez dos ajustes do texto.
+Mesmo editor de design para desktop no estilo Canva da tela anterior, com duas diferenças.
 
-O painel de 320px fica à direita, fundo branco, dividido em duas seções com título em mono
-pixelada caixa baixa:
+No TRILHO de 72px, o ícone ativo agora é o primeiro, "papel", com fundo #FFE566.
 
-"papel" — Tamanho (lista, valor "A4 — 21 × 29,7 cm") · Orientação (dois botões lado a lado,
-"retrato" selecionado e "paisagem").
+O PAINEL de 300px mostra o conteúdo de "papel": o campo Tamanho, como lista fechada com o
+valor "A4 — 21 × 29,7 cm"; e Orientação, como dois botões lado a lado, "retrato" selecionado
+em azul-escuro e "paisagem" de contorno. Abaixo deles, dois campos numéricos desativados,
+esmaecidos, rotulados "largura em mm" e "altura em mm", com a nota "só para tamanho
+personalizado".
 
-"foto" — Tamanho impresso (lista, valor "10 × 15 cm") · Orientação (dois botões, "retrato"
-selecionado) · Imagem (área de soltar arquivo, texto "arraste uma imagem ou toque para
-escolher — serve só para você visualizar") · e três botões iguais em linha: "girar foto",
-"centralizar foto", "centralizar em cima".
+Na BARRA SUPERIOR de 56px, como a foto é o objeto selecionado, aparecem só três botões à
+esquerda: "girar foto", "centralizar foto", "centralizar em cima". À direita, sem mudança: a
+frase "cabe em A4 · tamanho real" e o botão sólido #FFE566 "baixar molde pdf".
 
-O centro e a barra superior ficam como na tela anterior: quadro #DCE9F6, folha branca em pé,
-réguas em centímetros, barra de 56px com a marca, a linha da área do molde e o botão amarelo
-"baixar molde pdf".
+No CENTRO, a mesa #DCE9F6 com a folha branca, réguas em centímetros, e o retângulo da foto
+agora selecionado — borda contínua azul e alças nos quatro cantos — com a palavra "amor" em
+quadradinhos por cima, sem seleção.
 
-Nada mais. Sem painel à esquerda, sem lista de etapas, sem rodapé de estatísticas.
+RODAPÉ de 40px igual: "salvo neste navegador" à esquerda, zoom "100%" à direita.
 ```
 
-### D3 — Aviso de escala, os três estados
+### D3 — Painel "molde", com o aviso de que não cabe
 
 ```
-Três variações da mesma faixa horizontal, empilhadas uma sobre a outra para comparação, cada
-uma com 900px de largura e 56px de altura, sobre fundo #EDF4FB.
+Mesmo editor de design para desktop no estilo Canva, agora mostrando o estado de erro de
+escala.
 
-Primeira, estado normal: fundo branco, borda #C9DCEF, um ponto azul #88BDF2 à esquerda e o
-texto "Área do molde: 12,4 × 9,1 cm. Cabe numa folha A4 em tamanho real."
+TRILHO de 72px com o sexto ícone ativo, "molde", fundo #FFE566.
 
-Segunda, estado de atenção: fundo branco, borda #FFE566 mais grossa à esquerda, o texto
-"Área do molde: 18,9 × 26,4 cm. Cabe numa A4, com 4 mm de folga."
+PAINEL de 300px, título "molde", com três blocos separados por linha fina:
+— "espaçamento entre furos", um controle deslizante com o valor "2,5 mm" e, abaixo, a nota
+"vale para o molde inteiro".
+— duas linhas de número, rótulo à esquerda e valor à direita em mono pixelada: "pontos 612" e
+"furos 1.284".
+— um botão de contorno escrito "recalcular" e, embaixo, a nota "refaz as peças a partir dos
+controles e descarta os ajustes ponto a ponto".
 
-Terceira, estado de erro: fundo #BE5103, texto branco, ocupando a faixa inteira: "Área do
-molde: 24,0 × 18,5 cm — não cabe numa A4 em tamanho real: o PDF sairia reduzido a 78% e os
-furos não vão bater." À direita da faixa, um botão de contorno branco escrito "aproximar as
-peças".
+BARRA SUPERIOR de 56px: à esquerda, só o texto "A4 · retrato", porque nada está selecionado. À
+direita, no lugar da frase verde-azulada normal, uma faixa de alerta #BE5103 com texto branco:
+"não cabe em A4 — o PDF sairia a 78%". Ao lado dela, o botão "baixar molde pdf", agora
+esmaecido e com aparência de desativado.
 
-Só as três faixas na tela, uma embaixo da outra, com 24px entre elas. Sem título, sem
-legenda, sem ícone além do ponto da primeira.
+CENTRO: mesa #DCE9F6, folha branca em pé com réguas em centímetros, e dentro dela a palavra
+"amor" em quadradinhos transbordando visivelmente a área da folha, com um contorno tracejado
+#BE5103 marcando o quanto passou.
+
+RODAPÉ de 40px: "salvo neste navegador" à esquerda, zoom "100%" à direita.
 ```
 
-### D4 — Confirmação do Recalcular
+### D4 — Ajuste ponto a ponto
 
 ```
-Um diálogo modal centrado, 420px de largura, sobre um véu azul-escuro translúcido.
+Mesmo editor de design para desktop no estilo Canva, em modo de edição detalhada.
 
-Fundo branco, cantos de 8px. Título em mono pixelada caixa baixa: "recalcular as peças?".
+O TRILHO de 72px e o PAINEL de 300px continuam onde estavam, porém esmaecidos e sem destaque,
+para mostrar que estão inativos.
 
-Corpo em duas linhas de texto: "As peças serão refeitas a partir dos controles." e, na linha
-seguinte, em destaque: "Você acendeu ou apagou 47 quadradinhos à mão. Eles serão perdidos."
+A BARRA SUPERIOR de 56px fica inteira em #FFE566: à esquerda, em mono pixelada caixa baixa,
+"ajustando ponto a ponto"; em seguida, três botões de ferramenta, o primeiro selecionado —
+acender, apagar, mover a vista; depois os botões desfazer e refazer. À direita da barra, um
+único botão de contorno escuro: "terminar ajuste".
 
-Rodapé do diálogo com dois botões do mesmo tamanho: "cancelar", de contorno; e "recalcular",
-sólido na cor #BE5103 com texto branco.
+O CENTRO ganha o resto da tela e mostra a grade bem ampliada sobre a mesa #DCE9F6:
+quadradinhos grandes separados por linhas finas claras, parte deles preenchidos em azul-escuro
+formando a palavra "amor", e uma foto muito apagada atrás. Sem réguas neste modo.
 
-Abaixo dos dois botões, alinhado à esquerda, um link discreto: "recalcular só a peça
-selecionada".
-
-Nada mais no diálogo. Sem ícone de alerta, sem caixa de marcar, sem terceira linha de texto.
+RODAPÉ de 40px: à esquerda, o texto "47 quadradinhos alterados à mão"; à direita, o controle
+de zoom mostrando "400%".
 ```
 
 ---
 
 ## 3. Mobile (modo Mobile)
 
-### M1 — Editor principal
+No celular o Canva inverte: a tela de trabalho ocupa quase tudo e as ferramentas viram uma
+fileira rolável no rodapé, que muda conforme a seleção. É o mesmo princípio da barra contextual
+do desktop.
+
+### M1 — Editor, com uma palavra selecionada
 
 ```
-Tela de celular de um editor de molde de bordado.
+Tela de celular de um editor de design, arrumada como o Canva no celular.
 
-Metade de cima, fixa: um quadro de fundo #DCE9F6 com uma folha de papel branca em pé, sombra
-suave, um retângulo tracejado de foto dentro dela e a palavra "amor" por cima, desenhada como
-uma grade de quadradinhos pequenos em azul-escuro #384959.
+Barra de topo fina, 48px, fundo branco: à esquerda a marca "ponto & letra" em mono pixelada
+caixa baixa com um traço #FFE566 embaixo; à direita um ícone de baixar.
 
-Logo abaixo do quadro, uma linha fina de texto centralizada: "Área do molde: 12,4 × 9,1 cm.
-Cabe numa folha A4 em tamanho real."
+Abaixo dela, ocupando cerca de 60% da altura da tela, a mesa de fundo #DCE9F6 com uma folha de
+papel branca em pé, centralizada, sombra suave. Dentro da folha, um retângulo tracejado de foto
+e, por cima, a palavra "amor" desenhada como grade de quadradinhos azul-escuros, selecionada,
+com alças nos quatro cantos.
 
-Metade de baixo, painel branco de cantos arredondados no topo, com uma barra curta cinza no
-meio indicando que sobe e desce por arraste. Dentro dele, exatamente estes cinco controles,
-um por linha, com rótulo pequeno acima: Texto (campo com "amor") · Fonte (botão largo
-mostrando a palavra "amor" desenhada na própria fonte) · Altura 18 pontos (deslizante) ·
-Inclinação 0° (deslizante) · Espaçamento entre furos 2,5 mm (deslizante).
+Logo abaixo da mesa, uma linha de texto centralizada, pequena: "cabe em A4 · tamanho real".
 
-No pé da tela, fixas, quatro abas em mono pixelada caixa baixa, a segunda selecionada com um
-traço amarelo #FFE566 embaixo: papel · foto · peças · linha.
+No rodapé, fixa, uma fileira horizontal rolável de botões — são os controles da palavra
+selecionada, cada um como ícone com rótulo de 11px embaixo em mono pixelada caixa baixa:
+fonte, altura, espessura, sensibilidade, inclinação, ajustar, duplicar, excluir. O primeiro,
+"fonte", está destacado com fundo #FFE566. O último botão da fileira está cortado pela borda da
+tela, mostrando que a fileira rola.
 
-Sem barra superior. Sem botão de exportar nesta tela. Sem números de contagem.
+Abaixo da fileira, uma barra final de 56px com um botão sólido #FFE566 de largura total:
+"baixar molde pdf".
+
+Sem menu lateral. Sem abas fixas. Sem barra de progresso.
 ```
 
-### M2 — Escolher a fonte
+### M2 — Painel da fonte, aberto de baixo
 
 ```
-Folha que sobe de baixo cobrindo 85% da tela de um celular, fundo #EDF4FB.
+Mesma tela de celular do editor, agora com um painel aberto subindo do rodapé e cobrindo a
+metade de baixo — o toque foi no botão "fonte" da fileira de ferramentas.
 
-No topo, um campo de busca com o texto de exemplo "buscar fonte". Abaixo dele, uma fileira
-rolável de botões arredondados pequenos, o primeiro selecionado em azul-escuro: todas ·
-caligrafia fina · cursiva encorpada · letra de mão · serifada itálica · gótica · pixel.
+A metade de cima continua visível e não muda: mesa #DCE9F6, folha branca em pé, o retângulo
+tracejado da foto e a palavra "amor" em quadradinhos.
 
-Abaixo, uma lista vertical de cartões brancos, um por fonte, cada cartão com 88px de altura.
-Dentro do cartão, lado a lado: à esquerda a palavra "amor" escrita grande naquela fonte; à
-direita a mesma palavra "amor" desenhada como grade de quadradinhos, do jeito que ela vira
-furos. Embaixo, em texto pequeno cinza, o nome da fonte.
+O painel de baixo, fundo branco, cantos arredondados no topo, com uma barra curta cinza no meio
+indicando arraste. Dentro dele, no topo, uma fileira rolável de botões arredondados pequenos, o
+primeiro selecionado em azul-escuro: todas · caligrafia fina · cursiva encorpada · letra de mão
+· gótica · pixel.
 
-Mostre seis cartões. O terceiro é o selecionado: borda azul-escura e um traço amarelo
-#FFE566 na lateral esquerda.
+Abaixo, uma lista vertical de cartões brancos, um por fonte, altura de 80px. Cada cartão traz,
+lado a lado: a palavra "amor" escrita grande naquela fonte, e a mesma palavra "amor" desenhada
+como grade de quadradinhos. O nome da fonte em texto pequeno embaixo. Mostre quatro cartões; o
+segundo está selecionado, com borda escura e traço #FFE566 na lateral esquerda.
 
-No pé, fixo, um botão sólido azul-escuro de largura total: "usar esta fonte".
-
-Sem título de cabeçalho. Sem contagem de resultados. Sem ícone nos cartões.
+Sem botão de confirmar: a escolha vale no toque. Sem campo de busca nesta tela.
 ```
 
 ### M3 — Ajuste ponto a ponto
 
 ```
-Tela de celular, modo de edição detalhada de uma grade de bordado.
+Tela de celular de um editor de design em modo de edição detalhada.
 
-No topo, uma faixa amarela #FFE566 de 48px atravessando a tela: à esquerda, em mono pixelada
-caixa baixa, "ajustando ponto a ponto"; à direita, o botão de contorno escuro "terminar".
+No topo, uma faixa #FFE566 de 48px atravessando a tela: à esquerda, em mono pixelada caixa
+baixa, "ajustando ponto a ponto"; à direita, um botão de contorno escuro escrito "terminar".
 
 O resto da tela é a grade ampliada sobre fundo #DCE9F6: quadradinhos grandes, de no mínimo
-44px, separados por linhas finas claras, parte deles preenchidos em azul-escuro #384959
-formando o começo da palavra "amor", com uma foto muito apagada atrás.
+44px, separados por linhas finas claras, parte deles preenchidos em azul-escuro formando o
+começo da palavra "amor", com uma foto muito apagada atrás.
 
-Sobrepostos à grade, no canto inferior direito, três botões redondos empilhados na vertical,
-o de cima selecionado: acender, apagar, mover a vista.
+No rodapé, fixa, uma fileira de cinco botões redondos grandes, espaçados: acender (selecionado,
+fundo #FFE566), apagar, mover a vista, desfazer, refazer.
 
-No canto inferior esquerdo, dois botões redondos lado a lado: desfazer e refazer.
+Acima da fileira, centralizada, uma linha de texto pequena e discreta: "47 quadradinhos
+alterados à mão".
 
-Acima do rodapé, centralizada, uma linha de texto pequena e discreta: "o botão Recalcular
-refaz as peças a partir dos controles e descarta estes ajustes".
-
-Sem painel de controles. Sem abas no rodapé. Sem barra de zoom.
+Sem painel de controles. Sem fileira de ferramentas de peça. Sem barra de zoom.
 ```
 
 ### M4 — Baixar o molde
 
 ```
-Folha que sobe de baixo cobrindo 90% da tela de um celular, fundo #EDF4FB.
+Painel subindo de baixo e cobrindo 90% de uma tela de celular, fundo #EDF4FB.
 
 No topo, centralizada, a miniatura de uma folha A4 em pé, branca com sombra, mostrando por
 dentro uma moldura tracejada e pontinhos pretos dispostos formando uma palavra.
 
 Abaixo da miniatura, três linhas de informação, cada uma numa faixa branca de cantos
-arredondados, com o rótulo pequeno em cinza e o valor em mono pixelada:
-"tamanho de impressão — 100%, tamanho real" · "cole a foto a 5,5 cm da borda esquerda e 6,0
-cm do topo" · "1.284 furos".
+arredondados, rótulo pequeno em cinza à esquerda e valor em mono pixelada à direita:
+"tamanho de impressão — 100%, tamanho real" · "cole a foto a 5,5 cm da borda esquerda e 6,0 cm
+do topo" · "1.284 furos".
 
 Abaixo delas, quatro passos numerados em texto corrido, sem ícone e sem cartão:
 1. Imprima sem ajustar a escala.
@@ -223,8 +276,8 @@ Abaixo delas, quatro passos numerados em texto corrido, sem ícone e sem cartão
 3. Prenda sobre a foto com fita crepe nos quatro cantos.
 4. Fure com agulha grossa, apoiado em EVA ou cortiça.
 
-No pé, fixos, dois botões de largura total empilhados: "baixar molde pdf", sólido amarelo
-#FFE566 com texto azul-escuro; e "baixar prévia png", de contorno.
+No pé, fixos, dois botões de largura total empilhados: "baixar molde pdf", sólido #FFE566 com
+texto azul-escuro; e "baixar prévia png", de contorno.
 
 Sem barra de progresso. Sem botão de compartilhar.
 ```
@@ -233,26 +286,28 @@ Sem barra de progresso. Sem botão de compartilhar.
 
 ## 4. Como avaliar o que voltar
 
-Rejeite e peça de novo se a tela tiver qualquer um destes:
+Rejeite e peça de novo se aparecer:
 
-- Mais de uma barra de navegação, ou painel dos dois lados do canvas.
-- O canvas ocupando menos da metade da largura (desktop) ou da altura (mobile).
-- Qualquer dado que você não escreveu no prompt: gramatura, número de agulha, código DMC,
-  horário inventado, contagem que não pediu.
-- A mesma informação aparecendo duas vezes.
-- Verde, âmbar ou qualquer cor fora da lista.
-- Texto abaixo de 12px, ou mais de três tamanhos de texto.
-- Selo, badge, etiqueta ou pílula colorida em volta de um número.
+- Painel do lado direito, ou duas barras superiores, ou duas colunas de navegação.
+- Todos os controles visíveis ao mesmo tempo, em vez de só os do objeto selecionado.
+- A mesa de trabalho ocupando menos da metade da largura (desktop) ou da altura (mobile).
+- Espaçamento entre furos aparecendo como controle da peça, e não do molde.
+- Qualquer dado que você não escreveu: gramatura, número de agulha, código DMC, horário
+  inventado, contagem que não pediu.
+- A mesma informação em dois lugares.
+- Verde, âmbar ou cor fora da lista. Texto abaixo de 12px. Selo ou pílula colorida em volta de
+  um número.
 
-Para corrigir sem recomeçar, responda ao Stitch com uma instrução só, direta — por exemplo:
-"remova a coluna da esquerda inteira e alargue o quadro central até ela", ou "tire todos os
-selos e deixe os números em texto simples".
+Correção sem recomeçar: responda com uma instrução só e direta — "remova o painel da direita e
+alargue a mesa até a borda", ou "na barra de cima deixe só os controles da palavra, tire o
+resto".
 
-## 5. Se quiser mais telas depois
+## 5. Telas para pedir depois
 
-Peça uma de cada vez, sempre com o bloco de REGRAS junto:
+Uma de cada vez, sempre com o bloco de REGRAS:
 
-- A lista de peças do desktop (palavras e símbolos já criados, com duplicar e excluir).
-- A aba "linha" do mobile (as 8 paletas e as 4 amostras de cor de cada uma).
-- O painel de instruções "do arquivo ao material".
-- A escolha de símbolo (coração cheio, coração vazado, estrela, seta).
+- Painel "linha": as 8 paletas e as 4 amostras de cor de cada uma.
+- Painel "símbolos": coração cheio, coração vazado, estrela, seta.
+- Painel "foto" com imagem já carregada.
+- Diálogo de confirmação do Recalcular.
+- Barra superior com um símbolo selecionado, em vez de uma palavra.
