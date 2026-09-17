@@ -23,7 +23,10 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
   células como estão, então a cópia nasce com os ajustes manuais da original e segue a vida
   dela própria a partir dali.
 - **Fontes**: 40 famílias do Google Fonts agrupadas por caráter — caligrafia fina, cursiva
-  encorpada, letra de mão, serifada itálica, gótica, pixel e bloco.
+  encorpada, letra de mão, serifada itálica, gótica, pixel e bloco. A escolha é por amostra,
+  não por nome: cada linha mostra a sua palavra escrita naquela fonte e, ao lado, a mesma
+  palavra já em quadradinhos, que é o que vira furo. Com busca e filtro por grupo. Os cartões
+  pedem a fonte só quando chegam à vista, então abrir a lista não baixa as 40 famílias.
 - **Linhas**: oito paletas de quatro cores cada.
 - **Contagem**: pontos e furos, com o tamanho da peça selecionada em centímetros.
 - **PDF do molde**: em tamanho real, recortado na área do bordado, com a moldura de recorte, o

@@ -129,6 +129,35 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .t.txt input[type=text]{width:96px;height:26px;border:0;background:transparent;font-size:15px;color:var(--ink)}
 .t.fnt{padding:0 9px}
 .t.fnt select{font-size:16px;max-width:118px}
+#fontBtn{height:26px;max-width:130px;border:0;background:transparent;padding:0;
+  font-size:17px;line-height:1;color:var(--ink);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;text-align:left}
+
+/* ---- escolha de fonte com amostra ----------------------------------- */
+.pop{position:fixed;z-index:60;width:330px;max-height:min(560px,calc(100vh - 90px));
+  background:#fff;border:1px solid var(--line);border-radius:8px;
+  box-shadow:0 12px 40px rgba(56,73,89,.28);display:flex;flex-direction:column;overflow:hidden}
+.pop .busca{padding:10px;border-bottom:1px solid var(--line);flex:0 0 auto}
+.pop .busca input{height:36px;font-size:14px}
+.pop .grupos{display:flex;gap:5px;overflow-x:auto;padding:8px 10px;border-bottom:1px solid var(--line);
+  scrollbar-width:none;flex:0 0 auto}
+.pop .grupos::-webkit-scrollbar{height:0}
+.pop .grupos button{flex:0 0 auto;height:28px;padding:0 10px;border:1px solid var(--line);
+  border-radius:15px;background:#fff;font-family:var(--display);font-size:9px;
+  letter-spacing:.02em;color:var(--ink-soft);white-space:nowrap}
+.pop .grupos button.on{background:var(--mat);border-color:var(--mat);color:#fff}
+.pop .lista{overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:5px;flex:1 1 auto;min-height:0}
+.pop .vazio{padding:18px 10px;font-size:13.5px;color:var(--ink-soft)}
+
+.fcard{display:flex;align-items:center;gap:10px;width:100%;padding:7px 9px;text-align:left;
+  border:1px solid transparent;border-radius:7px;background:#fff;min-height:52px}
+.fcard:hover{background:var(--paper)}
+.fcard.on{border-color:var(--mat);box-shadow:inset 4px 0 0 var(--lemon)}
+.fcard .amostra{flex:1 1 auto;min-width:0;font-size:23px;line-height:1.15;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fcard canvas{flex:0 0 auto;image-rendering:pixelated;max-width:104px;height:auto}
+.fcard .nome{flex:0 0 74px;font-family:var(--display);font-size:8.5px;color:var(--ink-soft);
+  line-height:1.35;text-align:right;overflow-wrap:anywhere}
 
 .tbtn{height:36px;padding:0 12px;flex:0 0 auto;border:1px solid var(--line);border-radius:6px;
   background:#fff;font-family:var(--display);font-size:11px;letter-spacing:.02em;white-space:nowrap;
@@ -330,7 +359,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
     <fieldset id="ctlText" class="hide">
       <span class="t txt"><span>texto</span><input id="txt" type="text" value="champ" autocomplete="off" spellcheck="false"></span>
-      <span class="t fnt"><label class="hide" for="font">Fonte</label><select id="font">
+      <span class="t fnt"><label class="hide" for="font">Fonte</label><button type="button" id="fontBtn" title="escolher a fonte"></button><select id="font" class="hide">
         <optgroup label="Caligrafia fina">
           <option value="Great Vibes">Great Vibes</option>
           <option value="Pinyon Script">Pinyon Script</option>
@@ -578,6 +607,12 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   <span class="saved">salvo neste navegador</span>
 </div>
 
+</div>
+
+<div class="pop hide" id="fontPop" role="dialog" aria-label="escolher a fonte">
+  <div class="busca"><input id="fontBusca" type="text" placeholder="buscar fonte" autocomplete="off" spellcheck="false"></div>
+  <div class="grupos" id="fontGrupos"></div>
+  <div class="lista" id="fontLista"></div>
 </div>
 
 <div class="modal hide" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTit">
@@ -1323,6 +1358,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       $("ctlText").classList.remove("hide"); $("ctlSym").classList.add("hide");
       $("txt").value = el.text;
       $("font").value = el.font;
+      mostraFonte();
       $("rows").value = el.rowsTarget; $("rowsOut").textContent = el.rowsTarget;
       $("thick").value = el.thick; $("thickOut").textContent = el.thick;
       $("thr").value = Math.round(el.thr * 100); $("thrOut").textContent = Math.round(el.thr * 100);
@@ -1866,6 +1902,168 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   });
 
 
+  /* ---- escolher a fonte vendo o traço ----------------------------------
+     O <select id="font"> continua sendo a fonte da verdade — escondido, mas é
+     ele que o resto do código lê e escreve. Esta lista só o preenche e dispara
+     o mesmo evento "input", então nada mais precisou mudar.
+
+     As fontes entram sob demanda: cada cartão só pede a sua quando chega à
+     vista. Isso mantém a promessa do projeto de o navegador não baixar as 40
+     famílias de uma vez — e a amostra em quadradinhos só é honesta depois que
+     a fonte chegou, porque ela é amostrada do traço. */
+  var selFonte = $("font");
+  var FAMILIAS = [];
+  [].forEach.call(selFonte.querySelectorAll("optgroup"), function(g){
+    [].forEach.call(g.querySelectorAll("option"), function(o){
+      FAMILIAS.push({ valor: o.value, rotulo: o.textContent.trim(), grupo: g.label });
+    });
+  });
+  var GRUPOS = FAMILIAS.reduce(function(a, f){
+    if (a.indexOf(f.grupo) < 0) a.push(f.grupo);
+    return a;
+  }, []);
+
+  var popAberto = false, grupoAtivo = "", cacheAmostra = {};
+
+  function palavraAmostra(){
+    var el = els[sel];
+    var t = el && el.kind === "text" ? (el.text || "").trim() : "";
+    return (t || "amor").slice(0, 9);
+  }
+
+  // a mesma grade do molde, em miniatura: é o que a peça vira de verdade.
+  // O cache guarda as células, não o canvas: clonar um canvas copia o elemento
+  // e deixa o desenho para trás, porque o bitmap não faz parte do DOM.
+  function amostraFuros(fam, palavra){
+    var el = els[sel];
+    var esp = el && el.kind === "text" ? el.thick : 2;
+    var sens = el && el.kind === "text" ? el.thr : 0.35;
+    var chave = fam + "|" + palavra + "|" + esp + "|" + sens;
+    var cells = cacheAmostra[chave];
+    if (!cells){
+      try { cells = textMatrix(palavra, fam, 9, esp, sens); } catch (e){ cells = [[0]]; }
+      cacheAmostra[chave] = cells;
+    }
+    var lin = cells.length, col = cells[0] ? cells[0].length : 1, px = 3;
+    var c = document.createElement("canvas");
+    c.width = Math.max(1, col * px); c.height = Math.max(1, lin * px);
+    var x = c.getContext("2d");
+    x.fillStyle = "#384959";
+    for (var r = 0; r < lin; r++)
+      for (var q = 0; q < col; q++)
+        if (cells[r][q]) x.fillRect(q * px, r * px, px - 0.4, px - 0.4);
+    return c;
+  }
+
+  var observador = window.IntersectionObserver ? new IntersectionObserver(function(itens){
+    itens.forEach(function(it){
+      if (!it.isIntersecting) return;
+      observador.unobserve(it.target);
+      encheCartao(it.target);
+    });
+  }, { root: null, rootMargin: "120px" }) : null;
+
+  function encheCartao(b){
+    var fam = b.dataset.fam, palavra = palavraAmostra();
+    var amostra = b.querySelector(".amostra");
+    amostra.style.fontFamily = '"' + fam + '", cursive';
+    var por = function(){
+      var velho = b.querySelector("canvas");
+      var novo = amostraFuros(fam, palavra);
+      if (velho) b.replaceChild(novo, velho); else b.insertBefore(novo, b.lastChild);
+    };
+    if (document.fonts && document.fonts.load){
+      document.fonts.load(fontStr(100, fam)).then(por).catch(por);
+    } else por();
+  }
+
+  function mostraFonte(){
+    var v = selFonte.value;
+    var f = FAMILIAS.filter(function(x){ return x.valor === v; })[0];
+    var b = $("fontBtn");
+    b.textContent = f ? f.rotulo : v;
+    b.style.fontFamily = '"' + v + '", cursive';
+  }
+
+  function listaFontes(){
+    var q = ($("fontBusca").value || "").trim().toLowerCase();
+    var caixa = $("fontLista");
+    caixa.innerHTML = "";
+    var vistas = FAMILIAS.filter(function(f){
+      if (grupoAtivo && f.grupo !== grupoAtivo) return false;
+      return !q || f.rotulo.toLowerCase().indexOf(q) >= 0;
+    });
+    if (!vistas.length){
+      caixa.innerHTML = '<p class="vazio">Nenhuma fonte com esse nome.</p>';
+      return;
+    }
+    vistas.forEach(function(f){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "fcard" + (f.valor === selFonte.value ? " on" : "");
+      b.dataset.fam = f.valor;
+      b.innerHTML = '<span class="amostra"></span><span class="nome"></span>';
+      b.querySelector(".amostra").textContent = palavraAmostra();
+      b.querySelector(".nome").textContent = f.rotulo;
+      b.addEventListener("click", function(){
+        selFonte.value = f.valor;
+        selFonte.dispatchEvent(new Event("input", { bubbles: true }));
+        mostraFonte();
+        fechaPop();
+      });
+      caixa.appendChild(b);
+      if (observador) observador.observe(b); else encheCartao(b);
+    });
+  }
+
+  function abrePop(){
+    var r = $("fontBtn").getBoundingClientRect();
+    var pop = $("fontPop");
+    pop.classList.remove("hide");
+    popAberto = true;
+    var larg = pop.offsetWidth;
+    pop.style.left = Math.max(8, Math.min(r.left - 10, window.innerWidth - larg - 8)) + "px";
+    pop.style.top = (r.bottom + 8) + "px";
+    grupoAtivo = "";
+    $("fontBusca").value = "";
+    montaGrupos();
+    listaFontes();
+    var atual = $("fontLista").querySelector(".fcard.on");
+    if (atual) atual.scrollIntoView({ block: "center" });
+    $("fontBusca").focus();
+  }
+
+  function fechaPop(){ $("fontPop").classList.add("hide"); popAberto = false; }
+
+  function montaGrupos(){
+    var caixa = $("fontGrupos");
+    caixa.innerHTML = "";
+    ["todas"].concat(GRUPOS).forEach(function(nome){
+      var alvo = nome === "todas" ? "" : nome;
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = alvo === grupoAtivo ? "on" : "";
+      b.textContent = nome.toLowerCase();
+      b.addEventListener("click", function(){
+        grupoAtivo = alvo;
+        montaGrupos(); listaFontes();
+      });
+      caixa.appendChild(b);
+    });
+  }
+
+  $("fontBtn").addEventListener("click", function(e){
+    e.stopPropagation();
+    if (popAberto) fechaPop(); else abrePop();
+  });
+  $("fontBusca").addEventListener("input", listaFontes);
+  $("fontPop").addEventListener("click", function(e){ e.stopPropagation(); });
+  document.addEventListener("click", function(){ if (popAberto) fechaPop(); });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && popAberto) fechaPop();
+  });
+  window.addEventListener("resize", function(){ if (popAberto) fechaPop(); });
+
   /* ---- zoom e mover a vista -------------------------------------------
      O papel cresce dentro da mesa, que rola. Assim nem o desenho nem o acerto
      de toque mudam de conta: evPos continua lendo a posição pelo retângulo do
@@ -1951,6 +2149,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     renderChips();
     syncControls();
     restorePhoto();
+    mostraFonte();
     draw();
     mostraZoom();
     resetHist();
