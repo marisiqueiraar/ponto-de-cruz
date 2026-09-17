@@ -137,6 +137,25 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .tbtn svg{width:16px;height:16px;fill:currentColor;flex:0 0 auto}
 .tbtn.on{background:var(--lemon);border-color:var(--lemon-deep)}
 .tbtn.danger{color:var(--danger);border-color:var(--line);padding:0 10px}
+.tbtn.icon{padding:0 10px}
+.tbtn[disabled]{opacity:.35;cursor:default}
+.tbtn[disabled]:hover{border-color:var(--line)}
+
+/* ---- diálogo ------------------------------------------------------- */
+.modal{position:fixed;inset:0;z-index:50;background:rgba(56,73,89,.45);
+  display:flex;align-items:center;justify-content:center;padding:16px}
+.modal .card{background:#fff;border-radius:8px;max-width:420px;width:100%;
+  padding:22px 22px 18px;box-shadow:0 10px 40px rgba(56,73,89,.35)}
+.modal h3{font-family:var(--display);font-size:15px;font-weight:400;letter-spacing:.02em;
+  margin:0 0 12px;color:var(--ink)}
+.modal p{margin:0 0 10px;font-size:14.5px;line-height:1.5}
+.modal p.warn{color:var(--danger)}
+.modal .acts{display:flex;gap:10px;margin-top:18px}
+.modal .acts button{flex:1 1 0;height:44px;border-radius:6px;font-family:var(--display);
+  font-size:11px;letter-spacing:.02em;border:1px solid var(--line);background:#fff;color:var(--ink)}
+.modal .acts button.perigo{background:var(--danger);border-color:var(--danger);color:#fff}
+.modal .so{display:block;width:100%;margin-top:14px;border:0;background:none;padding:0;
+  text-align:left;font-size:13.5px;color:var(--ink-soft);text-decoration:underline}
 .tbtn.danger:hover{border-color:var(--danger)}
 
 .right{margin-left:auto;display:flex;align-items:center;gap:10px;flex:0 0 auto;padding-left:8px}
@@ -260,8 +279,9 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
   .right{display:contents}
   .fit{order:1;flex:1 1 60px;min-width:0;max-width:none}
   #pdf{order:2;padding:0 12px}
-  #ctlActs{order:4;flex:0 0 auto}
-  .tools{order:5;flex:1 1 90px;min-width:0;padding:0}
+  #hist{order:4;flex:0 0 auto}
+  #ctlActs{order:5;flex:0 0 auto}
+  .tools{order:6;flex:1 1 90px;min-width:0;padding:0}
 
   .rail{flex-direction:row;gap:0;padding:4px;border-right:0;
     border-top:1px solid var(--line);overflow-x:auto;overflow-y:hidden}
@@ -374,6 +394,10 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
   </div>
 
   <div class="right">
+    <span class="grp" id="hist">
+      <button id="undo" class="tbtn icon" title="desfazer (Ctrl+Z)" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg></button>
+      <button id="redo" class="tbtn icon" title="refazer (Ctrl+Shift+Z)" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.06-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"/></svg></button>
+    </span>
     <span class="grp hide" id="ctlActs">
       <button id="edit" class="tbtn" title="ajustar ponto a ponto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18V3H3zm8 16H5v-6h6v6zm0-8H5V5h6v6zm8 8h-6v-6h6v6zm0-8h-6V5h6v6z"/></svg><span id="editLabel">ajustar</span></button>
       <button id="delEl" class="tbtn danger"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg title="excluir peça"><span class="hide">excluir</span></button>
@@ -523,10 +547,24 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
 <!-- ===================== rodapé ===================== -->
 <div class="foot">
   <p class="hint" id="modeHint">Arraste a palavra ou a foto para posicionar. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.</p>
+  <span class="saved" id="manualOut"></span>
   <span class="saved" id="areaOut"></span>
   <span class="saved">salvo neste navegador</span>
 </div>
 
+</div>
+
+<div class="modal hide" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTit">
+  <div class="card">
+    <h3 id="modalTit">recalcular as peças?</h3>
+    <p>As peças serão refeitas a partir dos controles: fonte, altura, espessura e sensibilidade.</p>
+    <p class="warn" id="modalWarn"></p>
+    <div class="acts">
+      <button id="modalNo">cancelar</button>
+      <button id="modalYes" class="perigo">recalcular tudo</button>
+    </div>
+    <button class="so" id="modalOne">recalcular só a peça selecionada</button>
+  </div>
 </div>
 
 <script src="vendor/jspdf.umd.min.js"></script>
@@ -747,6 +785,7 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
   }
 
   function rebuild(el){
+    el.manual = 0;   // refazer a peça descarta o que foi aceso ou apagado à mão
     el.cells = el.kind === "sym"
       ? matrixFromStrings(SYMS[el.sym], el.scale)
       : textMatrix(el.text, el.font, el.rowsTarget, el.thick, el.thr);
@@ -946,6 +985,8 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
     }
     box.className = "fit" + (state ? " " + state : "");
     $("areaOut").textContent = "área do molde " + area;
+    var mn = manualCount();
+    $("manualOut").textContent = mn ? mn + (mn === 1 ? " quadradinho" : " quadradinhos") + " à mão" : "";
   }
 
   /* Réguas em centímetros com o zero na borda do papel — não na borda da mesa.
@@ -1014,7 +1055,7 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
   // preserva os ajustes feitos à mão no modo ponto a ponto. Uma linha por
   // string de "0" e "1" — mais compacto que JSON de array e igualmente legível.
   function packEl(el){
-    var r = { kind: el.kind, x: el.x, y: el.y, rot: el.rot,
+    var r = { kind: el.kind, x: el.x, y: el.y, rot: el.rot, manual: el.manual || 0,
               cells: el.cells.map(function(row){ return row.join(""); }) };
     if (el.kind === "text"){
       r.text = el.text; r.font = el.font;
@@ -1033,7 +1074,7 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
       return line;
     });
     var el = { kind: r.kind === "sym" ? "sym" : "text", cells: cells,
-               x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0 };
+               x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0, manual: +r.manual || 0 };
     if (el.kind === "text"){
       el.text = typeof r.text === "string" ? r.text : "";
       el.font = r.font || "Great Vibes";
@@ -1149,6 +1190,80 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
     img.src = url;
   }
 
+  /* ---- desfazer e refazer --------------------------------------------
+     Cada passo é o arranjo inteiro em texto, gravado do mesmo jeito que a
+     memória local: as células vão como estão, então desfazer devolve também o
+     que foi aceso ou apagado à mão. */
+  var hist = [], hpos = -1, HMAX = 80, voltando = false, histTimer = 0;
+
+  function snapshot(){
+    return JSON.stringify({ els: els.map(packEl), px: photo.x, py: photo.y, sel: sel });
+  }
+
+  function pushHist(){
+    if (voltando) return;
+    clearTimeout(histTimer); histTimer = 0;
+    var snap = snapshot();
+    if (hist[hpos] === snap) return;
+    hist.length = hpos + 1;
+    hist.push(snap);
+    if (hist.length > HMAX) hist.shift();
+    hpos = hist.length - 1;
+    updateHist();
+  }
+
+  // um arraste de controle deslizante dispara dezenas de eventos: um passo só
+  function pushLater(){
+    if (voltando) return;
+    clearTimeout(histTimer);
+    histTimer = setTimeout(pushHist, 450);
+  }
+
+  function applyHist(snap){
+    var d;
+    try { d = JSON.parse(snap); } catch (e){ return; }
+    voltando = true;
+    els = (d.els || []).map(unpackEl).filter(Boolean);
+    photo.x = +d.px || 0; photo.y = +d.py || 0;
+    clampPhoto();
+    sel = Math.min(Math.max(0, d.sel | 0), els.length - 1);
+    if (!els.length) focus = "none";
+    else if (focus === "none") focus = "el";
+    renderChips(); syncControls(); draw();
+    voltando = false;
+    updateHist();
+  }
+
+  // o arranjo de abertura é o fundo da pilha: não há o que desfazer antes dele
+  function resetHist(){ hist.length = 0; hpos = -1; pushHist(); }
+
+  function undo(){ if (hpos > 0){ hpos--; applyHist(hist[hpos]); } }
+  function redo(){ if (hpos < hist.length - 1){ hpos++; applyHist(hist[hpos]); } }
+
+  function updateHist(){
+    $("undo").disabled = hpos <= 0;
+    $("redo").disabled = hpos >= hist.length - 1;
+  }
+
+  function manualCount(){
+    var n = 0;
+    els.forEach(function(el){ n += el.manual || 0; });
+    return n;
+  }
+
+  $("undo").addEventListener("click", undo);
+  $("redo").addEventListener("click", redo);
+
+  document.addEventListener("keydown", function(e){
+    if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== "z") return;
+    var t = e.target || {};
+    var tag = (t.tagName || "").toUpperCase();
+    // dentro de um campo, Ctrl+Z é o desfazer do próprio navegador
+    if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+    e.preventDefault();
+    if (e.shiftKey) redo(); else undo();
+  });
+
   function renderChips(){
     var box = $("chips");
     box.innerHTML = "";
@@ -1201,14 +1316,14 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
                x: photo.x, y: photo.y + photo.h - 14, cells:[[0]] };
     rebuild(el);
     els.push(el); sel = els.length - 1; focus = "el";
-    renderChips(); syncControls(); draw();
+    renderChips(); syncControls(); draw(); pushHist();
   }
 
   function addSym(){
     var el = { kind:"sym", sym:"heart", scale:2, rot:0, x: photo.x + photo.w - 20, y: photo.y + photo.h - 20, cells:[[0]] };
     rebuild(el);
     els.push(el); sel = els.length - 1; focus = "el";
-    renderChips(); syncControls(); draw();
+    renderChips(); syncControls(); draw(); pushHist();
   }
 
   $("addText").addEventListener("click", function(){ loadFontThen(addText); });
@@ -1218,7 +1333,7 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
     els.splice(sel, 1);
     sel = Math.max(0, sel - 1);
     if (!els.length) focus = "none";
-    renderChips(); syncControls(); draw();
+    renderChips(); syncControls(); draw(); pushHist();
   });
 
   function updateSelected(){
@@ -1233,14 +1348,14 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
       $("rowsOut").textContent = el.rowsTarget;
       $("thickOut").textContent = el.thick;
       $("thrOut").textContent = $("thr").value;
-      loadFontThen(function(){ rebuild(el); renderChips(); draw(); });
+      loadFontThen(function(){ rebuild(el); renderChips(); draw(); pushLater(); });
       return;
     }
     el.sym = $("sym").value;
     el.scale = parseInt($("symScale").value, 10);
     $("symScaleOut").textContent = el.scale;
     rebuild(el);
-    renderChips(); draw();
+    renderChips(); draw(); pushLater();
   }
 
   ["txt","font","rows","thick","thr","sym","symScale"].forEach(function(id){
@@ -1250,11 +1365,11 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
     var el = els[sel]; if (!el) return;
     el.rot = parseInt($("rot").value, 10);
     $("rotOut").textContent = el.rot;
-    draw();
+    draw(); pushLater();
   });
   $("mm").addEventListener("input", function(){
     $("mmOut").textContent = fmt(parseFloat($("mm").value));
-    draw();
+    draw(); pushLater();
   });
 
   function onPaperChange(){
@@ -1277,7 +1392,7 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
 
   function onPhotoChange(){
     $("photoCustom").classList.toggle("hide", $("photoSize").value !== "custom");
-    syncPhotoSize(); draw();
+    syncPhotoSize(); draw(); pushLater();
   }
   ["photoSize","photoOr"].forEach(function(id){ $(id).addEventListener("change", onPhotoChange); });
   ["photoWmm","photoHmm"].forEach(function(id){ $(id).addEventListener("input", onPhotoChange); });
@@ -1297,20 +1412,20 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
     photo.y = cy - photo.h / 2;
     clampPhoto();
     els.forEach(function(el, i){ el.x = photo.x + dx[i]; el.y = photo.y + dy[i]; });
-    draw();
+    draw(); pushHist();
   });
 
   $("centerPhoto").addEventListener("click", function(){
     var pa = paperMM();
     photo.x = (pa.w - photo.w) / 2;
     photo.y = (pa.h - photo.h) / 2;
-    draw();
+    draw(); pushHist();
   });
   $("centerTop").addEventListener("click", function(){
     var pa = paperMM();
     photo.x = (pa.w - photo.w) / 2;
     photo.y = Math.max(0, pa.h * 0.12);
-    draw();
+    draw(); pushHist();
   });
 
   $("photo").addEventListener("change", function(e){
@@ -1334,8 +1449,37 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
       : "Arraste a palavra ou a foto para posicionar. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.";
   });
 
+  /* Recalcular refaz as células a partir dos controles, então apaga tudo que
+     foi aceso ou apagado à mão. Só pergunta quando há o que perder. */
+  function recalc(todas){
+    if (todas) els.forEach(rebuild);
+    else if (els[sel]) rebuild(els[sel]);
+    draw(); pushHist();
+  }
+
+  function fecharModal(){ $("modal").classList.add("hide"); }
+
   $("reset").addEventListener("click", function(){
-    els.forEach(rebuild); draw();
+    var n = manualCount();
+    if (!n){ recalc(true); return; }
+    var daSel = els[sel] ? (els[sel].manual || 0) : 0;
+    $("modalWarn").textContent = n === 1
+      ? "Você acendeu ou apagou 1 quadradinho à mão. Ele será perdido."
+      : "Você acendeu ou apagou " + n + " quadradinhos à mão. Eles serão perdidos.";
+    $("modalOne").classList.toggle("hide", els.length < 2);
+    $("modalOne").textContent = daSel
+      ? "recalcular só a peça selecionada (perde " + daSel + ")"
+      : "recalcular só a peça selecionada (não perde nada)";
+    $("modal").classList.remove("hide");
+    $("modalNo").focus();
+  });
+
+  $("modalNo").addEventListener("click", fecharModal);
+  $("modalYes").addEventListener("click", function(){ fecharModal(); recalc(true); });
+  $("modalOne").addEventListener("click", function(){ fecharModal(); recalc(false); });
+  $("modal").addEventListener("click", function(e){ if (e.target === this) fecharModal(); });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && !$("modal").classList.contains("hide")) fecharModal();
   });
 
   var drag = null;
@@ -1408,7 +1552,8 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
       var q = Math.floor(l.x / p), r = Math.floor(l.y / p);
       if (el.cells[r] && el.cells[r][q] !== undefined){
         el.cells[r][q] = el.cells[r][q] ? 0 : 1;
-        draw();
+        el.manual = (el.manual || 0) + 1;
+        draw(); pushHist();
       }
       return;
     }
@@ -1449,9 +1594,11 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
   });
 
   function endDrag(e){
+    var mexeu = !!(drag || pinch);
     if (e && pointers[e.pointerId]) delete pointers[e.pointerId];
     if (nPointers() < 2) pinch = null;
     drag = null;
+    if (mexeu) pushHist();
   }
   cv.addEventListener("pointerup", endDrag);
   cv.addEventListener("pointercancel", endDrag);
@@ -1661,6 +1808,7 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
     syncControls();
     restorePhoto();
     draw();
+    resetHist();
   }
   if (document.fonts && document.fonts.ready){ document.fonts.ready.then(boot); } else boot();
 
@@ -1668,7 +1816,9 @@ canvas{display:block;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
   // numa sessão restaurada ele fica de fora: as células guardadas já são o
   // resultado final, e recalcular apagaria os ajustes feitos ponto a ponto.
   // Se a fonte não tiver carregado na sessão anterior, o botão Recalcular refaz.
-  setTimeout(function(){ if (!restored && els.length){ els.forEach(rebuild); draw(); } }, 1400);
+  setTimeout(function(){
+    if (!restored && els.length){ els.forEach(rebuild); draw(); resetHist(); }
+  }, 1400);
 })();
 </script>
 </body>

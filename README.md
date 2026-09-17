@@ -28,10 +28,15 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
   retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
   distância exata para colar a foto no papel.
 - **PNG** da prévia, para conferir o arranjo.
+- **Desfazer e refazer**: cada passo guarda o arranjo inteiro, células incluídas, então voltar
+  atrás devolve também o que foi aceso ou apagado à mão. Botões na barra de cima, Ctrl+Z e
+  Ctrl+Shift+Z. Um arraste de controle deslizante vira um passo só, não dezenas.
 - **Memória local**: papel, foto, peças, posições, inclinações, paleta e os ajustes feitos ponto
   a ponto ficam guardados no navegador e voltam ao reabrir. As células são gravadas como estão,
   e não recalculadas na volta — é isso que preserva o que você acendeu ou apagou à mão. Para
-  refazer tudo a partir dos controles, o botão **Recalcular**.
+  refazer tudo a partir dos controles, o botão **Recalcular** — que pergunta antes quando há
+  ajustes manuais a perder, dizendo quantos são, e oferece refazer só a peça selecionada. O
+  rodapé mostra a conta o tempo todo.
 
 ## Rodando
 
