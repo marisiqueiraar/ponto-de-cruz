@@ -606,6 +606,16 @@ button:active{transform:scale(.99)}
     return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
   }
 
+  // a folha do PDF: 10 mm de margem lateral, 44 mm de cabeçalho e 8 mm embaixo.
+  // a tela e o PDF decidem a escala por aqui, para nunca discordarem sobre caber.
+  var PDF_SIDE = 10, PDF_TOP = 44, PDF_FOOT = 8;
+  function pdfFit(R){
+    var land = R.w > R.h;
+    var pageW = land ? 297 : 210, pageH = land ? 210 : 297;
+    var maxW = pageW - PDF_SIDE * 2, maxH = pageH - PDF_TOP - PDF_FOOT;
+    return { land: land, pageW: pageW, scale: Math.min(1, maxW / R.w, maxH / R.h) };
+  }
+
   function drawPhoto(ctx, k, region, alpha){
     var X = (photo.x - region.x) * k, Y = (photo.y - region.y) * k;
     var W = photo.w * k, H = photo.h * k;
@@ -707,11 +717,13 @@ button:active{transform:scale(.99)}
     } else $("size").textContent = "—";
 
     var cr = cropArea();
-    var fits = cr.w <= 186 && cr.h <= 273;
-    var fitsLand = cr.w <= 273 && cr.h <= 186;
-    $("fitHint").textContent = (fits || fitsLand)
-      ? "Área do molde: " + fmt(cr.w / 10) + " × " + fmt(cr.h / 10) + " cm. Cabe numa folha A4 em tamanho real."
-      : "Área do molde: " + fmt(cr.w / 10) + " × " + fmt(cr.h / 10) + " cm — maior que uma A4. O PDF vai reduzir e os furos não vão bater; aproxime as peças da foto ou reduza a altura do texto.";
+    var fit = pdfFit(cr);
+    var area = "Área do molde: " + fmt(cr.w / 10) + " × " + fmt(cr.h / 10) + " cm";
+    $("fitHint").textContent = fit.scale >= 1
+      ? area + ". Cabe numa folha A4 em tamanho real."
+      : area + " — não cabe numa A4 em tamanho real: o PDF sairia reduzido a " +
+        Math.round(fit.scale * 100) + "% e os furos não vão bater. Aproxime as peças da foto " +
+        "ou reduza a altura do texto.";
   }
 
   function renderChips(){
@@ -1090,12 +1102,10 @@ button:active{transform:scale(.99)}
     if (!els.length) return;
     var pa = paperMM();
     var R = cropArea();
-    var land = R.w > R.h;
+    var fit = pdfFit(R);
+    var land = fit.land, pageW = fit.pageW, scale = fit.scale;
     var pdf = new window.jspdf.jsPDF({ unit:"mm", format:"a4", orientation: land ? "landscape" : "portrait" });
-    var pageW = land ? 297 : 210, pageH = land ? 210 : 297;
-    var maxW = pageW - 20, maxH = pageH - 52;
-    var scale = Math.min(1, maxW / R.w, maxH / R.h);
-    var ox = (pageW - R.w * scale) / 2, oy = 44;
+    var ox = (pageW - R.w * scale) / 2, oy = PDF_TOP;
 
     pdf.setFontSize(15);
     var t = els[sel];
@@ -1113,13 +1123,15 @@ button:active{transform:scale(.99)}
       : "Imprima em 100%, sem ajustar a pagina. Confira com uma regua: o retangulo abaixo deve medir " + fmt(photo.w) + " mm de largura.", 12, 36);
     pdf.setTextColor(80);
 
+    // 4 px/mm basta para um fundo desenhado a 22% de opacidade, e a compressão
+    // impede o jsPDF de embutir o raster cru — sem ela o molde sai com 6,5 MB
     var bg = document.createElement("canvas");
-    var bgk = 8;
+    var bgk = 4;
     bg.width = Math.round(R.w * bgk); bg.height = Math.round(R.h * bgk);
     var bctx = bg.getContext("2d");
     bctx.fillStyle = "#fff"; bctx.fillRect(0, 0, bg.width, bg.height);
     drawPhoto(bctx, bgk, R, 0.22);
-    pdf.addImage(bg.toDataURL("image/png"), "PNG", ox, oy, R.w * scale, R.h * scale);
+    pdf.addImage(bg.toDataURL("image/png"), "PNG", ox, oy, R.w * scale, R.h * scale, undefined, "FAST");
 
     pdf.setDrawColor(150);
     pdf.setLineWidth(0.2);
