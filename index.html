@@ -252,6 +252,31 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
 .sw{width:34px;height:34px;flex:0 0 auto;padding:0;border-radius:50%;border:2px solid var(--line)}
 .sw.on{border-color:var(--ink);box-shadow:0 0 0 3px #fff inset}
 
+/* abas dentro do painel: a linha passou a ter duas telas — a cor que está no
+   molde agora e o catálogo inteiro das marcas, que tem centenas de cores e
+   não pode ficar aberto o tempo todo por cima do resto. */
+.abas{display:flex;gap:5px;margin-bottom:14px}
+.abas button{flex:1 1 0;min-height:30px;padding:0 8px;border:1px solid var(--line);
+  border-radius:15px;background:#fff;font-family:var(--display);font-size:9px;
+  letter-spacing:.02em;color:var(--ink-soft)}
+.abas button.on{background:var(--mat);border-color:var(--mat);color:#fff}
+
+/* catálogo das marcas: num painel de 300 px a bolinha de 34 px da paleta não
+   cabe 400 vezes, então aqui a cor vira quadradinho em grade. O visto fica
+   numa tarja branca, que é o único fundo que se enxerga sobre qualquer cor. */
+.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(30px,1fr));gap:6px}
+.cat{position:relative;height:30px;padding:0;border-radius:5px;
+  border:1px solid rgba(56,73,89,.22)}
+.cat.on{border-color:var(--mat);box-shadow:0 0 0 2px var(--mat)}
+.cat.on::after{content:"\2713";position:absolute;right:1px;bottom:0;padding:0 1px;
+  font-size:10px;line-height:1.2;color:var(--mat);background:#fff;border-radius:3px}
+.grade .vazio{grid-column:1/-1;font-size:12.5px;color:var(--ink-soft);margin:6px 0}
+.catfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin-top:14px;font-size:12.5px;color:var(--ink-soft)}
+.catfoot button{flex:0 0 auto;height:30px;padding:0 12px;border:1px solid var(--line);
+  border-radius:6px;background:#fff;font-family:var(--display);font-size:9px;color:var(--ink-soft)}
+.catfoot button.perigo{border-color:var(--danger);color:var(--danger)}
+
 .notes{font-size:14px;color:var(--ink-soft)}
 .notes ul{padding-left:18px;margin:0}
 .notes li{margin-bottom:9px}
@@ -576,16 +601,44 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   <section class="pane" data-pane="linha">
     <h2>linha</h2>
-    <div class="field">
-      <label for="palette">Paleta</label>
-      <select id="palette"></select>
+
+    <div class="abas" id="linhaAbas">
+      <button type="button" class="on" data-aba="usar">no molde</button>
+      <button type="button" data-aba="catalogo">catálogo</button>
     </div>
-    <div class="field">
-      <label>Cor da linha <b id="threadName">Limao escuro</b></label>
-      <div class="swrow" id="swatches"></div>
+
+    <div data-aba="usar">
+      <div class="field">
+        <label for="palette">Paleta</label>
+        <select id="palette"></select>
+      </div>
+      <div class="field">
+        <label>Cor da linha <b id="threadName">Limao escuro</b></label>
+        <div class="swrow" id="swatches"></div>
+      </div>
+      <p class="note">A cor vale para a tela e para a prévia em PNG. O molde em PDF sai sempre
+      em preto, porque é gabarito de furo.</p>
     </div>
-    <p class="note">A cor vale para a tela e para a prévia em PNG. O molde em PDF sai sempre
-    em preto, porque é gabarito de furo.</p>
+
+    <div data-aba="catalogo" class="hide">
+      <div class="abas" id="marcas"></div>
+      <div class="field">
+        <label for="catBusca">Buscar</label>
+        <input id="catBusca" type="text" placeholder="código ou nome da cor" autocomplete="off"
+               spellcheck="false">
+      </div>
+      <div class="grade" id="catGrade"></div>
+      <div class="catfoot">
+        <span id="catConta">nenhuma linha marcada</span>
+        <button type="button" id="catLimpar" class="hide">limpar</button>
+      </div>
+      <p class="note">Toque numa cor para dizer que você tem essa linha. Ela entra na paleta
+      <b>minhas linhas</b> e já passa a ser a cor do molde na tela, que é o jeito de
+      experimentar a cor no arranjo antes de gastar meada. Tocar de novo desmarca.</p>
+      <p class="note">As cores são referência de tela. A da Anchor sai da cartela da própria
+      marca; a da DMC vem de tabela pública e é mais aproximada. Monitor, luz e lote mudam o
+      que você vê na mão.</p>
+    </div>
   </section>
 
   <section class="pane" data-pane="molde">
@@ -665,6 +718,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 </div>
 
 <script src="vendor/jspdf.umd.min.js"></script>
+<script src="catalogos.js"></script>
 <script>
 (function(){
   var $ = function(id){ return document.getElementById(id); };
@@ -717,7 +771,50 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     ]}
   ];
   var thread = "#B3B347";
-  var curPal = 0;
+  var curPal = 0;   /* índice em PALETTES, ou "minhas" */
+
+  /* ---- catálogos das marcas e as linhas que você tem -------------------
+     O catálogo vem de catalogos.js, que é dado puro: marca, código e cor.
+     Daqui para baixo fica só o que é seu — a lista do que já está na caixa,
+     por chave "marca:codigo". Ela vira uma paleta como as outras, e é assim
+     que a cor de uma linha de verdade entra no molde para ser testada. */
+  var CAT = window.CATALOGOS || [];
+  var catIdx = {};
+  CAT.forEach(function(m){
+    m.cores.forEach(function(c){
+      catIdx[m.id + ":" + c[0]] = { marca: m.marca, code: c[0], hex: c[1], nome: c[2] || "" };
+    });
+  });
+  var minhas = [];                                   /* chaves, na ordem em que foram marcadas */
+  var marcaAtiva = CAT.length ? CAT[0].id : "";
+
+  /* Chave à parte da do molde de propósito, como a da foto: o que você tem na
+     caixa é inventário, não desenho. Começar um molde do zero não pode apagar
+     a caixa de linhas, e a caixa não deve viajar junto com o arranjo. */
+  var LINHAS_STORE = "ponto-e-letra/linhas/v1";
+
+  function nomeLinha(k){
+    var c = catIdx[k];
+    return c ? c.marca + " " + c.code : "";
+  }
+
+  function salvaLinhas(){
+    try {
+      localStorage.setItem(LINHAS_STORE, JSON.stringify({ v: 1, tenho: minhas }));
+    } catch (e){ /* janela anônima ou cota cheia: seguir sem memória */ }
+  }
+
+  function carregaLinhas(){
+    var raw;
+    try { raw = localStorage.getItem(LINHAS_STORE); } catch (e){ return; }
+    if (!raw) return;
+    var s;
+    try { s = JSON.parse(raw); } catch (e){ return; }
+    if (!s || s.v !== 1 || !s.tenho || !s.tenho.length) return;
+    // um código que saiu do catálogo entre uma versão e outra é descartado na
+    // volta: sem cor no índice não há o que mostrar nem o que pintar
+    minhas = s.tenho.filter(function(k){ return !!catIdx[k]; });
+  }
 
   /* ---- memória local -------------------------------------------------
      Duas chaves de propósito: a foto é o único item que pode estourar a cota
@@ -733,39 +830,158 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)];
   }
 
+  // a lista é montada de novo toda vez que a caixa de linhas muda de tamanho,
+  // porque é ela que traz — ou tira — a opção "minhas linhas" da frente
   function renderPaletteList(){
     var selEl = $("palette");
+    var alvo = String(curPal);
     selEl.innerHTML = "";
+    if (minhas.length){
+      var om = document.createElement("option");
+      om.value = "minhas";
+      om.textContent = "minhas linhas (" + minhas.length + ")";
+      selEl.appendChild(om);
+    }
     PALETTES.forEach(function(pal, i){
       var o = document.createElement("option");
       o.value = String(i);
       o.textContent = pal.name;
       selEl.appendChild(o);
     });
-    selEl.value = String(curPal);
-    selEl.addEventListener("change", function(){
-      curPal = parseInt(this.value, 10);
-      renderSwatches();
-    });
+    if (!selEl.querySelector('option[value="' + alvo + '"]')){ curPal = 0; alvo = "0"; }
+    selEl.value = alvo;
+  }
+
+  function coresDaPaleta(){
+    if (curPal === "minhas"){
+      return minhas.map(function(k){
+        var c = catIdx[k];
+        return [c.hex, c.marca + " " + c.code];
+      });
+    }
+    return PALETTES[curPal].colors;
   }
 
   function renderSwatches(){
     var box = $("swatches");
     box.innerHTML = "";
-    PALETTES[curPal].colors.forEach(function(c){
+    var cores = coresDaPaleta();
+    if (!cores.length){
+      box.innerHTML = '<p class="note">Nenhuma linha marcada ainda. Abra a aba <b>catálogo</b> ' +
+                      'e toque nas cores que você tem.</p>';
+      return;
+    }
+    cores.forEach(function(c){
       var b = document.createElement("button");
       b.className = "sw" + (c[0] === thread ? " on" : "");
       b.style.background = c[0];
       b.title = c[1] + " " + c[0];
       b.setAttribute("aria-label", "Linha " + c[1]);
       b.addEventListener("click", function(){
-        thread = c[0];
-        $("threadName").textContent = c[1];
+        usaCor(c[0], c[1]);
         renderSwatches();
-        draw();
       });
       box.appendChild(b);
     });
+  }
+
+  function usaCor(hex, nome){
+    thread = hex;
+    $("threadName").textContent = nome;
+    draw();          // draw() é quem agenda a gravação, inclusive da cor
+  }
+
+  /* ---- catálogo das marcas -------------------------------------------- */
+
+  function montaMarcas(){
+    var box = $("marcas");
+    box.innerHTML = "";
+    CAT.forEach(function(m){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = m.id === marcaAtiva ? "on" : "";
+      b.textContent = m.marca.toLowerCase() + " (" + m.cores.length + ")";
+      b.addEventListener("click", function(){
+        marcaAtiva = m.id;
+        montaMarcas();
+        listaCatalogo();
+      });
+      box.appendChild(b);
+    });
+  }
+
+  // são centenas de botões por marca: eles nascem num fragmento e dividem um
+  // ouvinte só, no pai, senão cada letra digitada na busca custa uma enxurrada
+  function listaCatalogo(){
+    var grade = $("catGrade");
+    var m = CAT.filter(function(x){ return x.id === marcaAtiva; })[0];
+    grade.innerHTML = "";
+    if (!m){
+      // sem catalogos.js não há catálogo nenhum: dizer isso é melhor do que
+      // deixar a aba vazia, que passa por painel quebrado
+      grade.innerHTML = '<p class="vazio">Os catálogos das marcas não carregaram. ' +
+                        'Falta o arquivo <b>catalogos.js</b> ao lado do index.html.</p>';
+      return;
+    }
+    var q = ($("catBusca").value || "").trim().toLowerCase();
+    var vistas = m.cores.filter(function(c){
+      if (!q) return true;
+      return c[0].toLowerCase().indexOf(q) >= 0 ||
+             (c[2] && c[2].toLowerCase().indexOf(q) >= 0);
+    });
+    if (!vistas.length){
+      grade.innerHTML = '<p class="vazio">Nenhuma cor da ' + m.marca + ' com esse código ou nome.</p>';
+      return;
+    }
+    var frag = document.createDocumentFragment();
+    vistas.forEach(function(c){
+      var k = m.id + ":" + c[0];
+      var tem = minhas.indexOf(k) >= 0;
+      var rot = m.marca + " " + c[0] + (c[2] ? " — " + c[2] : "");
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "cat" + (tem ? " on" : "");
+      b.style.background = c[1];
+      b.dataset.k = k;
+      b.title = rot + " " + c[1];
+      b.setAttribute("aria-label", rot);
+      b.setAttribute("aria-pressed", tem ? "true" : "false");
+      frag.appendChild(b);
+    });
+    grade.appendChild(frag);
+  }
+
+  // marcar é dizer "tenho essa" e, no mesmo gesto, jogar a cor no molde: é para
+  // isso que a caixa serve, ver a linha que você tem no arranjo antes de bordar
+  function alternaLinha(k, botao){
+    var c = catIdx[k];
+    if (!c) return;
+    var i = minhas.indexOf(k);
+    if (i >= 0) minhas.splice(i, 1);
+    else {
+      minhas.push(k);
+      curPal = "minhas";
+      usaCor(c.hex, c.marca + " " + c.code);
+    }
+    var tem = i < 0;
+    if (botao){
+      botao.classList.toggle("on", tem);
+      botao.setAttribute("aria-pressed", tem ? "true" : "false");
+    }
+    salvaLinhas();
+    renderPaletteList();
+    renderSwatches();
+    contaLinhas();
+  }
+
+  function contaLinhas(){
+    var n = minhas.length;
+    $("catConta").textContent = n === 0 ? "nenhuma linha marcada"
+                              : n === 1 ? "1 linha marcada"
+                              : n + " linhas marcadas";
+    $("catLimpar").classList.toggle("hide", n === 0);
+    $("catLimpar").textContent = "limpar";
+    $("catLimpar").classList.remove("perigo");
   }
 
   function P(){ return parseFloat($("mm").value); }
@@ -1214,6 +1430,10 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       var c = PALETTES[i].colors;
       for (var j = 0; j < c.length; j++) if (c[j][0] === hex) return c[j][1];
     }
+    for (var k = 0; k < minhas.length; k++){
+      var l = catIdx[minhas[k]];
+      if (l && l.hex === hex) return l.marca + " " + l.code;
+    }
     return "";
   }
 
@@ -1255,7 +1475,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     clampPhoto();
     lastPaper = paperMM();
 
-    if (typeof s.pal === "number" && PALETTES[s.pal]) curPal = s.pal;
+    if (s.pal === "minhas" && minhas.length) curPal = "minhas";
+    else if (typeof s.pal === "number" && PALETTES[s.pal]) curPal = s.pal;
     if (typeof s.thread === "string" && /^#[0-9A-Fa-f]{6}$/.test(s.thread)){
       thread = s.thread;
       var name = threadLabel(thread);
@@ -2156,6 +2377,49 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     setZoom(zoom * (e.deltaY < 0 ? 1.12 : 1 / 1.12), e.clientX, e.clientY);
   }, { passive: false });
 
+  /* ---- painel da linha ------------------------------------------------ */
+  $("palette").addEventListener("change", function(){
+    curPal = this.value === "minhas" ? "minhas" : parseInt(this.value, 10);
+    renderSwatches();
+  });
+
+  [].forEach.call(document.querySelectorAll("#linhaAbas button"), function(b){
+    b.addEventListener("click", function(){
+      var alvo = b.dataset.aba;
+      [].forEach.call(document.querySelectorAll("#linhaAbas button"), function(x){
+        x.classList.toggle("on", x === b);
+      });
+      [].forEach.call(document.querySelectorAll('.pane[data-pane="linha"] > div[data-aba]'),
+        function(d){ d.classList.toggle("hide", d.dataset.aba !== alvo); });
+      contaLinhas();          // desarma o "confirmar" do limpar ao trocar de aba
+    });
+  });
+
+  $("catBusca").addEventListener("input", listaCatalogo);
+
+  // um ouvinte só para a grade inteira: são centenas de quadradinhos
+  $("catGrade").addEventListener("click", function(e){
+    var b = e.target;                     // o quadradinho não tem filho: é ele mesmo
+    if (b && b.classList && b.classList.contains("cat")) alternaLinha(b.dataset.k, b);
+  });
+
+  // esvaziar a caixa apaga trabalho de catálogo que não dá para desfazer, então
+  // pede um segundo toque em vez de abrir a janela de confirmar do recalcular
+  $("catLimpar").addEventListener("click", function(){
+    if (!this.classList.contains("perigo")){
+      this.classList.add("perigo");
+      this.textContent = "confirmar";
+      return;
+    }
+    minhas = [];
+    if (curPal === "minhas") curPal = 0;
+    salvaLinhas();
+    renderPaletteList();
+    renderSwatches();
+    listaCatalogo();
+    contaLinhas();
+  });
+
   /* ---- trilho e painéis ---------------------------------------------- */
   [].forEach.call(document.querySelectorAll(".rail button"), function(b){
     b.addEventListener("click", function(){
@@ -2174,7 +2438,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   window.addEventListener("resize", draw);
 
   function boot(){
-    restored = restoreState();
+    carregaLinhas();          // antes de restaurar: a paleta "minhas linhas"
+    restored = restoreState();   // só existe se houver o que ela mostre
     if (!restored){
       syncPhotoSize();
       lastPaper = paperMM();
@@ -2187,6 +2452,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     }
     renderPaletteList();
     renderSwatches();
+    montaMarcas();
+    listaCatalogo();
+    contaLinhas();
     renderChips();
     syncControls();
     restorePhoto();

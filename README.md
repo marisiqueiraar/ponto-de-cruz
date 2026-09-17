@@ -7,7 +7,8 @@ posiciona as peças bordadas por cima, e baixa um PDF com o molde de furos na es
 material.
 
 A aplicação é o arquivo `index.html`: HTML, CSS e JavaScript em um único arquivo, sem build e
-sem backend. A tela é um editor: trilho de ícones à esquerda que abre um painel, barra de cima
+sem backend. Ao lado dele há um único arquivo de dados, `catalogos.js`, com os catálogos de cor
+das marcas de linha — dado puro, sem lógica nenhuma. A tela é um editor: trilho de ícones à esquerda que abre um painel, barra de cima
 que muda conforme o que está selecionado, e o papel no centro sobre uma mesa com réguas em
 centímetros. O `layout.html` na raiz é a maquete dessa arrumação, com os controles inertes —
 serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
@@ -27,7 +28,11 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
   não por nome: cada linha mostra a sua palavra escrita naquela fonte e, ao lado, a mesma
   palavra já em quadradinhos, que é o que vira furo. Com busca e filtro por grupo. Os cartões
   pedem a fonte só quando chegam à vista, então abrir a lista não baixa as 40 famílias.
-- **Linhas**: oito paletas de quatro cores cada.
+- **Linhas**: oito paletas de quatro cores cada, mais os catálogos das marcas — 391 cores da
+  Anchor e 455 da DMC. Na aba **catálogo** você toca nas cores que tem na caixa; elas viram a
+  paleta **minhas linhas**, e marcar uma já pinta o molde com ela, que é o jeito de ver a cor
+  real no arranjo antes de gastar meada. A busca aceita código ou nome. O que você marcou fica
+  guardado no navegador à parte do molde, e não some quando você recomeça um desenho.
 - **Contagem**: pontos e furos, com o tamanho da peça selecionada em centímetros.
 - **PDF do molde**: em tamanho real, recortado na área do bordado, com a moldura de recorte, o
   retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
@@ -74,6 +79,16 @@ Nenhuma. Tudo que o app precisa está no repositório, e ele funciona sem rede:
 - **jsPDF 2.5.1** está em `vendor/jspdf.umd.min.js` (MIT, cabeçalho de licença no próprio
   arquivo). Antes vinha do cdnjs, o que deixava a entrega final do app — o molde em PDF —
   dependente de internet.
+- **Os catálogos de cor** estão em `catalogos.js`, no repositório. As 391 cores da Anchor foram
+  amostradas da cartela de cores da própria marca: cada uma é a mediana dos pixels do miolo da
+  amostra impressa, e o código é o da cartela sem os zeros à esquerda (`00268` vira `268`). A
+  cartela traz `00268` duas vezes, na mesma cor, e aqui ela entra uma vez só. A Anchor não dá
+  nome às cores, só número. As 455 da DMC vêm da tabela pública de
+  [nathantspencer/DMC-ColorCodes](https://github.com/nathantspencer/DMC-ColorCodes), que não é
+  da DMC: são mais aproximadas que as da Anchor. O rótulo repetido `White` saiu de lá, porque é
+  a mesma cor do `Blanc`. Mandando a cartela da DMC em PDF, essas cores podem ser refeitas do
+  mesmo jeito que as da Anchor. Em qualquer caso é referência de tela: monitor, luz e lote
+  mudam a cor do fio na mão.
 - **Os três ícones** dos botões de ação são SVG embutidos no `index.html`, vindos do projeto
   [material-design-icons](https://github.com/google/material-design-icons) do Google, sob
   Apache License 2.0. São três caminhos de ~300 bytes: não há fonte de ícones nem biblioteca.
@@ -86,13 +101,16 @@ raiz declara que não há build — sem ele, um projeto criado com o preset Vite
 
 ## Onde ficam os dados
 
-Tudo no `localStorage` do próprio navegador, em duas chaves: `ponto-e-letra/molde/v1` para o
-arranjo e `ponto-e-letra/molde/foto/v1` para a imagem. Não há servidor nem conta — o trabalho
+Tudo no `localStorage` do próprio navegador, em três chaves: `ponto-e-letra/molde/v1` para o
+arranjo, `ponto-e-letra/molde/foto/v1` para a imagem e `ponto-e-letra/linhas/v1` para as linhas
+que você marcou como suas. Não há servidor nem conta — o trabalho
 não acompanha você para outro aparelho ou outro navegador, e some se você limpar os dados do
 site. A foto é guardada reduzida (1600 px no maior lado, JPEG), porque é só guia de
-posicionamento: na tela e no PDF ela aparece a 22% de opacidade. As duas chaves são separadas
-de propósito — a foto é o único item capaz de estourar a cota do navegador, e assim ela nunca
-leva o arranjo junto na queda.
+posicionamento: na tela e no PDF ela aparece a 22% de opacidade. As chaves são separadas de
+propósito. A foto é o único item capaz de estourar a cota do navegador, e assim ela nunca leva o
+arranjo junto na queda. As linhas ficam à parte porque são inventário, não desenho: a caixa de
+linhas continua a mesma quando você começa um molde do zero, e o molde não carrega a caixa
+junto.
 
 ## `sw.js`
 
