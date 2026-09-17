@@ -19,8 +19,8 @@
   /* ---- folha A4 retrato, em milímetros ---- */
   var PAGE = { w: 210, h: 297, margin: 10, caption: 8, overlap: 2 };
 
-  /* ---- fontes: fonte única da verdade, casa com os @font-face do style.css ---- */
-  var FONTS = [
+  /* ---- fontes locais: casam com os @font-face do style.css e funcionam sem rede ---- */
+  var LOCAL = [
     { family: "Great Vibes",        label: "Great Vibes",    style: "normal" },
     { family: "Pinyon Script",      label: "Pinyon Script",  style: "normal" },
     { family: "Dancing Script",     label: "Dancing Script", style: "normal" },
@@ -30,12 +30,26 @@
     { family: "Cormorant Garamond", label: "Serif itálica",  style: "italic" }
   ];
 
+  /* ---- catálogo do Google Fonts (catalog.js), buscado sob demanda ---- */
+  var CATS = { h: "manuscrita", d: "display", s: "serifada", n: "sem serifa", m: "mono" };
+  var CATALOG = (function(){
+    var src = window.FONT_CATALOG || {}, out = [];
+    ["h","d","s","n","m"].forEach(function(k){
+      (src[k] || []).forEach(function(name){ out.push({ name: name, cat: k }); });
+    });
+    return out;
+  })();
+  var RESULT_LIMIT = 80;
+
+  var remotes = [];        // famílias trazidas do catálogo nesta página
+  var remoteLoaded = {};   // família -> promessa da folha de estilo do Google
+
   var STORE = "ponto-e-letra/v1";
 
   var el = {};
   ["txt","font","rows","thick","thr","mm","rowsOut","thickOut","thrOut","mmOut",
    "dims","count","size","grid","notice","editbar","editcount","undo","clear",
-   "dl","print","reset","sheet","say"].forEach(function(id){ el[id] = document.getElementById(id); });
+   "dl","print","reset","sheet","say","more","panel","search","results","rcount"].forEach(function(id){ el[id] = document.getElementById(id); });
 
   /* ---- estado ---- */
   var state = {
@@ -49,14 +63,57 @@
   var generation = 0, timer = 0, saveTimer = 0;
 
   function dimsOf(g){ return g ? g.cols + "×" + g.rows : ""; }
+  function localFont(family){
+    for (var i = 0; i < LOCAL.length; i++) if (LOCAL[i].family === family) return LOCAL[i];
+    return null;
+  }
   function fontOf(family){
-    for (var i = 0; i < FONTS.length; i++) if (FONTS[i].family === family) return FONTS[i];
-    return FONTS[0];
+    var f = localFont(family);
+    if (f) return f;
+    if (remotes.indexOf(family) >= 0)
+      return { family: family, label: family, style: "normal", remote: true };
+    return LOCAL[0];
+  }
+
+  // a folha do Google registra o @font-face; só depois dela o fonts.load enxerga a família
+  function ensureRemote(family){
+    if (remoteLoaded[family]) return remoteLoaded[family];
+    remoteLoaded[family] = new Promise(function(resolve){
+      var link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "https://fonts.googleapis.com/css2?family=" +
+                  family.replace(/ /g, "+") + "&display=swap";
+      link.onload = link.onerror = function(){ resolve(); };
+      document.head.appendChild(link);
+    });
+    return remoteLoaded[family];
   }
   // a Cormorant Garamond só existe em itálico: pedir "normal" deixa o navegador
   // sintetizar ou cair fora da fonte, então o estilo entra na string do canvas
   function fontString(f, px){
-    return (f.style === "italic" ? "italic " : "") + px + 'px "' + f.family + '", cursive';
+    return faceSpec(f, px) + ", cursive";
+  }
+  function faceSpec(f, px){
+    return (f.style === "italic" ? "italic " : "") + px + 'px "' + f.family + '"';
+  }
+
+  // document.fonts.check() não serve aqui: para uma família sem @font-face ele
+  // consulta as fontes do sistema e responde "disponível" para qualquer nome,
+  // inclusive de uma fonte remota que nunca chegou. Medir é o que distingue:
+  // se o texto sair com a mesma largura do genérico, quem desenhou foi o genérico.
+  var probeCtx = null;
+  function fontAvailable(f){
+    if (!probeCtx) probeCtx = document.createElement("canvas").getContext("2d");
+    var pre = f.style === "italic" ? "italic " : "";
+    var sample = "mmmwwwiiilll0OSg";
+    var refs = ["monospace", "serif"];
+    for (var i = 0; i < refs.length; i++){
+      probeCtx.font = pre + '100px ' + refs[i];
+      var base = probeCtx.measureText(sample).width;
+      probeCtx.font = pre + '100px "' + f.family + '", ' + refs[i];
+      if (probeCtx.measureText(sample).width !== base) return true;
+    }
+    return false;
   }
 
   // acima disso o canvas da tela estoura silenciosamente e o quadro fica em branco
@@ -410,26 +467,28 @@
         localStorage.setItem(STORE, JSON.stringify({
           text: el.txt.value, family: el.font.value,
           rows: el.rows.value, thick: el.thick.value, thr: el.thr.value, mm: el.mm.value,
-          edits: edits, editsDims: state.editsDims
+          remotes: remotes, edits: edits, editsDims: state.editsDims
         }));
       } catch (e){ /* modo privado ou armazenamento cheio: seguir sem memória */ }
     }, 250);
   }
 
+  // devolve a família salva; quem chama aplica depois de montar as opções
   function restore(){
     var raw;
-    try { raw = localStorage.getItem(STORE); } catch (e){ return; }
-    if (!raw) return;
+    try { raw = localStorage.getItem(STORE); } catch (e){ return null; }
+    if (!raw) return null;
     try {
       var s = JSON.parse(raw);
       if (typeof s.text === "string") el.txt.value = s.text;
-      if (s.family && fontOf(s.family).family === s.family) el.font.value = s.family;
       ["rows","thick","thr","mm"].forEach(function(k){ if (s[k] != null) el[k].value = s[k]; });
+      if (Array.isArray(s.remotes)) remotes = s.remotes.filter(function(n){ return !localFont(n); });
       if (Array.isArray(s.edits)){
         state.edits = new Map(s.edits);
         state.editsDims = s.editsDims || "";
       }
-    } catch (e){ /* memória corrompida: começar limpo */ }
+      return typeof s.family === "string" ? s.family : null;
+    } catch (e){ return null; }   // memória corrompida: começar limpo
   }
 
   /* ---- ciclo de recálculo --------------------------------------------- */
@@ -445,8 +504,10 @@
       return;
     }
     notice(state.fontOk ? "" :
-      "A fonte " + o.font.label + " não carregou — o gráfico saiu numa cursiva genérica do sistema " +
-      "e não vai bater com o desenho esperado.", true);
+      "A fonte " + o.font.label + " não carregou" +
+      (o.font.remote ? ": ela vem da internet, e sem conexão o gráfico sai numa cursiva genérica do sistema."
+                     : " e o gráfico saiu numa cursiva genérica do sistema.") +
+      " O desenho não vai bater com o esperado.", true);
     state.grid = applyEdits(g);
     paint();
   }
@@ -454,17 +515,18 @@
   function render(){
     var mine = ++generation;
     var o = controls();
-    var spec = fontString(o.font, 100);
+    var spec = faceSpec(o.font, 100);
     var run = function(){
       if (mine !== generation) return;
-      state.fontOk = !document.fonts || !document.fonts.check || document.fonts.check(spec);
+      state.fontOk = fontAvailable(o.font);
       apply(o);
     };
-    if (document.fonts && document.fonts.load){
-      document.fonts.load(spec).then(run, run);
-    } else {
-      run();
-    }
+    var ready = o.font.remote ? ensureRemote(o.font.family) : Promise.resolve();
+    ready.then(function(){
+      if (mine !== generation) return;
+      if (document.fonts && document.fonts.load) document.fonts.load(spec).then(run, run);
+      else run();
+    });
   }
 
   function schedule(){
@@ -475,11 +537,64 @@
   /* ---- interface ------------------------------------------------------- */
 
   function buildFontOptions(){
-    var html = "";
-    for (var i = 0; i < FONTS.length; i++){
-      html += '<option value="' + esc(FONTS[i].family) + '">' + esc(FONTS[i].label) + "</option>";
+    var chosen = el.font.value, here = "", net = "";
+    for (var i = 0; i < LOCAL.length; i++){
+      here += '<option value="' + esc(LOCAL[i].family) + '">' + esc(LOCAL[i].label) + "</option>";
     }
-    el.font.innerHTML = html;
+    for (var j = 0; j < remotes.length; j++){
+      net += '<option value="' + esc(remotes[j]) + '">' + esc(remotes[j]) + "</option>";
+    }
+    el.font.innerHTML = '<optgroup label="No aparelho, sem rede">' + here + "</optgroup>" +
+                        (net ? '<optgroup label="Da internet">' + net + "</optgroup>" : "");
+    if (chosen){ el.font.value = chosen; }
+    if (!el.font.value) el.font.value = LOCAL[0].family;
+  }
+
+  /* ---- busca no catálogo ---------------------------------------------- */
+
+  function matches(q){
+    var out = [];
+    for (var i = 0; i < CATALOG.length; i++){
+      var r = CATALOG[i];
+      // sem busca, mostra as manuscritas: são as que servem a um gráfico de cursiva
+      if (q ? r.name.toLowerCase().indexOf(q) >= 0 : r.cat === "h") out.push(r);
+    }
+    return out;
+  }
+
+  function renderResults(){
+    if (!CATALOG.length){
+      el.results.innerHTML = "";
+      el.rcount.textContent = "O catálogo (catalog.js) não carregou — só as sete fontes locais estão disponíveis.";
+      return;
+    }
+    var q = el.search.value.trim().toLowerCase();
+    var all = matches(q), shown = all.slice(0, RESULT_LIMIT), html = "";
+    for (var i = 0; i < shown.length; i++){
+      var name = shown[i].name, mine = localFont(name);
+      html += '<button type="button" class="result' + (mine ? " here" : "") +
+              '" data-family="' + esc(name) + '"><span>' + esc(name) + "</span><em>" +
+              (mine ? "já está aqui" : CATS[shown[i].cat]) + "</em></button>";
+    }
+    el.results.innerHTML = html;
+    if (!all.length){
+      el.rcount.textContent = "Nenhuma família com esse nome.";
+    } else if (q){
+      el.rcount.textContent = all.length + (all.length === 1 ? " família encontrada" : " famílias encontradas") +
+        (all.length > shown.length ? ", mostrando as " + shown.length + " primeiras" : "");
+    } else {
+      el.rcount.textContent = all.length + " manuscritas. Digite para buscar nas " +
+        CATALOG.length + " famílias do catálogo com alfabeto latino.";
+    }
+  }
+
+  function pickFont(family){
+    if (!localFont(family) && remotes.indexOf(family) < 0) remotes.push(family);
+    buildFontOptions();
+    el.font.value = family;
+    say("Fonte " + family + " selecionada.");
+    render();
+    save();
   }
 
   function syncLabels(){
@@ -566,8 +681,27 @@
   window.addEventListener("resize", function(){ if (state.grid) paint(); });
   window.addEventListener("beforeprint", buildSheet);
 
+  el.more.addEventListener("click", function(){
+    var opening = el.panel.hidden;
+    el.panel.hidden = !opening;
+    el.more.setAttribute("aria-expanded", opening ? "true" : "false");
+    el.more.textContent = opening ? "Fechar a busca" : "Buscar mais fontes";
+    if (opening){ renderResults(); el.search.focus(); }
+  });
+
+  el.search.addEventListener("input", renderResults);
+
+  el.results.addEventListener("click", function(e){
+    var b = e.target && e.target.closest ? e.target.closest(".result") : null;
+    if (b) pickFont(b.getAttribute("data-family"));
+  });
+
+  var savedFamily = restore();
   buildFontOptions();
-  restore();
+  if (savedFamily){
+    el.font.value = savedFamily;
+    if (!el.font.value) el.font.value = LOCAL[0].family;
+  }
   syncLabels();
   render();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);

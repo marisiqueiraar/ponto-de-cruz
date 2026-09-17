@@ -12,8 +12,11 @@ hospedadas no próprio repositório, então o app funciona offline depois do pri
 
 - Converte o texto digitado em grade de pontos, renderizando a fonte num canvas e amostrando
   a cobertura de cada célula 6×6 px.
-- Sete cursivas: Great Vibes, Pinyon Script, Dancing Script, Sacramento, Parisienne, Caveat e
-  Cormorant Garamond em itálico.
+- Sete cursivas hospedadas aqui mesmo: Great Vibes, Pinyon Script, Dancing Script, Sacramento,
+  Parisienne, Caveat e Cormorant Garamond em itálico — funcionam sem rede.
+- Busca no catálogo do Google Fonts: 1.882 famílias com alfabeto latino (251 manuscritas),
+  baixadas sob demanda quando há internet. Se a fonte escolhida não chegar, o app avisa em vez
+  de desenhar um gráfico errado com a cursiva genérica do sistema.
 - Controles de altura (10–50 pontos), espessura do traço, sensibilidade da amostragem e
   espaçamento entre furos (1–6 mm).
 - Mostra dimensões da grade, contagem de pontos e o tamanho real em centímetros.
@@ -39,7 +42,8 @@ python3 -m http.server
 ```
 index.html    marcação
 style.css     estilos, @font-face e folha de impressão
-app.js        amostragem, desenho, ajustes, impressão e memória local
+app.js        amostragem, desenho, ajustes, impressão, busca de fontes e memória local
+catalog.js    catálogo do Google Fonts (gerado; ver abaixo)
 fonts/        as sete cursivas em .woff2 (subconjunto latino)
 favicon.svg
 ```
@@ -50,8 +54,19 @@ e passa a ser necessário servir por HTTP.
 
 ## Fontes
 
-As sete cursivas vêm do catálogo do Google Fonts, sob SIL Open Font License 1.1, guardadas
-aqui em `fonts/`. Os créditos e a nota de licença estão em [`fonts/OFL.txt`](fonts/OFL.txt).
+As sete cursivas locais vêm do catálogo do Google Fonts, sob SIL Open Font License 1.1,
+guardadas em `fonts/`. Os créditos e a nota de licença estão em
+[`fonts/OFL.txt`](fonts/OFL.txt).
+
+O resto do catálogo é carregado sob demanda pela API de CSS do Google, que não pede chave.
+A lista de nomes em `catalog.js` foi extraída dos arquivos `METADATA.pb` do repositório
+[google/fonts](https://github.com/google/fonts), mantendo só famílias com subconjunto latino
+— sem isso, uma família sem alfabeto latino geraria um gráfico vazio. É um arquivo gerado:
+para atualizá-lo, releia os `METADATA.pb` e reescreva os cinco grupos (`h` manuscrita,
+`d` display, `s` serifada, `n` sem serifa, `m` monoespaçada).
+
+O catálogo é carregado como script clássico, e não por `fetch` de um `.json`, porque `fetch`
+em `file://` é bloqueado por CORS — seria perder o duplo clique.
 
 ## Deploy
 
