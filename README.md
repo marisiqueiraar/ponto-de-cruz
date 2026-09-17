@@ -1,48 +1,61 @@
 # Ponto de Cruz
 
-**ponto & letra** — gerador de gráfico de ponto cruz para letras cursivas.
+**ponto & letra** — molde de furos em tamanho real para bordar sobre foto.
 
-Você digita a palavra, escolhe uma cursiva, e o app converte o traço da fonte em uma grade
-quadriculada de pontos, pronta para furar o papel ou bordar na aida.
+Você define o papel de fundo, encaixa a foto no tamanho em que ela será impressa, escreve e
+posiciona as peças bordadas por cima, e baixa um PDF com o molde de furos na escala exata do
+material.
 
-A aplicação é o arquivo `index.html`: HTML, CSS e JavaScript em um único arquivo, sem build,
-sem dependências e sem backend. A única coisa que vem de fora são as fontes (Google Fonts via CDN).
+A aplicação é o arquivo `index.html`: HTML, CSS e JavaScript em um único arquivo, sem build e
+sem backend.
 
 ## O que ele faz
 
-- Converte o texto digitado em grade de pontos, renderizando a fonte num canvas e amostrando
-  a cobertura de cada célula 6×6 px.
-- Sete cursivas: Great Vibes, Pinyon Script, Dancing Script, Sacramento, Parisienne, Caveat e
-  uma serif itálica (Cormorant Garamond).
-- Controles de altura (10–50 pontos), espessura do traço, sensibilidade da amostragem e
-  espaçamento entre furos (1–6 mm).
-- Mostra dimensões da grade, contagem de pontos e o tamanho real em centímetros.
-- Grade com linhas de referência de 10 em 10 e pontos desenhados como cruzinhas.
-- Clique em qualquer célula para acender ou apagar o ponto à mão.
-- Exporta o gráfico em PNG e tem layout de impressão (só o gráfico sai no papel).
+- **Papel**: A4, A5, A3, quadrado, 20×30, 15×20 ou medidas próprias, em retrato ou paisagem.
+- **Foto**: tamanhos de revelação comuns (10×15, 9×13, 13×18, 15×21, quadrado, polaroid) ou
+  medida própria, arrastável sobre o papel, com imagem opcional só para visualizar.
+- **Peças bordadas**: quantas quiser, cada uma sendo uma palavra ou um símbolo (coração cheio,
+  coração vazado, estrela, seta). Arraste para posicionar, incline de -45° a 45°, redimensione
+  com dois dedos, e ajuste ponto a ponto no modo de edição.
+- **Fontes**: 40 famílias do Google Fonts agrupadas por caráter — caligrafia fina, cursiva
+  encorpada, letra de mão, serifada itálica, gótica, pixel e bloco.
+- **Linhas**: oito paletas de quatro cores cada.
+- **Contagem**: pontos e furos, com o tamanho da peça selecionada em centímetros.
+- **PDF do molde**: em tamanho real, recortado na área do bordado, com a moldura de recorte, o
+  retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
+  distância exata para colar a foto no papel.
+- **PNG** da prévia, para conferir o arranjo.
 
 ## Rodando
 
-Abra `index.html` no navegador. Não há passo de build.
-
-Para servir localmente, qualquer servidor estático resolve — por exemplo:
+Abra `index.html` no navegador. Não há passo de build. Para servir localmente:
 
 ```bash
 python3 -m http.server
 ```
 
+## Dependências externas
+
+Duas, ambas em tempo de execução:
+
+- **Google Fonts** — as 40 famílias vêm do CDN. Sem rede, o texto cai numa cursiva genérica
+  do sistema e o gráfico gerado não corresponde à fonte escolhida.
+- **jsPDF 2.5.1** (cdnjs) — o botão de PDF avisa e não gera nada se o script não carregar.
+
 ## Deploy
 
-Site estático: é só publicar a raiz do repositório em qualquer host estático
-(GitHub Pages, Vercel, Netlify), sem comando de build e sem variáveis de ambiente.
+Site estático: publique a raiz do repositório em qualquer host. Na Vercel, o `vercel.json` da
+raiz declara que não há build — sem ele, um projeto criado com o preset Vite tenta rodar
+`vite build` e falha com `vite: command not found`.
 
 ## Histórico
 
-Até o commit `6ce5a7a` este repositório continha um app React + Vite + TypeScript diferente
-(gerador de padrão a partir de foto, matching DMC, export PDF, IndexedDB). Ele foi substituído
-por esta aplicação, mas continua inteiro no histórico do git e pode ser recuperado a
-qualquer momento:
+Este repositório já teve duas aplicações diferentes antes desta, ambas preservadas no histórico
+do git:
 
-```bash
-git checkout 6ce5a7a
-```
+- `6ce5a7a` — app React + Vite + TypeScript (padrão a partir de foto, matching DMC, export PDF).
+- `2b7f050` — versão anterior do artefato: gerador de gráfico só de letras cursivas. As branches
+  `claude/affectionate-pasteur-xia1o8`, `claude/segunda-leva` e `claude/terceira-leva` trazem
+  melhorias construídas sobre essa versão (impressão em escala real, ajustes manuais com
+  desfazer, fontes hospedadas localmente, acesso por teclado, memória local e busca no catálogo
+  do Google Fonts).
