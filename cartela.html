@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Extrator de cartela — ponto &amp; letra</title>
+<style>
+@font-face{font-family:"Silkscreen";src:url("fonts/silkscreen.woff2") format("woff2");font-display:swap}
+  :root{
+    --paper:#EDF4FB;
+    --surf:#FFFFFF;
+    --ink:#384959;
+    --ink-soft:#6A89A7;
+    --line:#C9DCEF;
+    --lemon:#FFE566;
+    --lemon-deep:#B3B347;
+    --danger:#BE5103;
+    --sombra:0 2px 10px rgba(56,73,89,.14);
+    --display:"Silkscreen","Courier New",monospace;
+    --corpo:"Segoe UI",Roboto,-apple-system,system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --paper:#151E27;
+      --surf:#1E2A36;
+      --ink:#DCE9F6;
+      --ink-soft:#8FA9C0;
+      --line:#31465A;
+      --lemon:#FFE566;
+      --lemon-deep:#C9C86A;
+      --danger:#E8843C;
+      --sombra:0 2px 10px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#151E27;
+    --surf:#1E2A36;
+    --ink:#DCE9F6;
+    --ink-soft:#8FA9C0;
+    --line:#31465A;
+    --lemon:#FFE566;
+    --lemon-deep:#C9C86A;
+    --danger:#E8843C;
+    --sombra:0 2px 10px rgba(0,0,0,.4);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--corpo);font-size:15px;line-height:1.55;
+  }
+  .env{max-width:860px;margin:0 auto;padding:28px 16px 64px}
+
+  h1{
+    font-family:var(--display);font-weight:400;font-size:20px;letter-spacing:.02em;
+    margin:0 0 6px;text-wrap:balance;
+  }
+  h1 .fio{display:inline-block;width:34px;height:5px;background:var(--lemon);
+    border-bottom:2px solid var(--lemon-deep);vertical-align:middle;margin-right:10px}
+  .sub{margin:0 0 24px;color:var(--ink-soft);max-width:62ch}
+
+  h2{font-family:var(--display);font-weight:400;font-size:12px;letter-spacing:.04em;
+    margin:32px 0 12px;color:var(--ink-soft)}
+
+  /* --- zona de soltar ------------------------------------------------- */
+  .solta{
+    border:2px dashed var(--line);border-radius:10px;background:var(--surf);
+    padding:30px 20px;text-align:center;transition:border-color .15s,background .15s;
+  }
+  .solta.sobre{border-color:var(--lemon-deep);background:color-mix(in srgb,var(--lemon) 14%,var(--surf))}
+  .solta p{margin:0 0 14px;color:var(--ink-soft)}
+  .botao{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    min-height:42px;padding:0 20px;border:1px solid var(--ink);border-radius:7px;
+    background:var(--surf);color:var(--ink);cursor:pointer;
+    font-family:var(--display);font-size:11px;letter-spacing:.03em;
+  }
+  .botao:hover{background:var(--lemon)}
+  .botao:focus-visible{outline:2px solid var(--lemon-deep);outline-offset:2px}
+  .botao.forte{background:var(--lemon);border-color:var(--lemon-deep)}
+  input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+
+  /* --- resultado por imagem ------------------------------------------- */
+  .telas{display:flex;flex-direction:column;gap:16px}
+  .tela{
+    background:var(--surf);border:1px solid var(--line);border-radius:10px;
+    box-shadow:var(--sombra);overflow:hidden;
+  }
+  .tela header{
+    display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+    padding:12px 14px;border-bottom:1px solid var(--line);
+  }
+  .tela .nome{font-size:13.5px;overflow-wrap:anywhere;flex:1 1 auto;min-width:0}
+  .tela .conta{
+    font-family:var(--display);font-size:10px;letter-spacing:.03em;flex:0 0 auto;
+    padding:3px 9px;border-radius:12px;background:var(--lemon);color:#384959;
+  }
+  .tela .conta.zero{background:var(--danger);color:#fff}
+  .tela .corpo{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr);gap:14px;padding:14px}
+  @media (max-width:560px){ .tela .corpo{grid-template-columns:minmax(0,1fr)} }
+  .tela canvas{width:100%;height:auto;border:1px solid var(--line);border-radius:6px;display:block}
+  .fitas{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;align-content:start}
+  .fita{border:1px solid rgba(56,73,89,.22);border-radius:5px;overflow:hidden}
+  .fita i{display:block;height:26px}
+  .fita span{
+    display:block;padding:2px 0;text-align:center;background:var(--surf);
+    font-family:var(--display);font-size:7.5px;color:var(--ink-soft);
+  }
+  .aviso{margin:0;padding:14px;color:var(--danger);font-size:13.5px}
+
+  /* --- saída ----------------------------------------------------------- */
+  .saida{background:var(--surf);border:1px solid var(--line);border-radius:10px;
+    box-shadow:var(--sombra);padding:14px}
+  textarea{
+    width:100%;min-height:150px;resize:vertical;padding:11px;border-radius:7px;
+    border:1px solid var(--line);background:var(--paper);color:var(--ink);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;
+  }
+  textarea:focus-visible{outline:2px solid var(--lemon-deep);outline-offset:1px}
+  .acoes{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+  .total{font-family:var(--display);font-size:10px;letter-spacing:.03em;color:var(--ink-soft);
+    font-variant-numeric:tabular-nums}
+
+  .passos{margin:0;padding-left:20px;color:var(--ink-soft);max-width:62ch}
+  .passos li{margin-bottom:7px}
+  .rodape{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);
+    color:var(--ink-soft);font-size:13px;max-width:62ch}
+  b{color:var(--ink);font-weight:600}
+</style>
+
+</head>
+<body>
+<div class="env">
+  <h1><span class="fio"></span>Extrator de cartela</h1>
+  <p class="sub">Arraste as telas ou as páginas de uma cartela de linha. Cada amostra vira um
+  número de cor, tirado da mediana dos pixels do miolo — é assim que as cores da Anchor
+  entraram no <code>catalogos.js</code>. As imagens não saem do seu navegador: a conta é
+  toda feita aqui.</p>
+
+  <div class="solta" id="solta">
+    <p>Solte aqui as imagens da cartela, ou</p>
+    <label class="botao forte" for="arq">escolher arquivos</label>
+    <input type="file" id="arq" accept="image/*" multiple>
+  </div>
+
+  <h2 id="tituloTelas">Exemplo</h2>
+  <div class="telas" id="telas"></div>
+
+  <h2>Para colar de volta</h2>
+  <div class="saida">
+    <textarea id="saida" readonly spellcheck="false" aria-label="Cores extraídas"></textarea>
+    <div class="acoes">
+      <button class="botao" id="copiar" type="button">copiar tudo</button>
+      <span class="total" id="total">exemplo · 8 cores</span>
+    </div>
+  </div>
+
+  <h2>Como usar</h2>
+  <ol class="passos">
+    <li>Solte as 14 telas de uma vez — as duas últimas, das mescladas 946 a 992, ficam de
+      fora. A ordem não importa: o nome do arquivo vai junto.</li>
+    <li>Confira a prévia — o contorno amarelo mostra o que ele achou. Bate se der 16 na
+      primeira tela e 20 em cada uma das outras treze: 276 cores no fim.</li>
+    <li><b>copiar tudo</b> e cole na conversa. Eu junto com os códigos e monto o catálogo.</li>
+  </ol>
+
+  <p class="rodape">Ele espera fundo claro com as amostras separadas, em colunas — que é
+  como as cartelas das marcas saem. Acha as colunas e as linhas pela projeção dos pixels que
+  não são fundo, então o rótulo embaixo da amostra, fino e estreito, não passa pelo corte; e
+  barra escura em cima ou embaixo do recorte não atrapalha. Se uma página vier com contagem
+  errada ou <b>0 amostras</b>, é aí que está o ajuste a fazer.</p>
+  <p class="rodape">Esta página é irmã do <code>index.html</code>, como o
+  <code>layout.html</code>: não faz parte do app e o app não depende dela. Fica aqui porque é
+  a ferramenta que alimenta o catálogo de linhas.</p>
+</div>
+
+<script>
+(function(){
+  var LARG = 900;               // as telas descem para isto antes da conta: basta e é rápido
+  var telasEl = document.getElementById("telas");
+  var saidaEl = document.getElementById("saida");
+  var totalEl = document.getElementById("total");
+  var tituloEl = document.getElementById("tituloTelas");
+  var resultados = [];
+
+  function faixas(soma, limiar, minTam, maxTam){
+    var fora = [], ini = null;
+    for (var i = 0; i < soma.length; i++){
+      if (soma[i] > limiar && ini === null) ini = i;
+      else if (soma[i] <= limiar && ini !== null){
+        if (i - ini >= minTam && i - ini <= maxTam) fora.push([ini, i]);
+        ini = null;
+      }
+    }
+    if (ini !== null && soma.length - ini >= minTam && soma.length - ini <= maxTam)
+      fora.push([ini, soma.length]);
+    return fora;
+  }
+
+  function mediana(v){
+    var c = v.slice().sort(function(a,b){ return a - b; });
+    return c[c.length >> 1];
+  }
+
+  function hex(n){ var s = n.toString(16).toUpperCase(); return s.length < 2 ? "0" + s : s; }
+
+  // Acha as amostras por projeção: colunas primeiro, depois as linhas dentro de cada
+  // coluna. O rótulo embaixo da amostra é fino e estreito, então não passa do limiar.
+  function extrair(fonte, larg, alt){
+    var k = Math.min(1, LARG / larg);
+    var w = Math.max(1, Math.round(larg * k)), h = Math.max(1, Math.round(alt * k));
+    var cv = document.createElement("canvas");
+    cv.width = w; cv.height = h;
+    var cx = cv.getContext("2d", { willReadFrequently: true });
+    cx.drawImage(fonte, 0, 0, w, h);
+    var d;
+    try { d = cx.getImageData(0, 0, w, h).data; }
+    catch (e){ return { erro: "o navegador não deixou ler os pixels desta imagem" }; }
+
+    var marca = new Uint8Array(w * h);
+    for (var i = 0, p = 0; p < w * h; i += 4, p++){
+      var r = d[i], g = d[i+1], b = d[i+2];
+      var mx = r > g ? (r > b ? r : b) : (g > b ? g : b);
+      var mn = r < g ? (r < b ? r : b) : (g < b ? g : b);
+      marca[p] = (mx < 246 || mx - mn > 12) ? 1 : 0;
+    }
+
+    var somaCol = new Int32Array(w);
+    for (var y = 0; y < h; y++)
+      for (var x = 0; x < w; x++) if (marca[y * w + x]) somaCol[x]++;
+
+    var colunas = faixas(somaCol, h * 0.10, Math.max(24, w * 0.025), w * 0.45);
+    var caixas = [];
+
+    colunas.forEach(function(col){
+      var larguraCol = col[1] - col[0];
+      var a = col[0] + Math.round(larguraCol * 0.2);
+      var b2 = col[1] - Math.round(larguraCol * 0.2);
+      var dentro = b2 - a;
+      if (dentro < 6) return;
+      var somaLin = new Int32Array(h);
+      for (var y = 0; y < h; y++){
+        var c = 0, base = y * w;
+        for (var x = a; x < b2; x++) if (marca[base + x]) c++;
+        somaLin[y] = c;
+      }
+      var linhas = faixas(somaLin, dentro * 0.85, 12, h);
+      if (!linhas.length) return;
+      var altMed = mediana(linhas.map(function(l){ return l[1] - l[0]; }));
+      linhas.forEach(function(lin){
+        if (lin[1] - lin[0] < altMed * 0.5) return;       // linha de rótulo, não amostra
+        var x0 = col[0] + larguraCol * 0.25, x1 = col[1] - larguraCol * 0.25;
+        var altura = lin[1] - lin[0];
+        var y0 = lin[0] + altura * 0.25, y1 = lin[1] - altura * 0.25;
+        var rs = [], gs = [], bs = [];
+        for (var yy = Math.round(y0); yy < Math.round(y1); yy++){
+          for (var xx = Math.round(x0); xx < Math.round(x1); xx++){
+            var q = (yy * w + xx) * 4;
+            rs.push(d[q]); gs.push(d[q+1]); bs.push(d[q+2]);
+          }
+        }
+        if (!rs.length) return;
+        caixas.push({
+          x: col[0], y: lin[0], w: larguraCol, h: altura,
+          hex: "#" + hex(mediana(rs)) + hex(mediana(gs)) + hex(mediana(bs))
+        });
+      });
+    });
+
+    // ordem de leitura: por faixa de linha, e dentro dela da esquerda para a direita
+    if (caixas.length){
+      var hMed = mediana(caixas.map(function(c){ return c.h; }));
+      caixas.sort(function(p, q){
+        var dy = (p.y + p.h / 2) - (q.y + q.h / 2);
+        if (Math.abs(dy) > hMed * 0.5) return dy;
+        return p.x - q.x;
+      });
+    }
+    return { caixas: caixas, canvas: cv, w: w, h: h };
+  }
+
+  function desenhaPrevia(res){
+    var cv = document.createElement("canvas");
+    cv.width = res.w; cv.height = res.h;
+    var cx = cv.getContext("2d");
+    cx.drawImage(res.canvas, 0, 0);
+    cx.strokeStyle = "#B3B347";
+    cx.lineWidth = Math.max(2, res.w / 240);
+    res.caixas.forEach(function(c){ cx.strokeRect(c.x, c.y, c.w, c.h); });
+    return cv;
+  }
+
+  function mostra(nome, res){
+    var cartao = document.createElement("div");
+    cartao.className = "tela";
+    var cab = document.createElement("header");
+    var n = document.createElement("span");
+    n.className = "nome"; n.textContent = nome;
+    var conta = document.createElement("span");
+    var qtd = res.caixas ? res.caixas.length : 0;
+    conta.className = "conta" + (qtd ? "" : " zero");
+    conta.textContent = qtd + (qtd === 1 ? " amostra" : " amostras");
+    cab.appendChild(n); cab.appendChild(conta);
+    cartao.appendChild(cab);
+
+    if (res.erro || !qtd){
+      var av = document.createElement("p");
+      av.className = "aviso";
+      av.textContent = res.erro || "Nenhuma amostra encontrada nesta tela.";
+      cartao.appendChild(av);
+      telasEl.appendChild(cartao);
+      return;
+    }
+
+    var corpo = document.createElement("div");
+    corpo.className = "corpo";
+    corpo.appendChild(desenhaPrevia(res));
+    var fitas = document.createElement("div");
+    fitas.className = "fitas";
+    res.caixas.forEach(function(c){
+      var f = document.createElement("div");
+      f.className = "fita";
+      f.innerHTML = '<i></i><span></span>';
+      f.querySelector("i").style.background = c.hex;
+      f.querySelector("span").textContent = c.hex.slice(1);
+      f.title = c.hex;
+      fitas.appendChild(f);
+    });
+    corpo.appendChild(fitas);
+    cartao.appendChild(corpo);
+    telasEl.appendChild(cartao);
+  }
+
+  function atualizaSaida(){
+    var linhas = resultados.map(function(r){
+      return r.nome + " | " + r.cores.length + " | " + r.cores.join(",");
+    });
+    saidaEl.value = linhas.join("\n");
+    var soma = resultados.reduce(function(a, r){ return a + r.cores.length; }, 0);
+    totalEl.textContent = resultados.length + (resultados.length === 1 ? " tela" : " telas") +
+                          " · " + soma + (soma === 1 ? " cor" : " cores");
+  }
+
+  function processa(arquivos){
+    var lista = [].slice.call(arquivos).filter(function(f){ return /^image\//.test(f.type); });
+    if (!lista.length) return;
+    lista.sort(function(a, b){ return a.name.localeCompare(b.name, "pt", { numeric: true }); });
+    if (!resultados.length){ telasEl.innerHTML = ""; tituloEl.textContent = "Telas lidas"; }
+    lista.forEach(function(f){
+      var img = new Image();
+      img.onload = function(){
+        var res = extrair(img, img.naturalWidth, img.naturalHeight);
+        mostra(f.name, res);
+        if (res.caixas && res.caixas.length){
+          resultados.push({ nome: f.name, cores: res.caixas.map(function(c){ return c.hex; }) });
+          atualizaSaida();
+        }
+        URL.revokeObjectURL(img.src);
+      };
+      img.onerror = function(){ mostra(f.name, { erro: "não consegui abrir esta imagem" }); };
+      img.src = URL.createObjectURL(f);
+    });
+  }
+
+  var solta = document.getElementById("solta");
+  ["dragenter", "dragover"].forEach(function(ev){
+    solta.addEventListener(ev, function(e){ e.preventDefault(); solta.classList.add("sobre"); });
+  });
+  ["dragleave", "drop"].forEach(function(ev){
+    solta.addEventListener(ev, function(e){ e.preventDefault(); solta.classList.remove("sobre"); });
+  });
+  solta.addEventListener("drop", function(e){ processa(e.dataTransfer.files); });
+  document.getElementById("arq").addEventListener("change", function(){ processa(this.files); });
+
+  document.getElementById("copiar").addEventListener("click", function(){
+    var b = this;
+    saidaEl.select();
+    var pronto = function(){
+      b.textContent = "copiado";
+      setTimeout(function(){ b.textContent = "copiar tudo"; }, 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(saidaEl.value).then(pronto).catch(function(){
+        b.textContent = "selecionado — Ctrl+C";
+      });
+    } else b.textContent = "selecionado — Ctrl+C";
+  });
+
+  // Uma cartela de mentira, desenhada aqui mesmo, para a página abrir funcionando e
+  // mostrar de cara o que ela devolve.
+  (function exemplo(){
+    var cores = ["#F9D6CA","#E96B7B","#FAD103","#EE8420","#5A953E","#2D5995","#802D64","#54392D"];
+    var cv = document.createElement("canvas");
+    cv.width = 560; cv.height = 300;
+    var cx = cv.getContext("2d");
+    cx.fillStyle = "#FFFFFF"; cx.fillRect(0, 0, cv.width, cv.height);
+    cores.forEach(function(cor, i){
+      var cl = i % 4, ln = (i / 4) | 0;
+      var x = 30 + cl * 130, y = 26 + ln * 140;
+      cx.fillStyle = cor; cx.fillRect(x, y, 100, 100);
+      cx.fillStyle = "rgba(0,0,0,.10)";          // um fiapo de textura, como no fio
+      for (var t = 0; t < 100; t += 5) cx.fillRect(x + t, y, 1, 100);
+      cx.fillStyle = "#777"; cx.font = "13px sans-serif"; cx.textAlign = "center";
+      cx.fillText(100 + i * 3, x + 50, y + 122);
+    });
+    var res = extrair(cv, cv.width, cv.height);
+    mostra("exemplo.png", res);
+    if (res.caixas){
+      saidaEl.value = "exemplo.png | " + res.caixas.length + " | " +
+                      res.caixas.map(function(c){ return c.hex; }).join(",");
+      totalEl.textContent = "exemplo · " + res.caixas.length + " cores";
+    }
+  })();
+})();
+</script>
+</body>
+</html>

@@ -11,7 +11,9 @@ sem backend. Ao lado dele há um único arquivo de dados, `catalogos.js`, com os
 das marcas de linha — dado puro, sem lógica nenhuma. A tela é um editor: trilho de ícones à esquerda que abre um painel, barra de cima
 que muda conforme o que está selecionado, e o papel no centro sobre uma mesa com réguas em
 centímetros. O `layout.html` na raiz é a maquete dessa arrumação, com os controles inertes —
-serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
+serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `cartela.html`
+é a outra página irmã: a ferramenta que lê as cores de uma cartela de linha e alimenta o
+`catalogos.js`.
 
 ## O que ele faz
 
@@ -32,7 +34,11 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
   Anchor e 455 da DMC. Na aba **catálogo** você toca nas cores que tem na caixa; elas viram a
   paleta **minhas linhas**, e marcar uma já pinta o molde com ela, que é o jeito de ver a cor
   real no arranjo antes de gastar meada. A busca aceita código ou nome. O que você marcou fica
-  guardado no navegador à parte do molde, e não some quando você recomeça um desenho.
+  guardado no navegador à parte do molde, e não some quando você recomeça um desenho. Para a
+  meada que não está em cartela nenhuma, o cadastro de **linha avulsa** na mesma aba: marca,
+  código e cor. Ela nasce marcada, entra em minhas linhas junto com as outras e aparece na
+  marca **avulsas** — onde desmarcar apaga de vez, porque ela só existe por você ter
+  cadastrado.
 - **Contagem**: pontos e furos, com o tamanho da peça selecionada em centímetros.
 - **PDF do molde**: em tamanho real, recortado na área do bordado, com a moldura de recorte, o
   retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
@@ -65,6 +71,21 @@ Abra `index.html` no navegador. Não há passo de build. Para servir localmente:
 ```bash
 python3 -m http.server
 ```
+
+## `cartela.html`
+
+A ferramenta que transforma a cartela de uma marca em entrada do `catalogos.js`. Abra a
+página, arraste as imagens da cartela, e ela devolve a cor de cada amostra — a mediana dos
+pixels do miolo, que é como as cores da Anchor foram tiradas. A saída é uma linha por
+imagem: nome do arquivo, contagem e as cores em ordem de leitura.
+
+Ela acha as amostras pela projeção dos pixels que não são fundo: primeiro as colunas, depois
+as linhas dentro de cada coluna. O rótulo embaixo da amostra é fino e estreito demais para
+passar pelo corte, e barra escura no topo de um recorte de tela não atrapalha. A prévia
+contorna o que foi achado e mostra a contagem, então dá para conferir antes de copiar.
+
+Nada sai do navegador: as imagens são lidas em `canvas`, ali mesmo. A página não faz parte
+do app e o app não depende dela.
 
 ## Dependências externas
 
@@ -103,7 +124,8 @@ raiz declara que não há build — sem ele, um projeto criado com o preset Vite
 
 Tudo no `localStorage` do próprio navegador, em três chaves: `ponto-e-letra/molde/v1` para o
 arranjo, `ponto-e-letra/molde/foto/v1` para a imagem e `ponto-e-letra/linhas/v1` para as linhas
-que você marcou como suas. Não há servidor nem conta — o trabalho
+que você marcou como suas — inclusive as avulsas, que moram só aí, já que não vêm de
+catálogo nenhum. Não há servidor nem conta — o trabalho
 não acompanha você para outro aparelho ou outro navegador, e some se você limpar os dados do
 site. A foto é guardada reduzida (1600 px no maior lado, JPEG), porque é só guia de
 posicionamento: na tela e no PDF ela aparece a 22% de opacidade. As chaves são separadas de
