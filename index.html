@@ -300,6 +300,24 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 #out img{max-width:100%;border:1px solid var(--line);border-radius:6px}
 #out a{color:var(--mat)}
 
+/* ---- modo ponto a ponto -------------------------------------------
+   Enquanto se acende e apaga quadradinho, os campos da peça saem da barra: no
+   celular eles roubam a altura de que a grade precisa, e em qualquer tela
+   mexer na altura ou na sensibilidade refaz a peça e joga fora justamente o
+   que se está ajustando à mão. */
+.app.editando .top{background:var(--lemon);border-bottom-color:var(--lemon-deep)}
+.app.editando .tools .t,
+.app.editando #ctlText,
+.app.editando #ctlSym,
+.app.editando #ctlPiece,
+.app.editando #ctlNone{display:none!important}
+.app.editando #ctlEdit{display:flex!important}
+.app.editando #ctlEditTxt{color:var(--ink)}
+.app.editando .tbtn,
+.app.editando #pdf{background:#fff}
+.app.editando .fit{background:#fff}
+.app.editando .fit.over{background:var(--danger)}
+
 /* No celular a arrumação vira: mesa em cima, painel no meio, trilho como abas
    no pé. A barra de cima quebra em duas linhas para o botão de baixar nunca
    sair da tela, e o painel fecha ao tocar de novo na aba já aberta. */
@@ -333,6 +351,23 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   .rail button svg{width:18px;height:18px}
 
   .panel{border-right:0;border-top:1px solid var(--line);padding:14px 14px 20px}
+  /* ajustando ponto a ponto: a grade fica com a tela inteira — as abas e o
+     painel não servem para nada enquanto se acende quadradinho */
+  .app.editando{grid-template-rows:auto minmax(120px,1fr) 0 0 28px}
+  .app.editando .panel,
+  .app.editando .rail{padding:0;overflow:hidden;border:0}
+  .app.editando #hist button,
+  .app.editando #ctlActs button{height:44px;padding:0 14px}
+  .app.editando .zoom button{width:38px;height:36px}
+  .app.editando .zoom #zVal{font-size:11px}
+
+  /* a lista de fontes vira folha subindo de baixo */
+  .pop{left:0!important;right:0!important;top:auto!important;bottom:0!important;
+    width:100%!important;max-height:72vh;border-radius:14px 14px 0 0;
+    border-left:0;border-right:0;border-bottom:0;padding-top:8px}
+  .pop::before{content:"";display:block;width:38px;height:4px;border-radius:2px;
+    background:var(--line);margin:0 auto 6px;flex:0 0 auto}
+
   .zoom{right:8px;bottom:8px;padding:2px;box-shadow:0 1px 6px rgba(56,73,89,.18)}
   .zoom button{width:26px;height:26px;font-size:13px}
   .zoom #zVal{padding:0 6px;font-size:10px}
@@ -356,6 +391,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   <div class="tools">
     <span class="none" id="ctlNone">&nbsp;</span>
+    <span class="grp hide" id="ctlEdit"><span class="none" id="ctlEditTxt">ajustando ponto a ponto</span></span>
 
     <fieldset id="ctlText" class="hide">
       <span class="t txt"><span>texto</span><input id="txt" type="text" value="champ" autocomplete="off" spellcheck="false"></span>
@@ -1526,7 +1562,10 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   $("edit").addEventListener("click", function(){
     editing = !editing;
     this.classList.toggle("on", editing);
+    document.querySelector(".app").classList.toggle("editando", editing);
+    $("ctlEdit").classList.toggle("hide", !editing);
     $("editLabel").textContent = editing ? "terminar" : "ajustar";
+    draw();   // a grade ganha ou devolve a altura do painel
     $("modeHint").textContent = editing
       ? "Toque num quadradinho da peça selecionada para acender ou apagar."
       : "Arraste a palavra ou a foto para posicionar. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.";
@@ -2021,9 +2060,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var pop = $("fontPop");
     pop.classList.remove("hide");
     popAberto = true;
-    var larg = pop.offsetWidth;
-    pop.style.left = Math.max(8, Math.min(r.left - 10, window.innerWidth - larg - 8)) + "px";
-    pop.style.top = (r.bottom + 8) + "px";
+    if (window.innerWidth > 860){          // no celular o CSS a prende embaixo
+      var larg = pop.offsetWidth;
+      pop.style.left = Math.max(8, Math.min(r.left - 10, window.innerWidth - larg - 8)) + "px";
+      pop.style.top = (r.bottom + 8) + "px";
+    }
     grupoAtivo = "";
     $("fontBusca").value = "";
     montaGrupos();

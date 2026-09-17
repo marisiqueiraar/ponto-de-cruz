@@ -38,6 +38,11 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
   "posicionar a peça" para "mover a vista" — no toque, com ela ligada, a pinça muda o zoom. A
   porcentagem é relativa ao encaixe do papel na tela: **100% é o papel inteiro visível**, não
   tamanho físico. Tamanho real é promessa do PDF, que a tela não tem como garantir.
+- **Modo ponto a ponto**: enquanto se acende e apaga quadradinho, a barra fica amarela e os
+  campos da peça saem dela — no celular eles roubam a altura de que a grade precisa, e em
+  qualquer tela mexer na altura ou na sensibilidade refaz a peça e joga fora justamente o que
+  se está ajustando à mão. No celular o painel e as abas recolhem: a grade passa de 164 × 232
+  para 328 × 464 px.
 - **Desfazer e refazer**: cada passo guarda o arranjo inteiro, células incluídas, então voltar
   atrás devolve também o que foi aceso ou apagado à mão. Botões na barra de cima, Ctrl+Z e
   Ctrl+Shift+Z. Um arraste de controle deslizante vira um passo só, não dezenas.
