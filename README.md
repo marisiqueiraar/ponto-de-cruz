@@ -1,47 +1,48 @@
 # Ponto de Cruz
 
-Gerador de padrões de ponto de cruz: envie uma foto e gere um gráfico de pontos com paleta
-mapeada para cores de linha de bordado (estilo DMC), tamanho ajustável por contagem de tecido,
-e uma ferramenta de texto com fontes em grade para adicionar letras ao padrão.
+**ponto & letra** — gerador de gráfico de ponto cruz para letras cursivas.
 
-Roda inteiramente no navegador — sem conta, sem backend. Tudo é salvo localmente
-(IndexedDB) e restaurado automaticamente ao reabrir.
+Você digita a palavra, escolhe uma cursiva, e o app converte o traço da fonte em uma grade
+quadriculada de pontos, pronta para furar o papel ou bordar na aida.
 
-## Rodando localmente
+A aplicação é o arquivo `index.html`: HTML, CSS e JavaScript em um único arquivo, sem build,
+sem dependências e sem backend. A única coisa que vem de fora são as fontes (Google Fonts via CDN).
+
+## O que ele faz
+
+- Converte o texto digitado em grade de pontos, renderizando a fonte num canvas e amostrando
+  a cobertura de cada célula 6×6 px.
+- Sete cursivas: Great Vibes, Pinyon Script, Dancing Script, Sacramento, Parisienne, Caveat e
+  uma serif itálica (Cormorant Garamond).
+- Controles de altura (10–50 pontos), espessura do traço, sensibilidade da amostragem e
+  espaçamento entre furos (1–6 mm).
+- Mostra dimensões da grade, contagem de pontos e o tamanho real em centímetros.
+- Grade com linhas de referência de 10 em 10 e pontos desenhados como cruzinhas.
+- Clique em qualquer célula para acender ou apagar o ponto à mão.
+- Exporta o gráfico em PNG e tem layout de impressão (só o gráfico sai no papel).
+
+## Rodando
+
+Abra `index.html` no navegador. Não há passo de build.
+
+Para servir localmente, qualquer servidor estático resolve — por exemplo:
 
 ```bash
-npm install
-npm run dev
+python3 -m http.server
 ```
-
-## Scripts
-
-- `npm run dev` — servidor de desenvolvimento
-- `npm run build` — build de produção (`dist/`), pronta para deploy estático (ex.: Vercel)
-- `npm run preview` — serve o build de produção localmente
-- `npm test` — testes unitários (Vitest)
-- `npm run lint` — lint (oxlint)
-
-## Estrutura
-
-- `src/lib/pattern/buildPattern.ts` — pipeline foto → padrão (reamostragem, quantização de cor, matching DMC)
-- `src/lib/color/` — conversão de cor (Lab/CIEDE2000), k-means, matching DMC
-- `src/lib/fonts/`, `src/data/fonts/` — sistema de fontes de ponto de cruz e composição de texto
-- `src/lib/persistence/` — Dexie/IndexedDB (padrões, imagem original, configurações)
-- `src/components/` — UI (upload, controles, visualizador do padrão)
-- `src/state/useEditorStore.ts` — estado do editor (Zustand)
-
-## Fontes
-
-Além de dois alfabetos em blocos desenhados à mão, o app inclui uma galeria de tipografias
-convertidas automaticamente em pontos (`public/fonts/`): Press Start 2P, VT323, Silkscreen e
-Pixelify Sans, todas Google Fonts sob licença SIL Open Font License. É possível também enviar
-uma fonte própria (.ttf/.otf) pela aba Gerador — a conversão é feita localmente no navegador.
 
 ## Deploy
 
-Build estático sem variáveis de ambiente — funciona em qualquer host estático (Vercel, Netlify, etc.):
+Site estático: é só publicar a raiz do repositório em qualquer host estático
+(GitHub Pages, Vercel, Netlify), sem comando de build e sem variáveis de ambiente.
+
+## Histórico
+
+Até o commit `6ce5a7a` este repositório continha um app React + Vite + TypeScript diferente
+(gerador de padrão a partir de foto, matching DMC, export PDF, IndexedDB). Ele foi substituído
+por esta aplicação, mas continua inteiro no histórico do git e pode ser recuperado a
+qualquer momento:
 
 ```bash
-npm run build
+git checkout 6ce5a7a
 ```
