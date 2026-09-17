@@ -25,6 +25,10 @@ sem backend.
   retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
   distância exata para colar a foto no papel.
 - **PNG** da prévia, para conferir o arranjo.
+- **Memória local**: papel, foto, peças, posições, inclinações, paleta e os ajustes feitos ponto
+  a ponto ficam guardados no navegador e voltam ao reabrir. As células são gravadas como estão,
+  e não recalculadas na volta — é isso que preserva o que você acendeu ou apagou à mão. Para
+  refazer tudo a partir dos controles, o botão **Recalcular**.
 
 ## Rodando
 
@@ -47,6 +51,16 @@ Duas, ambas em tempo de execução:
 Site estático: publique a raiz do repositório em qualquer host. Na Vercel, o `vercel.json` da
 raiz declara que não há build — sem ele, um projeto criado com o preset Vite tenta rodar
 `vite build` e falha com `vite: command not found`.
+
+## Onde ficam os dados
+
+Tudo no `localStorage` do próprio navegador, em duas chaves: `ponto-e-letra/molde/v1` para o
+arranjo e `ponto-e-letra/molde/foto/v1` para a imagem. Não há servidor nem conta — o trabalho
+não acompanha você para outro aparelho ou outro navegador, e some se você limpar os dados do
+site. A foto é guardada reduzida (1600 px no maior lado, JPEG), porque é só guia de
+posicionamento: na tela e no PDF ela aparece a 22% de opacidade. As duas chaves são separadas
+de propósito — a foto é o único item capaz de estourar a cota do navegador, e assim ela nunca
+leva o arranjo junto na queda.
 
 ## `sw.js`
 

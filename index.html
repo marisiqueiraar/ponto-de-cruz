@@ -366,6 +366,15 @@ button:active{transform:scale(.99)}
   var thread = "#B3B347";
   var curPal = 0;
 
+  /* ---- memória local -------------------------------------------------
+     Duas chaves de propósito: a foto é o único item que pode estourar a cota
+     do navegador, e guardada à parte ela nunca leva o resto junto na queda. */
+  var STORE = "ponto-e-letra/molde/v1";
+  var PHOTO_STORE = "ponto-e-letra/molde/foto/v1";
+  var PHOTO_MAX_PX = 1600;
+  var saveTimer = 0;
+  var restored = false;
+
   function threadRGB(){
     var h = thread.replace("#", "");
     return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)];
@@ -724,6 +733,152 @@ button:active{transform:scale(.99)}
       : area + " — não cabe numa A4 em tamanho real: o PDF sairia reduzido a " +
         Math.round(fit.scale * 100) + "% e os furos não vão bater. Aproxime as peças da foto " +
         "ou reduza a altura do texto.";
+
+    // toda alteração de estado passa por aqui, então é o único lugar que precisa
+    // pedir a gravação; o adiamento junta as centenas de draws de um arraste num
+    // único write ao fim do gesto
+    scheduleSave();
+  }
+
+  /* ---- memória local: gravar e restaurar ------------------------------ */
+
+  // as células vão gravadas como estão, e não recalculadas na volta: é o que
+  // preserva os ajustes feitos à mão no modo ponto a ponto. Uma linha por
+  // string de "0" e "1" — mais compacto que JSON de array e igualmente legível.
+  function packEl(el){
+    var r = { kind: el.kind, x: el.x, y: el.y, rot: el.rot,
+              cells: el.cells.map(function(row){ return row.join(""); }) };
+    if (el.kind === "text"){
+      r.text = el.text; r.font = el.font;
+      r.rowsTarget = el.rowsTarget; r.thick = el.thick; r.thr = el.thr;
+    } else {
+      r.sym = el.sym; r.scale = el.scale;
+    }
+    return r;
+  }
+
+  function unpackEl(r){
+    if (!r || !r.cells || !r.cells.length) return null;
+    var cells = r.cells.map(function(row){
+      var line = [];
+      for (var i = 0; i < row.length; i++) line.push(row.charAt(i) === "1" ? 1 : 0);
+      return line;
+    });
+    var el = { kind: r.kind === "sym" ? "sym" : "text", cells: cells,
+               x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0 };
+    if (el.kind === "text"){
+      el.text = typeof r.text === "string" ? r.text : "";
+      el.font = r.font || "Great Vibes";
+      el.rowsTarget = +r.rowsTarget || 18;
+      el.thick = r.thick == null ? 2 : +r.thick;
+      el.thr = +r.thr || 0.35;
+    } else {
+      el.sym = SYMS[r.sym] ? r.sym : "heart";
+      el.scale = +r.scale || 1;
+    }
+    return el;
+  }
+
+  function saveState(){
+    try {
+      localStorage.setItem(STORE, JSON.stringify({
+        v: 1,
+        paper: { size: $("paperSize").value, or: $("paperOr").value,
+                 w: $("paperW").value, h: $("paperH").value },
+        photoBox: { size: $("photoSize").value, or: $("photoOr").value,
+                    w: $("photoWmm").value, h: $("photoHmm").value,
+                    x: Math.round(photo.x * 10) / 10, y: Math.round(photo.y * 10) / 10 },
+        mm: $("mm").value, pal: curPal, thread: thread, sel: sel,
+        els: els.map(packEl)
+      }));
+    } catch (e){ /* janela anônima ou cota cheia: seguir sem memória */ }
+  }
+
+  function scheduleSave(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveState, 400);
+  }
+
+  function threadLabel(hex){
+    for (var i = 0; i < PALETTES.length; i++){
+      var c = PALETTES[i].colors;
+      for (var j = 0; j < c.length; j++) if (c[j][0] === hex) return c[j][1];
+    }
+    return "";
+  }
+
+  function restoreState(){
+    var raw;
+    try { raw = localStorage.getItem(STORE); } catch (e){ return false; }
+    if (!raw) return false;
+    var s;
+    try { s = JSON.parse(raw); } catch (e){ return false; }
+    if (!s || s.v !== 1 || !s.els || !s.els.length) return false;
+
+    var pieces = s.els.map(unpackEl).filter(Boolean);
+    if (!pieces.length) return false;
+
+    if (s.paper){
+      if (s.paper.size) $("paperSize").value = s.paper.size;
+      if (s.paper.or) $("paperOr").value = s.paper.or;
+      if (s.paper.w) $("paperW").value = s.paper.w;
+      if (s.paper.h) $("paperH").value = s.paper.h;
+      $("paperCustom").classList.toggle("hide", $("paperSize").value !== "custom");
+    }
+    if (s.photoBox){
+      if (s.photoBox.size) $("photoSize").value = s.photoBox.size;
+      if (s.photoBox.or) $("photoOr").value = s.photoBox.or;
+      if (s.photoBox.w) $("photoWmm").value = s.photoBox.w;
+      if (s.photoBox.h) $("photoHmm").value = s.photoBox.h;
+      $("photoCustom").classList.toggle("hide", $("photoSize").value !== "custom");
+    }
+    if (s.mm != null){
+      $("mm").value = s.mm;
+      $("mmOut").textContent = fmt(parseFloat($("mm").value));
+    }
+
+    syncPhotoSize();                      // define photo.w/h a partir dos controles
+    if (s.photoBox){
+      photo.x = +s.photoBox.x || 0;
+      photo.y = +s.photoBox.y || 0;
+    }
+    clampPhoto();
+    lastPaper = paperMM();
+
+    if (typeof s.pal === "number" && PALETTES[s.pal]) curPal = s.pal;
+    if (typeof s.thread === "string" && /^#[0-9A-Fa-f]{6}$/.test(s.thread)){
+      thread = s.thread;
+      var name = threadLabel(thread);
+      if (name) $("threadName").textContent = name;
+    }
+
+    els = pieces;
+    sel = Math.min(Math.max(0, s.sel | 0), els.length - 1);
+    return true;
+  }
+
+  // a foto costuma ser o maior item do navegador: vai reduzida, e num formato
+  // com perda, porque serve só de guia na tela e a 22% no PDF
+  function savePhoto(img){
+    try {
+      var k = Math.min(1, PHOTO_MAX_PX / Math.max(img.width, img.height));
+      var c = document.createElement("canvas");
+      c.width = Math.round(img.width * k);
+      c.height = Math.round(img.height * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      localStorage.setItem(PHOTO_STORE, c.toDataURL("image/jpeg", 0.85));
+    } catch (e){
+      try { localStorage.removeItem(PHOTO_STORE); } catch (e2){}
+    }
+  }
+
+  function restorePhoto(){
+    var url;
+    try { url = localStorage.getItem(PHOTO_STORE); } catch (e){ return; }
+    if (!url) return;
+    var img = new Image();
+    img.onload = function(){ photoImg = img; draw(); };
+    img.src = url;
   }
 
   function renderChips(){
@@ -886,7 +1041,7 @@ button:active{transform:scale(.99)}
     var rd = new FileReader();
     rd.onload = function(){
       var img = new Image();
-      img.onload = function(){ photoImg = img; photoURL = rd.result; draw(); };
+      img.onload = function(){ photoImg = img; photoURL = rd.result; savePhoto(img); draw(); };
       img.src = rd.result;
     };
     rd.readAsDataURL(f);
@@ -1191,21 +1346,31 @@ button:active{transform:scale(.99)}
   window.addEventListener("resize", draw);
 
   function boot(){
-    syncPhotoSize();
-    lastPaper = paperMM();
-    var pa = paperMM();
-    photo.x = (pa.w - photo.w) / 2;
-    photo.y = pa.h * 0.14;
-    addText();
-    els[0].x = photo.x - 6;
-    els[0].y = photo.y + photo.h - 10;
+    restored = restoreState();
+    if (!restored){
+      syncPhotoSize();
+      lastPaper = paperMM();
+      var pa = paperMM();
+      photo.x = (pa.w - photo.w) / 2;
+      photo.y = pa.h * 0.14;
+      addText();
+      els[0].x = photo.x - 6;
+      els[0].y = photo.y + photo.h - 10;
+    }
     renderPaletteList();
     renderSwatches();
+    renderChips();
     syncControls();
+    restorePhoto();
     draw();
   }
   if (document.fonts && document.fonts.ready){ document.fonts.ready.then(boot); } else boot();
-  setTimeout(function(){ if (els.length){ els.forEach(rebuild); draw(); } }, 1400);
+
+  // redesenho cego para quando as fontes da web chegam depois do primeiro traçado.
+  // numa sessão restaurada ele fica de fora: as células guardadas já são o
+  // resultado final, e recalcular apagaria os ajustes feitos ponto a ponto.
+  // Se a fonte não tiver carregado na sessão anterior, o botão Recalcular refaz.
+  setTimeout(function(){ if (!restored && els.length){ els.forEach(rebuild); draw(); } }, 1400);
 })();
 </script>
 </body>
