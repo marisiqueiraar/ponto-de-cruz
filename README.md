@@ -28,6 +28,11 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
   retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
   distância exata para colar a foto no papel.
 - **PNG** da prévia, para conferir o arranjo.
+- **Zoom e deslocamento**: o papel cresce dentro da mesa, que rola. Botões no canto, Ctrl (ou ⌘)
+  com a roda do mouse aproximando no ponto sob o cursor, e uma mãozinha que troca o arraste de
+  "posicionar a peça" para "mover a vista" — no toque, com ela ligada, a pinça muda o zoom. A
+  porcentagem é relativa ao encaixe do papel na tela: **100% é o papel inteiro visível**, não
+  tamanho físico. Tamanho real é promessa do PDF, que a tela não tem como garantir.
 - **Desfazer e refazer**: cada passo guarda o arranjo inteiro, células incluídas, então voltar
   atrás devolve também o que foi aceso ou apagado à mão. Botões na barra de cima, Ctrl+Z e
   Ctrl+Shift+Z. Um arraste de controle deslizante vira um passo só, não dezenas.
