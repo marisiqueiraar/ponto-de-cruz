@@ -30,15 +30,23 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   não por nome: cada linha mostra a sua palavra escrita naquela fonte e, ao lado, a mesma
   palavra já em quadradinhos, que é o que vira furo. Com busca e filtro por grupo. Os cartões
   pedem a fonte só quando chegam à vista, então abrir a lista não baixa as 40 famílias.
-- **Linhas**: oito paletas de quatro cores cada, mais os catálogos das marcas — 391 cores da
-  Anchor e 455 da DMC. Na aba **catálogo** você toca nas cores que tem na caixa; elas viram a
-  paleta **minhas linhas**, e marcar uma já pinta o molde com ela, que é o jeito de ver a cor
-  real no arranjo antes de gastar meada. A busca aceita código ou nome. O que você marcou fica
-  guardado no navegador à parte do molde, e não some quando você recomeça um desenho. Para a
-  meada que não está em cartela nenhuma, o cadastro de **linha avulsa** na mesma aba: marca,
-  código e cor. Ela nasce marcada, entra em minhas linhas junto com as outras e aparece na
-  marca **avulsas** — onde desmarcar apaga de vez, porque ela só existe por você ter
-  cadastrado.
+- **Linhas**: o painel é o catálogo das marcas — 391 cores da Anchor e 455 da DMC — numa
+  fileira de marcas e uma grade. Cada quadradinho traz o **código impresso dentro**, que é o
+  que se pede na loja. Tocar num deles diz que você tem aquela linha e já pinta o molde com
+  ela, que é o jeito de ver a cor real no arranjo antes de gastar meada; tocar de novo
+  desmarca. A busca aceita código ou nome.
+
+  As cores saem **por tom**, não por número: a família vem do matiz, em faixas de 15°, e
+  dentro dela a escala vai do claro ao escuro, com os neutros no fim — é o que faz a grade
+  ler como cartela e deixa os tons vizinhos lado a lado. O botão **por código** troca para a
+  ordem numérica quando você já sabe o número que procura.
+
+  O que você marcou vira a marca **minhas**, a primeira da fileira; ali tocar numa cor só a
+  põe no molde, sem tirar da caixa — tirar se faz na marca de onde ela veio. Fica guardado no
+  navegador à parte do molde, e não some quando você recomeça um desenho. Para a meada que não
+  está em cartela nenhuma, o cadastro de **linha avulsa**: marca, código e cor. Ela nasce
+  marcada e aparece na marca **avulsas**, onde desmarcar apaga de vez, porque ela só existe
+  por você ter cadastrado.
 - **Contagem**: pontos e furos, com o tamanho da peça selecionada em centímetros.
 - **PDF do molde**: em tamanho real, recortado na área do bordado, com a moldura de recorte, o
   retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
@@ -57,7 +65,7 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
 - **Desfazer e refazer**: cada passo guarda o arranjo inteiro, células incluídas, então voltar
   atrás devolve também o que foi aceso ou apagado à mão. Botões na barra de cima, Ctrl+Z e
   Ctrl+Shift+Z. Um arraste de controle deslizante vira um passo só, não dezenas.
-- **Memória local**: papel, foto, peças, posições, inclinações, paleta e os ajustes feitos ponto
+- **Memória local**: papel, foto, peças, posições, inclinações, cor da linha e os ajustes feitos ponto
   a ponto ficam guardados no navegador e voltam ao reabrir. As células são gravadas como estão,
   e não recalculadas na volta — é isso que preserva o que você acendeu ou apagou à mão. Para
   refazer tudo a partir dos controles, o botão **Recalcular** — que pergunta antes quando há
