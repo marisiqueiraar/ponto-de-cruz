@@ -1,0 +1,53 @@
+As 40 fontes desta pasta vêm do catálogo do Google Fonts e estão guardadas aqui para
+o app funcionar sem rede. Cada arquivo é o subconjunto latino servido pelo próprio
+Google, no peso e estilo que o app usa — regular, ou itálico nas três serifadas.
+
+Licenças integrais:
+  SIL Open Font License 1.1 — https://openfontlicense.org
+  Apache License 2.0        — https://www.apache.org/licenses/LICENSE-2.0
+
+Ambas permitem esta redistribuição desde que a licença acompanhe os arquivos, que é
+o papel deste aviso.
+
+FAMÍLIA                   AUTORIA                             LICENÇA
+------------------------------------------------------------------------------------
+Alex Brush                Robert Leuschke                     SIL Open Font License 1.1
+Allura                    Robert Leuschke                     SIL Open Font License 1.1
+Bad Script                Gaslight                            SIL Open Font License 1.1
+Berkshire Swash           Astigmatic                          SIL Open Font License 1.1
+Caveat                    Impallari Type                      SIL Open Font License 1.1
+Cedarville Cursive        Kimberly Geswein                    SIL Open Font License 1.1
+Cormorant Garamond (itálico)  Christian Thalmann                  SIL Open Font License 1.1
+Courgette                 Karolina Lach                       SIL Open Font License 1.1
+Dancing Script            Impallari Type                      SIL Open Font License 1.1
+EB Garamond (itálico)     Georg Duffner, Octavio Pardo        SIL Open Font License 1.1
+Grand Hotel               Astigmatic                          SIL Open Font License 1.1
+Great Vibes               Robert Leuschke                     SIL Open Font License 1.1
+Herr Von Muellerhoff      Sudtipos                            SIL Open Font License 1.1
+Homemade Apple            Font Diner                          Apache License 2.0
+Indie Flower              Kimberly Geswein                    SIL Open Font License 1.1
+Italianno                 Robert Leuschke                     SIL Open Font License 1.1
+Kaushan Script            Impallari Type                      SIL Open Font License 1.1
+League Script             Haley Fiege                         SIL Open Font License 1.1
+Lobster                   Impallari Type                      SIL Open Font License 1.1
+Marck Script              Denis Masharov                      SIL Open Font License 1.1
+Monsieur La Doulaise      Sudtipos                            SIL Open Font License 1.1
+Mrs Saint Delafield       Sudtipos                            SIL Open Font License 1.1
+Norican                   Vernon Adams                        SIL Open Font License 1.1
+Pacifico                  Vernon Adams, Jacques Le Bailly, B  SIL Open Font License 1.1
+Parisienne                Astigmatic                          SIL Open Font License 1.1
+Petit Formal Script       Impallari Type                      SIL Open Font License 1.1
+Pinyon Script             Nicole Fally                        SIL Open Font License 1.1
+Pirata One                Rodrigo Fuenzalida, Nicolas Massi   SIL Open Font License 1.1
+Pixelify Sans             Stefie Justprince                   SIL Open Font License 1.1
+Playfair Display (itálico)  Claus Eggers Sørensen               SIL Open Font License 1.1
+Press Start 2P            CodeMan38                           SIL Open Font License 1.1
+Rouge Script              Sabrina Mariela Lopez               SIL Open Font License 1.1
+Sacramento                Astigmatic                          SIL Open Font License 1.1
+Satisfy                   Sideshow                            Apache License 2.0
+Shadows Into Light        Kimberly Geswein                    SIL Open Font License 1.1
+Silkscreen                Jason Kottke                        SIL Open Font License 1.1
+Tangerine                 Toshi Omagari                       SIL Open Font License 1.1
+UnifrakturMaguntia        j. \'mach\' wust                    SIL Open Font License 1.1
+VT323                     Peter Hull                          SIL Open Font License 1.1
+Yellowtail                Astigmatic                          Apache License 2.0

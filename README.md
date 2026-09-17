@@ -40,11 +40,20 @@ python3 -m http.server
 
 ## Dependências externas
 
-Duas, ambas em tempo de execução:
+Nenhuma. Tudo que o app precisa está no repositório, e ele funciona sem rede:
 
-- **Google Fonts** — as 40 famílias vêm do CDN. Sem rede, o texto cai numa cursiva genérica
-  do sistema e o gráfico gerado não corresponde à fonte escolhida.
-- **jsPDF 2.5.1** (cdnjs) — o botão de PDF avisa e não gera nada se o script não carregar.
+- **As 40 fontes** ficam em `fonts/`, uma por família, no subconjunto latino e no peso que o
+  app usa (0,94 MB somadas). O navegador só baixa a fonte que for realmente usada. Isso não é
+  só conforto offline: a grade é amostrada a partir do traço da fonte, então uma fonte que não
+  chega faz o canvas desenhar numa cursiva genérica e o molde sair errado **sem avisar**.
+  Créditos e licenças em [`fonts/LICENCAS.txt`](fonts/LICENCAS.txt) — 37 sob SIL Open Font
+  License 1.1 e 3 sob Apache 2.0.
+- **jsPDF 2.5.1** está em `vendor/jspdf.umd.min.js` (MIT, cabeçalho de licença no próprio
+  arquivo). Antes vinha do cdnjs, o que deixava a entrega final do app — o molde em PDF —
+  dependente de internet.
+- **Os três ícones** dos botões de ação são SVG embutidos no `index.html`, vindos do projeto
+  [material-design-icons](https://github.com/google/material-design-icons) do Google, sob
+  Apache License 2.0. São três caminhos de ~300 bytes: não há fonte de ícones nem biblioteca.
 
 ## Deploy
 

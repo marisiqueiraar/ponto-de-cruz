@@ -10,10 +10,51 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#EDF4FB">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23384959'/%3E%3Crect x='30' y='142' width='120' height='12' fill='%23FFE566'/%3E%3Cg stroke='%23FFE566' stroke-width='11' stroke-linecap='round'%3E%3Cpath d='M46 46 78 78M78 46 46 78'/%3E%3Cpath d='M102 46 134 78M134 46 102 78'/%3E%3Cpath d='M46 102 78 134M78 102 46 134'/%3E%3Cpath d='M102 102 134 134M134 102 102 134'/%3E%3C/g%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Allura&family=Bad+Script&family=Berkshire+Swash&family=Caveat:wght@400;700&family=Cedarville+Cursive&family=Cormorant+Garamond:ital,wght@1,400;1,600&family=Courgette&family=Dancing+Script:wght@400;700&family=EB+Garamond:ital@1&family=Grand+Hotel&family=Great+Vibes&family=Herr+Von+Muellerhoff&family=Homemade+Apple&family=Indie+Flower&family=Italianno&family=Kaushan+Script&family=League+Script&family=Lobster&family=Marck+Script&family=Monsieur+La+Doulaise&family=Mrs+Saint+Delafield&family=Norican&family=Pacifico&family=Parisienne&family=Petit+Formal+Script&family=Pinyon+Script&family=Pirata+One&family=Pixelify+Sans:wght@400;700&family=Playfair+Display:ital,wght@1,400;1,700&family=Press+Start+2P&family=Rouge+Script&family=Sacramento&family=Satisfy&family=Shadows+Into+Light&family=Silkscreen:wght@400;700&family=Tangerine:wght@400;700&family=UnifrakturMaguntia&family=VT323&family=Yellowtail&display=swap" rel="stylesheet">
 <style>
+/* As 40 famílias moram aqui: sem rede, o canvas desenharia numa cursiva
+   genérica do sistema e o molde sairia errado sem avisar, porque a grade é
+   amostrada a partir do traço da fonte. O navegador só baixa a que for usada.
+   Licenças e créditos em fonts/LICENCAS.txt */
+@font-face{font-family:"Alex Brush";src:url("fonts/alex-brush.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Allura";src:url("fonts/allura.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Bad Script";src:url("fonts/bad-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Berkshire Swash";src:url("fonts/berkshire-swash.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Caveat";src:url("fonts/caveat.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Cedarville Cursive";src:url("fonts/cedarville-cursive.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Cormorant Garamond";font-style:italic;src:url("fonts/cormorant-garamond.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Courgette";src:url("fonts/courgette.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Dancing Script";src:url("fonts/dancing-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"EB Garamond";font-style:italic;src:url("fonts/eb-garamond.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Grand Hotel";src:url("fonts/grand-hotel.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Great Vibes";src:url("fonts/great-vibes.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Herr Von Muellerhoff";src:url("fonts/herr-von-muellerhoff.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Homemade Apple";src:url("fonts/homemade-apple.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Indie Flower";src:url("fonts/indie-flower.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Italianno";src:url("fonts/italianno.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Kaushan Script";src:url("fonts/kaushan-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"League Script";src:url("fonts/league-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Lobster";src:url("fonts/lobster.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Marck Script";src:url("fonts/marck-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Monsieur La Doulaise";src:url("fonts/monsieur-la-doulaise.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Mrs Saint Delafield";src:url("fonts/mrs-saint-delafield.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Norican";src:url("fonts/norican.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Pacifico";src:url("fonts/pacifico.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Parisienne";src:url("fonts/parisienne.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Petit Formal Script";src:url("fonts/petit-formal-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Pinyon Script";src:url("fonts/pinyon-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Pirata One";src:url("fonts/pirata-one.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Pixelify Sans";src:url("fonts/pixelify-sans.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Playfair Display";font-style:italic;src:url("fonts/playfair-display.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Press Start 2P";src:url("fonts/press-start-2p.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Rouge Script";src:url("fonts/rouge-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Sacramento";src:url("fonts/sacramento.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Satisfy";src:url("fonts/satisfy.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Shadows Into Light";src:url("fonts/shadows-into-light.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Silkscreen";src:url("fonts/silkscreen.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Tangerine";src:url("fonts/tangerine.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"UnifrakturMaguntia";src:url("fonts/unifrakturmaguntia.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"VT323";src:url("fonts/vt323.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Yellowtail";src:url("fonts/yellowtail.woff2") format("woff2");font-display:swap}
 @font-face{
   font-family:"CS Norman Mono";
   src:url("./CSNormanMono.woff2") format("woff2"),
@@ -68,6 +109,8 @@ input[type=range]{width:100%;accent-color:var(--mat);height:32px}
 canvas{display:block;touch-action:none;max-width:100%;box-shadow:0 1px 5px rgba(56,73,89,.22)}
 .hint{font-size:14px;color:var(--ink-soft);margin:10px 0 18px}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.actions button svg{width:18px;height:18px;flex:0 0 auto;fill:currentColor}
 button{flex:1 1 auto;min-height:46px;padding:0 14px;border:1px solid var(--mat);border-radius:6px;background:var(--mat);color:#fff;font-family:var(--display);font-size:13px;letter-spacing:.02em;cursor:pointer}
 button.ghost{background:#fff;color:var(--mat)}
 button.danger{border-color:var(--danger);color:var(--danger)}
@@ -292,9 +335,9 @@ button:active{transform:scale(.99)}
   <button id="edit" class="ghost">Ajustar ponto a ponto</button>
 </div>
 <div class="actions">
-  <button id="pdf">Baixar molde PDF</button>
-  <button id="dl" class="ghost">Baixar prévia PNG</button>
-  <button id="reset" class="ghost">Recalcular</button>
+  <button id="pdf"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg>Baixar molde PDF</button>
+  <button id="dl" class="ghost"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>Baixar prévia PNG</button>
+  <button id="reset" class="ghost"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>Recalcular</button>
 </div>
 <p class="hint" id="fitHint">O molde sai em tamanho real, recortado na área do bordado, com as medidas exatas até as bordas do papel.</p>
 
@@ -313,7 +356,7 @@ button:active{transform:scale(.99)}
 
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
 <script>
 (function(){
   var $ = function(id){ return document.getElementById(id); };
@@ -1251,7 +1294,7 @@ button:active{transform:scale(.99)}
 
   $("pdf").addEventListener("click", function(){
     if (!window.jspdf || !window.jspdf.jsPDF){
-      alert("O gerador de PDF não carregou. Conecte à internet e recarregue a página.");
+      alert("O gerador de PDF não carregou. Recarregue a página.");
       return;
     }
     if (!els.length) return;
