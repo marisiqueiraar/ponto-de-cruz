@@ -76,6 +76,14 @@ button:active{transform:scale(.99)}
 .notes{margin-top:34px;border-top:1px solid var(--line);padding-top:18px;font-size:15px;color:var(--ink-soft)}
 .notes ul{padding-left:20px;margin:0}
 .notes li{margin-bottom:8px}
+.hist{margin-bottom:10px}
+.hitem{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:8px;background:#fff;padding:10px 12px;margin-bottom:8px;flex-wrap:wrap}
+.hthumb{width:54px;height:54px;flex:0 0 auto;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:4px}
+.hinfo{flex:1 1 150px;min-width:0}
+.hinfo strong{display:block;font-family:var(--display);font-size:13px;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hinfo span{display:block;font-size:12px;color:var(--ink-soft);margin-top:3px}
+.hacts{display:flex;gap:8px;flex:0 0 auto}
+.hitem button{flex:0 0 auto;min-height:38px;padding:0 12px;font-size:12px}
 .hide{display:none!important}
 </style>
 </head>
@@ -299,6 +307,13 @@ button:active{transform:scale(.99)}
 <p class="hint" id="fitHint">O molde sai em tamanho real, recortado na área do bordado, com as medidas exatas até as bordas do papel.</p>
 
 <div id="out"></div>
+
+<h2>Histórico de moldes</h2>
+<p class="hint" id="histHint">Cada PDF gerado fica guardado aqui, neste navegador e neste aparelho. Os 20 mais recentes.</p>
+<div class="hist" id="hist"></div>
+<div class="actions hide" id="histActions">
+  <button id="histClear" class="ghost danger">Limpar histórico</button>
+</div>
 
 <div class="notes">
   <h2>Do arquivo ao material</h2>
@@ -1094,6 +1109,184 @@ button:active{transform:scale(.99)}
     if (blob) deliver(blob, saveName("png"), url); else showImage(url);
   });
 
+  // ——— histórico dos moldes ————————————————————————————————————
+  // não há backend: os PDFs ficam no IndexedDB deste navegador e não saem do aparelho.
+  var HIST_DB = "ponto-letra", HIST_STORE = "moldes", HIST_MAX = 20;
+  var histDB = null, histOff = false, histURLs = [];
+
+  function withHist(fn){
+    if (histOff){ fn(null); return; }
+    if (histDB){ fn(histDB); return; }
+    var req;
+    try { req = window.indexedDB && indexedDB.open(HIST_DB, 1); } catch(e){ req = null; }
+    if (!req){ histOff = true; fn(null); return; }
+    req.onupgradeneeded = function(){
+      var db = req.result;
+      if (!db.objectStoreNames.contains(HIST_STORE)) db.createObjectStore(HIST_STORE, { keyPath: "id" });
+    };
+    req.onsuccess = function(){ histDB = req.result; fn(histDB); };
+    req.onerror = req.onblocked = function(){ histOff = true; fn(null); };
+  }
+
+  function histWrite(job, ok, fail){
+    withHist(function(db){
+      if (!db){ if (fail) fail(); return; }
+      var tx;
+      try { tx = db.transaction(HIST_STORE, "readwrite"); } catch(e){ if (fail) fail(e); return; }
+      try { job(tx.objectStore(HIST_STORE)); } catch(e){ if (fail) fail(e); return; }
+      tx.oncomplete = function(){ if (ok) ok(); };
+      tx.onerror = tx.onabort = function(){ if (fail) fail(tx.error); };
+    });
+  }
+
+  // do mais recente para o mais antigo
+  function histAll(cb){
+    withHist(function(db){
+      if (!db){ cb(null); return; }
+      var out = [], tx;
+      try { tx = db.transaction(HIST_STORE, "readonly"); } catch(e){ cb(null); return; }
+      var cur = tx.objectStore(HIST_STORE).openCursor();
+      cur.onsuccess = function(){
+        var c = cur.result;
+        if (c){ out.push(c.value); c.continue(); }
+      };
+      tx.oncomplete = function(){
+        out.sort(function(a, b){ return b.at - a.at; });
+        cb(out);
+      };
+      tx.onerror = tx.onabort = function(){ cb(null); };
+    });
+  }
+
+  function histThumb(R){
+    try {
+      var k = Math.min(3, 150 / R.w);
+      var c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(R.w * k));
+      c.height = Math.max(1, Math.round(R.h * k));
+      paint(c.getContext("2d"), k, R, { photoAlpha: 1, outline: false });
+      return c.toDataURL("image/jpeg", 0.6);
+    } catch(e){ return ""; }
+  }
+
+  function histSave(blob, name, note, thumb){
+    if (histOff) return;
+    var fr = new FileReader();
+    fr.onload = function(){
+      var rec = {
+        id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8),
+        at: Date.now(), name: name, size: blob.size, note: note, thumb: thumb, buf: fr.result
+      };
+      // cheio ou sem espaço: o mais antigo sai para o novo entrar.
+      histAll(function(list){
+        var velhos = list && list.length > HIST_MAX - 1 ? list.slice(HIST_MAX - 1) : [];
+        histWrite(function(st){
+          velhos.forEach(function(v){ st.delete(v.id); });
+          st.put(rec);
+        }, histRender, function(){
+          if (list && list.length){
+            histWrite(function(st){ st.delete(list[list.length - 1].id); st.put(rec); }, histRender, histRender);
+          } else { histRender(); }
+        });
+      });
+    };
+    fr.onerror = function(){};
+    fr.readAsArrayBuffer(blob);
+  }
+
+  function histSize(n){
+    if (n >= 1048576) return (Math.round(n / 104857.6) / 10).toFixed(1).replace(".", ",") + " MB";
+    return Math.max(1, Math.round(n / 1024)) + " KB";
+  }
+
+  function histWhen(at){
+    var d = new Date(at);
+    try {
+      return d.toLocaleDateString("pt-BR") + " às " +
+             d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    } catch(e){ return d.toISOString().slice(0, 16).replace("T", " "); }
+  }
+
+  function histOpen(rec, download){
+    var href;
+    try { href = URL.createObjectURL(new Blob([rec.buf], { type: "application/pdf" })); }
+    catch(e){ return; }
+    histURLs.push(href);
+    var a = document.createElement("a");
+    a.href = href; a.target = "_blank"; a.rel = "noopener";
+    if (download) a.download = rec.name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+
+  function histRow(rec){
+    var row = document.createElement("div");
+    row.className = "hitem";
+    if (rec.thumb){
+      var img = document.createElement("img");
+      img.className = "hthumb"; img.src = rec.thumb; img.alt = "";
+      row.appendChild(img);
+    }
+    var info = document.createElement("div");
+    info.className = "hinfo";
+    var nm = document.createElement("strong");
+    nm.textContent = rec.name;
+    var when = document.createElement("span");
+    when.textContent = histWhen(rec.at) + " · " + histSize(rec.size);
+    info.appendChild(nm); info.appendChild(when);
+    if (rec.note){
+      var nt = document.createElement("span");
+      nt.textContent = rec.note;
+      info.appendChild(nt);
+    }
+    row.appendChild(info);
+
+    var acts = document.createElement("div");
+    acts.className = "hacts";
+    [["Abrir", "ghost", function(){ histOpen(rec, false); }],
+     ["Baixar", "ghost", function(){ histOpen(rec, true); }],
+     ["Apagar", "ghost danger", function(){
+        if (!confirm("Apagar “" + rec.name + "” do histórico?")) return;
+        histWrite(function(st){ st.delete(rec.id); }, histRender, histRender);
+     }]].forEach(function(b){
+      var bt = document.createElement("button");
+      bt.className = b[1]; bt.type = "button"; bt.textContent = b[0];
+      bt.addEventListener("click", b[2]);
+      acts.appendChild(bt);
+    });
+    row.appendChild(acts);
+    return row;
+  }
+
+  function histRender(){
+    var box = $("hist"), hint = $("histHint"), acts = $("histActions");
+    if (!box) return;
+    histURLs.splice(0).forEach(function(u){ try { URL.revokeObjectURL(u); } catch(e){} });
+    histAll(function(list){
+      box.innerHTML = "";
+      if (!list){
+        acts.classList.add("hide");
+        hint.textContent = "Este navegador não guarda o histórico — em janela anônima ou com os dados do site bloqueados, o PDF só fica no download.";
+        return;
+      }
+      hint.textContent = "Cada PDF gerado fica guardado aqui, neste navegador e neste aparelho. Os " + HIST_MAX + " mais recentes.";
+      if (!list.length){
+        acts.classList.add("hide");
+        var p = document.createElement("p");
+        p.className = "hint";
+        p.textContent = "Nenhum molde guardado ainda. O próximo PDF que você baixar aparece aqui.";
+        box.appendChild(p);
+        return;
+      }
+      acts.classList.remove("hide");
+      list.slice(0, HIST_MAX).forEach(function(rec){ box.appendChild(histRow(rec)); });
+    });
+  }
+
+  $("histClear").addEventListener("click", function(){
+    if (!confirm("Apagar todos os moldes guardados neste navegador?")) return;
+    histWrite(function(st){ st.clear(); }, histRender, histRender);
+  });
+
   $("pdf").addEventListener("click", function(){
     if (!window.jspdf || !window.jspdf.jsPDF){
       alert("O gerador de PDF não carregou. Conecte à internet e recarregue a página.");
@@ -1185,7 +1378,10 @@ button:active{transform:scale(.99)}
       });
     });
 
-    deliver(pdf.output("blob"), saveName("pdf"), null);
+    var blob = pdf.output("blob"), name = saveName("pdf");
+    histSave(blob, name, "Papel " + fmt(pa.w) + " × " + fmt(pa.h) + " mm · foto " + fmt(photo.w) + " × " +
+             fmt(photo.h) + " mm · " + totalCount.toLocaleString("pt-BR") + " pontos", histThumb(R));
+    deliver(blob, name, null);
   });
 
   window.addEventListener("resize", draw);
@@ -1203,6 +1399,7 @@ button:active{transform:scale(.99)}
     renderSwatches();
     syncControls();
     draw();
+    histRender();
   }
   if (document.fonts && document.fonts.ready){ document.fonts.ready.then(boot); } else boot();
   setTimeout(function(){ if (els.length){ els.forEach(rebuild); draw(); } }, 1400);

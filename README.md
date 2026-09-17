@@ -25,6 +25,11 @@ sem backend.
   retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
   distância exata para colar a foto no papel.
 - **PNG** da prévia, para conferir o arranjo.
+- **Histórico**: cada PDF gerado fica guardado no navegador (IndexedDB), com miniatura, data,
+  tamanho e as medidas usadas. Dá para abrir, baixar de novo ou apagar. Guarda os 20 mais
+  recentes — o 21º empurra o mais antigo para fora. É armazenamento local: não sincroniza entre
+  aparelhos e some se o usuário limpar os dados do site; em janela anônima o painel avisa que
+  não há histórico.
 
 ## Rodando
 
