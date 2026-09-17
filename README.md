@@ -1,85 +1,63 @@
 # Ponto de Cruz
 
-**ponto & letra** — gerador de gráfico de ponto cruz para letras cursivas.
+**ponto & letra** — molde de furos em tamanho real para bordar sobre foto.
 
-Você digita a palavra, escolhe uma cursiva, e o app converte o traço da fonte em uma grade
-quadriculada de pontos, pronta para furar o papel ou bordar na aida.
+Você define o papel de fundo, encaixa a foto no tamanho em que ela será impressa, escreve e
+posiciona as peças bordadas por cima, e baixa um PDF com o molde de furos na escala exata do
+material.
 
-Site estático, sem build, sem dependências, sem backend e **sem rede**: as fontes estão
-hospedadas no próprio repositório, então o app funciona offline depois do primeiro carregamento.
+A aplicação é o arquivo `index.html`: HTML, CSS e JavaScript em um único arquivo, sem build e
+sem backend.
 
 ## O que ele faz
 
-- Converte o texto digitado em grade de pontos, renderizando a fonte num canvas e amostrando
-  a cobertura de cada célula 6×6 px.
-- Sete cursivas hospedadas aqui mesmo: Great Vibes, Pinyon Script, Dancing Script, Sacramento,
-  Parisienne, Caveat e Cormorant Garamond em itálico — funcionam sem rede.
-- Busca no catálogo do Google Fonts: 1.882 famílias com alfabeto latino (251 manuscritas),
-  baixadas sob demanda quando há internet. Se a fonte escolhida não chegar, o app avisa em vez
-  de desenhar um gráfico errado com a cursiva genérica do sistema.
-- Controles de altura (10–50 pontos), espessura do traço, sensibilidade da amostragem e
-  espaçamento entre furos (1–6 mm).
-- Mostra dimensões da grade, contagem de pontos e o tamanho real em centímetros.
-- Grade com linhas de referência de 10 em 10 e pontos desenhados como cruzinhas.
-- Ajuste ponto a ponto: clique, toque ou setas do teclado com barra de espaço. Os ajustes
-  sobrevivem a mudanças nos controles e têm desfazer (botão ou Ctrl+Z).
-- **Impressão em tamanho real**: a folha é montada em SVG dimensionado em milímetros, então
-  a grade sai no papel exatamente com o espaçamento escolhido. Páginas A4 com 2 células de
-  sobreposição, emenda tracejada e legenda com as faixas de colunas e linhas.
-- Exporta o gráfico em PNG.
-- Guarda texto, ajustes e edições manuais no navegador e restaura ao reabrir.
+- **Papel**: A4, A5, A3, quadrado, 20×30, 15×20 ou medidas próprias, em retrato ou paisagem.
+- **Foto**: tamanhos de revelação comuns (10×15, 9×13, 13×18, 15×21, quadrado, polaroid) ou
+  medida própria, arrastável sobre o papel, com imagem opcional só para visualizar.
+- **Peças bordadas**: quantas quiser, cada uma sendo uma palavra ou um símbolo (coração cheio,
+  coração vazado, estrela, seta). Arraste para posicionar, incline de -45° a 45°, redimensione
+  com dois dedos, e ajuste ponto a ponto no modo de edição.
+- **Fontes**: 40 famílias do Google Fonts agrupadas por caráter — caligrafia fina, cursiva
+  encorpada, letra de mão, serifada itálica, gótica, pixel e bloco.
+- **Linhas**: oito paletas de quatro cores cada.
+- **Contagem**: pontos e furos, com o tamanho da peça selecionada em centímetros.
+- **PDF do molde**: em tamanho real, recortado na área do bordado, com a moldura de recorte, o
+  retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
+  distância exata para colar a foto no papel.
+- **PNG** da prévia, para conferir o arranjo.
 
 ## Rodando
 
-Abra `index.html` no navegador — não há passo de build. Para servir localmente:
+Abra `index.html` no navegador. Não há passo de build. Para servir localmente:
 
 ```bash
 python3 -m http.server
 ```
 
-## Estrutura
+## Dependências externas
 
-```
-index.html    marcação
-style.css     estilos, @font-face e folha de impressão
-app.js        amostragem, desenho, ajustes, impressão, busca de fontes e memória local
-catalog.js    catálogo do Google Fonts (gerado; ver abaixo)
-fonts/        as sete cursivas em .woff2 (subconjunto latino)
-favicon.svg
-```
+Duas, ambas em tempo de execução:
 
-`app.js` é script clássico, não módulo — é o que mantém o duplo clique em `index.html`
-funcionando sem servidor. Se um dia o código for dividido em módulos ES, isso deixa de valer
-e passa a ser necessário servir por HTTP.
-
-## Fontes
-
-As sete cursivas locais vêm do catálogo do Google Fonts, sob SIL Open Font License 1.1,
-guardadas em `fonts/`. Os créditos e a nota de licença estão em
-[`fonts/OFL.txt`](fonts/OFL.txt).
-
-O resto do catálogo é carregado sob demanda pela API de CSS do Google, que não pede chave.
-A lista de nomes em `catalog.js` foi extraída dos arquivos `METADATA.pb` do repositório
-[google/fonts](https://github.com/google/fonts), mantendo só famílias com subconjunto latino
-— sem isso, uma família sem alfabeto latino geraria um gráfico vazio. É um arquivo gerado:
-para atualizá-lo, releia os `METADATA.pb` e reescreva os cinco grupos (`h` manuscrita,
-`d` display, `s` serifada, `n` sem serifa, `m` monoespaçada).
-
-O catálogo é carregado como script clássico, e não por `fetch` de um `.json`, porque `fetch`
-em `file://` é bloqueado por CORS — seria perder o duplo clique.
+- **Google Fonts** — as 40 famílias vêm do CDN. Sem rede, o texto cai numa cursiva genérica
+  do sistema e o gráfico gerado não corresponde à fonte escolhida.
+- **jsPDF 2.5.1** (cdnjs) — o botão de PDF avisa e não gera nada se o script não carregar.
 
 ## Deploy
 
-Estático puro: publique a raiz do repositório em qualquer host (GitHub Pages, Vercel, Netlify),
-**sem comando de build**. Na Vercel, o `vercel.json` na raiz já fixa isso — sem ele, um projeto
-criado com o preset Vite tenta rodar `vite build` e falha com `vite: command not found`.
+Site estático: publique a raiz do repositório em qualquer host. Na Vercel, o `vercel.json` da
+raiz declara que não há build — sem ele, um projeto criado com o preset Vite tenta rodar
+`vite build` e falha com `vite: command not found`.
 
 ## Histórico
 
-Até o commit `6ce5a7a` este repositório continha um app React + Vite + TypeScript diferente
-(gerador de padrão a partir de foto, matching DMC, export PDF, IndexedDB). Ele foi substituído
-por esta aplicação, mas continua inteiro no histórico do git:
+Este repositório já teve duas aplicações diferentes antes desta, ambas preservadas no histórico
+do git:
 
-```bash
-git checkout 6ce5a7a
-```
+- `6ce5a7a` — app React + Vite + TypeScript (padrão a partir de foto, matching DMC, export PDF).
+- `2b7f050` — versão anterior do artefato: gerador de gráfico só de letras cursivas.
+- `98af2b9` — essa mesma versão com três levas de melhorias por cima (impressão em escala real,
+  ajustes manuais com desfazer, fontes hospedadas localmente, acesso por teclado, memória local
+  e busca no catálogo do Google Fonts). Chegou a ser o conteúdo da `master` e continua inteira
+  aqui e nas branches `claude/affectionate-pasteur-xia1o8`, `claude/segunda-leva` e
+  `claude/terceira-leva`. É de lá que saem `app.js`, `style.css`, `catalog.js` e as sete fontes
+  em `fonts/`, removidos da árvore nesta versão por pertencerem àquele outro aplicativo.

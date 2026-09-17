@@ -3,47 +3,230 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ponto &amp; letra — gráfico de ponto cruz para letras cursivas</title>
-<meta name="description" content="Digite uma palavra, escolha uma cursiva e gere um gráfico quadriculado de ponto cruz, com impressão em tamanho real para furar papel ou bordar na aida.">
-<meta name="theme-color" content="#FBF9F3">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="style.css">
+<title>ponto &amp; letra — molde de furos em tamanho real</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ponto & letra">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#EDF4FB">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23384959'/%3E%3Crect x='30' y='142' width='120' height='12' fill='%23FFE566'/%3E%3Cg stroke='%23FFE566' stroke-width='11' stroke-linecap='round'%3E%3Cpath d='M46 46 78 78M78 46 46 78'/%3E%3Cpath d='M102 46 134 78M134 46 102 78'/%3E%3Cpath d='M46 102 78 134M78 102 46 134'/%3E%3Cpath d='M102 102 134 134M134 102 102 134'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Allura&family=Bad+Script&family=Berkshire+Swash&family=Caveat:wght@400;700&family=Cedarville+Cursive&family=Cormorant+Garamond:ital,wght@1,400;1,600&family=Courgette&family=Dancing+Script:wght@400;700&family=EB+Garamond:ital@1&family=Grand+Hotel&family=Great+Vibes&family=Herr+Von+Muellerhoff&family=Homemade+Apple&family=Indie+Flower&family=Italianno&family=Kaushan+Script&family=League+Script&family=Lobster&family=Marck+Script&family=Monsieur+La+Doulaise&family=Mrs+Saint+Delafield&family=Norican&family=Pacifico&family=Parisienne&family=Petit+Formal+Script&family=Pinyon+Script&family=Pirata+One&family=Pixelify+Sans:wght@400;700&family=Playfair+Display:ital,wght@1,400;1,700&family=Press+Start+2P&family=Rouge+Script&family=Sacramento&family=Satisfy&family=Shadows+Into+Light&family=Silkscreen:wght@400;700&family=Tangerine:wght@400;700&family=UnifrakturMaguntia&family=VT323&family=Yellowtail&display=swap" rel="stylesheet">
+<style>
+@font-face{
+  font-family:"CS Norman Mono";
+  src:url("./CSNormanMono.woff2") format("woff2"),
+      url("./CSNormanMono.woff") format("woff"),
+      url("./CSNormanMono.otf") format("opentype");
+  font-weight:400;
+  font-display:swap;
+}
+:root{
+  --display:"CS Norman Mono","Silkscreen","Courier New",monospace;
+  --paper:#EDF4FB;
+  --ink:#384959;
+  --ink-soft:#6A89A7;
+  --mat:#384959;
+  --accent:#88BDF2;
+  --lemon:#FFE566;
+  --lemon-deep:#B3B347;
+  --danger:#BE5103;
+  --line:#C9DCEF;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Segoe UI",Roboto,-apple-system,system-ui,sans-serif;font-size:16px;line-height:1.55}
+.wrap{max-width:660px;margin:0 auto;padding:20px 16px 72px}
+header{margin:8px 0 22px}
+h1{font-family:var(--display);font-size:26px;font-weight:400;line-height:1.15;letter-spacing:.02em;margin:0 0 6px;color:var(--mat)}
+h1::after{content:"";display:block;width:120px;height:6px;margin-top:8px;background:var(--lemon)}
+header p{margin:0;color:var(--ink-soft);font-size:15px;max-width:48ch}
+h2{font-family:var(--display);font-size:14px;font-weight:400;letter-spacing:.03em;margin:26px 0 10px;color:var(--ink)}
+fieldset{border:0;margin:0;padding:0}
+.field{margin-bottom:14px}
+label{display:block;font-size:14px;color:var(--ink-soft);margin-bottom:6px}
+label b{font-family:var(--display);font-weight:400;color:var(--ink)}
+input[type=text],input[type=number],select{width:100%;height:44px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);font-size:16px;font-family:inherit}
+input[type=file]{width:100%;font-size:14px;color:var(--ink-soft)}
+input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--mat);height:32px}
+.swrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;min-height:44px}
+.sw{width:34px;height:34px;min-height:34px;flex:0 0 auto;padding:0;border-radius:50%;border:2px solid var(--line);cursor:pointer}
+.sw.on{border-color:var(--ink);box-shadow:0 0 0 3px #fff inset}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:7px 14px;font-size:13px;font-family:var(--display);color:var(--ink-soft);cursor:pointer;min-height:38px}
+.chip.on{border-color:var(--mat);background:var(--mat);color:#fff}
+.stats{display:flex;border:1px solid var(--line);border-radius:8px;background:#fff;margin:18px 0 12px;overflow:hidden}
+.stat{flex:1 1 33%;padding:11px 12px;border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
+.stat span{display:block;font-size:12px;color:var(--ink-soft)}
+.stat strong{display:block;font-family:var(--display);font-size:15px;font-weight:400;margin-top:4px}
+.board{border:1px solid var(--line);border-radius:8px;background:#DCE9F6;padding:12px;display:flex;justify-content:center}
+canvas{display:block;touch-action:none;max-width:100%;box-shadow:0 1px 5px rgba(56,73,89,.22)}
+.hint{font-size:14px;color:var(--ink-soft);margin:10px 0 18px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+button{flex:1 1 auto;min-height:46px;padding:0 14px;border:1px solid var(--mat);border-radius:6px;background:var(--mat);color:#fff;font-family:var(--display);font-size:13px;letter-spacing:.02em;cursor:pointer}
+button.ghost{background:#fff;color:var(--mat)}
+button.danger{border-color:var(--danger);color:var(--danger)}
+button.on{background:var(--lemon);border-color:var(--lemon-deep);color:#384959}
+button:active{transform:scale(.99)}
+.notes{margin-top:34px;border-top:1px solid var(--line);padding-top:18px;font-size:15px;color:var(--ink-soft)}
+.notes ul{padding-left:20px;margin:0}
+.notes li{margin-bottom:8px}
+.hide{display:none!important}
+</style>
 </head>
 <body>
 <div class="wrap">
 
 <header>
   <h1>ponto &amp; letra</h1>
-  <p>Digita a palavra, escolhe a cursiva e sai o gráfico quadriculado pronto pra furar o papel ou bordar na aida.</p>
+  <p>Define o papel, encaixa a foto, escreve por cima e imprime o molde de furos no tamanho exato do material.</p>
 </header>
 
-<fieldset>
-  <legend>Ajustes do gráfico</legend>
+<h2>Papel de fundo</h2>
+<div class="row">
+  <div class="field">
+    <label for="paperSize">Tamanho</label>
+    <select id="paperSize">
+      <option value="210x297" selected>A4 — 21 × 29,7 cm</option>
+      <option value="148x210">A5 — 14,8 × 21 cm</option>
+      <option value="297x420">A3 — 29,7 × 42 cm</option>
+      <option value="200x200">Quadrado — 20 × 20 cm</option>
+      <option value="200x300">20 × 30 cm</option>
+      <option value="150x200">15 × 20 cm</option>
+      <option value="custom">Personalizado</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="paperOr">Orientação</label>
+    <select id="paperOr">
+      <option value="p" selected>Retrato</option>
+      <option value="l">Paisagem</option>
+    </select>
+  </div>
+</div>
+<div class="row hide" id="paperCustom">
+  <div class="field"><label for="paperW">Largura em mm</label><input id="paperW" type="number" min="50" max="600" value="210"></div>
+  <div class="field"><label for="paperH">Altura em mm</label><input id="paperH" type="number" min="50" max="600" value="297"></div>
+</div>
+
+<h2>Foto</h2>
+<div class="row">
+  <div class="field">
+    <label for="photoSize">Tamanho impresso</label>
+    <select id="photoSize">
+      <option value="100x150" selected>10 × 15 cm</option>
+      <option value="89x127">9 × 13 cm</option>
+      <option value="127x178">13 × 18 cm</option>
+      <option value="150x210">15 × 21 cm</option>
+      <option value="100x100">Quadrado — 10 × 10 cm</option>
+      <option value="88x107">Polaroid — 8,8 × 10,7 cm</option>
+      <option value="custom">Personalizado</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="photoOr">Orientação</label>
+    <select id="photoOr">
+      <option value="p" selected>Retrato</option>
+      <option value="l">Paisagem</option>
+    </select>
+  </div>
+</div>
+<div class="row hide" id="photoCustom">
+  <div class="field"><label for="photoWmm">Largura em mm</label><input id="photoWmm" type="number" min="20" max="500" value="100"></div>
+  <div class="field"><label for="photoHmm">Altura em mm</label><input id="photoHmm" type="number" min="20" max="500" value="150"></div>
+</div>
+<div class="field">
+  <label for="photo">Imagem (opcional, só para você visualizar)</label>
+  <input id="photo" type="file" accept="image/*">
+</div>
+<div class="actions">
+  <button id="rotPhoto" class="ghost">Girar foto</button>
+  <button id="centerPhoto" class="ghost">Centralizar foto</button>
+  <button id="centerTop" class="ghost">Centralizar em cima</button>
+</div>
+
+<h2>Peças bordadas</h2>
+<div class="chips" id="chips"></div>
+<div class="actions">
+  <button id="addText" class="ghost">Nova palavra</button>
+  <button id="addSym" class="ghost">Novo símbolo</button>
+  <button id="delEl" class="ghost danger">Excluir peça</button>
+</div>
+
+<fieldset id="ctlText">
   <div class="field">
     <label for="txt">Texto</label>
-    <input id="txt" type="text" value="andai" autocomplete="off" spellcheck="false" maxlength="80">
+    <input id="txt" type="text" value="champ" autocomplete="off" spellcheck="false">
   </div>
-
   <div class="row">
     <div class="field">
       <label for="font">Fonte</label>
-      <select id="font"></select>
-      <button type="button" class="linkbtn findbtn" id="more" aria-expanded="false" aria-controls="panel">Buscar mais fontes</button>
+      <select id="font">
+        <optgroup label="Caligrafia fina">
+          <option value="Great Vibes">Great Vibes</option>
+          <option value="Pinyon Script">Pinyon Script</option>
+          <option value="Allura">Allura</option>
+          <option value="Alex Brush">Alex Brush</option>
+          <option value="Tangerine">Tangerine</option>
+          <option value="Italianno">Italianno</option>
+          <option value="Rouge Script">Rouge Script</option>
+          <option value="League Script">League Script</option>
+          <option value="Petit Formal Script">Petit Formal Script</option>
+          <option value="Mrs Saint Delafield">Mrs Saint Delafield</option>
+          <option value="Herr Von Muellerhoff">Herr Von Muellerhoff</option>
+          <option value="Monsieur La Doulaise">Monsieur La Doulaise</option>
+        </optgroup>
+        <optgroup label="Cursiva encorpada">
+          <option value="Dancing Script">Dancing Script</option>
+          <option value="Sacramento">Sacramento</option>
+          <option value="Parisienne">Parisienne</option>
+          <option value="Pacifico">Pacifico</option>
+          <option value="Satisfy">Satisfy</option>
+          <option value="Yellowtail">Yellowtail</option>
+          <option value="Kaushan Script">Kaushan Script</option>
+          <option value="Courgette">Courgette</option>
+          <option value="Grand Hotel">Grand Hotel</option>
+          <option value="Lobster">Lobster</option>
+          <option value="Berkshire Swash">Berkshire Swash</option>
+          <option value="Norican">Norican</option>
+        </optgroup>
+        <optgroup label="Letra de mão">
+          <option value="Caveat">Caveat</option>
+          <option value="Marck Script">Marck Script</option>
+          <option value="Bad Script">Bad Script</option>
+          <option value="Shadows Into Light">Shadows Into Light</option>
+          <option value="Indie Flower">Indie Flower</option>
+          <option value="Homemade Apple">Homemade Apple</option>
+          <option value="Cedarville Cursive">Cedarville Cursive</option>
+        </optgroup>
+        <optgroup label="Serifada itálica">
+          <option value="Cormorant Garamond">Cormorant Garamond</option>
+          <option value="EB Garamond">EB Garamond</option>
+          <option value="Playfair Display">Playfair Display</option>
+        </optgroup>
+        <optgroup label="Gótica">
+          <option value="UnifrakturMaguntia">UnifrakturMaguntia</option>
+          <option value="Pirata One">Pirata One</option>
+        </optgroup>
+        <optgroup label="Pixel e bloco">
+          <option value="CS Norman Mono">CS Norman Mono (arquivo seu)</option>
+          <option value="Silkscreen">Silkscreen</option>
+          <option value="Press Start 2P">Press Start 2P</option>
+          <option value="Pixelify Sans">Pixelify Sans</option>
+          <option value="VT323">VT323</option>
+        </optgroup>
+      </select>
     </div>
     <div class="field">
-      <label for="rows">Altura <b id="rowsOut">22</b> pontos</label>
-      <input id="rows" type="range" min="10" max="50" step="1" value="22">
+      <label for="rows">Altura <b id="rowsOut">18</b> pontos</label>
+      <input id="rows" type="range" min="8" max="60" step="1" value="18">
     </div>
   </div>
-
-  <div class="panel" id="panel" hidden>
-    <p id="panelnote">Catálogo do Google Fonts. As sete de cima ficam no próprio site e funcionam sem rede; as daqui são baixadas da internet na hora.</p>
-    <label class="sr" for="search">Buscar fonte pelo nome</label>
-    <input id="search" type="text" placeholder="Buscar pelo nome…" autocomplete="off" spellcheck="false">
-    <div class="results" id="results"></div>
-    <p class="count" id="rcount"></p>
-  </div>
-
   <div class="row">
     <div class="field">
       <label for="thick">Espessura do traço <b id="thickOut">2</b></label>
@@ -54,50 +237,976 @@
       <input id="thr" type="range" min="10" max="80" step="5" value="35">
     </div>
   </div>
+</fieldset>
 
+<fieldset id="ctlSym" class="hide">
+  <div class="row">
+    <div class="field">
+      <label for="sym">Desenho</label>
+      <select id="sym">
+        <option value="heart">Coração cheio</option>
+        <option value="heartOutline">Coração vazado</option>
+        <option value="star">Estrela</option>
+        <option value="arrow">Seta</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="symScale">Tamanho <b id="symScaleOut">1</b>×</label>
+      <input id="symScale" type="range" min="1" max="6" step="1" value="1">
+    </div>
+  </div>
+</fieldset>
+
+<div class="row">
+  <div class="field">
+    <label for="rot">Inclinação <b id="rotOut">0</b>°</label>
+    <input id="rot" type="range" min="-45" max="45" step="1" value="0">
+  </div>
   <div class="field">
     <label for="mm">Espaçamento entre furos <b id="mmOut">2,5</b> mm</label>
     <input id="mm" type="range" min="1" max="6" step="0.5" value="2.5">
   </div>
-</fieldset>
+</div>
+
+<div class="row">
+  <div class="field">
+    <label for="palette">Paleta</label>
+    <select id="palette"></select>
+  </div>
+  <div class="field">
+    <label>Cor da linha <b id="threadName">Limao escuro</b></label>
+    <div class="swrow" id="swatches"></div>
+  </div>
+</div>
 
 <div class="stats">
-  <div class="stat"><span>Grade</span><strong id="dims">—</strong></div>
   <div class="stat"><span>Pontos</span><strong id="count">—</strong></div>
-  <div class="stat"><span>Tamanho real</span><strong id="size">—</strong></div>
+  <div class="stat"><span>Furos</span><strong id="holes">—</strong></div>
+  <div class="stat"><span>Peça selecionada</span><strong id="size">—</strong></div>
 </div>
 
-<div class="board"><canvas id="grid" width="10" height="10" tabindex="0" role="img" aria-label="Gráfico"></canvas></div>
-<p class="notice" id="notice" hidden></p>
-<div class="editbar" id="editbar" hidden>
-  <span id="editcount"></span>
-  <button type="button" class="linkbtn" id="undo">Desfazer</button>
-  <button type="button" class="linkbtn" id="clear">Descartar ajustes</button>
-</div>
-<p class="hint">Toque num quadradinho para acender ou apagar — ou navegue com as setas do teclado e marque com a barra de espaço. Nas curvas das cursivas sempre sobra um ponto solto pra ajustar.</p>
+<div class="board"><canvas id="grid" width="10" height="10"></canvas></div>
+<p class="hint" id="modeHint">Arraste a palavra ou a foto para posicionar. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.</p>
 
 <div class="actions">
-  <button id="dl">Baixar PNG</button>
-  <button id="print" class="ghost">Imprimir</button>
+  <button id="edit" class="ghost">Ajustar ponto a ponto</button>
+</div>
+<div class="actions">
+  <button id="pdf">Baixar molde PDF</button>
+  <button id="dl" class="ghost">Baixar prévia PNG</button>
   <button id="reset" class="ghost">Recalcular</button>
 </div>
+<p class="hint" id="fitHint">O molde sai em tamanho real, recortado na área do bordado, com as medidas exatas até as bordas do papel.</p>
+
+<div id="out"></div>
 
 <div class="notes">
-  <h2>Como usar no papel</h2>
+  <h2>Do arquivo ao material</h2>
   <ul>
-    <li>Imprima o gráfico no tamanho real ou marque os pontos no papel quadriculado, contando pelas linhas grossas de 10 em 10.</li>
-    <li>Prenda o gráfico atrás do cartão com fita crepe e fure ponto a ponto com agulha grossa ou alfinete, apoiando sobre EVA ou espuma.</li>
-    <li>Tire o papel do gráfico e borde nos furos com 2 ou 3 fios de meada. Não puxe forte: furo alargado no papel não volta.</li>
-    <li>Altura abaixo de 18 pontos apaga o detalhe das cursivas finas. Se precisar de letra pequena, aumente a espessura do traço.</li>
+    <li>Cole a foto no papel usando a medida que aparece no cabeçalho do PDF: distância da borda esquerda e da borda de cima. É essa posição que faz o molde bater.</li>
+    <li>Recorte o molde impresso pela moldura tracejada e prenda sobre o conjunto alinhando o retângulo da foto com a foto de verdade, fita crepe nos quatro cantos.</li>
+    <li>Fure ponto a ponto com agulha grossa, apoiado em EVA ou cortiça. Cada quadradinho usa quatro furos, compartilhados com os vizinhos — por isso o número de furos é menor que o dobro de pontos.</li>
+    <li>Borde com 2 ou 3 fios de meada. Em furo que atravessa foto e papel, puxe devagar: papel fotográfico não fecha depois de rasgar.</li>
+    <li>Espaçamento entre 2,5 e 3 mm é o mais seguro nesse material. Abaixo de 2 mm a tira de papel entre dois furos vira pó.</li>
   </ul>
 </div>
 
 </div>
 
-<div id="say" class="sr" role="status" aria-live="polite"></div>
-<div id="sheet" aria-hidden="true"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var S = 6;
+  var ITALIC = { "Cormorant Garamond":1, "EB Garamond":1, "Playfair Display":1 };
+  function fontStr(size, fam){ return (ITALIC[fam] ? "italic " : "") + size + 'px "' + fam + '", cursive'; }
+  function fmt(v){ return (Math.round(v * 10) / 10).toFixed(1).replace(".", ","); }
 
-<script src="catalog.js"></script>
-<script src="app.js"></script>
+  var SYMS = {
+    heart: [".XX...XX.","XXXX.XXXX","XXXXXXXXX","XXXXXXXXX",".XXXXXXX.","..XXXXX..","...XXX...","....X...."],
+    heartOutline: [".XX...XX.","X..X.X..X","X...X...X","X.......X",".X.....X.","..X...X..","...X.X...","....X...."],
+    star: ["....X....","...XXX...","...XXX...","XXXXXXXXX",".XXXXXXX.","..XXXXX..","..XX.XX..",".XX...XX.","XX.....XX"],
+    arrow: ["....X....","...XX....","..X.X....",".X..X....","XXXXXXXXX",".X..X....","..X.X....","...XX....","....X...."]
+  };
+
+  var els = [];
+  var sel = 0;
+  var photoImg = null, photoURL = null;
+  var photo = { x: 55, y: 60, w: 100, h: 150 };
+  var editing = false;
+  var totalCount = 0, totalHoles = 0;
+  var lastPaper = null;
+
+  var PALETTES = [
+    { name: "Zesty lemon", colors: [
+      ["#FFFF66","Limao claro"],["#FFE566","Limao"],["#D6D58B","Limao seco"],["#B3B347","Limao escuro"]
+    ]},
+    { name: "Golden taupe", colors: [
+      ["#D4AF37","Dourado"],["#BDB76B","Taupe verde"],["#FDFBD4","Creme"],["#CE8946","Caramelo"]
+    ]},
+    { name: "Retro sunset", colors: [
+      ["#BE5103","Terracota"],["#FFCE1B","Mostarda"],["#069494","Verde agua"],["#B7410E","Ferrugem"]
+    ]},
+    { name: "Stormy morning", colors: [
+      ["#384959","Azul noite"],["#6A89A7","Azul fumaca"],["#88BDF2","Azul claro"],["#BDDDFC","Azul gelo"]
+    ]},
+    { name: "Mossy hollow", colors: [
+      ["#636B2F","Musgo"],["#BAC095","Salvia"],["#D4DE95","Verde broto"],["#3D4127","Oliva escuro"]
+    ]},
+    { name: "Blue eclipse", colors: [
+      ["#272757","Meia-noite"],["#8686AC","Lavanda fria"],["#505081","Violeta fumaca"],["#0F0E47","Tinta"]
+    ]},
+    { name: "Chili spice", colors: [
+      ["#CD1C18","Pimenta"],["#FFA896","Salmao"],["#9B1313","Vermelho seco"],["#38000A","Vinho"]
+    ]},
+    { name: "Chocolate truffle", colors: [
+      ["#713600","Cacau"],["#C05800","Caramelo queimado"],["#FDFBD4","Creme"],["#38240D","Chocolate amargo"]
+    ]}
+  ];
+  var thread = "#B3B347";
+  var curPal = 0;
+
+  function threadRGB(){
+    var h = thread.replace("#", "");
+    return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)];
+  }
+
+  function renderPaletteList(){
+    var selEl = $("palette");
+    selEl.innerHTML = "";
+    PALETTES.forEach(function(pal, i){
+      var o = document.createElement("option");
+      o.value = String(i);
+      o.textContent = pal.name;
+      selEl.appendChild(o);
+    });
+    selEl.value = String(curPal);
+    selEl.addEventListener("change", function(){
+      curPal = parseInt(this.value, 10);
+      renderSwatches();
+    });
+  }
+
+  function renderSwatches(){
+    var box = $("swatches");
+    box.innerHTML = "";
+    PALETTES[curPal].colors.forEach(function(c){
+      var b = document.createElement("button");
+      b.className = "sw" + (c[0] === thread ? " on" : "");
+      b.style.background = c[0];
+      b.title = c[1] + " " + c[0];
+      b.setAttribute("aria-label", "Linha " + c[1]);
+      b.addEventListener("click", function(){
+        thread = c[0];
+        $("threadName").textContent = c[1];
+        renderSwatches();
+        draw();
+      });
+      box.appendChild(b);
+    });
+  }
+
+  function P(){ return parseFloat($("mm").value); }
+
+  function paperMM(){
+    var v = $("paperSize").value, w, h;
+    if (v === "custom"){
+      w = parseFloat($("paperW").value) || 210;
+      h = parseFloat($("paperH").value) || 297;
+    } else {
+      var q = v.split("x"); w = parseFloat(q[0]); h = parseFloat(q[1]);
+    }
+    if ($("paperOr").value === "l"){ var t = w; w = h; h = t; }
+    return { w: w, h: h };
+  }
+
+  function photoSizeMM(){
+    var v = $("photoSize").value, w, h;
+    if (v === "custom"){
+      w = parseFloat($("photoWmm").value) || 100;
+      h = parseFloat($("photoHmm").value) || 150;
+    } else {
+      var q = v.split("x"); w = parseFloat(q[0]); h = parseFloat(q[1]);
+    }
+    if ($("photoOr").value === "l"){ var t = w; w = h; h = t; }
+    return { w: w, h: h };
+  }
+
+  function syncPhotoSize(){
+    var z = photoSizeMM();
+    photo.w = z.w; photo.h = z.h;
+    clampPhoto();
+  }
+
+  function clampPhoto(){
+    var pa = paperMM();
+    photo.x = Math.max(0, Math.min(pa.w - photo.w, photo.x));
+    photo.y = Math.max(0, Math.min(pa.h - photo.h, photo.y));
+  }
+
+  function matrixFromStrings(rows, scale){
+    var out = [];
+    for (var r = 0; r < rows.length; r++){
+      for (var sy = 0; sy < scale; sy++){
+        var line = [];
+        for (var q = 0; q < rows[r].length; q++){
+          var v = rows[r].charAt(q) === "X" ? 1 : 0;
+          for (var sx = 0; sx < scale; sx++) line.push(v);
+        }
+        out.push(line);
+      }
+    }
+    return out;
+  }
+
+  function trim(cells){
+    var loX = 1e9, hiX = -1, loY = 1e9, hiY = -1;
+    for (var r = 0; r < cells.length; r++){
+      for (var q = 0; q < cells[r].length; q++){
+        if (!cells[r][q]) continue;
+        if (q < loX) loX = q;
+        if (q > hiX) hiX = q;
+        if (r < loY) loY = r;
+        if (r > hiY) hiY = r;
+      }
+    }
+    if (hiX < 0) return [[0]];
+    var out = [];
+    for (var r2 = loY; r2 <= hiY; r2++) out.push(cells[r2].slice(loX, hiX + 1));
+    return out;
+  }
+
+  function textMatrix(text, fam, targetRows, thick, thr){
+    text = text || " ";
+    var c = document.createElement("canvas");
+    var x = c.getContext("2d");
+    x.font = fontStr(100, fam);
+    var m = x.measureText(text);
+    var asc = m.actualBoundingBoxAscent || 72;
+    var dsc = m.actualBoundingBoxDescent || 28;
+    var left = m.actualBoundingBoxLeft || 0;
+    var right = m.actualBoundingBoxRight || m.width;
+    var h = asc + dsc, w = left + right;
+    if (h <= 0 || w <= 0) return [[0]];
+    var k = (targetRows * S) / h;
+    var pad = S * 3;
+    c.width = Math.ceil(w * k) + pad * 2;
+    c.height = Math.ceil(targetRows * S) + pad * 2;
+    x = c.getContext("2d");
+    x.font = fontStr(100 * k, fam);
+    x.textBaseline = "alphabetic";
+    x.fillStyle = "#000"; x.strokeStyle = "#000";
+    x.lineJoin = "round"; x.lineCap = "round";
+    var bx = pad + left * k, by = pad + asc * k;
+    if (thick > 0){ x.lineWidth = thick * k * 0.55; x.strokeText(text, bx, by); }
+    x.fillText(text, bx, by);
+    var cols = Math.floor(c.width / S), rowsN = Math.floor(c.height / S);
+    var data = x.getImageData(0, 0, c.width, c.height).data;
+    var cells = [];
+    for (var r = 0; r < rowsN; r++){
+      var line = [];
+      for (var q = 0; q < cols; q++){
+        var on = 0;
+        for (var yy = 0; yy < S; yy++){
+          for (var xx = 0; xx < S; xx++){
+            var i = (((r * S + yy) * c.width) + (q * S + xx)) * 4 + 3;
+            if (data[i] > 90) on++;
+          }
+        }
+        line.push(on / (S * S) > thr ? 1 : 0);
+      }
+      cells.push(line);
+    }
+    return trim(cells);
+  }
+
+  function rebuild(el){
+    el.cells = el.kind === "sym"
+      ? matrixFromStrings(SYMS[el.sym], el.scale)
+      : textMatrix(el.text, el.font, el.rowsTarget, el.thick, el.thr);
+  }
+
+  function bboxMM(el){
+    var p = P();
+    return { x: el.x, y: el.y, w: el.cells[0].length * p, h: el.cells.length * p };
+  }
+
+  function localToPaper(el, lx, ly){
+    var b = bboxMM(el);
+    var a = el.rot * Math.PI / 180;
+    var dx = lx - b.w / 2, dy = ly - b.h / 2;
+    return {
+      x: b.x + b.w / 2 + dx * Math.cos(a) - dy * Math.sin(a),
+      y: b.y + b.h / 2 + dx * Math.sin(a) + dy * Math.cos(a)
+    };
+  }
+
+  function paperToLocal(el, px, py){
+    var b = bboxMM(el);
+    var a = -el.rot * Math.PI / 180;
+    var dx = px - (b.x + b.w / 2), dy = py - (b.y + b.h / 2);
+    return {
+      x: b.w / 2 + dx * Math.cos(a) - dy * Math.sin(a),
+      y: b.h / 2 + dx * Math.sin(a) + dy * Math.cos(a)
+    };
+  }
+
+  function holesOf(el){
+    var p = P(), seen = {}, list = [];
+    for (var r = 0; r < el.cells.length; r++){
+      for (var q = 0; q < el.cells[r].length; q++){
+        if (!el.cells[r][q]) continue;
+        for (var dy = 0; dy < 2; dy++){
+          for (var dx = 0; dx < 2; dx++){
+            var key = (q + dx) + "," + (r + dy);
+            if (seen[key]) continue;
+            seen[key] = 1;
+            list.push(localToPaper(el, (q + dx) * p, (r + dy) * p));
+          }
+        }
+      }
+    }
+    return list;
+  }
+
+  function countOf(el){
+    var n = 0;
+    for (var r = 0; r < el.cells.length; r++)
+      for (var q = 0; q < el.cells[r].length; q++) if (el.cells[r][q]) n++;
+    return n;
+  }
+
+  function stitchArea(){
+    var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
+    els.forEach(function(el){
+      var b = bboxMM(el);
+      [[0,0],[b.w,0],[0,b.h],[b.w,b.h]].forEach(function(c){
+        var p = localToPaper(el, c[0], c[1]);
+        if (p.x < minX) minX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.x > maxX) maxX = p.x;
+        if (p.y > maxY) maxY = p.y;
+      });
+    });
+    if (maxX < 0) return null;
+    return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+  }
+
+  function cropArea(){
+    var pa = paperMM();
+    var sa = stitchArea();
+    var minX = photo.x, minY = photo.y, maxX = photo.x + photo.w, maxY = photo.y + photo.h;
+    if (sa){
+      minX = Math.min(minX, sa.x); minY = Math.min(minY, sa.y);
+      maxX = Math.max(maxX, sa.x + sa.w); maxY = Math.max(maxY, sa.y + sa.h);
+    }
+    var pad = 8;
+    minX = Math.max(0, minX - pad); minY = Math.max(0, minY - pad);
+    maxX = Math.min(pa.w, maxX + pad); maxY = Math.min(pa.h, maxY + pad);
+    return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+  }
+
+  // a folha do PDF: 10 mm de margem lateral, 44 mm de cabeçalho e 8 mm embaixo.
+  // a tela e o PDF decidem a escala por aqui, para nunca discordarem sobre caber.
+  var PDF_SIDE = 10, PDF_TOP = 44, PDF_FOOT = 8;
+  function pdfFit(R){
+    var land = R.w > R.h;
+    var pageW = land ? 297 : 210, pageH = land ? 210 : 297;
+    var maxW = pageW - PDF_SIDE * 2, maxH = pageH - PDF_TOP - PDF_FOOT;
+    return { land: land, pageW: pageW, scale: Math.min(1, maxW / R.w, maxH / R.h) };
+  }
+
+  function drawPhoto(ctx, k, region, alpha){
+    var X = (photo.x - region.x) * k, Y = (photo.y - region.y) * k;
+    var W = photo.w * k, H = photo.h * k;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    if (photoImg){
+      var ir = photoImg.width / photoImg.height, tr = photo.w / photo.h;
+      var sw, sh, sx, sy;
+      if (ir > tr){ sh = photoImg.height; sw = sh * tr; sx = (photoImg.width - sw) / 2; sy = 0; }
+      else { sw = photoImg.width; sh = sw / tr; sx = 0; sy = (photoImg.height - sh) / 2; }
+      ctx.drawImage(photoImg, sx, sy, sw, sh, X, Y, W, H);
+    } else {
+      ctx.fillStyle = "#DDD8CC";
+      ctx.fillRect(X, Y, W, H);
+      ctx.fillStyle = "#9A948A";
+      ctx.font = (12) + "px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(fmt(photo.w) + " × " + fmt(photo.h) + " mm", X + W / 2, Y + H / 2);
+      ctx.textAlign = "start";
+    }
+    ctx.restore();
+    ctx.strokeStyle = "#1E2A26";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(X + .5, Y + .5, W - 1, H - 1);
+  }
+
+  function drawStitches(ctx, el, k, region, color, lw){
+    var p = P() * k;
+    var b = bboxMM(el);
+    ctx.save();
+    ctx.translate((b.x - region.x + b.w / 2) * k, (b.y - region.y + b.h / 2) * k);
+    ctx.rotate(el.rot * Math.PI / 180);
+    ctx.translate(-b.w / 2 * k, -b.h / 2 * k);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lw;
+    ctx.lineCap = "round";
+    var inset = p * 0.22;
+    for (var r = 0; r < el.cells.length; r++){
+      for (var q = 0; q < el.cells[r].length; q++){
+        if (!el.cells[r][q]) continue;
+        var X = q * p, Y = r * p;
+        ctx.beginPath();
+        ctx.moveTo(X + inset, Y + inset); ctx.lineTo(X + p - inset, Y + p - inset);
+        ctx.moveTo(X + p - inset, Y + inset); ctx.lineTo(X + inset, Y + p - inset);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawOutline(ctx, el, k, region){
+    var b = bboxMM(el);
+    ctx.save();
+    ctx.translate((b.x - region.x + b.w / 2) * k, (b.y - region.y + b.h / 2) * k);
+    ctx.rotate(el.rot * Math.PI / 180);
+    ctx.strokeStyle = "#384959";
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 1;
+    ctx.strokeRect(-b.w / 2 * k - 3, -b.h / 2 * k - 3, b.w * k + 6, b.h * k + 6);
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  function paint(ctx, k, region, opts){
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, region.w * k, region.h * k);
+    drawPhoto(ctx, k, region, opts.photoAlpha);
+    totalCount = 0; totalHoles = 0;
+    els.forEach(function(el, i){
+      totalCount += countOf(el);
+      totalHoles += holesOf(el).length;
+      drawStitches(ctx, el, k, region, thread, Math.max(1.3, P() * k * 0.15));
+      if (opts.outline && i === sel) drawOutline(ctx, el, k, region);
+    });
+  }
+
+  function draw(){
+    var cv = $("grid"), ctx = cv.getContext("2d");
+    var pa = paperMM();
+    var box = cv.parentNode;
+    var availW = box.clientWidth - 24;
+    var availH = Math.min(520, Math.max(300, window.innerHeight * 0.55));
+    var k = Math.min(availW / pa.w, availH / pa.h);
+    var dpr = window.devicePixelRatio || 1;
+    cv.width = Math.round(pa.w * k * dpr);
+    cv.height = Math.round(pa.h * k * dpr);
+    cv.style.width = (pa.w * k) + "px";
+    cv.style.height = (pa.h * k) + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    paint(ctx, k, { x: 0, y: 0, w: pa.w, h: pa.h }, { photoAlpha: 1, outline: true });
+    cv._k = k;
+
+    $("count").textContent = totalCount.toLocaleString("pt-BR");
+    $("holes").textContent = totalHoles.toLocaleString("pt-BR");
+    var el = els[sel];
+    if (el){
+      var b = bboxMM(el);
+      $("size").textContent = fmt(b.w / 10) + " × " + fmt(b.h / 10) + " cm";
+    } else $("size").textContent = "—";
+
+    var cr = cropArea();
+    var fit = pdfFit(cr);
+    var area = "Área do molde: " + fmt(cr.w / 10) + " × " + fmt(cr.h / 10) + " cm";
+    $("fitHint").textContent = fit.scale >= 1
+      ? area + ". Cabe numa folha A4 em tamanho real."
+      : area + " — não cabe numa A4 em tamanho real: o PDF sairia reduzido a " +
+        Math.round(fit.scale * 100) + "% e os furos não vão bater. Aproxime as peças da foto " +
+        "ou reduza a altura do texto.";
+  }
+
+  function renderChips(){
+    var box = $("chips");
+    box.innerHTML = "";
+    els.forEach(function(el, i){
+      var b = document.createElement("button");
+      b.className = "chip" + (i === sel ? " on" : "");
+      b.textContent = el.kind === "text" ? (el.text || "texto")
+        : ({heart:"coração", heartOutline:"coração vazado", star:"estrela", arrow:"seta"})[el.sym];
+      b.addEventListener("click", function(){ sel = i; syncControls(); draw(); renderChips(); });
+      box.appendChild(b);
+    });
+  }
+
+  function syncControls(){
+    var el = els[sel];
+    if (!el){ $("ctlText").classList.add("hide"); $("ctlSym").classList.add("hide"); return; }
+    if (el.kind === "text"){
+      $("ctlText").classList.remove("hide"); $("ctlSym").classList.add("hide");
+      $("txt").value = el.text;
+      $("font").value = el.font;
+      $("rows").value = el.rowsTarget; $("rowsOut").textContent = el.rowsTarget;
+      $("thick").value = el.thick; $("thickOut").textContent = el.thick;
+      $("thr").value = Math.round(el.thr * 100); $("thrOut").textContent = Math.round(el.thr * 100);
+    } else {
+      $("ctlText").classList.add("hide"); $("ctlSym").classList.remove("hide");
+      $("sym").value = el.sym;
+      $("symScale").value = el.scale; $("symScaleOut").textContent = el.scale;
+    }
+    $("rot").value = el.rot; $("rotOut").textContent = el.rot;
+  }
+
+  function loadFontThen(fn){
+    var f = $("font").value;
+    if (document.fonts && document.fonts.load){
+      document.fonts.load(fontStr(100, f)).then(fn).catch(fn);
+    } else fn();
+  }
+
+  function addText(){
+    var el = { kind:"text", text:"champ", font:"Great Vibes", rowsTarget:18, thick:2, thr:0.35, rot:-4,
+               x: photo.x, y: photo.y + photo.h - 14, cells:[[0]] };
+    rebuild(el);
+    els.push(el); sel = els.length - 1;
+    renderChips(); syncControls(); draw();
+  }
+
+  function addSym(){
+    var el = { kind:"sym", sym:"heart", scale:2, rot:0, x: photo.x + photo.w - 20, y: photo.y + photo.h - 20, cells:[[0]] };
+    rebuild(el);
+    els.push(el); sel = els.length - 1;
+    renderChips(); syncControls(); draw();
+  }
+
+  $("addText").addEventListener("click", function(){ loadFontThen(addText); });
+  $("addSym").addEventListener("click", addSym);
+  $("delEl").addEventListener("click", function(){
+    if (!els.length) return;
+    els.splice(sel, 1);
+    sel = Math.max(0, sel - 1);
+    renderChips(); syncControls(); draw();
+  });
+
+  function updateSelected(){
+    var el = els[sel];
+    if (!el) return;
+    if (el.kind === "text"){
+      el.text = $("txt").value;
+      el.font = $("font").value;
+      el.rowsTarget = parseInt($("rows").value, 10);
+      el.thick = parseInt($("thick").value, 10);
+      el.thr = parseInt($("thr").value, 10) / 100;
+      $("rowsOut").textContent = el.rowsTarget;
+      $("thickOut").textContent = el.thick;
+      $("thrOut").textContent = $("thr").value;
+      loadFontThen(function(){ rebuild(el); renderChips(); draw(); });
+      return;
+    }
+    el.sym = $("sym").value;
+    el.scale = parseInt($("symScale").value, 10);
+    $("symScaleOut").textContent = el.scale;
+    rebuild(el);
+    renderChips(); draw();
+  }
+
+  ["txt","font","rows","thick","thr","sym","symScale"].forEach(function(id){
+    $(id).addEventListener("input", updateSelected);
+  });
+  $("rot").addEventListener("input", function(){
+    var el = els[sel]; if (!el) return;
+    el.rot = parseInt($("rot").value, 10);
+    $("rotOut").textContent = el.rot;
+    draw();
+  });
+  $("mm").addEventListener("input", function(){
+    $("mmOut").textContent = fmt(parseFloat($("mm").value));
+    draw();
+  });
+
+  function onPaperChange(){
+    $("paperCustom").classList.toggle("hide", $("paperSize").value !== "custom");
+    var before = lastPaper || paperMM();
+    var fx = (photo.x + photo.w / 2) / before.w;
+    var fy = (photo.y + photo.h / 2) / before.h;
+    var dx = [], dy = [];
+    els.forEach(function(el){ dx.push(el.x - photo.x); dy.push(el.y - photo.y); });
+    var after = paperMM();
+    photo.x = fx * after.w - photo.w / 2;
+    photo.y = fy * after.h - photo.h / 2;
+    clampPhoto();
+    els.forEach(function(el, i){ el.x = photo.x + dx[i]; el.y = photo.y + dy[i]; });
+    lastPaper = after;
+    draw();
+  }
+  ["paperSize","paperOr"].forEach(function(id){ $(id).addEventListener("change", onPaperChange); });
+  ["paperW","paperH"].forEach(function(id){ $(id).addEventListener("input", onPaperChange); });
+
+  function onPhotoChange(){
+    $("photoCustom").classList.toggle("hide", $("photoSize").value !== "custom");
+    syncPhotoSize(); draw();
+  }
+  ["photoSize","photoOr"].forEach(function(id){ $(id).addEventListener("change", onPhotoChange); });
+  ["photoWmm","photoHmm"].forEach(function(id){ $(id).addEventListener("input", onPhotoChange); });
+
+  function flip(id){
+    var e = $(id);
+    e.value = e.value === "p" ? "l" : "p";
+  }
+
+  $("rotPhoto").addEventListener("click", function(){
+    var cx = photo.x + photo.w / 2, cy = photo.y + photo.h / 2;
+    var dx = [], dy = [];
+    els.forEach(function(el){ dx.push(el.x - photo.x); dy.push(el.y - photo.y); });
+    flip("photoOr");
+    syncPhotoSize();
+    photo.x = cx - photo.w / 2;
+    photo.y = cy - photo.h / 2;
+    clampPhoto();
+    els.forEach(function(el, i){ el.x = photo.x + dx[i]; el.y = photo.y + dy[i]; });
+    draw();
+  });
+
+  $("centerPhoto").addEventListener("click", function(){
+    var pa = paperMM();
+    photo.x = (pa.w - photo.w) / 2;
+    photo.y = (pa.h - photo.h) / 2;
+    draw();
+  });
+  $("centerTop").addEventListener("click", function(){
+    var pa = paperMM();
+    photo.x = (pa.w - photo.w) / 2;
+    photo.y = Math.max(0, pa.h * 0.12);
+    draw();
+  });
+
+  $("photo").addEventListener("change", function(e){
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    var rd = new FileReader();
+    rd.onload = function(){
+      var img = new Image();
+      img.onload = function(){ photoImg = img; photoURL = rd.result; draw(); };
+      img.src = rd.result;
+    };
+    rd.readAsDataURL(f);
+  });
+
+  $("edit").addEventListener("click", function(){
+    editing = !editing;
+    this.classList.toggle("on", editing);
+    this.textContent = editing ? "Terminar ajuste" : "Ajustar ponto a ponto";
+    $("modeHint").textContent = editing
+      ? "Toque num quadradinho da peça selecionada para acender ou apagar."
+      : "Arraste a palavra ou a foto para posicionar. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.";
+  });
+
+  $("reset").addEventListener("click", function(){
+    els.forEach(rebuild); draw();
+  });
+
+  var drag = null;
+  var pointers = {};
+  var pinch = null;
+  var cv = $("grid");
+
+  function nPointers(){ return Object.keys(pointers).length; }
+
+  function spread(){
+    var k = Object.keys(pointers);
+    var a = pointers[k[0]], b = pointers[k[1]];
+    return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+  }
+
+  function resizeSelected(steps){
+    var el = els[sel];
+    if (!el) return;
+    var b = bboxMM(el);
+    var cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+    if (el.kind === "text"){
+      var v = Math.max(8, Math.min(60, steps));
+      if (v === el.rowsTarget) return;
+      el.rowsTarget = v;
+      $("rows").value = v;
+      $("rowsOut").textContent = v;
+    } else {
+      var z = Math.max(1, Math.min(6, steps));
+      if (z === el.scale) return;
+      el.scale = z;
+      $("symScale").value = z;
+      $("symScaleOut").textContent = z;
+    }
+    rebuild(el);
+    var nb = bboxMM(el);
+    el.x = Math.round((cx - nb.w / 2) * 10) / 10;
+    el.y = Math.round((cy - nb.h / 2) * 10) / 10;
+    draw();
+  }
+
+  function evPos(e){
+    var b = cv.getBoundingClientRect();
+    var k = cv._k || 1;
+    return { x: (e.clientX - b.left) / k, y: (e.clientY - b.top) / k };
+  }
+
+  function hitEl(pt){
+    for (var i = els.length - 1; i >= 0; i--){
+      var l = paperToLocal(els[i], pt.x, pt.y);
+      var b = bboxMM(els[i]);
+      if (l.x >= -2 && l.y >= -2 && l.x <= b.w + 2 && l.y <= b.h + 2) return i;
+    }
+    return -1;
+  }
+
+  cv.addEventListener("pointerdown", function(e){
+    e.preventDefault();
+    var pt = evPos(e);
+    pointers[e.pointerId] = pt;
+    var i = hitEl(pt);
+    if (i >= 0 && i !== sel){ sel = i; syncControls(); renderChips(); }
+    if (editing){
+      var el = els[sel]; if (!el) return;
+      var l = paperToLocal(el, pt.x, pt.y);
+      var p = P();
+      var q = Math.floor(l.x / p), r = Math.floor(l.y / p);
+      if (el.cells[r] && el.cells[r][q] !== undefined){
+        el.cells[r][q] = el.cells[r][q] ? 0 : 1;
+        draw();
+      }
+      return;
+    }
+    cv.setPointerCapture(e.pointerId);
+    if (nPointers() === 2 && els[sel]){
+      drag = null;
+      pinch = { d0: spread(), base: els[sel].kind === "text" ? els[sel].rowsTarget : els[sel].scale };
+      return;
+    }
+    if (i >= 0){
+      drag = { kind:"el", i: sel, dx: pt.x - els[sel].x, dy: pt.y - els[sel].y };
+    } else if (pt.x >= photo.x && pt.x <= photo.x + photo.w && pt.y >= photo.y && pt.y <= photo.y + photo.h){
+      drag = { kind:"photo", dx: pt.x - photo.x, dy: pt.y - photo.y };
+    }
+  });
+
+  cv.addEventListener("pointermove", function(e){
+    if (pointers[e.pointerId]) pointers[e.pointerId] = evPos(e);
+    if (pinch && nPointers() === 2){
+      e.preventDefault();
+      var ratio = spread() / (pinch.d0 || 1);
+      resizeSelected(Math.round(pinch.base * ratio));
+      return;
+    }
+    if (!drag) return;
+    e.preventDefault();
+    var pt = evPos(e);
+    if (drag.kind === "el"){
+      var el = els[drag.i];
+      el.x = Math.round((pt.x - drag.dx) * 10) / 10;
+      el.y = Math.round((pt.y - drag.dy) * 10) / 10;
+    } else {
+      photo.x = Math.round((pt.x - drag.dx) * 10) / 10;
+      photo.y = Math.round((pt.y - drag.dy) * 10) / 10;
+      clampPhoto();
+    }
+    draw();
+  });
+
+  function endDrag(e){
+    if (e && pointers[e.pointerId]) delete pointers[e.pointerId];
+    if (nPointers() < 2) pinch = null;
+    drag = null;
+  }
+  cv.addEventListener("pointerup", endDrag);
+  cv.addEventListener("pointercancel", endDrag);
+
+  function saveName(ext){
+    var el = els[sel];
+    var t = (el && el.kind === "text" ? el.text : "bordado").trim().replace(/\s+/g, "-").replace(/[^A-Za-z0-9\-]/g, "");
+    return "molde-" + (t || "ponto-cruz") + "." + ext;
+  }
+
+  function showImage(url){
+    var box = $("out");
+    box.innerHTML = "";
+    var p = document.createElement("p");
+    p.className = "hint"; p.style.marginTop = "20px";
+    p.textContent = "Segure a imagem abaixo e escolha Salvar em Fotos.";
+    var img = document.createElement("img");
+    img.src = url; img.alt = "Prévia gerada";
+    img.style.maxWidth = "100%";
+    img.style.border = "1px solid var(--line)";
+    img.style.borderRadius = "6px";
+    img.style.background = "#fff";
+    box.appendChild(p); box.appendChild(img);
+  }
+
+  function dataURLToBlob(d){
+    var parts = d.split(","), bin = atob(parts[1]), len = bin.length;
+    var arr = new Uint8Array(len);
+    for (var i = 0; i < len; i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: "image/png" });
+  }
+
+  function deliver(blob, name, dataUrlForImg){
+    var file = null;
+    try { if (window.File) file = new File([blob], name, { type: blob.type }); } catch(e){}
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })){
+      navigator.share({ files: [file] }).catch(function(){ fallbackLink(blob, name, dataUrlForImg); });
+      return;
+    }
+    fallbackLink(blob, name, dataUrlForImg);
+  }
+
+  function fallbackLink(blob, name, dataUrlForImg){
+    var href = null;
+    try { href = URL.createObjectURL(blob); } catch(e){}
+    if (href){
+      try {
+        var a = document.createElement("a");
+        a.href = href; a.download = name; a.target = "_blank";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      } catch(e){}
+    }
+    if (dataUrlForImg){ showImage(dataUrlForImg); return; }
+    if (href){
+      var box = $("out");
+      box.innerHTML = "";
+      var p = document.createElement("p");
+      p.className = "hint"; p.style.marginTop = "20px";
+      var link = document.createElement("a");
+      link.href = href; link.target = "_blank"; link.textContent = "Abrir o PDF numa nova aba";
+      link.style.color = "var(--mat)";
+      p.appendChild(document.createTextNode("Não baixou sozinho? "));
+      p.appendChild(link);
+      box.appendChild(p);
+    }
+  }
+
+  $("dl").addEventListener("click", function(){
+    var pa = paperMM();
+    var k = Math.min(6, 1400 / pa.w);
+    var c = document.createElement("canvas");
+    c.width = Math.round(pa.w * k); c.height = Math.round(pa.h * k);
+    paint(c.getContext("2d"), k, { x:0, y:0, w:pa.w, h:pa.h }, { photoAlpha: 1, outline: false });
+    var url = c.toDataURL("image/png");
+    var blob = null;
+    try { blob = dataURLToBlob(url); } catch(e){}
+    if (blob) deliver(blob, saveName("png"), url); else showImage(url);
+  });
+
+  $("pdf").addEventListener("click", function(){
+    if (!window.jspdf || !window.jspdf.jsPDF){
+      alert("O gerador de PDF não carregou. Conecte à internet e recarregue a página.");
+      return;
+    }
+    if (!els.length) return;
+    var pa = paperMM();
+    var R = cropArea();
+    var fit = pdfFit(R);
+    var land = fit.land, pageW = fit.pageW, scale = fit.scale;
+    var pdf = new window.jspdf.jsPDF({ unit:"mm", format:"a4", orientation: land ? "landscape" : "portrait" });
+    var ox = (pageW - R.w * scale) / 2, oy = PDF_TOP;
+
+    pdf.setFontSize(15);
+    var t = els[sel];
+    pdf.text(t && t.kind === "text" ? (t.text || "molde de furos") : "molde de furos", 12, 15);
+    pdf.setFontSize(9);
+    pdf.setTextColor(80);
+    pdf.text("Papel " + fmt(pa.w) + " x " + fmt(pa.h) + " mm   |   foto " + fmt(photo.w) + " x " + fmt(photo.h) +
+             " mm   |   furos de " + fmt(P()) + " mm   |   " + totalCount.toLocaleString("pt-BR") +
+             " pontos, " + totalHoles.toLocaleString("pt-BR") + " furos", 12, 21);
+    pdf.text("Cole a foto a " + fmt(photo.x) + " mm da borda esquerda e " + fmt(photo.y) + " mm da borda de cima do papel.", 12, 26);
+    pdf.text("Sobra: " + fmt(pa.w - photo.x - photo.w) + " mm a direita, " + fmt(pa.h - photo.y - photo.h) + " mm embaixo.", 12, 31);
+    pdf.setTextColor(scale < 1 ? 190 : 80, scale < 1 ? 81 : 80, scale < 1 ? 3 : 80);
+    pdf.text(scale < 1
+      ? "ATENCAO: reduzido a " + Math.round(scale * 100) + "% para caber na folha. Nesse tamanho os furos nao batem com o material."
+      : "Imprima em 100%, sem ajustar a pagina. Confira com uma regua: o retangulo abaixo deve medir " + fmt(photo.w) + " mm de largura.", 12, 36);
+    pdf.setTextColor(80);
+
+    // 4 px/mm basta para um fundo desenhado a 22% de opacidade, e a compressão
+    // impede o jsPDF de embutir o raster cru — sem ela o molde sai com 6,5 MB
+    var bg = document.createElement("canvas");
+    var bgk = 4;
+    bg.width = Math.round(R.w * bgk); bg.height = Math.round(R.h * bgk);
+    var bctx = bg.getContext("2d");
+    bctx.fillStyle = "#fff"; bctx.fillRect(0, 0, bg.width, bg.height);
+    drawPhoto(bctx, bgk, R, 0.22);
+    pdf.addImage(bg.toDataURL("image/png"), "PNG", ox, oy, R.w * scale, R.h * scale, undefined, "FAST");
+
+    pdf.setDrawColor(150);
+    pdf.setLineWidth(0.2);
+    pdf.setLineDashPattern([2, 2], 0);
+    pdf.rect(ox, oy, R.w * scale, R.h * scale);
+    pdf.setLineDashPattern([], 0);
+
+    pdf.setDrawColor(20);
+    pdf.setLineWidth(0.4);
+    pdf.rect(ox + (photo.x - R.x) * scale, oy + (photo.y - R.y) * scale, photo.w * scale, photo.h * scale);
+
+    var edges = [];
+    if (R.x <= 0.01) edges.push(["v", 0]);
+    if (R.y <= 0.01) edges.push(["h", 0]);
+    if (R.x + R.w >= pa.w - 0.01) edges.push(["v", pa.w]);
+    if (R.y + R.h >= pa.h - 0.01) edges.push(["h", pa.h]);
+    pdf.setDrawColor(56, 73, 89);
+    pdf.setLineWidth(0.6);
+    edges.forEach(function(e){
+      if (e[0] === "v"){
+        var X = ox + (e[1] - R.x) * scale;
+        pdf.line(X, oy, X, oy + R.h * scale);
+      } else {
+        var Y = oy + (e[1] - R.y) * scale;
+        pdf.line(ox, Y, ox + R.w * scale, Y);
+      }
+    });
+
+    var p = P();
+    var trgb = threadRGB();
+    pdf.setDrawColor(trgb[0], trgb[1], trgb[2]);
+    pdf.setLineWidth(0.22);
+    els.forEach(function(el){
+      for (var r = 0; r < el.cells.length; r++){
+        for (var q = 0; q < el.cells[r].length; q++){
+          if (!el.cells[r][q]) continue;
+          var a1 = localToPaper(el, q * p + p * 0.22, r * p + p * 0.22);
+          var a2 = localToPaper(el, (q + 1) * p - p * 0.22, (r + 1) * p - p * 0.22);
+          var b1 = localToPaper(el, (q + 1) * p - p * 0.22, r * p + p * 0.22);
+          var b2 = localToPaper(el, q * p + p * 0.22, (r + 1) * p - p * 0.22);
+          pdf.line(ox + (a1.x - R.x) * scale, oy + (a1.y - R.y) * scale, ox + (a2.x - R.x) * scale, oy + (a2.y - R.y) * scale);
+          pdf.line(ox + (b1.x - R.x) * scale, oy + (b1.y - R.y) * scale, ox + (b2.x - R.x) * scale, oy + (b2.y - R.y) * scale);
+        }
+      }
+    });
+
+    pdf.setFillColor(15, 15, 15);
+    els.forEach(function(el){
+      holesOf(el).forEach(function(h){
+        pdf.circle(ox + (h.x - R.x) * scale, oy + (h.y - R.y) * scale, Math.max(0.22, 0.3 * scale), "F");
+      });
+    });
+
+    deliver(pdf.output("blob"), saveName("pdf"), null);
+  });
+
+  window.addEventListener("resize", draw);
+
+  function boot(){
+    syncPhotoSize();
+    lastPaper = paperMM();
+    var pa = paperMM();
+    photo.x = (pa.w - photo.w) / 2;
+    photo.y = pa.h * 0.14;
+    addText();
+    els[0].x = photo.x - 6;
+    els[0].y = photo.y + photo.h - 10;
+    renderPaletteList();
+    renderSwatches();
+    syncControls();
+    draw();
+  }
+  if (document.fonts && document.fonts.ready){ document.fonts.ready.then(boot); } else boot();
+  setTimeout(function(){ if (els.length){ els.forEach(rebuild); draw(); } }, 1400);
+})();
+</script>
 </body>
 </html>
