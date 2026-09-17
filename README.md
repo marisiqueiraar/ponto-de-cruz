@@ -84,6 +84,18 @@ as linhas dentro de cada coluna. O rótulo embaixo da amostra é fino e estreito
 passar pelo corte, e barra escura no topo de um recorte de tela não atrapalha. A prévia
 contorna o que foi achado e mostra a contagem, então dá para conferir antes de copiar.
 
+Os códigos você escreve na ordem de leitura — ou, para a cartela da Círculo, escolhe a tela
+num atalho embutido, que é a única lista que vem pronta. Eles aparecem embaixo de cada
+amostra, e só quando a quantidade bate com a contagem: lista torta pareia errado, e pareado
+errado é pior do que sem código nenhum.
+
+**Das amostras direto para a caixa de linhas.** Clicar numa amostra e em *guardar na caixa*
+grava a cor em `ponto-e-letra/linhas/v1`, como linha avulsa, com a cor tirada do pixel em vez
+de escolhida no olho. É o caminho curto para quem tem trinta meadas de uma marca e não quer
+subir a cartela inteira. Como `localStorage` é por origem, isso só funciona com as duas
+páginas no mesmo endereço; a página avisa quando não encontra a memória do app, e aí o
+caminho é o `copiar tudo` e o `catalogos.js`.
+
 Nada sai do navegador: as imagens são lidas em `canvas`, ali mesmo. A página não faz parte
 do app e o app não depende dela.
 
