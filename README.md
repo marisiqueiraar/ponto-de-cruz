@@ -54,8 +54,10 @@ Este repositório já teve duas aplicações diferentes antes desta, ambas prese
 do git:
 
 - `6ce5a7a` — app React + Vite + TypeScript (padrão a partir de foto, matching DMC, export PDF).
-- `2b7f050` — versão anterior do artefato: gerador de gráfico só de letras cursivas. As branches
-  `claude/affectionate-pasteur-xia1o8`, `claude/segunda-leva` e `claude/terceira-leva` trazem
-  melhorias construídas sobre essa versão (impressão em escala real, ajustes manuais com
-  desfazer, fontes hospedadas localmente, acesso por teclado, memória local e busca no catálogo
-  do Google Fonts).
+- `2b7f050` — versão anterior do artefato: gerador de gráfico só de letras cursivas.
+- `98af2b9` — essa mesma versão com três levas de melhorias por cima (impressão em escala real,
+  ajustes manuais com desfazer, fontes hospedadas localmente, acesso por teclado, memória local
+  e busca no catálogo do Google Fonts). Chegou a ser o conteúdo da `master` e continua inteira
+  aqui e nas branches `claude/affectionate-pasteur-xia1o8`, `claude/segunda-leva` e
+  `claude/terceira-leva`. É de lá que saem `app.js`, `style.css`, `catalog.js` e as sete fontes
+  em `fonts/`, removidos da árvore nesta versão por pertencerem àquele outro aplicativo.
