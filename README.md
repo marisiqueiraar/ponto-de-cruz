@@ -5,43 +5,65 @@
 Você digita a palavra, escolhe uma cursiva, e o app converte o traço da fonte em uma grade
 quadriculada de pontos, pronta para furar o papel ou bordar na aida.
 
-A aplicação é o arquivo `index.html`: HTML, CSS e JavaScript em um único arquivo, sem build,
-sem dependências e sem backend. A única coisa que vem de fora são as fontes (Google Fonts via CDN).
+Site estático, sem build, sem dependências, sem backend e **sem rede**: as fontes estão
+hospedadas no próprio repositório, então o app funciona offline depois do primeiro carregamento.
 
 ## O que ele faz
 
 - Converte o texto digitado em grade de pontos, renderizando a fonte num canvas e amostrando
   a cobertura de cada célula 6×6 px.
 - Sete cursivas: Great Vibes, Pinyon Script, Dancing Script, Sacramento, Parisienne, Caveat e
-  uma serif itálica (Cormorant Garamond).
+  Cormorant Garamond em itálico.
 - Controles de altura (10–50 pontos), espessura do traço, sensibilidade da amostragem e
   espaçamento entre furos (1–6 mm).
 - Mostra dimensões da grade, contagem de pontos e o tamanho real em centímetros.
 - Grade com linhas de referência de 10 em 10 e pontos desenhados como cruzinhas.
-- Clique em qualquer célula para acender ou apagar o ponto à mão.
-- Exporta o gráfico em PNG e tem layout de impressão (só o gráfico sai no papel).
+- Ajuste ponto a ponto: clique, toque ou setas do teclado com barra de espaço. Os ajustes
+  sobrevivem a mudanças nos controles e têm desfazer (botão ou Ctrl+Z).
+- **Impressão em tamanho real**: a folha é montada em SVG dimensionado em milímetros, então
+  a grade sai no papel exatamente com o espaçamento escolhido. Páginas A4 com 2 células de
+  sobreposição, emenda tracejada e legenda com as faixas de colunas e linhas.
+- Exporta o gráfico em PNG.
+- Guarda texto, ajustes e edições manuais no navegador e restaura ao reabrir.
 
 ## Rodando
 
-Abra `index.html` no navegador. Não há passo de build.
-
-Para servir localmente, qualquer servidor estático resolve — por exemplo:
+Abra `index.html` no navegador — não há passo de build. Para servir localmente:
 
 ```bash
 python3 -m http.server
 ```
 
+## Estrutura
+
+```
+index.html    marcação
+style.css     estilos, @font-face e folha de impressão
+app.js        amostragem, desenho, ajustes, impressão e memória local
+fonts/        as sete cursivas em .woff2 (subconjunto latino)
+favicon.svg
+```
+
+`app.js` é script clássico, não módulo — é o que mantém o duplo clique em `index.html`
+funcionando sem servidor. Se um dia o código for dividido em módulos ES, isso deixa de valer
+e passa a ser necessário servir por HTTP.
+
+## Fontes
+
+As sete cursivas vêm do catálogo do Google Fonts, sob SIL Open Font License 1.1, guardadas
+aqui em `fonts/`. Os créditos e a nota de licença estão em [`fonts/OFL.txt`](fonts/OFL.txt).
+
 ## Deploy
 
-Site estático: é só publicar a raiz do repositório em qualquer host estático
-(GitHub Pages, Vercel, Netlify), sem comando de build e sem variáveis de ambiente.
+Estático puro: publique a raiz do repositório em qualquer host (GitHub Pages, Vercel, Netlify),
+**sem comando de build**. Na Vercel, o `vercel.json` na raiz já fixa isso — sem ele, um projeto
+criado com o preset Vite tenta rodar `vite build` e falha com `vite: command not found`.
 
 ## Histórico
 
 Até o commit `6ce5a7a` este repositório continha um app React + Vite + TypeScript diferente
 (gerador de padrão a partir de foto, matching DMC, export PDF, IndexedDB). Ele foi substituído
-por esta aplicação, mas continua inteiro no histórico do git e pode ser recuperado a
-qualquer momento:
+por esta aplicação, mas continua inteiro no histórico do git:
 
 ```bash
 git checkout 6ce5a7a
