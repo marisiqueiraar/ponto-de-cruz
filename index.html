@@ -247,6 +247,8 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
 .chip{display:block;width:100%;text-align:left;border:1px solid var(--line);background:#fff;
   border-radius:6px;padding:9px 11px;font-size:14px;color:var(--ink);min-height:40px}
 .chip.on{border-color:var(--mat);box-shadow:inset 4px 0 0 var(--lemon)}
+.chip .pt{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;
+  vertical-align:-1px;border:1px solid rgba(0,0,0,.2)}
 
 /* cores da linha */
 .swrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;min-height:44px}
@@ -614,7 +616,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         <select id="palette"></select>
       </div>
       <div class="field">
-        <label>Cor da linha <b id="threadName">Limao escuro</b></label>
+        <label><span id="threadAlvo">Cor da linha</span> <b id="threadName">Limao escuro</b></label>
         <div class="swrow" id="swatches"></div>
       </div>
       <p class="note">A cor vale para a tela e para a prévia em PNG. O molde em PDF sai sempre
@@ -670,6 +672,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <li>Recorte o molde impresso pela moldura tracejada e prenda sobre o conjunto alinhando o retângulo da foto com a foto de verdade, fita crepe nos quatro cantos.</li>
       <li>Molde maior que uma A4 sai em várias folhas, todas em tamanho real. Cada uma diz qual é no cabeçalho, e as vizinhas repetem uma faixa do desenho: sobreponha uma na outra até os furos da faixa coincidirem, e só então prenda. As margens dizem qual folha continua de cada lado.</li>
       <li>Fure ponto a ponto com agulha grossa, apoiado em EVA ou cortiça. Cada quadradinho usa quatro furos, compartilhados com os vizinhos — por isso o número de furos é menor que o dobro de pontos.</li>
+      <li>Cada peça pode ter a sua linha: selecione a peça e toque na cor. O rodapé do PDF lista as linhas usadas com o código da marca — a cor impressa é referência de tela, o código é o que se compra.</li>
       <li>Borde com 2 ou 3 fios de meada. Em furo que atravessa foto e papel, puxe devagar: papel fotográfico não fecha depois de rasgar.</li>
       <li>Espaçamento entre 2,5 e 3 mm é o mais seguro nesse material. Abaixo de 2 mm a tira de papel entre dois furos vira pó.</li>
     </ul>
@@ -828,9 +831,34 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   var saveTimer = 0;
   var restored = false;
 
-  function threadRGB(){
-    var h = thread.replace("#", "");
+  function hexRGB(hex){
+    var h = hex.replace("#", "");
     return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)];
+  }
+
+  /* A cor mora na peça, não no molde inteiro. É vendo duas peças com as duas
+     linhas de verdade, lado a lado no arranjo, que a escolha se decide — e o
+     catálogo das marcas só serve para isso se der para usar mais de uma.
+
+     `thread` continua existindo como a cor corrente: a que a próxima peça
+     nasce usando, e a que vale para as peças gravadas antes desta mudança,
+     que não têm cor nenhuma dentro delas. */
+  function corDe(el){
+    if (el && el.color)
+      return { hex: el.color, nome: el.colorName || threadLabel(el.color) || el.color };
+    return { hex: thread, nome: threadLabel(thread) || thread };
+  }
+
+  // as linhas do molde, na ordem das peças e sem repetir cor
+  function linhasUsadas(){
+    var vistas = {}, lista = [];
+    els.forEach(function(el){
+      var c = corDe(el);
+      if (vistas[c.hex]) return;
+      vistas[c.hex] = 1;
+      lista.push(c);
+    });
+    return lista;
   }
 
   // a lista é montada de novo toda vez que a caixa de linhas muda de tamanho,
@@ -874,9 +902,10 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
                       'e toque nas cores que você tem.</p>';
       return;
     }
+    var atual = corDe(els[sel]).hex;
     cores.forEach(function(c){
       var b = document.createElement("button");
-      b.className = "sw" + (c[0] === thread ? " on" : "");
+      b.className = "sw" + (c[0] === atual ? " on" : "");
       b.style.background = c[0];
       b.title = c[1] + " " + c[0];
       b.setAttribute("aria-label", "Linha " + c[1]);
@@ -889,9 +918,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   }
 
   function usaCor(hex, nome){
-    thread = hex;
+    thread = hex;                       // a cor corrente, com que a próxima peça nasce
+    var el = els[sel];
+    if (el){ el.color = hex; el.colorName = nome; }
     $("threadName").textContent = nome;
+    renderChips();
     draw();          // draw() é quem agenda a gravação, inclusive da cor
+    if (el) pushHist();   // trocar a linha se desfaz como qualquer outro passo
   }
 
   /* ---- catálogo das marcas -------------------------------------------- */
@@ -1201,11 +1234,31 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   // a folha do PDF: 10 mm de margem lateral, 46 mm de cabeçalho e 8 mm embaixo.
   // a tela e o PDF decidem por aqui se cabe, para nunca discordarem.
-  var PDF_SIDE = 10, PDF_TOP = 46, PDF_FOOT = 8;
+  var PDF_SIDE = 10, PDF_TOP = 46, PDF_FOOT = 8, FOOT_LINHA = 4.2;
+
+  /* Quanto rodapé a legenda das linhas pede. A conta é feita sem o jsPDF,
+     porque quem pergunta se o molde cabe é a tela, a cada desenho, e ela não
+     tem documento nenhum na mão. Helvetica de 7 pt não passa de 1,45 mm por
+     caractere; superestimar sobra rodapé, subestimar comeria o molde. A folha
+     estreita decide, para a conta valer nas duas orientações. */
+  function legendaLinhas(){
+    var usadas = linhasUsadas();
+    if (!usadas.length) return 1;
+    var util = 210 - PDF_SIDE * 2;
+    var n = 1, x = 0;
+    usadas.forEach(function(c){
+      var w = 9 + c.nome.length * 1.45;
+      if (x > 0 && x + w > util){ n++; x = 0; }
+      x += w;
+    });
+    return Math.min(n, 3);   // passou de três linhas, o rodapé come o molde
+  }
+  function footMM(){ return PDF_FOOT + (legendaLinhas() - 1) * FOOT_LINHA; }
+
   function pdfFit(R){
     var land = R.w > R.h;
     var pageW = land ? 297 : 210, pageH = land ? 210 : 297;
-    var maxW = pageW - PDF_SIDE * 2, maxH = pageH - PDF_TOP - PDF_FOOT;
+    var maxW = pageW - PDF_SIDE * 2, maxH = pageH - PDF_TOP - footMM();
     return { land: land, pageW: pageW, scale: Math.min(1, maxW / R.w, maxH / R.h) };
   }
 
@@ -1242,7 +1295,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
     function grade(land){
       var uw = (land ? 297 : 210) - PDF_SIDE * 2;
-      var uh = (land ? 210 : 297) - TILE_TOP - PDF_FOOT;
+      var uh = (land ? 210 : 297) - TILE_TOP - footMM();
       var cols = nFolhas(R.w, uw), rows = nFolhas(R.h, uh);
       return { land: land, uw: uw, uh: uh, cols: cols, rows: rows, n: cols * rows };
     }
@@ -1328,7 +1381,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     els.forEach(function(el, i){
       totalCount += countOf(el);
       totalHoles += holesOf(el).length;
-      drawStitches(ctx, el, k, region, thread, Math.max(1.3, P() * k * 0.15));
+      drawStitches(ctx, el, k, region, corDe(el).hex, Math.max(1.3, P() * k * 0.15));
       if (opts.outline && i === sel) drawOutline(ctx, el, k, region);
     });
   }
@@ -1339,7 +1392,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var plano = pdfPlan(cr);
     var land = cr.w > cr.h;
     var maxW = (land ? 297 : 210) - PDF_SIDE * 2;
-    var maxH = (land ? 210 : 297) - PDF_TOP - PDF_FOOT;
+    var maxH = (land ? 210 : 297) - PDF_TOP - footMM();
     var folga = Math.min(maxW - cr.w, maxH - cr.h);
     var area = fmt(cr.w / 10) + " × " + fmt(cr.h / 10) + " cm";
     var box = $("fitHint"), txt = $("fitTxt"), state = "";
@@ -1437,6 +1490,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   // string de "0" e "1" — mais compacto que JSON de array e igualmente legível.
   function packEl(el){
     var r = { kind: el.kind, x: el.x, y: el.y, rot: el.rot, manual: el.manual || 0,
+              color: el.color || "", colorName: el.colorName || "",
               cells: el.cells.map(function(row){ return row.join(""); }) };
     if (el.kind === "text"){
       r.text = el.text; r.font = el.font;
@@ -1456,6 +1510,12 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     });
     var el = { kind: r.kind === "sym" ? "sym" : "text", cells: cells,
                x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0, manual: +r.manual || 0 };
+    // molde gravado antes de a cor morar na peça volta sem cor, e aí vale a
+    // corrente — que é exatamente a cor com que ele foi desenhado na época
+    if (typeof r.color === "string" && /^#[0-9A-Fa-f]{6}$/.test(r.color)){
+      el.color = r.color;
+      el.colorName = typeof r.colorName === "string" ? r.colorName : "";
+    }
     if (el.kind === "text"){
       el.text = typeof r.text === "string" ? r.text : "";
       el.font = r.font || "Great Vibes";
@@ -1656,8 +1716,16 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     els.forEach(function(el, i){
       var b = document.createElement("button");
       b.className = "chip" + (i === sel ? " on" : "");
-      b.textContent = el.kind === "text" ? (el.text || "texto")
-        : ({heart:"coração", heartOutline:"coração vazado", star:"estrela", arrow:"seta"})[el.sym];
+      // o ponto de cor é o que deixa ver o arranjo inteiro de uma vez, sem
+      // ter de selecionar peça por peça para lembrar de que linha é cada uma
+      var cor = corDe(el);
+      var pt = document.createElement("span");
+      pt.className = "pt";
+      pt.style.background = cor.hex;
+      pt.title = cor.nome;
+      b.appendChild(pt);
+      b.appendChild(document.createTextNode(el.kind === "text" ? (el.text || "texto")
+        : ({heart:"coração", heartOutline:"coração vazado", star:"estrela", arrow:"seta"})[el.sym]));
       b.addEventListener("click", function(){ sel = i; focus = "el"; syncControls(); draw(); renderChips(); });
       box.appendChild(b);
     });
@@ -1666,6 +1734,14 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function syncControls(){
     var el = els[sel];
     var piece = focus === "el" && !!el;
+    // com uma linha por peça, o painel precisa dizer qual peça ele está
+    // pintando — senão o quadradinho marcado vira adivinhação
+    var cor = corDe(el);
+    $("threadName").textContent = cor.nome;
+    $("threadAlvo").textContent = el
+      ? "Linha de " + (el.kind === "text" ? "“" + (el.text || "texto") + "”" : "símbolo")
+      : "Linha da próxima peça";
+    renderSwatches();
     $("ctlPhoto").classList.toggle("hide", focus !== "photo");
     $("ctlPiece").classList.toggle("hide", !piece);
     $("ctlActs").classList.toggle("hide", !piece);
@@ -1700,14 +1776,16 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   function addText(){
     var el = { kind:"text", text:"champ", font:"Great Vibes", rowsTarget:18, thick:2, thr:0.35, rot:-4,
-               x: photo.x, y: photo.y + photo.h - 14, cells:[[0]] };
+               x: photo.x, y: photo.y + photo.h - 14, cells:[[0]],
+               color: thread, colorName: threadLabel(thread) || thread };
     rebuild(el);
     els.push(el); sel = els.length - 1; focus = "el";
     renderChips(); syncControls(); draw(); pushHist();
   }
 
   function addSym(){
-    var el = { kind:"sym", sym:"heart", scale:2, rot:0, x: photo.x + photo.w - 20, y: photo.y + photo.h - 20, cells:[[0]] };
+    var el = { kind:"sym", sym:"heart", scale:2, rot:0, x: photo.x + photo.w - 20, y: photo.y + photo.h - 20,
+               cells:[[0]], color: thread, colorName: threadLabel(thread) || thread };
     rebuild(el);
     els.push(el); sel = els.length - 1; focus = "el";
     renderChips(); syncControls(); draw(); pushHist();
@@ -2158,6 +2236,38 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         pdf.rect(x + q * c, y + r * c, c, c, (r * plano.cols + q) === idx ? "FD" : "D");
   }
 
+  /* A legenda no rodapé. Sem ela o molde impresso não diz qual linha é qual:
+     o traço sai na cor, mas cor de tela não é código de meada, e quem volta ao
+     trabalho uma semana depois não tem como saber o que comprar de novo.
+     Vai em toda folha, porque cada folha é recortada e usada sozinha. */
+  function legenda(pdf, plano){
+    var usadas = linhasUsadas();
+    if (!usadas.length) return;
+    var util = plano.pageW - PDF_SIDE * 2;
+    var y = (plano.land ? 210 : 297) - footMM() + 4;
+    var x = 12, linha = 1, max = legendaLinhas();
+    pdf.setFontSize(7);
+    for (var i = 0; i < usadas.length; i++){
+      var w = 9.5 + pdf.getTextWidth(usadas[i].nome);
+      if (x > 12 && x - 12 + w > util){
+        if (linha >= max){
+          pdf.setTextColor(120);
+          pdf.text("+ " + (usadas.length - i) + " linhas", x, y);
+          return;
+        }
+        linha++; x = 12; y += FOOT_LINHA;
+      }
+      var rgb = hexRGB(usadas[i].hex);
+      pdf.setFillColor(rgb[0], rgb[1], rgb[2]);
+      pdf.setDrawColor(120);
+      pdf.setLineWidth(0.15);
+      pdf.rect(x, y - 2.4, 3.2, 3.2, "FD");
+      pdf.setTextColor(60);
+      pdf.text(usadas[i].nome, x + 4.6, y);
+      x += w;
+    }
+  }
+
   function cabecalho(pdf, plano, idx){
     var pa = paperMM();
     var t = els[sel];
@@ -2266,11 +2376,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     };
 
     var p = P();
-    var trgb = threadRGB();
-    pdf.setDrawColor(trgb[0], trgb[1], trgb[2]);
     pdf.setLineWidth(0.22);
     els.forEach(function(el){
       if (!cabe(el)) return;
+      var rgb = hexRGB(corDe(el).hex);
+      pdf.setDrawColor(rgb[0], rgb[1], rgb[2]);
       for (var r = 0; r < el.cells.length; r++){
         for (var q = 0; q < el.cells[r].length; q++){
           if (!el.cells[r][q]) continue;
@@ -2330,6 +2440,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       var ox = (plano.pageW - plano.tw) / 2, oy = plano.top;
       cabecalho(pdf, plano, i);
       moldeNaFolha(pdf, vw, ox, oy);
+      legenda(pdf, plano);
       if (plano.tiled) vizinhas(pdf, plano, i, ox, oy);
     }
 

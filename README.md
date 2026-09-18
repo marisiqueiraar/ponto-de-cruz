@@ -29,16 +29,21 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
   palavra já em quadradinhos, que é o que vira furo. Com busca e filtro por grupo. Os cartões
   pedem a fonte só quando chegam à vista, então abrir a lista não baixa as 40 famílias.
 - **Linhas**: oito paletas de quatro cores cada, mais os catálogos das marcas — 391 cores da
-  Anchor e 455 da DMC. Na aba **catálogo** você toca nas cores que tem na caixa; elas viram a
-  paleta **minhas linhas**, e marcar uma já pinta o molde com ela, que é o jeito de ver a cor
-  real no arranjo antes de gastar meada. A busca aceita código ou nome. O que você marcou fica
+  Anchor e 455 da DMC. **Cada peça tem a sua linha**: escolher uma cor pinta a peça selecionada,
+  e a lista de peças mostra um ponto da cor de cada uma, para ver o arranjo inteiro de uma vez.
+  Sem isso o catálogo só servia para uma cor de cada vez, e é comparando duas linhas lado a lado
+  no arranjo que a escolha se decide. Na aba **catálogo** você toca nas cores que tem na caixa;
+  elas viram a paleta **minhas linhas**, e marcar uma já pinta a peça com ela, que é o jeito de
+  ver a cor real antes de gastar meada. A busca aceita código ou nome. O que você marcou fica
   guardado no navegador à parte do molde, e não some quando você recomeça um desenho.
 - **Contagem**: pontos e furos, com o tamanho da peça selecionada em centímetros. O rodapé diz o
   tempo todo se o molde sai numa folha ou em quantas.
 - **PDF do molde**: em tamanho real, recortado na área do bordado, com a moldura de recorte, o
   retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
   distância exata para colar a foto no papel e uma **régua de aferição de 50 mm** — se ela não
-  medir 50 mm na régua de verdade, a impressora reduziu a página e nenhum furo vai bater.
+  medir 50 mm na régua de verdade, a impressora reduziu a página e nenhum furo vai bater. No
+  rodapé de cada folha vai a legenda das linhas usadas, com o código da marca — cor de tela não
+  é código de meada, e sem a legenda o molde impresso não diz o que comprar de novo.
 - **Molde em várias folhas**: o que não cabe numa A4 é repartido, nunca reduzido. Molde reduzido
   é molde errado, e o erro só aparece com a agulha na mão. Cada folha traz o seu número, um
   mapinha de onde ela fica no conjunto e, nas margens, qual folha continua de cada lado. As
@@ -59,8 +64,8 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
 - **Desfazer e refazer**: cada passo guarda o arranjo inteiro, células incluídas, então voltar
   atrás devolve também o que foi aceso ou apagado à mão. Botões na barra de cima, Ctrl+Z e
   Ctrl+Shift+Z. Um arraste de controle deslizante vira um passo só, não dezenas.
-- **Memória local**: papel, foto, peças, posições, inclinações, paleta e os ajustes feitos ponto
-  a ponto ficam guardados no navegador e voltam ao reabrir. As células são gravadas como estão,
+- **Memória local**: papel, foto, peças, posições, inclinações, linha de cada peça e os ajustes
+  feitos ponto a ponto ficam guardados no navegador e voltam ao reabrir. As células são gravadas como estão,
   e não recalculadas na volta — é isso que preserva o que você acendeu ou apagou à mão. Para
   refazer tudo a partir dos controles, o botão **Recalcular** — que pergunta antes quando há
   ajustes manuais a perder, dizendo quantos são, e oferece refazer só a peça selecionada. O
