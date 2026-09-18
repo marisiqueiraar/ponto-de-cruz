@@ -8,7 +8,7 @@ def bloco(i, f):
     a = s.index(i); b = s.index(f, a); return s[a:b]
 
 io.open(os.path.join(D, "pdfcode.js"), "w", encoding="utf-8").write(
-    bloco(u"  function hexRGB(hex){", u"  // a lista é montada de novo") +
+    bloco(u"  function hexRGB(hex){", u"  // A caixa de linhas é uma marca") +
     bloco(u"  function bboxMM(el){", u"  function drawPhoto(") +
     bloco(u"  /* Régua impressa.", u"  /* ---- escolher a fonte vendo o traço"))
 

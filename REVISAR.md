@@ -151,3 +151,30 @@ salvar o arquivo primeiro?). Está no backlog como item 1.
 
 Enquanto isso, o conselho honesto é o que a ajuda já diz: **salve o arquivo do
 molde** antes de acumular muitos.
+
+---
+
+## 5. O que ficou preso num branch e voltou agora
+
+O painel de linha já tinha sido refeito uma vez, em `ee5a9ab`, no branch
+`claude/tender-turing-btqvak`: as oito paletas de fantasia saíam, o código ia
+impresso dentro do quadradinho e a grade passava a sair por tom. Só que o PR #10
+daquele branch **já estava mergeado** quando esses commits foram empurrados, e o
+PR não reabre sozinho — o trabalho ficou no branch e o `master` nunca o viu. Os
+PRs #11 e #12 saíram do `master` sem ele, então ninguém reverteu nada: o que
+voltou à tela foram as paletas que nunca tinham saído de lá.
+
+Isto aqui traz de volta o `ee5a9ab`, adaptado ao que mudou depois (cor por peça,
+consumo de linha, estante de moldes).
+
+**Ainda preso naquele branch**, se você quiser:
+
+- `2bb1303` + `42991ea` — o `cartela.html`, uma página ao lado do app que lê uma
+  foto da cartela de papel, tira a cor do pixel de cada amostra e grava direto na
+  caixa de linhas; e o cadastro de **linha avulsa** (marca, código e cor à mão),
+  para a meada que não está em catálogo nenhum.
+- `6427eed` + `89826a3` — dois acertos nas réguas: os tiques da barra de cima e o
+  número de dois dígitos que não cabia na borda do papel.
+
+Nenhum dos dois veio junto porque você não pediu, e o primeiro é um arquivo novo
+inteiro. Dizer "traz a cartela" basta.

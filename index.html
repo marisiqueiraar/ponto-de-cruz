@@ -270,10 +270,12 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
 .chip .pt{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;
   vertical-align:-1px;border:1px solid rgba(0,0,0,.2)}
 
-/* cores da linha */
-.swrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;min-height:44px}
-.sw{width:34px;height:34px;flex:0 0 auto;padding:0;border-radius:50%;border:2px solid var(--line)}
-.sw.on{border-color:var(--ink);box-shadow:0 0 0 3px #fff inset}
+/* a cor que está na peça agora, no alto do painel */
+.atual{display:flex;align-items:center;gap:9px;margin:0 0 14px;font-size:13px;
+  color:var(--ink-soft);flex-wrap:wrap}
+.atual i{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1px solid var(--line)}
+.atual b{font-family:var(--display);font-weight:400;font-size:11px;color:var(--ink);
+  overflow-wrap:anywhere}
 
 /* abas dentro do painel: a linha passou a ter duas telas — a cor que está no
    molde agora e o catálogo inteiro das marcas, que tem centenas de cores e
@@ -284,15 +286,22 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
   letter-spacing:.02em;color:var(--ink-soft)}
 .abas button.on{background:var(--mat);border-color:var(--mat);color:#fff}
 
-/* catálogo das marcas: num painel de 300 px a bolinha de 34 px da paleta não
-   cabe 400 vezes, então aqui a cor vira quadradinho em grade. O visto fica
-   numa tarja branca, que é o único fundo que se enxerga sobre qualquer cor. */
-.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(30px,1fr));gap:6px}
-.cat{position:relative;height:30px;padding:0;border-radius:5px;
-  border:1px solid rgba(56,73,89,.22)}
+/* catálogo das marcas: num painel de 300 px uma bolinha de 34 px não cabe 400
+   vezes, então aqui a cor vira quadradinho em grade, com o código impresso
+   dentro. O visto fica numa tarja branca, que é o único fundo que se enxerga
+   sobre qualquer cor. */
+.ordem{margin:-4px 0 12px}
+.ordem button{flex:0 0 auto;padding:0 13px}
+.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:6px}
+.cat{position:relative;height:36px;padding:0;border-radius:5px;
+  border:1px solid rgba(56,73,89,.22);
+  font-family:var(--display);font-size:9px;letter-spacing:.02em;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  text-shadow:0 1px 2px rgba(0,0,0,.28)}
 .cat.on{border-color:var(--mat);box-shadow:0 0 0 2px var(--mat)}
-.cat.on::after{content:"\2713";position:absolute;right:1px;bottom:0;padding:0 1px;
-  font-size:10px;line-height:1.2;color:var(--mat);background:#fff;border-radius:3px}
+.cat.on::after{content:"\2713";position:absolute;right:1px;top:0;padding:0 1px;
+  font-size:9px;line-height:1.3;color:var(--mat);background:#fff;border-radius:3px;
+  text-shadow:none}
 .grade .vazio{grid-column:1/-1;font-size:12.5px;color:var(--ink-soft);margin:6px 0}
 .catfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;
   margin-top:14px;font-size:12.5px;color:var(--ink-soft)}
@@ -645,42 +654,34 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   <section class="pane" data-pane="linha">
     <h2>linha</h2>
 
-    <div class="abas" id="linhaAbas">
-      <button type="button" class="on" data-aba="usar">no molde</button>
-      <button type="button" data-aba="catalogo">catálogo</button>
-    </div>
+    <p class="atual"><i id="threadDot"></i><span id="threadAlvo">Linha da próxima peça</span>
+      <b id="threadName">—</b></p>
 
-    <div data-aba="usar">
-      <div class="field">
-        <label for="palette">Paleta</label>
-        <select id="palette"></select>
-      </div>
-      <div class="field">
-        <label><span id="threadAlvo">Cor da linha</span> <b id="threadName">Limao escuro</b></label>
-        <div class="swrow" id="swatches"></div>
-      </div>
-      <p class="note">A cor vale para a tela e para a prévia em PNG. O molde em PDF sai sempre
-      em preto, porque é gabarito de furo.</p>
-    </div>
-
-    <div data-aba="catalogo" class="hide">
+    <div>
       <div class="abas" id="marcas"></div>
       <div class="field">
         <label for="catBusca">Buscar</label>
         <input id="catBusca" type="text" placeholder="código ou nome da cor" autocomplete="off"
                spellcheck="false">
       </div>
+      <div class="abas ordem" id="catOrdem" role="group" aria-label="ordem das cores">
+        <button type="button" class="on" data-ordem="tom">por tom</button>
+        <button type="button" data-ordem="codigo">por código</button>
+      </div>
       <div class="grade" id="catGrade"></div>
       <div class="catfoot">
         <span id="catConta">nenhuma linha marcada</span>
         <button type="button" id="catLimpar" class="hide">limpar</button>
       </div>
-      <p class="note">Toque numa cor para dizer que você tem essa linha. Ela entra na paleta
-      <b>minhas linhas</b> e já passa a ser a cor do molde na tela, que é o jeito de
-      experimentar a cor no arranjo antes de gastar meada. Tocar de novo desmarca.</p>
+      <p class="note">Toque numa cor para dizer que você tem essa linha. Ela entra na marca
+      <b>minhas</b>, a primeira da fileira, e já passa a ser a cor da peça selecionada, que é o
+      jeito de experimentar a cor no arranjo antes de gastar meada. Tocar de novo desmarca —
+      dentro de <b>minhas</b>, tocar só usa a cor; para tirar da caixa, volte à marca de onde
+      ela veio.</p>
       <p class="note">As cores são referência de tela. A da Anchor sai da cartela da própria
       marca; a da DMC vem de tabela pública e é mais aproximada. Monitor, luz e lote mudam o
-      que você vê na mão.</p>
+      que você vê na mão. Na tela e na prévia em PNG o molde sai na cor escolhida; em PDF sai
+      sempre em preto, porque é gabarito de furo.</p>
     </div>
   </section>
 
@@ -840,40 +841,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   var totalCount = 0, totalHoles = 0;
   var lastPaper = null;
 
-  var PALETTES = [
-    { name: "Zesty lemon", colors: [
-      ["#FFFF66","Limao claro"],["#FFE566","Limao"],["#D6D58B","Limao seco"],["#B3B347","Limao escuro"]
-    ]},
-    { name: "Golden taupe", colors: [
-      ["#D4AF37","Dourado"],["#BDB76B","Taupe verde"],["#FDFBD4","Creme"],["#CE8946","Caramelo"]
-    ]},
-    { name: "Retro sunset", colors: [
-      ["#BE5103","Terracota"],["#FFCE1B","Mostarda"],["#069494","Verde agua"],["#B7410E","Ferrugem"]
-    ]},
-    { name: "Stormy morning", colors: [
-      ["#384959","Azul noite"],["#6A89A7","Azul fumaca"],["#88BDF2","Azul claro"],["#BDDDFC","Azul gelo"]
-    ]},
-    { name: "Mossy hollow", colors: [
-      ["#636B2F","Musgo"],["#BAC095","Salvia"],["#D4DE95","Verde broto"],["#3D4127","Oliva escuro"]
-    ]},
-    { name: "Blue eclipse", colors: [
-      ["#272757","Meia-noite"],["#8686AC","Lavanda fria"],["#505081","Violeta fumaca"],["#0F0E47","Tinta"]
-    ]},
-    { name: "Chili spice", colors: [
-      ["#CD1C18","Pimenta"],["#FFA896","Salmao"],["#9B1313","Vermelho seco"],["#38000A","Vinho"]
-    ]},
-    { name: "Chocolate truffle", colors: [
-      ["#713600","Cacau"],["#C05800","Caramelo queimado"],["#FDFBD4","Creme"],["#38240D","Chocolate amargo"]
-    ]}
-  ];
   var thread = "#B3B347";
-  var curPal = 0;   /* índice em PALETTES, ou "minhas" */
 
   /* ---- catálogos das marcas e as linhas que você tem -------------------
      O catálogo vem de catalogos.js, que é dado puro: marca, código e cor.
      Daqui para baixo fica só o que é seu — a lista do que já está na caixa,
-     por chave "marca:codigo". Ela vira uma paleta como as outras, e é assim
-     que a cor de uma linha de verdade entra no molde para ser testada. */
+     por chave "marca:codigo". Ela vira a marca "minhas", a primeira da fileira,
+     e é assim que a cor de uma linha de verdade entra no molde para ser testada. */
   var CAT = window.CATALOGOS || [];
   var catIdx = {};
   CAT.forEach(function(m){
@@ -1055,67 +1029,30 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return lista;
   }
 
-  // a lista é montada de novo toda vez que a caixa de linhas muda de tamanho,
-  // porque é ela que traz — ou tira — a opção "minhas linhas" da frente
-  function renderPaletteList(){
-    var selEl = $("palette");
-    var alvo = String(curPal);
-    selEl.innerHTML = "";
-    if (minhas.length){
-      var om = document.createElement("option");
-      om.value = "minhas";
-      om.textContent = "minhas linhas (" + minhas.length + ")";
-      selEl.appendChild(om);
-    }
-    PALETTES.forEach(function(pal, i){
-      var o = document.createElement("option");
-      o.value = String(i);
-      o.textContent = pal.name;
-      selEl.appendChild(o);
-    });
-    if (!selEl.querySelector('option[value="' + alvo + '"]')){ curPal = 0; alvo = "0"; }
-    selEl.value = alvo;
+  // A caixa de linhas é uma marca como as outras na fileira, e a primeira
+  // quando tem algo dentro: é a lista de onde se escolhe cor para o molde.
+  function chavesDaVista(){
+    if (marcaAtiva === "minhas") return minhas.slice();
+    var m = CAT.filter(function(x){ return x.id === marcaAtiva; })[0];
+    return m ? m.cores.map(function(c){ return m.id + ":" + c[0]; }) : null;
   }
 
-  function coresDaPaleta(){
-    if (curPal === "minhas"){
-      return minhas.map(function(k){
-        var c = catIdx[k];
-        return [c.hex, c.marca + " " + c.code];
-      });
-    }
-    return PALETTES[curPal].colors;
-  }
-
-  function renderSwatches(){
-    var box = $("swatches");
-    box.innerHTML = "";
-    var cores = coresDaPaleta();
-    if (!cores.length){
-      box.innerHTML = '<p class="note">Nenhuma linha marcada ainda. Abra a aba <b>catálogo</b> ' +
-                      'e toque nas cores que você tem.</p>';
-      return;
-    }
-    var atual = corDe(els[sel]).hex;
-    cores.forEach(function(c){
-      var b = document.createElement("button");
-      b.className = "sw" + (c[0] === atual ? " on" : "");
-      b.style.background = c[0];
-      b.title = c[1] + " " + c[0];
-      b.setAttribute("aria-label", "Linha " + c[1]);
-      b.addEventListener("click", function(){
-        usaCor(c[0], c[1]);
-        renderSwatches();
-      });
-      box.appendChild(b);
-    });
+  // o alto do painel diz duas coisas: que peça está sendo pintada e com quê
+  function mostraThread(){
+    var el = els[sel];
+    var cor = corDe(el);
+    $("threadDot").style.background = cor.hex;
+    $("threadName").textContent = cor.nome;
+    $("threadAlvo").textContent = el
+      ? "Linha de " + (el.kind === "text" ? "“" + (el.text || "texto") + "”" : "símbolo")
+      : "Linha da próxima peça";
   }
 
   function usaCor(hex, nome){
     thread = hex;                       // a cor corrente, com que a próxima peça nasce
     var el = els[sel];
     if (el){ el.color = hex; el.colorName = nome; }
-    $("threadName").textContent = nome;
+    mostraThread();
     renderChips();
     draw();          // draw() é quem agenda a gravação, inclusive da cor
     if (el) pushHist();   // trocar a linha se desfaz como qualquer outro passo
@@ -1126,13 +1063,18 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function montaMarcas(){
     var box = $("marcas");
     box.innerHTML = "";
-    CAT.forEach(function(m){
+    var vistas = CAT.map(function(m){
+      return { id: m.id, nome: m.marca.toLowerCase(), n: m.cores.length };
+    });
+    if (minhas.length) vistas.unshift({ id: "minhas", nome: "minhas", n: minhas.length });
+    if (marcaAtiva === "minhas" && !minhas.length) marcaAtiva = CAT.length ? CAT[0].id : "";
+    vistas.forEach(function(v){
       var b = document.createElement("button");
       b.type = "button";
-      b.className = m.id === marcaAtiva ? "on" : "";
-      b.textContent = m.marca.toLowerCase() + " (" + m.cores.length + ")";
+      b.className = v.id === marcaAtiva ? "on" : "";
+      b.textContent = v.nome + " (" + v.n + ")";
       b.addEventListener("click", function(){
-        marcaAtiva = m.id;
+        marcaAtiva = v.id;
         montaMarcas();
         listaCatalogo();
       });
@@ -1140,42 +1082,103 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     });
   }
 
+  /* ---- ordem por tom --------------------------------------------------
+     Uma cartela impressa não vem por número: vem por família, e dentro da
+     família do claro ao escuro. Aqui a família sai do matiz, em faixas de 15°,
+     e a escala sai da luminância — o cinza, o cru e o preto não têm matiz que
+     preste, então vão juntos no fim, do mais claro ao mais escuro. */
+  function matizEscala(hex){
+    var r = parseInt(hex.substr(1, 2), 16) / 255,
+        g = parseInt(hex.substr(3, 2), 16) / 255,
+        b = parseInt(hex.substr(5, 2), 16) / 255;
+    var mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+    var h = 0;
+    if (d > 0){
+      if (mx === r) h = ((g - b) / d + (g < b ? 6 : 0));
+      else if (mx === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h *= 60;
+    }
+    var lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    var sat = (mx + mn === 0 || mx + mn === 2) ? 0 : d / (1 - Math.abs(mx + mn - 1));
+    // pouca cor, ou escuro demais para a cor significar algo: é neutro
+    var neutro = sat < 0.16 || mx < 0.10;
+    return { faixa: neutro ? 99 : Math.floor(h / 15), lum: lum };
+  }
+
+  var ordemModo = "tom";
+  var ordemCache = {};
+
+  function ordena(chaves, marca){
+    if (ordemModo === "codigo"){
+      return chaves.slice().sort(function(a, b){
+        var x = parseInt(catIdx[a].code, 10), y = parseInt(catIdx[b].code, 10);
+        if (isNaN(x) && isNaN(y)) return catIdx[a].code.localeCompare(catIdx[b].code);
+        if (isNaN(x)) return 1;                       // Blanc, Ecru e afins no fim
+        if (isNaN(y)) return -1;
+        return x - y;
+      });
+    }
+    var cache = ordemCache[marca];
+    if (cache && cache.n === chaves.length) return cache.ordem;
+    var ordem = chaves.slice().sort(function(a, b){
+      var p = matizEscala(catIdx[a].hex), q = matizEscala(catIdx[b].hex);
+      if (p.faixa !== q.faixa) return p.faixa - q.faixa;
+      return q.lum - p.lum;                           // do claro ao escuro
+    });
+    ordemCache[marca] = { n: chaves.length, ordem: ordem };
+    return ordem;
+  }
+
+  // Preto ou branco por cima da cor, conforme ela seja clara ou escura: o
+  // código tem de ser lido em cima de qualquer amostra da cartela.
+  function tinta(hex){
+    var r = parseInt(hex.substr(1, 2), 16),
+        g = parseInt(hex.substr(3, 2), 16),
+        b = parseInt(hex.substr(5, 2), 16);
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > 0.55 ? "#26323D" : "#FFFFFF";
+  }
+
   // são centenas de botões por marca: eles nascem num fragmento e dividem um
   // ouvinte só, no pai, senão cada letra digitada na busca custa uma enxurrada
   function listaCatalogo(){
     var grade = $("catGrade");
-    var m = CAT.filter(function(x){ return x.id === marcaAtiva; })[0];
     grade.innerHTML = "";
-    if (!m){
+    var chaves = chavesDaVista();
+    if (!chaves){
       // sem catalogos.js não há catálogo nenhum: dizer isso é melhor do que
-      // deixar a aba vazia, que passa por painel quebrado
+      // deixar o painel vazio, que passa por painel quebrado
       grade.innerHTML = '<p class="vazio">Os catálogos das marcas não carregaram. ' +
                         'Falta o arquivo <b>catalogos.js</b> ao lado do index.html.</p>';
       return;
     }
+    chaves = ordena(chaves, marcaAtiva);
     var q = ($("catBusca").value || "").trim().toLowerCase();
-    var vistas = m.cores.filter(function(c){
-      if (!q) return true;
-      return c[0].toLowerCase().indexOf(q) >= 0 ||
-             (c[2] && c[2].toLowerCase().indexOf(q) >= 0);
+    var vistas = chaves.filter(function(k){
+      var r = catIdx[k];
+      if (!r) return false;
+      return !q || (r.marca + " " + r.code + " " + r.nome).toLowerCase().indexOf(q) >= 0;
     });
     if (!vistas.length){
-      grade.innerHTML = '<p class="vazio">Nenhuma cor da ' + m.marca + ' com esse código ou nome.</p>';
+      grade.innerHTML = '<p class="vazio">Nenhuma cor com esse código ou nome.</p>';
       return;
     }
+    var naCaixa = marcaAtiva === "minhas";
     var frag = document.createDocumentFragment();
-    vistas.forEach(function(c){
-      var k = m.id + ":" + c[0];
+    vistas.forEach(function(k){
+      var reg = catIdx[k];
       var tem = minhas.indexOf(k) >= 0;
-      var rot = m.marca + " " + c[0] + (c[2] ? " — " + c[2] : "");
+      var rot = reg.marca + " " + reg.code + (reg.nome ? " — " + reg.nome : "");
       var b = document.createElement("button");
       b.type = "button";
-      b.className = "cat" + (tem ? " on" : "");
-      b.style.background = c[1];
+      b.className = "cat" + (tem && !naCaixa ? " on" : "");
+      b.style.background = reg.hex;
+      b.style.color = tinta(reg.hex);
       b.dataset.k = k;
-      b.title = rot + " " + c[1];
+      b.textContent = reg.code || "—";
+      b.title = rot + " " + reg.hex;
       b.setAttribute("aria-label", rot);
-      b.setAttribute("aria-pressed", tem ? "true" : "false");
+      if (!naCaixa) b.setAttribute("aria-pressed", tem ? "true" : "false");
       frag.appendChild(b);
     });
     grade.appendChild(frag);
@@ -1186,11 +1189,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function alternaLinha(k, botao){
     var c = catIdx[k];
     if (!c) return;
+    // na caixa toda cor já é sua: clicar ali é escolher a cor da peça, não
+    // tirar da caixa — tirar se faz na marca de onde ela veio
+    if (marcaAtiva === "minhas"){ usaCor(c.hex, c.marca + " " + c.code); return; }
     var i = minhas.indexOf(k);
     if (i >= 0) minhas.splice(i, 1);
     else {
       minhas.push(k);
-      curPal = "minhas";
       usaCor(c.hex, c.marca + " " + c.code);
     }
     var tem = i < 0;
@@ -1199,8 +1204,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       botao.setAttribute("aria-pressed", tem ? "true" : "false");
     }
     salvaLinhas();
-    renderPaletteList();
-    renderSwatches();
+    montaMarcas();
     contaLinhas();
   }
 
@@ -1828,7 +1832,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         photoBox: { size: $("photoSize").value, or: $("photoOr").value,
                     w: $("photoWmm").value, h: $("photoHmm").value,
                     x: Math.round(photo.x * 10) / 10, y: Math.round(photo.y * 10) / 10 },
-        mm: $("mm").value, pal: curPal, thread: thread, sel: sel,
+        mm: $("mm").value, thread: thread, sel: sel,
         els: els.map(packEl)
       }));
     } catch (e){ /* janela anônima ou cota cheia: seguir sem memória */ return; }
@@ -1844,15 +1848,16 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     saveTimer = setTimeout(saveState, 400);
   }
 
+  // primeiro na caixa, que é onde o nome importa; depois no catálogo inteiro,
+  // para um molde restaurado não perder o nome de uma cor que ainda não é sua
   function threadLabel(hex){
-    for (var i = 0; i < PALETTES.length; i++){
-      var c = PALETTES[i].colors;
-      for (var j = 0; j < c.length; j++) if (c[j][0] === hex) return c[j][1];
-    }
     for (var k = 0; k < minhas.length; k++){
       var l = catIdx[minhas[k]];
       if (l && l.hex === hex) return l.marca + " " + l.code;
     }
+    var chaves = Object.keys(catIdx);
+    for (var i = 0; i < chaves.length; i++)
+      if (catIdx[chaves[i]].hex === hex) return catIdx[chaves[i]].marca + " " + catIdx[chaves[i]].code;
     return "";
   }
 
@@ -1894,13 +1899,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     clampPhoto();
     lastPaper = paperMM();
 
-    if (s.pal === "minhas" && minhas.length) curPal = "minhas";
-    else if (typeof s.pal === "number" && PALETTES[s.pal]) curPal = s.pal;
-    if (typeof s.thread === "string" && /^#[0-9A-Fa-f]{6}$/.test(s.thread)){
-      thread = s.thread;
-      var name = threadLabel(thread);
-      if (name) $("threadName").textContent = name;
-    }
+    // s.pal, de quando havia paletas prontas, é ignorado de propósito
+    if (typeof s.thread === "string" && /^#[0-9A-Fa-f]{6}$/.test(s.thread)) thread = s.thread;
 
     els = pieces;
     sel = Math.min(Math.max(0, s.sel | 0), els.length - 1);
@@ -2066,12 +2066,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var piece = focus === "el" && !!el;
     // com uma linha por peça, o painel precisa dizer qual peça ele está
     // pintando — senão o quadradinho marcado vira adivinhação
-    var cor = corDe(el);
-    $("threadName").textContent = cor.nome;
-    $("threadAlvo").textContent = el
-      ? "Linha de " + (el.kind === "text" ? "“" + (el.text || "texto") + "”" : "símbolo")
-      : "Linha da próxima peça";
-    renderSwatches();
+    mostraThread();
     $("alinha").classList.toggle("hide", !piece);
     $("flipEl").classList.toggle("on", !!(el && el.flip));
     $("ctlPhoto").classList.toggle("hide", focus !== "photo");
@@ -3084,24 +3079,17 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   }, { passive: false });
 
   /* ---- painel da linha ------------------------------------------------ */
-  $("palette").addEventListener("change", function(){
-    curPal = this.value === "minhas" ? "minhas" : parseInt(this.value, 10);
-    renderSwatches();
-  });
+  $("catBusca").addEventListener("input", listaCatalogo);
 
-  [].forEach.call(document.querySelectorAll("#linhaAbas button"), function(b){
+  [].forEach.call(document.querySelectorAll("#catOrdem button"), function(b){
     b.addEventListener("click", function(){
-      var alvo = b.dataset.aba;
-      [].forEach.call(document.querySelectorAll("#linhaAbas button"), function(x){
+      ordemModo = b.dataset.ordem;
+      [].forEach.call(document.querySelectorAll("#catOrdem button"), function(x){
         x.classList.toggle("on", x === b);
       });
-      [].forEach.call(document.querySelectorAll('.pane[data-pane="linha"] > div[data-aba]'),
-        function(d){ d.classList.toggle("hide", d.dataset.aba !== alvo); });
-      contaLinhas();          // desarma o "confirmar" do limpar ao trocar de aba
+      listaCatalogo();
     });
   });
-
-  $("catBusca").addEventListener("input", listaCatalogo);
 
   // um ouvinte só para a grade inteira: são centenas de quadradinhos
   $("catGrade").addEventListener("click", function(e){
@@ -3118,10 +3106,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       return;
     }
     minhas = [];
-    if (curPal === "minhas") curPal = 0;
     salvaLinhas();
-    renderPaletteList();
-    renderSwatches();
+    montaMarcas();
     listaCatalogo();
     contaLinhas();
   });
@@ -3378,14 +3364,12 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   window.addEventListener("resize", draw);
 
   function boot(){
-    carregaLinhas();          // antes de restaurar: a paleta "minhas linhas"
+    carregaLinhas();          // antes de restaurar: a caixa é a primeira marca
     carregaEstante();         // e antes do molde: é ela que diz qual abrir
     var it = itemAtual();
     restored = !!it && restoreState(it.dados);
     if (!restored) moldeEmBranco();
     renderMoldes();
-    renderPaletteList();
-    renderSwatches();
     montaMarcas();
     listaCatalogo();
     contaLinhas();
