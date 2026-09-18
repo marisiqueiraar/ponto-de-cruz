@@ -48,12 +48,14 @@ function gera(nome, esperado){
     const txt = b.toString("latin1");
     const paginas = (txt.match(/\/Type\s*\/Page[^s]/g) || []).length;
     const R = cropArea();
-    const plano = pdfPlan(R);
+    const plano = pdfPlan(R, contentArea());
     const n = plano.cols * plano.rows;
-    const bate = paginas === n && (esperado == null || n === esperado);
+    // a folha de instrução é uma página a mais, e nenhuma folha de molde a mais
+    const pgs = n + (plano.capa ? 1 : 0);
+    const bate = paginas === pgs && (esperado == null || n === esperado);
     console.log((bate ? "ok   " : "FALHA") + " " + nome.padEnd(30) +
       " molde " + R.w.toFixed(0) + "x" + R.h.toFixed(0) + " mm -> " +
-      n + " folha(s) " + (plano.land ? "deitadas" : "em pé") +
+      n + " folha(s) " + (plano.land ? "deitadas" : "em pé") + (plano.capa ? " + instrução" : "") +
       ", " + paginas + " páginas no PDF, " + (b.length / 1024).toFixed(0) + " KB");
     if (!bate) process.exitCode = 1;
     return b;
@@ -96,6 +98,25 @@ function gera(nome, esperado){
   // sem molde na estante o título vem da peça, como sempre foi
   console.log((t.includes("amor") ? "ok   " : "FALHA") + " sem estante, o título do PDF é a palavra da peça");
   if (!t.includes("amor")) process.exitCode = 1;
+
+  /* ---- o caso da folha de instrução -----------------------------------
+
+     Molde que ocupa quase toda a A4 deitada: cabe no papel, não cabe embaixo
+     do cabeçalho. Antes saía em duas folhas de molde, para emendar à mão um
+     desenho que era inteiro. Agora sai numa folha só, com o texto na anterior. */
+  paper = { w: 297, h: 210 };
+  photo = { x: 148.5, y: 31.5, w: 100, h: 150 };
+  els = [peca(25, 18, 70, 65), peca(25, 100, 70, 70)];
+  const capa = await gera("A4 deitada quase cheia", 1);
+  const tc = streams(capa).join("\n");
+  const R = cropArea(), pl = pdfPlan(R, contentArea());
+  function diz(c, m){ console.log((c ? "ok   " : "FALHA") + " " + m); if (!c) process.exitCode = 1; }
+  diz(pl.capa, "molde de " + R.w.toFixed(0) + "x" + R.h.toFixed(0) + " mm ganha folha de instrução");
+  diz((capa.toString("latin1").match(/\/Type\s*\/Page[^s]/g) || []).length === 2, "sai em 2 páginas, não em 2 folhas de molde");
+  diz(tc.includes("50 mm exatos"), "a régua vai na folha de instrução");
+  diz(tc.includes("folha 2"), "a instrução diz onde o molde está");
+  diz(!tc.includes("folha 1 de"), "sem numeração de folha repartida");
+  molde = null;
 
   // com um molde nomeado, o nome dele manda
   molde = { nome: "presente da vo" };

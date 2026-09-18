@@ -82,7 +82,15 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   medir 50 mm na régua de verdade, a impressora reduziu a página e nenhum furo vai bater. No
   rodapé de cada folha vai a legenda das linhas usadas, com o código da marca — cor de tela não
   é código de meada, e sem a legenda o molde impresso não diz o que comprar de novo.
-- **Molde em várias folhas**: o que não cabe numa A4 é repartido, nunca reduzido. Molde reduzido
+- **Folha de instrução**: o cabeçalho ocupa 46 mm de altura e o rodapé mais 8. Um molde que
+  usa quase toda a folha cabe no papel e não cabe embaixo desse texto — e era repartido em duas
+  folhas por causa das instruções, não do desenho. Quando isso acontece o texto é que muda de
+  folha: a página 1 leva o cabeçalho, a régua e a legenda, e a página 2 leva o molde sozinho,
+  inteiro e em tamanho real, centrado. São duas páginas e **uma folha de molde só** — imprimir
+  e recortar é só a segunda. A conta guarda 5 mm de borda até o furo mais de fora, que é o que
+  a impressora doméstica não alcança; a folga em volta do desenho pode encostar na borda, porque
+  não tem furo nenhum ali.
+- **Molde em várias folhas**: o que não cabe nem na folha nua é repartido, nunca reduzido. Molde reduzido
   é molde errado, e o erro só aparece com a agulha na mão. Cada folha traz o seu número, um
   mapinha de onde ela fica no conjunto e, nas margens, qual folha continua de cada lado. As
   vizinhas repetem pelo menos 10 mm do desenho: é sobrepondo essa faixa até os furos coincidirem

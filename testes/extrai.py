@@ -21,7 +21,7 @@ io.open(os.path.join(D, "geo.js"), "w", encoding="utf-8").write(
     # geo.js testa so o repartir em folhas; a legenda do rodape tem teste proprio
     u"var els = [];\nfunction linhasUsadas(){ return []; }\n" +
     bloco(u"  var PDF_SIDE = 10", u"  function drawPhoto(") +
-    u"\nmodule.exports = { pdfFit, pdfPlan, nFolhas, inicios, PDF_SIDE, PDF_TOP, PDF_FOOT, TILE_TOP, SOBRA };\n")
+    u"\nmodule.exports = { pdfFit, pdfPlan, cabeSolta, nFolhas, inicios, PDF_SIDE, PDF_TOP, PDF_FOOT, PDF_BLEED, TILE_TOP, SOBRA };\n")
 # o script inteiro, so para o node --check achar erro de sintaxe
 import re
 io.open(os.path.join(D, "app.js"), "w", encoding="utf-8").write(
