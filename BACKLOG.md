@@ -7,7 +7,37 @@ Ordem: quanto mais alto, mais muda a vida de quem borda.
 
 ---
 
-## 1. Avisar quando a memória do navegador encher
+## 1. O canvas do arco pode passar do que um celular aceita
+
+**É o único item desta lista que faria o app entregar um molde errado em
+silêncio, que é o modo de falhar contra o qual o README inteiro foi escrito.**
+
+O arco desenha a palavra num canvas intermediário e depois o dobra. Esse canvas
+tem seis pixels por quadradinho, então a largura dele cresce com o tamanho da
+palavra. Medido no Chromium, nos extremos que a interface permite (altura 60,
+arco 120°):
+
+| texto | grade | canvas |
+|---|---|---|
+| "amorosa" | 326 × 133 | ~1 956 px |
+| "amorosa para sempre" | 443 × 148 | ~2 658 px |
+| "amorosa para sempre e um dia" | 493 × 158 | ~2 958 px |
+| frase de 46 caracteres | 763 × 243 | **~4 578 px, 25 MB** |
+
+Passa de 4 096 px em uma dimensão a partir de umas 45 letras na altura máxima.
+Alguns navegadores de celular recusam canvas acima disso, e o que sai de um
+canvas recusado é vazio — ou seja, a peça sairia em branco sem nada avisar.
+**Não consegui reproduzir num celular de verdade**: no Chromium de mesa os 25 MB
+passam sem erro. É risco medido de um lado e não confirmado do outro.
+
+O conserto é contido: calcular o tamanho do canvas antes de criar e, se passar
+de um teto seguro, amostrar com menos pixels por quadradinho. A grade de
+quadradinhos não muda — ela vem da altura escolhida, não da resolução do
+rascunho —, só o traço fica um pouco mais grosseiro antes de virar furo.
+
+---
+
+## 2. Avisar quando a memória do navegador encher
 
 Gravar falha em silêncio quando o `localStorage` estoura — o `saveState()`
 engole o erro. Com vários moldes e uma foto em cada, isso deixou de ser
@@ -24,7 +54,7 @@ pode aproveitar isso e oferecer "manter o molde, largar a foto".
 
 ---
 
-## 2. ~~Ajustes finos de posição~~ — feito
+## 3. ~~Ajustes finos de posição~~ — feito
 
 Era o item 4 da lista que combinamos, e saiu inteiro:
 
@@ -44,7 +74,7 @@ duas linhas. Não entrou porque pede escolher com qual, e aí é mais interface.
 
 ---
 
-## 3. O que o ofício pede — parcialmente feito
+## 4. O que o ofício pede — parcialmente feito
 
 Era o item 5 da lista. Saiu inteiro, menos uma flor:
 
@@ -73,7 +103,7 @@ Falta:
 
 ---
 
-## 4. Coisas que apareceram construindo as três levas
+## 5. Coisas que apareceram no caminho
 
 - **Importar o mesmo arquivo duas vezes cria dois moldes.** Não há detecção de
   repetido nem opção de substituir. Pode ser o certo (é uma cópia mesmo), mas
@@ -87,6 +117,19 @@ Falta:
   rede de segurança, não limitação sentida.
 - **O nome do molde grava a cada tecla digitada.** Sem espera. É uma escrita
   pequena no índice, mas é uma escrita por tecla.
+- **Arrastar num molde grande anda a 20 quadros por segundo.** Medido: 50 ms por
+  movimento com 16 375 pontos em cinco peças, contra 17 ms num molde leve. Fui
+  conferir se tinha sido eu — as contas de fio e do rodapé do PDF passaram a
+  varrer as células a cada desenho — e **não foi**: a mesma medida na versão
+  anterior à sessão dá 50,4 ms. O custo é o canvas desenhando dezesseis mil
+  cruzinhas, e quem quiser atacar isso ataca o desenho, não as varreduras.
+- **O espaçamento entre letras não avisa quando o navegador não o suporta.** O
+  código confere `"letterSpacing" in ctx` e, se não houver, simplesmente não
+  espaça — o controle fica na barra sem fazer nada. Em 2026 isso é raro, mas
+  controle que não faz nada e não diz por quê é pior que controle ausente.
+- **`testes/amostra.js` tem uma cópia dos desenhos dos símbolos.** Ele desenha
+  sem abrir o app, então repete a tabela do `index.html`. Se os símbolos mudarem,
+  a amostra fica mentindo sem ninguém notar.
 - **`sw.js` continua na raiz.** Ele existe só para desregistrar o service
   worker que o app React deixou para trás. Em algum momento todo mundo que
   abriu aquela versão já passou por aqui e ele pode sair — mas não há como
@@ -94,7 +137,7 @@ Falta:
 
 ---
 
-## 5. Ideias do app anterior que ainda valem
+## 6. Ideias do app anterior que ainda valem
 
 Vieram do `BACKLOG.md` da versão React (preservado em `6ce5a7a`) e sobrevivem à
 mudança de aplicativo:
@@ -110,7 +153,7 @@ mudança de aplicativo:
 
 ---
 
-## 6. Sobre os testes
+## 7. Sobre os testes
 
 `testes/` cobre o repartir em folhas, a posição em cada folha, a emenda, a cor
 por peça, a estante, a montagem da tela no Chromium, as setas e botões de
@@ -126,3 +169,6 @@ conjuntos; `testes/roda.sh` roda todos. O que **não** existe:
   botões.
 - Nada compara o PDF com uma imagem de referência. Os testes leem coordenadas
   de dentro do arquivo, o que pega o molde no lugar errado, mas não pega feio.
+- Nada roda num navegador de celular de verdade. `tela.js` usa um Chromium de
+  mesa numa janela de 360 px, que confere o layout mas não os limites do
+  aparelho — e é exatamente um desses limites que o item 1 desta lista teme.
