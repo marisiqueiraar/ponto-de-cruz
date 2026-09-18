@@ -100,7 +100,28 @@ cor: `190` volta como `191` num canal. É 0,4%, invisível, e a legenda leva o
 código da marca de qualquer jeito. Registro porque é perda de informação real,
 ainda que sem consequência.
 
-### 3.7 Subi os testes para dentro do repositório
+### 3.7 As duas suposições da conta de fio
+
+A frente é geometria: duas diagonais de p√2 por ponto cheio, sem dúvida
+possível. As outras duas parcelas eu escolhi:
+
+- **O avesso, 2p por ponto.** Vem da ordem de bordar um ponto cheio de cada vez
+  — sobe em A, desce em D, sobe em C, desce em B —, em que o fio anda dois
+  lados do quadradinho por trás. Quem borda em fileiras (todas as pernas de um
+  lado, depois as do outro) gasta menos; quem pula de um canto a outro do
+  desenho gasta mais.
+- **A perda, 15%.** Começos, remates e a ponta curta que não dá para usar.
+
+As duas estão escritas na tela, com os números do espaçamento escolhido, para
+quem lê poder discordar. Se a sua experiência disser outro número, são duas
+constantes no código.
+
+**Não converto para meadas** de propósito: isso depende do comprimento da meada
+de cada marca, e eu não tenho essa medida de fonte confiável. A tela diz o que
+dá para dizer com certeza — uma meada de 6 fios desfiada em pares rende três
+vezes o comprimento dela.
+
+### 3.8 Subi os testes para dentro do repositório
 
 **Esta é a decisão que mais quero que você confirme.** Escrevi os testes numa
 pasta temporária da sessão, que some quando o contêiner é recolhido — e os

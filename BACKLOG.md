@@ -59,15 +59,13 @@ Era o item 5 da lista. Saíram quatro dos cinco:
 - ~~**Mais símbolos**~~ — de quatro para dez: entraram folha, coroa, lua, sol,
   infinito e casa.
 
+- ~~**Estimativa de consumo de linha**~~ — metros por cor, na aba molde e na
+  legenda do PDF, com a conta escrita ao lado e com os números do espaçamento
+  escolhido. Frente exata, avesso e perda declarados como suposição. Sem
+  conversão para meadas, que depende da marca.
+
 Falta:
 
-- **Estimativa de consumo de linha**, em metros ou meadas, a partir da contagem
-  de pontos que já existe. Não entrou porque a conta honesta depende de coisas
-  que o app não sabe — quantos fios da meada, como o avesso é percorrido — e
-  número inventado aqui faz alguém comprar linha errada. O caminho: calcular a
-  frente pela geometria (duas diagonais de p√2 por ponto), assumir o avesso e a
-  perda com margem declarada, mostrar em metros para 2 fios, e dizer na tela de
-  que conta veio.
 - **Uma flor.** Desenhei quatro e nenhuma lia como flor em 9 × 9 — saíram laço,
   balão, máscara e rosquinha. Símbolo que parece outra coisa é pior que símbolo
   nenhum, então não entrou. Uma flor legível pede grade maior (11 × 11 ou mais);

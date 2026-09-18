@@ -52,6 +52,12 @@ function temCor(cores, rgb){
   const texto = streams(buf).join("\n");
   ["Terracota", "Azul noite", "Verde agua"].forEach(n =>
     ok(texto.includes(n), "legenda traz \"" + n + "\""));
+  // a legenda leva os metros junto: é com ela na mão que se compra a linha
+  const comMetros = (texto.match(/\d+,\d+ m/g) || []);
+  ok(comMetros.length >= 3, "e os metros de cada linha (" + comMetros.join(", ") + ")");
+  const esperado = linhasUsadas()[0];
+  ok(texto.includes(esperado.rotulo),
+     "com nome e metros na mesma entrada: \"" + esperado.rotulo + "\"");
 
   // peça sem cor gravada (molde antigo) cai na cor corrente
   els = [{ kind:"sym", sym:"heart", scale:1, rot:0, x:40, y:190,

@@ -46,6 +46,14 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
   de cinco com Shift — com a foto selecionada, movem a foto. Na aba peças, três botões alinham a
   peça: centralizar na foto, centralizar no papel, alinhar pela base da foto. Eles movem a caixa
   já girada, porque alinhar uma palavra inclinada pelo canto de cima dela a deixaria torta.
+- **Fio por linha**: quantos metros cada cor pede, somados por cor e repetidos na legenda do
+  PDF. A conta fica escrita ao lado, com os números do espaçamento escolhido, porque quem vai à
+  loja com um número merece saber de onde ele veio: a **frente** é geometria (duas diagonais de
+  p√2 por ponto cheio, exato), o **avesso** supõe que você borda um ponto de cada vez (dois
+  lados, 2p) e os **15%** são começos, remates e sobras. O comprimento é do fio como ele passa
+  no furo — bordando com 2 fios, são metros de fio de 2 fios. Não há conversão para meadas
+  porque isso depende da marca, mas uma meada de 6 fios desfiada em pares rende três vezes o
+  comprimento dela.
 - **Contagem**: pontos e furos, com o tamanho da peça selecionada em centímetros. O rodapé diz o
   tempo todo se o molde sai numa folha ou em quantas, e avisa em vermelho quando alguma peça
   passou da borda do papel — o molde é recortado no papel, então o que está fora não sai no PDF.

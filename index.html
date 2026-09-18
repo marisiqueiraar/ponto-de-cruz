@@ -234,6 +234,14 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
 .num span{font-size:13px;color:var(--ink-soft)}
 .num strong{font-family:var(--display);font-weight:400;font-size:14px}
 
+/* fio por linha */
+.fios{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.fio{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink)}
+.fio .pt{width:11px;height:11px;border-radius:50%;flex:0 0 auto;border:1px solid rgba(0,0,0,.2)}
+.fio .nm{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fio b{font-family:var(--display);font-weight:400;font-size:13px;flex:0 0 auto}
+.fio .vazio{color:var(--ink-soft)}
+
 /* alinhar a peça */
 .alinha{margin:0 0 12px}
 .alinha button{width:100%;min-height:38px;margin-bottom:6px;padding:0 10px;
@@ -688,6 +696,17 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <div class="num"><span>Pontos</span><strong id="count">—</strong></div>
     <div class="num"><span>Furos</span><strong id="holes">—</strong></div>
     <div class="num"><span>Peça selecionada</span><strong id="size">—</strong></div>
+
+    <div class="rule"></div>
+    <h2>fio por linha</h2>
+    <div class="fios" id="fios"></div>
+    <p class="note" id="fiosConta"></p>
+    <p class="note">A frente é geometria e não tem dúvida. O avesso supõe que você borda um
+    ponto cheio de cada vez — em fileiras gasta menos, pulando de um canto a outro gasta mais.
+    A perda é margem. O comprimento é do fio como ele passa no furo: bordando com 2 fios, são
+    metros de fio de 2 fios. Uma meada de 6 fios desfiada em pares rende três vezes o
+    comprimento dela.</p>
+
     <div class="rule"></div>
     <button id="dl" class="wide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>baixar prévia png</button>
     <button id="reset" class="wide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>recalcular</button>
@@ -727,6 +746,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <li>Para o nome curvado por cima da foto, use o campo <b>arco</b> na barra de cima. Se a cursiva fechar demais em letra pequena, abra o <b>espaço</b> entre as letras — ele é contado em quadradinhos, os mesmos que viram furo.</li>
       <li>Para posicionar fino, use as setas do teclado: meio milímetro por toque, cinco com Shift. Os três botões na aba <b>peças</b> centralizam a peça na foto ou no papel, e encostam ela na base da foto.</li>
       <li>Guarde o arquivo do molde na aba <b>moldes</b> antes de mudar de aparelho ou limpar o navegador. O que fica só no navegador não vai a lugar nenhum e some com os dados do site.</li>
+      <li>A aba <b>molde</b> diz quantos metros cada linha pede, e mostra a conta que usou. A frente é exata; o avesso e os 15% de perda são estimativa, então compre com folga.</li>
       <li>Cada peça pode ter a sua linha: selecione a peça e toque na cor. O rodapé do PDF lista as linhas usadas com o código da marca — a cor impressa é referência de tela, o código é o que se compra.</li>
       <li>Borde com 2 ou 3 fios de meada. Em furo que atravessa foto e papel, puxe devagar: papel fotográfico não fecha depois de rasgar.</li>
       <li>Espaçamento entre 2,5 e 3 mm é o mais seguro nesse material. Abaixo de 2 mm a tira de papel entre dois furos vira pó.</li>
@@ -990,14 +1010,47 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return { hex: thread, nome: threadLabel(thread) || thread };
   }
 
-  // as linhas do molde, na ordem das peças e sem repetir cor
+  /* ---- quanto fio cada linha gasta ------------------------------------
+
+     A conta tem uma parte certa e duas suposições, e as três ficam à vista na
+     aba molde, porque quem vai à loja com um número merece saber de onde ele
+     veio.
+
+     CERTO: a frente. Cada ponto cheio são duas diagonais de um quadradinho,
+     p√2 cada uma. Isso é geometria, não palpite.
+
+     SUPOSTO: o avesso. Bordando um ponto cheio de cada vez — sobe em A, desce
+     em D, sobe em C, desce em B — o fio anda dois LADOS do quadradinho por
+     trás, 2p. Quem borda em fileiras gasta menos; quem pula de um canto a
+     outro do desenho gasta mais.
+
+     SUPOSTO: os 15% de começos, remates e a ponta que não dá para usar.
+
+     O que sai é o comprimento do fio como ele atravessa o furo: se você borda
+     com 2 fios, são metros de fio de 2 fios. Não converto para meadas porque
+     isso depende do comprimento da meada de cada marca — mas uma meada de 6
+     fios desfiada em pares rende três vezes o comprimento dela. */
+  var PERDA = 1.15;
+  function fioFrente(){ return 2 * P() * Math.SQRT2; }   // mm por ponto, exato
+  function fioAvesso(){ return 2 * P(); }                // mm por ponto, suposto
+  function fioPorPonto(){ return (fioFrente() + fioAvesso()) * PERDA; }
+
+  // as linhas do molde, na ordem das peças e sem repetir cor, com quantos
+  // pontos e quantos metros cada uma pede
   function linhasUsadas(){
     var vistas = {}, lista = [];
     els.forEach(function(el){
       var c = corDe(el);
-      if (vistas[c.hex]) return;
-      vistas[c.hex] = 1;
-      lista.push(c);
+      if (!vistas[c.hex]){
+        vistas[c.hex] = { hex: c.hex, nome: c.nome, pontos: 0 };
+        lista.push(vistas[c.hex]);
+      }
+      vistas[c.hex].pontos += countOf(el);
+    });
+    var porPonto = fioPorPonto();
+    lista.forEach(function(l){
+      l.metros = l.pontos * porPonto / 1000;
+      l.rotulo = l.nome + "  ·  " + fmt(l.metros) + " m";
     });
     return lista;
   }
@@ -1469,7 +1522,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var util = 210 - PDF_SIDE * 2;
     var n = 1, x = 0;
     usadas.forEach(function(c){
-      var w = 9 + c.nome.length * 1.45;
+      var w = 9 + c.rotulo.length * 1.45;
       if (x > 0 && x + w > util){ n++; x = 0; }
       x += w;
     });
@@ -1706,6 +1759,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     } else $("size").textContent = "—";
 
     showFit(cropArea());
+    renderFios();
     rulers(k);
 
     // toda alteração de estado passa por aqui, então é o único lugar que precisa
@@ -1953,6 +2007,38 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     e.preventDefault();
     if (e.shiftKey) redo(); else undo();
   });
+
+  /* A conta aparece com os números do espaçamento de agora, e não como
+     fórmula genérica: "7,1 mm de frente" diz mais do que "2p√2", e muda
+     junto quando se mexe no espaçamento entre furos. */
+  function renderFios(){
+    var box = $("fios");
+    if (!box) return;
+    box.innerHTML = "";
+    var lista = linhasUsadas();
+    if (!lista.length){
+      box.innerHTML = '<p class="note vazio">Nenhuma peça no molde ainda.</p>';
+      $("fiosConta").textContent = "";
+      return;
+    }
+    lista.forEach(function(l){
+      var d = document.createElement("div");
+      d.className = "fio";
+      d.title = l.pontos.toLocaleString("pt-BR") + " pontos";
+      var pt = document.createElement("span");
+      pt.className = "pt"; pt.style.background = l.hex;
+      var nm = document.createElement("span");
+      nm.className = "nm"; nm.textContent = l.nome;
+      var qt = document.createElement("b");
+      qt.textContent = fmt(l.metros) + " m";
+      d.appendChild(pt); d.appendChild(nm); d.appendChild(qt);
+      box.appendChild(d);
+    });
+    $("fiosConta").textContent =
+      "Com furos de " + fmt(P()) + " mm, cada ponto cheio gasta " + fmt(fioFrente()) +
+      " mm de frente (duas diagonais), " + fmt(fioAvesso()) + " mm de avesso (dois lados) e " +
+      Math.round((PERDA - 1) * 100) + "% de perda: " + fmt(fioPorPonto()) + " mm por ponto.";
+  }
 
   function renderChips(){
     var box = $("chips");
@@ -2515,7 +2601,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var x = 12, linha = 1, max = legendaLinhas();
     pdf.setFontSize(7);
     for (var i = 0; i < usadas.length; i++){
-      var w = 9.5 + pdf.getTextWidth(usadas[i].nome);
+      var w = 9.5 + pdf.getTextWidth(usadas[i].rotulo);
       if (x > 12 && x - 12 + w > util){
         if (linha >= max){
           pdf.setTextColor(120);
@@ -2530,7 +2616,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       pdf.setLineWidth(0.15);
       pdf.rect(x, y - 2.4, 3.2, 3.2, "FD");
       pdf.setTextColor(60);
-      pdf.text(usadas[i].nome, x + 4.6, y);
+      pdf.text(usadas[i].rotulo, x + 4.6, y);
       x += w;
     }
   }
