@@ -111,16 +111,19 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .tools .sep{width:1px;height:26px;background:var(--line);flex:0 0 auto}
 .tools .none{font-family:var(--display);font-size:12px;color:var(--ink-soft);white-space:nowrap}
 
-.t{display:inline-flex;align-items:center;gap:5px;height:36px;padding:0 7px;flex:0 0 auto;
+/* Os campos da barra de cima. O seletor mora preso a .tools porque a régua
+   também chama os seus tiques de .t: solto, o padding, a borda e o raio daqui
+   caíam em cima deles e cada tique virava uma pastilha de 16px. */
+.tools .t{display:inline-flex;align-items:center;gap:5px;height:36px;padding:0 7px;flex:0 0 auto;
   background:#fff;border:1px solid var(--line);border-radius:6px;white-space:nowrap}
-.t > span{font-family:var(--display);font-size:10px;color:var(--ink-soft);letter-spacing:0}
-.t input[type=number]{width:44px;height:26px;padding:0 4px;border:0;background:transparent;
+.tools .t > span{font-family:var(--display);font-size:10px;color:var(--ink-soft);letter-spacing:0}
+.tools .t input[type=number]{width:44px;height:26px;padding:0 4px;border:0;background:transparent;
   font-family:var(--display);font-size:13px;color:var(--ink);text-align:right}
-.t input[type=number]:focus{outline:2px solid var(--accent);border-radius:3px}
-.t select{height:26px;border:0;background:transparent;font-size:14px;color:var(--ink);max-width:150px}
-.t.txt input[type=text]{width:96px;height:26px;border:0;background:transparent;font-size:15px;color:var(--ink)}
-.t.fnt{padding:0 9px}
-.t.fnt select{font-size:16px;max-width:118px}
+.tools .t input[type=number]:focus{outline:2px solid var(--accent);border-radius:3px}
+.tools .t select{height:26px;border:0;background:transparent;font-size:14px;color:var(--ink);max-width:150px}
+.tools .t.txt input[type=text]{width:96px;height:26px;border:0;background:transparent;font-size:15px;color:var(--ink)}
+.tools .t.fnt{padding:0 9px}
+.tools .t.fnt select{font-size:16px;max-width:118px}
 #fontBtn{height:26px;max-width:130px;border:0;background:transparent;padding:0;
   font-size:17px;line-height:1;color:var(--ink);white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis;text-align:left}
@@ -318,13 +321,18 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
 .ruler{position:absolute;background:#fff;color:var(--ink-soft);font-size:9px;z-index:2;overflow:hidden}
 .ruler.h{top:0;left:var(--rule);right:0;height:var(--rule);border-bottom:1px solid var(--line)}
 .ruler.v{top:var(--rule);left:0;bottom:0;width:var(--rule);border-right:1px solid var(--line)}
-.ruler .t{position:absolute;background:var(--line)}
+/* Os dois eixos seguem a mesma regra, senão o número de um deles descola do
+   seu tique: centrado no tique ao longo da régua, e a 11px da borda onde os
+   tiques nascem — 9px do tique grande mais 2px de respiro. */
+.ruler .t{position:absolute;display:block;padding:0;border:0;border-radius:0;
+  background:var(--line)}
+.ruler .l{position:absolute;font-family:var(--display);line-height:1;white-space:nowrap}
 .ruler.h .t{bottom:0;width:1px;height:5px}
 .ruler.h .t.big{height:9px}
-.ruler.h .l{position:absolute;bottom:8px;transform:translateX(2px);font-family:var(--display)}
+.ruler.h .l{bottom:11px;transform:translateX(-50%)}
 .ruler.v .t{right:0;height:1px;width:5px}
 .ruler.v .t.big{width:9px}
-.ruler.v .l{position:absolute;right:9px;font-family:var(--display);transform:translateY(-1px)}
+.ruler.v .l{right:11px;transform:translateY(-50%)}
 .corner{position:absolute;top:0;left:0;width:var(--rule);height:var(--rule);background:#fff;
   border-right:1px solid var(--line);border-bottom:1px solid var(--line);z-index:3}
 /* a mesa rola quando o papel cresce; margin:auto no filho centraliza sem
@@ -1710,24 +1718,31 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   /* Réguas em centímetros com o zero na borda do papel — não na borda da mesa.
      Régua cujo zero está em outro lugar não mede nada. */
+  // a espessura da régua é uma coisa só, definida no CSS: lida daqui para o
+  // JS não guardar uma cópia que possa envelhecer sozinha
+  var RULE = parseFloat(getComputedStyle(document.documentElement)
+               .getPropertyValue("--rule")) || 22;
+
   function rulers(k){
     var cvr = cv.getBoundingClientRect();
     var mr = $("mesa").getBoundingClientRect();
-    var RULE = 22;
     var pxcm = k * 10;
     if (!(pxcm > 0)) return;
+    // as réguas começam depois do quadradinho de canto, então o zero do papel
+    // vale o mesmo desconto nos dois eixos
     var ox = cvr.left - mr.left - RULE;
     var oy = cvr.top - mr.top - RULE;
+    var larg = mr.width - RULE, alt = mr.height - RULE;
     var a = "", b = "", i, x, y, big;
     var passo = pxcm < 14 ? 5 : (pxcm < 30 ? 2 : 1);   // sem números grudados
     var i0 = Math.max(0, Math.floor(-ox / pxcm));
-    for (i = i0; (x = ox + i * pxcm) < mr.width && i - i0 < 600; i++){
+    for (i = i0; (x = ox + i * pxcm) < larg && i - i0 < 600; i++){
       big = i % passo === 0;
       a += '<span class="t' + (big ? " big" : "") + '" style="left:' + x + 'px"></span>';
       if (big) a += '<span class="l" style="left:' + x + 'px">' + i + '</span>';
     }
     i0 = Math.max(0, Math.floor(-oy / pxcm));
-    for (i = i0; (y = oy + i * pxcm) < mr.height && i - i0 < 600; i++){
+    for (i = i0; (y = oy + i * pxcm) < alt && i - i0 < 600; i++){
       big = i % passo === 0;
       b += '<span class="t' + (big ? " big" : "") + '" style="top:' + y + 'px"></span>';
       if (big) b += '<span class="l" style="top:' + y + 'px">' + i + '</span>';
