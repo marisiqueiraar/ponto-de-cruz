@@ -100,13 +100,34 @@
   @media (max-width:560px){ .tela .corpo{grid-template-columns:minmax(0,1fr)} }
   .tela canvas{width:100%;height:auto;border:1px solid var(--line);border-radius:6px;display:block}
   .fitas{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;align-content:start}
-  .fita{border:1px solid rgba(56,73,89,.22);border-radius:5px;overflow:hidden}
-  .fita i{display:block;height:26px}
+  .fita i{display:block;height:26px;pointer-events:none}
   .fita span{
     display:block;padding:2px 0;text-align:center;background:var(--surf);
     font-family:var(--display);font-size:7.5px;color:var(--ink-soft);
   }
   .aviso{margin:0;padding:14px;color:var(--danger);font-size:13.5px}
+
+  /* a fita vira botão: é por ela que você diz "tenho essa" */
+  .fita{border:1px solid rgba(56,73,89,.22);border-radius:5px;overflow:hidden;
+    padding:0;background:var(--surf);cursor:pointer;text-align:center;font:inherit;color:inherit}
+  .fita[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--lemon-deep)}
+  .fita[aria-pressed="true"] span{background:var(--lemon);color:#384959}
+
+  .ajuste{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:10px;
+    padding:0 14px 14px}
+  @media (max-width:560px){ .ajuste{grid-template-columns:minmax(0,1fr)} }
+  .ajuste label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:4px}
+  .ajuste input,.ajuste select,.ajuste textarea{
+    width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;
+    background:var(--paper);color:var(--ink);font-family:inherit;font-size:13.5px}
+  .ajuste textarea{min-height:52px;resize:vertical;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+  .ajuste input:focus-visible,.ajuste select:focus-visible,.ajuste textarea:focus-visible{
+    outline:2px solid var(--lemon-deep);outline-offset:1px}
+  .guardar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:0 14px 14px}
+  .guardar .nota{font-size:12.5px;color:var(--ink-soft)}
+  .naomesma{margin:0 0 16px;padding:12px 14px;border:1px solid var(--danger);border-radius:8px;
+    background:var(--surf);color:var(--ink);font-size:13.5px}
 
   /* --- saída ----------------------------------------------------------- */
   .saida{background:var(--surf);border:1px solid var(--line);border-radius:10px;
@@ -132,10 +153,11 @@
 <body>
 <div class="env">
   <h1><span class="fio"></span>Extrator de cartela</h1>
-  <p class="sub">Arraste as telas ou as páginas de uma cartela de linha. Cada amostra vira um
-  número de cor, tirado da mediana dos pixels do miolo — é assim que as cores da Anchor
-  entraram no <code>catalogos.js</code>. As imagens não saem do seu navegador: a conta é
-  toda feita aqui.</p>
+  <p class="sub">Arraste as páginas de uma cartela de linha. Cada amostra vira um número de
+  cor, tirado da mediana dos pixels do miolo — é assim que as cores da Anchor entraram no
+  <code>catalogos.js</code>. Daqui as cores vão para a sua caixa de linhas no app, uma a uma,
+  ou para um catálogo inteiro. As imagens não saem do seu navegador: a conta é toda feita
+  aqui.</p>
 
   <div class="solta" id="solta">
     <p>Solte aqui as imagens da cartela, ou</p>
@@ -143,10 +165,12 @@
     <input type="file" id="arq" accept="image/*" multiple>
   </div>
 
+  <p class="naomesma" id="naomesma" hidden></p>
+
   <h2 id="tituloTelas">Exemplo</h2>
   <div class="telas" id="telas"></div>
 
-  <h2>Para colar de volta</h2>
+  <h2>Para virar catálogo</h2>
   <div class="saida">
     <textarea id="saida" readonly spellcheck="false" aria-label="Cores extraídas"></textarea>
     <div class="acoes">
@@ -157,11 +181,18 @@
 
   <h2>Como usar</h2>
   <ol class="passos">
-    <li>Solte as 14 telas de uma vez — as duas últimas, das mescladas 946 a 992, ficam de
-      fora. A ordem não importa: o nome do arquivo vai junto.</li>
-    <li>Confira a prévia — o contorno amarelo mostra o que ele achou. Bate se der 16 na
-      primeira tela e 20 em cada uma das outras treze: 276 cores no fim.</li>
-    <li><b>copiar tudo</b> e cole na conversa. Eu junto com os códigos e monto o catálogo.</li>
+    <li>Solte as páginas da cartela. A ordem não importa: o nome do arquivo vai junto.</li>
+    <li>Confira a prévia — o contorno amarelo mostra o que ele achou. Se a contagem bater
+      com as amostras da página, a leitura está certa.</li>
+    <li>Escreva os códigos da página na ordem de leitura, ou escolha a tela no atalho da
+      cartela Círculo. Eles aparecem embaixo de cada amostra: confira um contra a imagem
+      antes de seguir.</li>
+    <li>Clique nas amostras que você tem e <b>guardar na caixa</b>. Elas entram em
+      <b>minhas linhas</b> no app, com a cor tirada do pixel — não escolhida no olho.
+      Recarregue o app para vê-las.</li>
+    <li>Para levar a cartela inteira ao <code>catalogos.js</code>, em vez da caixa, é
+      <b>copiar tudo</b>: uma linha por página, com o nome do arquivo, a contagem e as
+      cores em ordem de leitura.</li>
   </ol>
 
   <p class="rodape">Ele espera fundo claro com as amostras separadas, em colunas — que é
@@ -182,6 +213,70 @@
   var totalEl = document.getElementById("total");
   var tituloEl = document.getElementById("tituloTelas");
   var resultados = [];
+
+  /* ---- a caixa de linhas do app ---------------------------------------
+     Esta página e o index.html moram no mesmo endereço, então dividem o mesmo
+     localStorage: dá para pôr uma cor direto na caixa sem passar por arquivo
+     nenhum. A chave e o formato são os do app — v, tenho e avulsas. */
+  var CHAVE = "ponto-e-letra/linhas/v1";
+  var CHAVE_MOLDE = "ponto-e-letra/molde/v1";
+
+  // As telas da cartela da Círculo, com os códigos na ordem de leitura. É o
+  // único atalho embutido: para qualquer outra marca, escreva os códigos.
+  var PRESET_CIRCULO = [
+    { n: 1, de: "100", ate: "136", codigos: "100 103 104 106 109 112 115 118 121 122 123 126 129 132 135 136" },
+    { n: 2, de: "138", ate: "226", codigos: "138 141 143 146 149 152 155 158 161 164 167 205 208 211 214 217 218 220 223 226" },
+    { n: 3, de: "229", ate: "274", codigos: "229 232 234 235 238 241 244 245 246 247 250 253 256 257 259 262 265 268 271 274" },
+    { n: 4, de: "308", ate: "344", codigos: "308 311 312 313 314 317 320 323 325 326 327 329 332 334 335 338 340 341 343 344" },
+    { n: 5, de: "345", ate: "417", codigos: "345 347 350 353 354 356 357 359 362 365 368 371 374 377 401 404 407 410 413 417" },
+    { n: 6, de: "420", ate: "471", codigos: "420 423 424 426 429 432 435 438 441 444 447 450 453 456 457 459 462 465 468 471" },
+    { n: 7, de: "503", ate: "545", codigos: "503 506 509 512 515 518 521 524 525 527 530 533 534 536 538 539 542 543 544 545" },
+    { n: 8, de: "548", ate: "619", codigos: "548 549 550 551 554 555 557 560 563 566 569 572 606 609 612 613 615 617 618 619" },
+    { n: 9, de: "621", ate: "708", codigos: "621 624 627 630 633 636 639 642 645 648 651 654 657 660 663 666 669 672 705 708" },
+    { n: 10, de: "711", ate: "756", codigos: "711 712 714 717 718 720 723 726 729 732 735 738 741 743 744 747 748 750 753 756" },
+    { n: 11, de: "759", ate: "822", codigos: "759 762 765 768 771 774 777 800 802 804 805 806 808 810 812 814 816 818 820 822" },
+    { n: 12, de: "823", ate: "858", codigos: "823 824 826 828 829 830 834 836 837 838 840 841 842 844 846 850 852 854 856 858" },
+    { n: 13, de: "860", ate: "894", codigos: "860 862 864 865 866 868 869 870 872 874 876 878 880 882 884 886 888 890 892 894" },
+    { n: 14, de: "896", ate: "944", codigos: "896 900 903 905 908 911 913 914 915 917 918 923 925 928 930 936 938 940 942 944" }
+  ];
+
+  function leCaixa(){
+    try {
+      var s = JSON.parse(localStorage.getItem(CHAVE) || "null");
+      if (s && s.v === 1) return { v: 1, tenho: s.tenho || [], avulsas: s.avulsas || {} };
+    } catch (e){ /* janela anônima, dados bloqueados: começa vazia */ }
+    return { v: 1, tenho: [], avulsas: {} };
+  }
+
+  // Se nenhuma chave do app existe aqui, esta página está noutro endereço e o
+  // que ela gravar nunca chega ao app. Melhor dizer do que gravar no vazio.
+  function mesmaCasa(){
+    try { return !!(localStorage.getItem(CHAVE) || localStorage.getItem(CHAVE_MOLDE)); }
+    catch (e){ return false; }
+  }
+
+  function guardaNaCaixa(itens){
+    var caixa = leCaixa(), prox = 1;
+    Object.keys(caixa.avulsas).forEach(function(k){
+      var n = parseInt(String(k).split(":")[1], 10);
+      if (n >= prox) prox = n + 1;
+    });
+    var novos = 0, repetidos = 0;
+    itens.forEach(function(it){
+      var ja = Object.keys(caixa.avulsas).some(function(k){
+        var a = caixa.avulsas[k];
+        return a.marca === it.marca && a.code === it.code && a.hex === it.hex;
+      });
+      if (ja){ repetidos++; return; }
+      var k = "avulsa:" + (prox++);
+      caixa.avulsas[k] = it;
+      caixa.tenho.push(k);
+      novos++;
+    });
+    try { localStorage.setItem(CHAVE, JSON.stringify(caixa)); }
+    catch (e){ return { erro: "o navegador não deixou gravar — janela anônima ou cota cheia" }; }
+    return { novos: novos, repetidos: repetidos, total: caixa.tenho.length };
+  }
 
   function faixas(soma, limiar, minTam, maxTam){
     var fora = [], ini = null;
@@ -290,6 +385,18 @@
     return cv;
   }
 
+  function campo(pai, rotulo, el){
+    var cx = document.createElement("div");
+    var lb = document.createElement("label");
+    lb.textContent = rotulo;
+    if (el.id) lb.setAttribute("for", el.id);
+    cx.appendChild(lb); cx.appendChild(el);
+    pai.appendChild(cx);
+    return el;
+  }
+
+  var seq = 0;
+
   function mostra(nome, res){
     var cartao = document.createElement("div");
     cartao.className = "tela";
@@ -306,28 +413,131 @@
     if (res.erro || !qtd){
       var av = document.createElement("p");
       av.className = "aviso";
-      av.textContent = res.erro || "Nenhuma amostra encontrada nesta tela.";
+      av.textContent = res.erro || "Nenhuma amostra encontrada nesta página.";
       cartao.appendChild(av);
       telasEl.appendChild(cartao);
       return;
     }
+
+    var id = ++seq;
+    var escolhidas = {}, codigos = [], fitasEls = [];
 
     var corpo = document.createElement("div");
     corpo.className = "corpo";
     corpo.appendChild(desenhaPrevia(res));
     var fitas = document.createElement("div");
     fitas.className = "fitas";
-    res.caixas.forEach(function(c){
-      var f = document.createElement("div");
+    res.caixas.forEach(function(c, i){
+      var f = document.createElement("button");
+      f.type = "button";
       f.className = "fita";
+      f.setAttribute("aria-pressed", "false");
       f.innerHTML = '<i></i><span></span>';
       f.querySelector("i").style.background = c.hex;
-      f.querySelector("span").textContent = c.hex.slice(1);
-      f.title = c.hex;
+      f.addEventListener("click", function(){
+        if (escolhidas[i]) delete escolhidas[i]; else escolhidas[i] = true;
+        f.setAttribute("aria-pressed", escolhidas[i] ? "true" : "false");
+        atualizaBotao();
+      });
       fitas.appendChild(f);
+      fitasEls.push(f);
     });
     corpo.appendChild(fitas);
     cartao.appendChild(corpo);
+
+    var ajuste = document.createElement("div");
+    ajuste.className = "ajuste";
+    var entMarca = document.createElement("input");
+    entMarca.type = "text"; entMarca.value = "Círculo"; entMarca.maxLength = 24;
+    entMarca.id = "marca" + id;
+    campo(ajuste, "marca", entMarca);
+
+    var caixaCods = document.createElement("div");
+    var lbCods = document.createElement("label");
+    lbCods.textContent = "códigos, na ordem de leitura";
+    lbCods.setAttribute("for", "cods" + id);
+    var sel = document.createElement("select");
+    sel.setAttribute("aria-label", "atalho para os códigos da cartela Círculo");
+    sel.innerHTML = '<option value="">— escreva abaixo, ou use a cartela Círculo —</option>';
+    PRESET_CIRCULO.forEach(function(t){
+      var o = document.createElement("option");
+      o.value = t.codigos;
+      o.textContent = "Círculo · tela " + t.n + " — " + t.de + " a " + t.ate +
+                      " (" + t.codigos.split(" ").length + ")";
+      sel.appendChild(o);
+    });
+    var entCods = document.createElement("textarea");
+    entCods.id = "cods" + id; entCods.spellcheck = false;
+    entCods.placeholder = "100 103 104 106 …";
+    caixaCods.appendChild(lbCods);
+    caixaCods.appendChild(sel);
+    caixaCods.appendChild(entCods);
+    ajuste.appendChild(caixaCods);
+    cartao.appendChild(ajuste);
+
+    var barra = document.createElement("div");
+    barra.className = "guardar";
+    var bt = document.createElement("button");
+    bt.type = "button"; bt.className = "botao forte";
+    var nota = document.createElement("span");
+    nota.className = "nota";
+    barra.appendChild(bt); barra.appendChild(nota);
+    cartao.appendChild(barra);
+
+    function quais(){ return Object.keys(escolhidas).map(Number).sort(function(a,b){ return a-b; }); }
+
+    function atualizaBotao(){
+      var q = quais().length;
+      bt.textContent = q ? "guardar " + q + (q === 1 ? " na caixa" : " na caixa") : "guardar na caixa";
+      bt.disabled = !q;
+      bt.style.opacity = q ? "" : ".5";
+    }
+
+    // o código de cada amostra só aparece quando a lista bate com a contagem:
+    // lista torta pareia errado, e pareado errado é pior do que sem código
+    function rotula(){
+      var txt = (entCods.value || "").trim();
+      codigos = txt ? txt.split(/[\s,;]+/).filter(Boolean) : [];
+      var bate = codigos.length === fitasEls.length;
+      var marca = entMarca.value.trim();
+      fitasEls.forEach(function(f, i){
+        var cod = bate ? codigos[i] : "";
+        f.querySelector("span").textContent = cod || res.caixas[i].hex.slice(1);
+        f.title = ((marca + " " + cod).trim() || "sem código") + " · " + res.caixas[i].hex;
+      });
+      nota.textContent = !codigos.length ? "sem códigos: vão para a caixa só com a marca"
+                       : bate ? ""
+                       : codigos.length + " códigos para " + fitasEls.length + " amostras — não bate";
+      atualizaBotao();
+    }
+
+    sel.addEventListener("change", function(){
+      if (!this.value) return;
+      entCods.value = this.value;
+      entMarca.value = "Círculo";
+      rotula();
+    });
+    entCods.addEventListener("input", rotula);
+    entMarca.addEventListener("input", rotula);
+
+    bt.addEventListener("click", function(){
+      var marca = entMarca.value.trim();
+      var bate = codigos.length === fitasEls.length;
+      var itens = quais().map(function(i){
+        return { marca: marca, code: bate ? codigos[i] : "", hex: res.caixas[i].hex };
+      }).filter(function(it){ return it.marca || it.code; });
+      if (!itens.length){ nota.textContent = "escreva a marca ou os códigos primeiro"; return; }
+      var r = guardaNaCaixa(itens);
+      if (r.erro){ nota.textContent = r.erro; return; }
+      nota.textContent = r.novos + (r.novos === 1 ? " cor guardada" : " cores guardadas") +
+        (r.repetidos ? " · " + r.repetidos + " já estava" + (r.repetidos > 1 ? "m" : "") + " lá" : "") +
+        " · a caixa tem " + r.total + ". Recarregue o app para vê-las.";
+      quais().forEach(function(i){ fitasEls[i].setAttribute("aria-pressed", "false"); });
+      escolhidas = {};
+      atualizaBotao();
+    });
+
+    rotula();
     telasEl.appendChild(cartao);
   }
 
@@ -385,6 +595,15 @@
       });
     } else b.textContent = "selecionado — Ctrl+C";
   });
+
+  if (!mesmaCasa()){
+    var alerta = document.getElementById("naomesma");
+    alerta.hidden = false;
+    alerta.innerHTML = "Não achei a memória do app neste endereço: ou esta página " +
+      "não está no mesmo lugar que o <code>index.html</code>, ou o app ainda não foi aberto " +
+      "aqui neste navegador. Guardar na caixa daqui só chega ao app se os dois vierem do " +
+      "mesmo endereço — se não vierem, use <b>copiar tudo</b> lá embaixo.";
+  }
 
   // Uma cartela de mentira, desenhada aqui mesmo, para a página abrir funcionando e
   // mostrar de cara o que ela devolve.
