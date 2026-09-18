@@ -2020,39 +2020,106 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return new Blob([arr], { type: "image/png" });
   }
 
+  // Salvar o arquivo é a única parte do app que muda de aparelho para aparelho,
+  // então há três caminhos, do melhor para o pior:
+  //   1. Chrome/Edge no desktop têm showSaveFilePicker: abre o diálogo do Windows
+  //      e o arquivo cai na pasta escolhida. É o único caminho que pergunta.
+  //   2. o iPhone não tem picker, e o jeito de chegar na pasta Arquivos é a folha
+  //      de compartilhar, onde existe "Salvar em Arquivos".
+  //   3. o resto cai no <a download>, que vai para a pasta de downloads, sem perguntar.
+  // O <a download> nunca leva target="_blank": com os dois juntos o Safari ignora
+  // o download e apenas abre o arquivo numa aba, que era o que acontecia aqui.
   function deliver(blob, name, dataUrlForImg){
+    if (window.showSaveFilePicker){
+      savePicker(blob, name).then(function(r){
+        if (r === "salvo"){ saved(name); return; }
+        if (r === "cancelado") return;          // fechou o diálogo de propósito
+        if (!anchorDownload(blob, name)) rescue(blob, name, dataUrlForImg);
+        else saved(name);
+      });
+      return;
+    }
+
     var file = null;
     try { if (window.File) file = new File([blob], name, { type: blob.type }); } catch(e){}
     if (file && navigator.canShare && navigator.canShare({ files: [file] })){
-      navigator.share({ files: [file] }).catch(function(){ fallbackLink(blob, name, dataUrlForImg); });
+      navigator.share({ files: [file] }).then(function(){ clearOut(); }).catch(function(err){
+        if (err && err.name === "AbortError") return;
+        if (!anchorDownload(blob, name)) rescue(blob, name, dataUrlForImg);
+        else saved(name);
+      });
       return;
     }
-    fallbackLink(blob, name, dataUrlForImg);
+
+    if (!anchorDownload(blob, name)) rescue(blob, name, dataUrlForImg);
+    else saved(name);
   }
 
-  function fallbackLink(blob, name, dataUrlForImg){
+  function isPDF(name){ return name.slice(-4).toLowerCase() === ".pdf"; }
+
+  // o diálogo "salvar como" de verdade. Devolve sempre uma promessa que resolve
+  // em texto, para quem chamou decidir sem precisar distinguir tipos de erro.
+  function savePicker(blob, name){
+    var tipo = isPDF(name)
+      ? { description: "Molde em PDF", accept: { "application/pdf": [".pdf"] } }
+      : { description: "Imagem PNG",   accept: { "image/png":       [".png"] } };
+    return window.showSaveFilePicker({ suggestedName: name, types: [tipo] })
+      .then(function(handle){ return handle.createWritable(); })
+      .then(function(w){
+        return w.write(blob).then(function(){ return w.close(); });
+      })
+      .then(function(){ return "salvo"; })
+      .catch(function(err){
+        return (err && err.name === "AbortError") ? "cancelado" : "falhou";
+      });
+  }
+
+  // download comum, direto para a pasta de downloads. Devolve se o clique saiu.
+  function anchorDownload(blob, name){
     var href = null;
-    try { href = URL.createObjectURL(blob); } catch(e){}
-    if (href){
-      try {
-        var a = document.createElement("a");
-        a.href = href; a.download = name; a.target = "_blank";
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      } catch(e){}
+    try { href = URL.createObjectURL(blob); } catch(e){ return false; }
+    try {
+      var a = document.createElement("a");
+      a.href = href; a.download = name;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    } catch(e){
+      URL.revokeObjectURL(href);
+      return false;
     }
+    // o blob precisa sobreviver ao download; um minuto é folga de sobra
+    setTimeout(function(){ URL.revokeObjectURL(href); }, 60000);
+    return true;
+  }
+
+  function clearOut(){ $("out").innerHTML = ""; }
+
+  function saved(name){
+    var box = $("out");
+    box.innerHTML = "";
+    var p = document.createElement("p");
+    p.className = "hint"; p.style.marginTop = "20px";
+    p.textContent = "Pronto: " + name + " salvo.";
+    box.appendChild(p);
+  }
+
+  // último recurso, quando nem o picker nem o download saíram: um link na página
+  // para a pessoa clicar na mão. No celular sem compartilhar, a prévia em imagem
+  // ainda é o caminho para "Salvar em Fotos".
+  function rescue(blob, name, dataUrlForImg){
     if (dataUrlForImg){ showImage(dataUrlForImg); return; }
-    if (href){
-      var box = $("out");
-      box.innerHTML = "";
-      var p = document.createElement("p");
-      p.className = "hint"; p.style.marginTop = "20px";
-      var link = document.createElement("a");
-      link.href = href; link.target = "_blank"; link.textContent = "Abrir o PDF numa nova aba";
-      link.style.color = "var(--mat)";
-      p.appendChild(document.createTextNode("Não baixou sozinho? "));
-      p.appendChild(link);
-      box.appendChild(p);
-    }
+    var href = null;
+    try { href = URL.createObjectURL(blob); } catch(e){ return; }
+    var box = $("out");
+    box.innerHTML = "";
+    var p = document.createElement("p");
+    p.className = "hint"; p.style.marginTop = "20px";
+    var link = document.createElement("a");
+    link.href = href; link.download = name;
+    link.textContent = "Baixar " + (isPDF(name) ? "o PDF" : "a imagem") + " na mão";
+    link.style.color = "var(--mat)";
+    p.appendChild(document.createTextNode("Não baixou sozinho? "));
+    p.appendChild(link);
+    box.appendChild(p);
   }
 
   $("dl").addEventListener("click", function(){
