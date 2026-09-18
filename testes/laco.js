@@ -1,0 +1,156 @@
+// O laço: pegar a foto e as peças de uma vez e mover o bloco inteiro, num
+// Chromium. Como em posicao.js, a medida sai do que o app grava no
+// localStorage — assim dá para afirmar "todo mundo andou o mesmo milímetro"
+// em vez de "a tela mexeu".
+let chromium;
+try { chromium = require("playwright").chromium; }
+catch (e){
+  try { chromium = require("/opt/node22/lib/node_modules/playwright").chromium; }
+  catch (e2){ console.log("pulado: precisa do playwright e de um Chromium."); process.exit(0); }
+}
+const alvo = "file://" + require("path").resolve(__dirname, "..", "index.html");
+
+let falhas = 0;
+const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falhas++; };
+const perto = (a, b, t) => Math.abs(a - b) <= (t === undefined ? 0.051 : t);
+
+(async () => {
+  const nav = await chromium.launch();
+  const pg = await nav.newPage({ viewport: { width: 1280, height: 820 } });
+  await pg.goto(alvo);
+  await pg.waitForTimeout(2300);
+
+  const estado = async () => {
+    await pg.waitForTimeout(600);          // a gravação é adiada em 400 ms
+    return pg.evaluate(() => {
+      const idx = JSON.parse(localStorage.getItem("ponto-e-letra/moldes/v1"));
+      const it = idx.itens.find(i => i.id === idx.atual);
+      const d = JSON.parse(localStorage.getItem(it.dados));
+      return { foto: { x: +d.photoBox.x, y: +d.photoBox.y,
+                       w: +d.photoBox.w, h: +d.photoBox.h },
+               mm: parseFloat(d.mm),
+               els: d.els.map(e => ({ x: +e.x, y: +e.y,
+                                      cols: e.cells[0].length, rows: e.cells.length })) };
+    });
+  };
+
+  // mm de papel -> pixel de tela: o canvas inteiro é o papel
+  const mapa = () => pg.evaluate(() => {
+    const b = document.getElementById("grid").getBoundingClientRect();
+    const v = document.getElementById("paperSize").value;
+    let w, h;
+    if (v === "custom"){
+      w = parseFloat(document.getElementById("paperW").value) || 210;
+      h = parseFloat(document.getElementById("paperH").value) || 297;
+    } else { const p = v.split("x"); w = parseFloat(p[0]); h = parseFloat(p[1]); }
+    if (document.getElementById("paperOr").value === "l"){ const t = w; w = h; h = t; }
+    return { left: b.left, top: b.top, k: b.width / w, pw: w, ph: h };
+  });
+
+  const arrasta = async (de, para) => {
+    const m = await mapa();
+    await pg.mouse.move(m.left + de[0] * m.k, m.top + de[1] * m.k);
+    await pg.mouse.down();
+    await pg.mouse.move(m.left + para[0] * m.k, m.top + para[1] * m.k);
+    await pg.mouse.up();
+  };
+  const clica = async (x, y) => {
+    const m = await mapa();
+    await pg.mouse.click(m.left + x * m.k, m.top + y * m.k);
+  };
+  const noLaco = () => pg.locator("#ctlGrupo").getAttribute("class");
+  const diz = () => pg.locator("#ctlGrupoTxt").textContent();
+  // o centro da peça acerta o alvo mesmo girada: o giro é em torno dele
+  const centro = (st, i) => ({ x: st.els[i].x + st.els[i].cols * st.mm / 2,
+                               y: st.els[i].y + st.els[i].rows * st.mm / 2 });
+  const seta = async (tecla, n) => { for (let i = 0; i < n; i++) await pg.locator("body").press(tecla); };
+  // o que prova que o bloco não se desmanchou: a distância de cada peça até a
+  // foto é a mesma de antes
+  const arranjo = st => st.els.map(e => [e.x - st.foto.x, e.y - st.foto.y]);
+  const mesmoArranjo = (a, b) => a.length === b.length &&
+    a.every((p, i) => perto(p[0], b[i][0]) && perto(p[1], b[i][1]));
+
+  await pg.click('.rail button[data-pane="pecas"]');
+  await pg.waitForTimeout(300);
+  await pg.click("#addSym");                // duas peças e a foto na mesa
+  await pg.waitForTimeout(300);
+
+  const st0 = await estado();
+  ok(st0.els.length === 2, "a mesa tem duas peças e a foto");
+
+  // ---- 1. o retângulo pega o que couber inteiro dentro dele ---------------
+  await arrasta([1, 1], [209, 296]);
+  await pg.waitForTimeout(200);
+  ok(!/hide/.test(await noLaco()), "o laço em volta de tudo acendeu a barra do bloco");
+  ok(/2 peças e a foto no laço/.test(await pg.locator("#ctlGrupoTxt").textContent()),
+     "e a barra diz o que está laçado: " + (await pg.locator("#ctlGrupoTxt").textContent()));
+
+  // ---- 2. as setas movem o bloco inteiro ---------------------------------
+  await seta("ArrowRight", 2);              // 0,5 mm cada
+  let st = await estado();
+  ok(perto(st.foto.x - st0.foto.x, 1), "duas setas andam 1 mm com a foto junto (andou " +
+     (st.foto.x - st0.foto.x).toFixed(2) + ")");
+  ok(st.els.every((e, i) => perto(e.x - st0.els[i].x, 1) && perto(e.y, st0.els[i].y)),
+     "e as duas peças andam o mesmo 1 mm, sem sair do lugar no outro eixo");
+
+  // ---- 3. arrastar de dentro do laço move tudo ---------------------------
+  // as posições de partida saem da medida, não de número escrito à mão: quem
+  // decide onde a foto abre é o app
+  const base = st, antes = arranjo(st);
+  await arrasta([105, 135], [125, 125]);    // pega pela foto, que está laçada
+  st = await estado();
+  ok(perto(st.foto.x - base.foto.x, 20) && perto(st.foto.y - base.foto.y, -10),
+     "o arraste de dentro do laço levou a foto 20 mm para o lado e 10 para cima (andou " +
+     (st.foto.x - base.foto.x).toFixed(1) + ", " + (st.foto.y - base.foto.y).toFixed(1) + ")");
+  ok(mesmoArranjo(arranjo(st), antes), "e o bloco chegou inteiro: as distâncias não mudaram");
+  const meio = st;
+
+  // ---- 4. a foto segura o bloco na borda, em vez de o desmanchar ---------
+  const m = await mapa();
+  const borda = m.pw - base.foto.w;         // a foto encostada na borda direita
+  await arrasta([125, 125], [205, 125]);
+  st = await estado();
+  ok(perto(st.foto.x, borda), "a foto para na borda do papel (" + borda +
+     " mm, ficou em " + st.foto.x.toFixed(1) + ")");
+  ok(mesmoArranjo(arranjo(st), antes), "e as peças param junto com ela: o bloco não se desmancha");
+
+  // ---- 5. o arraste do bloco é um passo só no desfazer -------------------
+  await pg.locator("body").press("Control+z");
+  st = await estado();
+  ok(perto(st.foto.x, meio.foto.x) && perto(st.foto.y, meio.foto.y) &&
+     mesmoArranjo(arranjo(st), antes),
+     "um desfazer devolve o bloco inteiro para onde ele estava");
+
+  // ---- 6. clique no vazio larga o laço -----------------------------------
+  await clica(5, 290);
+  await pg.waitForTimeout(200);
+  ok(/hide/.test(await noLaco()), "um clique no vazio desmancha o laço");
+
+  // ---- 7. o laço só leva quem cabe inteiro dentro dele --------------------
+  await arrasta([1, 1], [209, 180]);        // pega a foto pela metade: não leva
+  await pg.waitForTimeout(200);
+  ok(/hide/.test(await noLaco()),
+     "um laço que corta a foto ao meio não a leva, e sozinho não vira bloco");
+
+  // ---- 8. Shift soma ao laço o que o retângulo não pegou -----------------
+  const c0 = centro(st, 0), c1 = centro(st, 1);
+  await clica(c0.x, c0.y);
+  await pg.waitForTimeout(200);
+  ok(/hide/.test(await noLaco()), "uma peça sozinha não é bloco");
+  await pg.keyboard.down("Shift");
+  await clica(c1.x, c1.y);
+  await pg.keyboard.up("Shift");
+  await pg.waitForTimeout(200);
+  ok(/2 peças no laço/.test(await diz()),
+     "Shift soma a outra peça ao laço, sem a foto (barra: " + (await diz()) + ")");
+
+  await pg.keyboard.down("Shift");
+  await clica(c1.x, c1.y);
+  await pg.keyboard.up("Shift");
+  await pg.waitForTimeout(200);
+  ok(/hide/.test(await noLaco()), "e Shift de novo na mesma peça tira ela do laço");
+
+  await nav.close();
+  console.log(falhas ? "\n" + falhas + " falha(s)" : "\ntudo certo");
+  process.exit(falhas ? 1 : 0);
+})();

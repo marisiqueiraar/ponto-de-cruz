@@ -8,7 +8,7 @@ um Chromium e se pula sozinho quando não acha um.
 testes/roda.sh        # todos, com a extração refeita antes
 ```
 
-Três deles (`tela.js`, `posicao.js` e `traco.js`) dirigem um Chromium e se pulam
+Quatro deles (`tela.js`, `posicao.js`, `traco.js` e `laco.js`) dirigem um Chromium e se pulam
 sozinhos quando não acham um. O `posicao.js` mede as posições lendo o que o app
 grava no `localStorage`, em vez de olhar a tela: assim dá para afirmar "andou
 0,5 mm" em vez de "alguma coisa mudou".
@@ -37,6 +37,7 @@ em todas as folhas.
 | `fio.js` | os metros na tela batem com a conta que a própria tela diz fazer, a conta responde ao espaçamento entre furos, e a soma por cor fecha com o total de pontos |
 | `teto.js` | o teto do rascunho não deforma o molde: o degrau na fronteira é menor que a variação natural, e o pior caso mantém a grade que tinha sem o teto |
 | `cota.js` | com o `localStorage` recusando a escrita, o rodapé avisa em vermelho, a aba moldes diz o que fazer, os dois somem quando volta a caber, e o aviso aparece mesmo numa janela de 360 px, onde o resto do rodapé fica escondido |
+| `laco.js` | o laço pega o que couber inteiro dentro dele, a barra diz o que está laçado, as setas e o arraste movem foto e peças sem mudar as distâncias entre elas, a foto segura o bloco na borda do papel, e o arraste do bloco é um passo só no desfazer |
 | `traco.js` | o arraste no modo ponto a ponto acende a fileira inteira sem furo mesmo quando o ponteiro pula de uma vez, o primeiro quadradinho decide se o traço acende ou apaga, e o traço todo é um passo só no desfazer |
 | `posicao.js` | as setas andam 0,5 mm (5 com Shift), a rajada vira um passo só no desfazer, a seta dentro de um campo não empurra a peça, e os três botões de alinhar acertam o centro da caixa já girada |
 

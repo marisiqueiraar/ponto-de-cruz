@@ -102,6 +102,12 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   "posicionar a peça" para "mover a vista" — no toque, com ela ligada, a pinça muda o zoom. A
   porcentagem é relativa ao encaixe do papel na tela: **100% é o papel inteiro visível**, não
   tamanho físico. Tamanho real é promessa do PDF, que a tela não tem como garantir.
+- **Laço**: arrastar no vazio desenha um retângulo, e o que couber **inteiro** dentro dele —
+  peças e a foto — passa a andar junto, no arraste e nas setas. É "couber inteiro" e não
+  "encostar" por causa da foto: ela costuma estar embaixo de tudo, e pelo encostar um laço em
+  volta de duas palavras a levaria junto sem ninguém pedir. Shift (ou Ctrl) no clique soma ou
+  tira uma peça do laço, na mesa ou nas fichas da aba peças. Quem segura o bloco é a foto: ela
+  não sai do papel, e o bloco inteiro para com ela em vez de se desmanchar na borda.
 - **Modo ponto a ponto**: um toque acende ou apaga um quadradinho, e arrastar sem soltar
   acende ou apaga a fileira inteira por onde o dedo (ou o botão) passa — quem decide se o
   traço acende ou apaga é o primeiro quadradinho dele, então voltar por cima do próprio

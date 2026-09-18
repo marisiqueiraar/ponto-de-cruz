@@ -166,3 +166,42 @@ memória" e a aba moldes escreve o caminho. Os detalhes estão no
 que encheu, mas ninguém aumenta 5 MB. A saída de verdade é o arquivo do molde,
 e vale pensar se o app deveria insistir mais nisso — oferecer o download
 sozinho quando a memória encher, por exemplo, em vez de só recomendar.
+
+---
+
+## 5. O laço — o que eu decidi sozinho
+
+Você pediu para poder selecionar o bloco inteiro — foto mais peças — e mover
+tudo junto. Está feito: arrastar no vazio desenha um retângulo, e o que ele
+pegar anda junto no arraste e nas setas. Três decisões foram minhas.
+
+**O laço leva o que couber inteiro dentro dele, e não o que ele encostar.** A
+maioria dos programas de desenho faz pelo encostar. Aqui a foto atrapalha: ela
+costuma ocupar o meio do papel, embaixo das palavras, então pelo encostar
+qualquer laço em volta de duas palavras levaria a foto junto — e mover a foto
+sem querer é o pior estrago possível, porque as peças foram posicionadas em
+relação a ela. Envolver a foto inteira é um jeito claro de dizer que ela vai.
+O custo é que laço curto não pega palavra comprida; para esse caso, Shift no
+clique soma a peça. **Se você preferir pelo encostar, é uma linha só** (a
+função `dentro()` em `index.html`).
+
+**Com um bloco laçado, a barra de cima esconde os campos da peça.** Texto,
+fonte, altura, giro, espelhar, apagar, duplicar e os botões de alinhar mexeriam
+em uma só das peças laçadas, e ninguém saberia em qual. No lugar deles a barra
+diz o que está no laço. Isso quer dizer que **o laço serve para mover, e só**:
+para o resto, clique numa peça sozinha. Se você quiser apagar ou girar o bloco
+inteiro, dá para fazer — só não fiz sem você decidir.
+
+**A foto segura o bloco na borda.** A foto não pode sair do papel (isso já era
+assim), e uma peça pode. Se cada um obedecesse à sua própria regra, o bloco se
+desmancharia ao chegar na borda: a foto pararia e as palavras seguiriam. Então
+o passo do bloco inteiro é limitado pelo que a foto aceita. O contrário
+defensável seria deixar as palavras seguirem e o arranjo quebrar.
+
+Duas coisas que o laço **não** faz, de propósito: ele não é gravado (ao abrir o
+molde de novo, nada está laçado) e não entra no desfazer — o desfazer devolve
+posições, não seleção. Laço é para onde você está olhando, não é parte do molde.
+
+`testes/laco.js` prova o que dá para provar num Chromium: que o bloco anda
+inteiro, que as distâncias entre as peças não mudam nem quando a foto bate na
+borda, e que o arraste do bloco é um passo só no desfazer.
