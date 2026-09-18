@@ -95,12 +95,20 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   não no `localStorage`: um molde grande em PDF tem megabytes, e a cota do `localStorage` já é
   disputada pela estante e pela foto. Em janela anônima, ou com os dados do site bloqueados, a
   lista diz isso em vez de sumir sem explicação.
-- **PDF do molde**: em tamanho real, recortado na área do bordado, com a moldura de recorte, o
+- **PDF do molde**: em tamanho real, com a moldura de recorte, o
   retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
   distância exata para colar a foto no papel e uma **régua de aferição de 50 mm** — se ela não
   medir 50 mm na régua de verdade, a impressora reduziu a página e nenhum furo vai bater. No
   rodapé de cada folha vai a legenda das linhas usadas, com o código da marca — cor de tela não
   é código de meada, e sem a legenda o molde impresso não diz o que comprar de novo.
+- **A moldura de recorte é a folha inteira**: e não a caixa do desenho. Molde recortado rente
+  ao bordado só se prende mirando o retângulo da foto; molde do tamanho do papel se prende
+  borda com borda, que é a mira que a mão acerta. Numa A4 isso nunca cabe embaixo do
+  cabeçalho, então o texto sai na página 1 e o papel inteiro na 2 — a folha impressa **é** o
+  molde, sem tesoura. O que não se paga é folha de molde a mais: se houver furo perto demais
+  da borda do papel, a folha inteira sairia repartida onde o desenho sozinho sai inteiro, e aí
+  a moldura volta a cercar o bordado com 8 mm de folga. O aviso ao lado do botão de baixar diz
+  quando isso acontece.
 - **Folha de instrução**: o cabeçalho ocupa 46 mm de altura e o rodapé mais 8. Um molde que
   usa quase toda a folha cabe no papel e não cabe embaixo desse texto — e era repartido em duas
   folhas por causa das instruções, não do desenho. Quando isso acontece o texto é que muda de
@@ -121,7 +129,17 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   "posicionar a peça" para "mover a vista" — no toque, com ela ligada, a pinça muda o zoom. A
   porcentagem é relativa ao encaixe do papel na tela: **100% é o papel inteiro visível**, não
   tamanho físico. Tamanho real é promessa do PDF, que a tela não tem como garantir.
-- **Modo ponto a ponto**: enquanto se acende e apaga quadradinho, a barra fica amarela e os
+- **Laço**: arrastar no vazio desenha um retângulo, e o que couber **inteiro** dentro dele —
+  peças e a foto — passa a andar junto, no arraste e nas setas. É "couber inteiro" e não
+  "encostar" por causa da foto: ela costuma estar embaixo de tudo, e pelo encostar um laço em
+  volta de duas palavras a levaria junto sem ninguém pedir. Shift (ou Ctrl) no clique soma ou
+  tira uma peça do laço, na mesa ou nas fichas da aba peças. Quem segura o bloco é a foto: ela
+  não sai do papel, e o bloco inteiro para com ela em vez de se desmanchar na borda.
+- **Modo ponto a ponto**: um toque acende ou apaga um quadradinho, e arrastar sem soltar
+  acende ou apaga a fileira inteira por onde o dedo (ou o botão) passa — quem decide se o
+  traço acende ou apaga é o primeiro quadradinho dele, então voltar por cima do próprio
+  traço não desfaz o que acabou de sair, e o traço inteiro é um passo só no desfazer.
+  Enquanto se acende e apaga quadradinho, a barra fica amarela e os
   campos da peça saem dela — no celular eles roubam a altura de que a grade precisa, e em
   qualquer tela mudar a grade embaixo do dedo que a está acertando é o caminho mais curto para
   se perder. No celular o painel e as abas recolhem: a grade passa de 164 × 232 para 328 × 464 px.

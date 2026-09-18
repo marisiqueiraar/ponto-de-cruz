@@ -9,7 +9,10 @@
 <meta name="apple-mobile-web-app-title" content="ponto & letra">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#EDF4FB">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23384959'/%3E%3Crect x='30' y='142' width='120' height='12' fill='%23FFE566'/%3E%3Cg stroke='%23FFE566' stroke-width='11' stroke-linecap='round'%3E%3Cpath d='M46 46 78 78M78 46 46 78'/%3E%3Cpath d='M102 46 134 78M134 46 102 78'/%3E%3Cpath d='M46 102 78 134M78 102 46 134'/%3E%3Cpath d='M102 102 134 134M134 102 102 134'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icone-180.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icone-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icone-32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="icone.png">
 <style>
 /* As 40 famílias moram aqui: sem rede, o canvas desenharia numa cursiva
    genérica do sistema e o molde sairia errado sem avisar, porque a grade é
@@ -447,6 +450,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 .app.editando #ctlNone{display:none!important}
 .app.editando #ctlEdit{display:flex!important}
 .app.editando #ctlEditTxt{color:var(--ink)}
+/* a mira diz que dá para arrastar; com a mãozinha ligada quem manda é ela */
+.app.editando .stage:not(.mao) canvas{cursor:crosshair}
 .app.editando .tbtn,
 .app.editando #pdf{background:#fff}
 .app.editando .fit{background:#fff}
@@ -529,6 +534,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   <div class="tools">
     <span class="none" id="ctlNone">&nbsp;</span>
     <span class="grp hide" id="ctlEdit"><span class="none" id="ctlEditTxt">ajustando ponto a ponto</span></span>
+    <span class="grp hide" id="ctlGrupo"><span class="none" id="ctlGrupoTxt"></span></span>
 
     <fieldset id="ctlText" class="hide">
       <span class="t txt"><span>texto</span><input id="txt" type="text" value="champ" autocomplete="off" spellcheck="false"></span>
@@ -730,7 +736,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <div class="chips" id="chips"></div>
     <p class="note">Toque numa peça para selecioná-la: os ajustes dela aparecem na barra de cima.
     O botão <b>ajustar</b> abre o modo ponto a ponto, onde cada toque acende ou apaga um
-    quadradinho.</p>
+    quadradinho — e arrastar sem soltar acende ou apaga a fileira inteira por onde passa,
+    do jeito que o primeiro quadradinho do traço mandou.</p>
   </section>
 
   <section class="pane" data-pane="linha">
@@ -854,8 +861,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <ul>
       <li>Cole a foto no papel usando a medida que aparece no cabeçalho do PDF: distância da borda esquerda e da borda de cima. É essa posição que faz o molde bater.</li>
       <li>Antes de furar, meça a régua impressa no cabeçalho: se os 50 mm dela não derem 50 mm na sua régua, a impressora reduziu a página e nenhum furo vai bater. Imprima de novo em 100%, sem "ajustar à página".</li>
-      <li>Recorte o molde impresso pela moldura tracejada e prenda sobre o conjunto alinhando o retângulo da foto com a foto de verdade, fita crepe nos quatro cantos.</li>
-      <li>Molde que usa quase toda a folha não cabe embaixo do cabeçalho, então o PDF sai em duas páginas: a primeira só com as instruções, a régua e a legenda, e a segunda com o molde sozinho na folha, inteiro e em tamanho real. É só a segunda que você imprime e recorta.</li>
+      <li>Recorte o molde impresso pela moldura tracejada: ela é a borda do papel da peça, então a folha recortada sai do tamanho exato dele. Se o papel da peça for A4 e você imprimir em A4, a moldura cai na borda da própria folha impressa e não há o que recortar — a folha já é o molde. Prenda sobre o conjunto encostando borda com borda, que o retângulo impresso cai em cima da foto de verdade, fita crepe nos quatro cantos. (Só quando há furo perto demais da borda do papel a moldura encolhe para a caixa do desenho, e aí a mira volta a ser o retângulo da foto.)</li>
+      <li>O cabeçalho do PDF ocupa 46 mm da página, e uma moldura do tamanho da folha não cabe embaixo dele — nem um molde que use quase toda a folha. Quando isso acontece o PDF sai em duas páginas: a primeira só com as instruções, a régua e a legenda, e a segunda com o molde sozinho na folha, inteiro e em tamanho real. É só a segunda que você imprime e recorta.</li>
       <li>Molde maior que a folha inteira sai em várias folhas, todas em tamanho real. Cada uma diz qual é no cabeçalho, e as vizinhas repetem uma faixa do desenho: sobreponha uma na outra até os furos da faixa coincidirem, e só então prenda. As margens dizem qual folha continua de cada lado.</li>
       <li>Fure ponto a ponto com agulha grossa, apoiado em EVA ou cortiça. Cada quadradinho usa quatro furos, compartilhados com os vizinhos — por isso o número de furos é menor que o dobro de pontos.</li>
       <li>Se o rodapé ficar vermelho dizendo <b>não coube na memória</b>, salve o arquivo do molde na aba <b>moldes</b> e apague um molde antigo. A partir desse momento o trabalho parou de ser guardado.</li>
@@ -892,7 +899,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
 <!-- ===================== rodapé ===================== -->
 <div class="foot">
-  <p class="hint" id="modeHint">Arraste a palavra ou a foto para posicionar. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.</p>
+  <p class="hint" id="modeHint">Arraste a palavra ou a foto para posicionar, ou arraste no vazio para laçar várias e mover juntas. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.</p>
   <span class="saved" id="manualOut"></span>
   <span class="saved" id="areaOut"></span>
   <span class="saved" id="gravado">salvo neste navegador</span>
@@ -977,6 +984,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   var photoImg = null, photoURL = null;
   var photo = { x: 55, y: 60, w: 100, h: 150 };
   var editing = false;
+  var MODO_MOVER = "Arraste a palavra ou a foto para posicionar, ou arraste no vazio para laçar várias e mover juntas. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.";
   var zoom = 1, fitK = 1, mao = false;   /* vista: escala relativa ao encaixe */
   /* As guias: linhas pontilhadas que atravessam a mesa de ponta a ponta, para
      posicionar no olho sem sair torto. Os valores são milímetros de papel — e
@@ -990,6 +998,18 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
      grande. Vira milímetros dividindo pela escala da vista, onde é usada. */
   var FOLGA_PX = 6;
   var focus = "el";   /* "el" | "photo" | "none" — decide a barra de cima */
+
+  /* ---- o laço ---------------------------------------------------------
+     `marca` diz quais peças estão laçadas e `marcaFoto` diz se a foto veio
+     junto. Com um item só é a seleção de sempre, e `sel` continua sendo a
+     peça que a barra de cima edita — tudo o que já existia segue igual. Com
+     mais de um, o arraste e as setas movem o bloco inteiro.
+
+     O laço não é gravado nem entra no desfazer: ele é para onde se está
+     olhando, não o que está no molde. */
+  var marca = [0];
+  var marcaFoto = false;
+  var laco = null;    // o retângulo enquanto o botão está apertado
   var totalCount = 0, totalHoles = 0;
   var lastPaper = null;
 
@@ -1850,11 +1870,50 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return { x: minX, y: minY, w: Math.max(0, maxX - minX), h: Math.max(0, maxY - minY) };
   }
 
-  function cropArea(){
+  /* ---- o que a moldura tracejada cerca ---------------------------------
+
+     A folha inteira, e não a caixa do desenho. Molde recortado rente ao
+     desenho só se prende mirando o retângulo da foto; molde do tamanho do
+     papel se prende borda com borda, que é a mira que a mão acerta.
+
+     O preço é o cabeçalho: ele come 46 mm da página, e uma moldura do tamanho
+     da folha nunca cabe embaixo dele. Então o texto passa a sair numa página
+     só dele e o molde fica sozinho na seguinte — duas páginas, uma folha de
+     molde só, a mesma troca que o molde grande já fazia.
+
+     O que não se paga é folha de molde a mais. Furo colado na borda do papel
+     não cabe nem na folha nua, e aí o papel inteiro sairia repartido onde o
+     desenho sozinho saía inteiro: emendar duas folhas com a mão é pior do que
+     recortar mirando a foto. Só nesse caso a moldura volta a ser a caixa do
+     desenho com 8 mm de folga, que é como sempre foi. */
+  function cropJusto(){
     var pa = paperMM(), c = contentArea(), pad = 8;
     var minX = Math.max(0, c.x - pad), minY = Math.max(0, c.y - pad);
     var maxX = Math.min(pa.w, c.x + c.w + pad), maxY = Math.min(pa.h, c.y + c.h + pad);
     return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+  }
+
+  function cropFolha(){
+    var pa = paperMM();
+    return { x: 0, y: 0, w: pa.w, h: pa.h };
+  }
+
+  function folhasDe(R){
+    var pl = pdfPlan(R, contentArea());
+    return pl.cols * pl.rows;
+  }
+
+  function cropArea(){
+    var justo = cropJusto();
+    if (justo.w <= 0 || justo.h <= 0) return justo;   // nada para imprimir
+    var folha = cropFolha();
+    return folhasDe(folha) <= folhasDe(justo) ? folha : justo;
+  }
+
+  // a moldura pegou o papel todo: quem recorta está cortando na borda da folha
+  function folhaCheia(R){
+    var pa = paperMM();
+    return R.w >= pa.w - 0.01 && R.h >= pa.h - 0.01;
   }
 
   // a folha do PDF: 10 mm de margem lateral, 46 mm de cabeçalho e 8 mm embaixo.
@@ -2054,13 +2113,41 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       totalCount += countOf(el);
       totalHoles += holesOf(el).length;
       drawStitches(ctx, el, k, region, corDe(el).hex, Math.max(1.3, P() * k * 0.15));
-      if (opts.outline && i === sel) drawOutline(ctx, el, k, region);
+      if (opts.outline && marcado(i)) drawOutline(ctx, el, k, region);
     });
+    if (opts.outline && marcaFoto) drawFotoOutline(ctx, k, region);
+    if (opts.outline && laco) drawLaco(ctx, k, region);
+  }
+
+  // a foto também ganha contorno quando está marcada: sem isso, um bloco de
+  // foto mais palavras ficaria com metade dele sem dizer que está laçada
+  function drawFotoOutline(ctx, k, region){
+    ctx.save();
+    ctx.strokeStyle = "#384959";
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 1;
+    ctx.strokeRect((photo.x - region.x) * k - 3, (photo.y - region.y) * k - 3,
+                   photo.w * k + 6, photo.h * k + 6);
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  function drawLaco(ctx, k, region){
+    var r = lacoRect();
+    ctx.save();
+    ctx.fillStyle = "rgba(56,73,89,.07)";
+    ctx.strokeStyle = "#384959";
+    ctx.setLineDash([5, 4]);
+    ctx.lineWidth = 1;
+    ctx.fillRect((r.x - region.x) * k, (r.y - region.y) * k, r.w * k, r.h * k);
+    ctx.strokeRect((r.x - region.x) * k, (r.y - region.y) * k, r.w * k, r.h * k);
+    ctx.setLineDash([]);
+    ctx.restore();
   }
 
   /* O aviso de escala mora colado no botão de baixar, porque é sobre o que vai
      sair quando ele for apertado. Três estados: cabe, cabe por pouco, não cabe. */
-  var AVISO_CAPA = "O molde não cabe embaixo do cabeçalho, então o PDF sai em duas " +
+  var AVISO_CAPA = "O que vai ser recortado não cabe embaixo do cabeçalho, então o PDF sai em duas " +
     "páginas: a primeira com as instruções, a régua e a legenda, a segunda com o molde " +
     "sozinho na folha, inteiro e em tamanho real. Imprimir e usar é só a segunda.";
 
@@ -2073,7 +2160,16 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
        na margem sem custar um ponto. O próprio plano já traz essa conta. */
     var folga = plano.capa ? plano.folga
       : Math.min(plano.pageW - PDF_SIDE * 2 - cr.w, pageH - PDF_TOP - footMM() - cr.h);
-    var area = fmt(cr.w / 10) + " × " + fmt(cr.h / 10) + " cm";
+    /* A área continua sendo a do desenho, e não a da moldura: com a moldura
+       valendo a folha inteira, esse número viraria "21 × 29,7 cm" em todo molde
+       e deixaria de dizer o tamanho da peça, que é para o que se olha. */
+    var ju = cropJusto();
+    var area = fmt(ju.w / 10) + " × " + fmt(ju.h / 10) + " cm";
+    // a moldura só encolhe para o desenho quando a folha inteira custaria uma
+    // folha de molde a mais; dizer isso evita a pergunta
+    var recorte = folhaCheia(cr) ? "" :
+      " A moldura de recorte sai no tamanho do desenho, e não na folha inteira: " +
+      "há furo perto demais da borda do papel, e a folha inteira sairia repartida.";
     var box = $("fitHint"), txt = $("fitTxt"), state = "";
     var fora = pecasForaDoPapel();
 
@@ -2097,11 +2193,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       state = "tight";
       txt.textContent = "cabe em A4 · " + fmt(folga) + " mm de folga";
       box.title = "Área do molde: " + area + ". Cabe numa folha A4 em tamanho real, com " +
-        fmt(folga) + " mm de sobra até a margem." + (plano.capa ? " " + AVISO_CAPA : "");
+        fmt(folga) + " mm de sobra até a margem." + recorte + (plano.capa ? " " + AVISO_CAPA : "");
     } else {
       txt.textContent = "cabe em A4 · tamanho real";
       box.title = "Área do molde: " + area + ". Cabe numa folha A4 em tamanho real." +
-        (plano.capa ? " " + AVISO_CAPA : "");
+        recorte + (plano.capa ? " " + AVISO_CAPA : "");
     }
     box.className = "fit" + (state ? " " + state : "");
     $("areaOut").textContent = "área do molde " + area;
@@ -2380,6 +2476,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
     els = pieces;
     sel = Math.min(Math.max(0, s.sel | 0), els.length - 1);
+    soUm(sel);
     return true;
   }
 
@@ -2449,6 +2546,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     photo.x = +d.px || 0; photo.y = +d.py || 0;
     clampPhoto();
     sel = Math.min(Math.max(0, d.sel | 0), els.length - 1);
+    soUm(sel);                 // índice de antes pode nem existir mais
     if (!els.length) focus = "none";
     else if (focus === "none") focus = "el";
     renderChips(); syncControls(); draw();
@@ -2523,8 +2621,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     box.innerHTML = "";
     els.forEach(function(el, i){
       var b = document.createElement("button");
-      b.className = "chip" + (i === sel ? " on" : "");
-      b.setAttribute("aria-pressed", i === sel ? "true" : "false");
+      b.className = "chip" + (marcado(i) ? " on" : "");
+      b.setAttribute("aria-pressed", marcado(i) ? "true" : "false");
       // o ponto de cor é o que deixa ver o arranjo inteiro de uma vez, sem
       // ter de selecionar peça por peça para lembrar de que linha é cada uma
       var cor = corDe(el);
@@ -2535,7 +2633,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       b.appendChild(pt);
       b.appendChild(document.createTextNode(el.kind === "text" ? (el.text || "texto")
         : (NOMES_SYM[el.sym] || "símbolo")));
-      b.addEventListener("click", function(){ sel = i; focus = "el"; syncControls(); draw(); renderChips(); });
+      // com Shift (ou Ctrl) a ficha soma ao laço em vez de trocar a seleção:
+      // é o caminho para laçar duas peças distantes sem passar por cima do resto
+      b.addEventListener("click", function(e){
+        if (e.shiftKey || e.ctrlKey || e.metaKey) alternaMarca(i);
+        else { sel = i; soUm(i); focus = "el"; }
+        syncControls(); draw(); renderChips();
+      });
       box.appendChild(b);
     });
   }
@@ -2546,6 +2650,20 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     // com uma linha por peça, o painel precisa dizer qual peça ele está
     // pintando — senão o quadradinho marcado vira adivinhação
     mostraThread();
+    /* Com um bloco laçado a barra não mostra os campos da peça: eles mexeriam
+       em uma só das laçadas, e ninguém saberia em qual. Ela diz o que está no
+       laço e o que dá para fazer com ele. */
+    var bloco = noLaco();
+    $("ctlGrupo").classList.toggle("hide", !bloco);
+    if (bloco){
+      var n = marca.length;
+      var q = n ? n + (n === 1 ? " peça" : " peças") : "";
+      if (marcaFoto) q += (q ? " e " : "") + "a foto";
+      $("ctlGrupoTxt").textContent = q + " no laço · arraste ou use as setas para mover tudo junto";
+      ["alinha", "ctlPhoto", "ctlPiece", "ctlActs", "ctlNone", "ctlText", "ctlSym"]
+        .forEach(function(id){ $(id).classList.add("hide"); });
+      return;
+    }
     $("alinha").classList.toggle("hide", !piece);
     $("alAcima").classList.toggle("hide", !piece || sel < 1);
     $("flipEl").classList.toggle("on", !!(el && el.flip));
@@ -2620,7 +2738,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
                x: photo.x, y: photo.y + photo.h - 14, cells:[[0]],
                color: thread, colorName: threadLabel(thread) || thread };
     rebuild(el);
-    els.push(el); sel = els.length - 1; focus = "el";
+    els.push(el); sel = els.length - 1; soUm(sel); focus = "el";
     renderChips(); syncControls(); draw(); pushHist();
   }
 
@@ -2628,7 +2746,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var el = { kind:"sym", sym:"heart", scale:2, rot:0, x: photo.x + photo.w - 20, y: photo.y + photo.h - 20,
                flip:0, edits:[], cells:[[0]], color: thread, colorName: threadLabel(thread) || thread };
     rebuild(el);
-    els.push(el); sel = els.length - 1; focus = "el";
+    els.push(el); sel = els.length - 1; soUm(sel); focus = "el";
     renderChips(); syncControls(); draw(); pushHist();
   }
 
@@ -2640,6 +2758,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     if (!els.length) return;
     els.splice(sel, 1);
     sel = Math.max(0, sel - 1);
+    soUm(sel);
     if (!els.length) focus = "none";
     renderChips(); syncControls(); draw(); pushHist();
   });
@@ -2673,6 +2792,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     copia.y = Math.min(el.y + 4, Math.max(0, pa.h - b.h));
     els.splice(sel + 1, 0, copia);
     sel = sel + 1;
+    soUm(sel);
     focus = "el";
     renderChips(); syncControls(); draw(); pushHist();
   });
@@ -2789,14 +2909,16 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   $("edit").addEventListener("click", function(){
     editing = !editing;
+    if (editing) soUm(sel);   // ponto a ponto é numa peça só
+    syncControls();
     this.classList.toggle("on", editing);
     document.querySelector(".app").classList.toggle("editando", editing);
     $("ctlEdit").classList.toggle("hide", !editing);
     $("editLabel").textContent = editing ? "terminar" : "ajustar";
     draw();   // a grade ganha ou devolve a altura do painel
     $("modeHint").textContent = editing
-      ? "Toque num quadradinho da peça selecionada para acender ou apagar."
-      : "Arraste a palavra ou a foto para posicionar. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.";
+      ? "Toque num quadradinho da peça selecionada para acender ou apagar. Arrastando sem soltar, o traço inteiro segue o primeiro."
+      : MODO_MOVER;
   });
 
   /* Recalcular refaz as células a partir dos controles, então apaga tudo que
@@ -2927,6 +3049,147 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return -1;
   }
 
+  /* ---- o laço: várias peças, e a foto, de uma vez --------------------
+     Arrastar no vazio desenha um retângulo; o que couber inteiro dentro dele
+     entra no laço. É "couber inteiro", e não "encostar", por causa da foto:
+     ela costuma estar embaixo de tudo, e pelo encostar qualquer laço em volta
+     de duas palavras levaria a foto junto sem ninguém pedir. Envolver a foto
+     inteira é um jeito de dizer que ela vai — e Shift soma a peça que o
+     retângulo não pegou. */
+  function noLaco(){ return marca.length + (marcaFoto ? 1 : 0) > 1; }
+  function marcado(i){ return marca.indexOf(i) >= 0; }
+
+  function soUm(i){
+    marca = i >= 0 && els[i] ? [i] : [];
+    marcaFoto = false;
+  }
+
+  function alternaMarca(i){
+    var p = marca.indexOf(i);
+    if (p >= 0){ marca.splice(p, 1); if (!marca.length && !marcaFoto) focus = "none"; }
+    else { marca.push(i); sel = i; focus = "el"; }
+  }
+
+  function lacoRect(){
+    return { x: Math.min(laco.x0, laco.x), y: Math.min(laco.y0, laco.y),
+             w: Math.abs(laco.x - laco.x0), h: Math.abs(laco.y - laco.y0) };
+  }
+
+  function dentro(b, r){
+    return b.x >= r.x && b.y >= r.y && b.x + b.w <= r.x + r.w && b.y + b.h <= r.y + r.h;
+  }
+
+  function fechaLaco(r, soma){
+    if (!soma) soUm(-1);
+    els.forEach(function(el, i){
+      if (dentro(elPaperBox(el), r) && !marcado(i)) marca.push(i);
+    });
+    if (dentro(photo, r)) marcaFoto = true;
+    marca.sort(function(a, b){ return a - b; });
+    if (marca.length){ if (!marcado(sel)) sel = marca[0]; focus = "el"; }
+    else focus = marcaFoto ? "photo" : "none";
+  }
+
+  /* O bloco anda inteiro, então quem é limitado é o passo, e não cada peça:
+     a foto não pode sair do papel, e se ela parasse na borda sozinha o bloco
+     se desmancharia no meio do arraste. Peça pode passar da borda — disso
+     quem avisa é o "peça fora do papel" na barra de cima. */
+  function seguraPasso(dx, dy, bx, by){
+    if (!marcaFoto) return { x: dx, y: dy };
+    var pa = paperMM();
+    return { x: Math.max(-bx, Math.min(pa.w - photo.w - bx, dx)),
+             y: Math.max(-by, Math.min(pa.h - photo.h - by, dy)) };
+  }
+
+  function pegaLaco(pt){
+    var d = { kind:"laco", x: pt.x, y: pt.y, itens: [], foto: null };
+    marca.forEach(function(i){
+      if (els[i]) d.itens.push({ i: i, x: els[i].x, y: els[i].y });
+    });
+    if (marcaFoto) d.foto = { x: photo.x, y: photo.y };
+    return d;
+  }
+
+  // o arraste conta sempre da posição de partida, e não do passo anterior:
+  // somar passo a passo acumularia o arredondamento de cada evento
+  function arrastaLaco(pt){
+    var f = drag.foto || { x: 0, y: 0 };
+    var p = seguraPasso(pt.x - drag.x, pt.y - drag.y, f.x, f.y);
+    drag.itens.forEach(function(it){
+      els[it.i].x = Math.round((it.x + p.x) * 10) / 10;
+      els[it.i].y = Math.round((it.y + p.y) * 10) / 10;
+    });
+    if (drag.foto){
+      photo.x = Math.round((drag.foto.x + p.x) * 10) / 10;
+      photo.y = Math.round((drag.foto.y + p.y) * 10) / 10;
+      clampPhoto();
+    }
+  }
+
+  function andaLaco(dx, dy){
+    var p = seguraPasso(dx, dy, photo.x, photo.y);
+    marca.forEach(function(i){ if (els[i]) moveEl(els[i], p.x, p.y); });
+    if (marcaFoto){
+      photo.x = Math.round((photo.x + p.x) * 10) / 10;
+      photo.y = Math.round((photo.y + p.y) * 10) / 10;
+      clampPhoto();
+    }
+  }
+
+  /* ---- acender e apagar em traço -------------------------------------
+     Um toque acende ou apaga um quadradinho; o dedo (ou o botão do mouse)
+     apertado e arrastando acende ou apaga a fileira inteira por onde passa.
+     Três decisões moram aqui:
+
+     o primeiro quadradinho do traço decide se o traço inteiro acende ou
+     apaga, e não cada quadradinho por si — senão passar de volta por cima do
+     próprio traço ficaria piscando, e numa curva, onde o dedo cruza o que
+     acabou de acender, o resultado seria adivinhação;
+
+     entre um evento e o outro o ponteiro pula vários quadradinhos, então o
+     traço liga o de agora ao de antes em linha reta — sem isso um arraste
+     rápido sai furado, e furo no molde é ponto que falta no pano;
+
+     e o traço inteiro é um passo só no desfazer, como o arraste do controle
+     deslizante já era. */
+  var pinta = null;
+
+  function celulaEm(el, pt){
+    var l = paperToLocal(el, pt.x, pt.y);
+    var p = P();
+    return { q: Math.floor(l.x / p), r: Math.floor(l.y / p) };
+  }
+
+  // devolve 1 quando o quadradinho mudou de fato. O traço anota quadradinho
+  // por quadradinho na lista de ajustes da peça, e não um total: é o que faz
+  // o ajuste à mão sobreviver a uma mudança de altura
+  function pintaCelula(q, r){
+    var el = pinta.el;
+    if (!el.cells[r] || el.cells[r][q] === undefined) return 0;
+    if (pinta.val < 0) pinta.val = el.cells[r][q] ? 0 : 1;
+    if (el.cells[r][q] === pinta.val) return 0;
+    el.cells[r][q] = pinta.val;
+    marcaEdit(el, r, q, pinta.val);
+    return 1;
+  }
+
+  function pintaAte(pt){
+    var c = celulaEm(pinta.el, pt), n = 0;
+    if (pinta.q === null){
+      n = pintaCelula(c.q, c.r);
+    } else {
+      var dq = c.q - pinta.q, dr = c.r - pinta.r;
+      var passos = Math.max(Math.abs(dq), Math.abs(dr));
+      for (var i = 1; i <= passos; i++){
+        n += pintaCelula(pinta.q + Math.round(dq * i / passos),
+                         pinta.r + Math.round(dr * i / passos));
+      }
+    }
+    pinta.q = c.q; pinta.r = c.r;
+    pinta.mudou += n;
+    return n;
+  }
+
   cv.addEventListener("pointerdown", function(e){
     e.preventDefault();
     var pt = evPos(e);
@@ -2947,37 +3210,73 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var i = hitEl(pt);
     var onPhoto = pt.x >= photo.x && pt.x <= photo.x + photo.w &&
                   pt.y >= photo.y && pt.y <= photo.y + photo.h;
-    var want = i >= 0 ? "el" : (onPhoto ? "photo" : "none");
-    if (i >= 0 && i !== sel) sel = i;
-    if (want !== focus || i >= 0){ focus = want; syncControls(); renderChips(); }
+    var soma = !editing && (e.shiftKey || e.ctrlKey || e.metaKey);
+    var antes = marca.join(",") + "|" + marcaFoto + "|" + focus + "|" + sel;
+
+    // tocar no que já está laçado arrasta o bloco inteiro: desmanchar o laço
+    // aqui obrigaria a laçar de novo a cada arraste
+    var pega = noLaco() && (i >= 0 ? marcado(i) : (onPhoto && marcaFoto));
+    var lacando = !editing && i < 0 && !onPhoto;
+
+    if (soma && (i >= 0 || onPhoto)){
+      if (i >= 0) alternaMarca(i);
+      else { marcaFoto = !marcaFoto; if (marcaFoto) focus = "photo";
+             else if (!marca.length) focus = "none"; }
+      syncControls(); renderChips(); draw();
+      return;
+    }
+    if (!pega && !(lacando && soma)){
+      var want = i >= 0 ? "el" : (onPhoto ? "photo" : "none");
+      if (i >= 0) sel = i;
+      soUm(i);
+      marcaFoto = !!onPhoto && i < 0;
+      focus = want;
+    }
+    if (antes !== marca.join(",") + "|" + marcaFoto + "|" + focus + "|" + sel){
+      syncControls(); renderChips();
+    }
     if (editing){
       var el = els[sel]; if (!el) return;
-      var l = paperToLocal(el, pt.x, pt.y);
-      var p = P();
-      var q = Math.floor(l.x / p), r = Math.floor(l.y / p);
-      if (el.cells[r] && el.cells[r][q] !== undefined){
-        var v = el.cells[r][q] ? 0 : 1;
-        el.cells[r][q] = v;
-        marcaEdit(el, r, q, v);
-        draw(); pushHist();
-      }
+      if (pinta) return;                     // um dedo por traço: o segundo espera
+      // a captura mantém o traço vivo se o ponteiro sair da grade e voltar
+      cv.setPointerCapture(e.pointerId);
+      pinta = { id: e.pointerId, el: el, val: -1, q: null, r: null, mudou: 0 };
+      if (pintaAte(pt)) draw();
       return;
     }
     cv.setPointerCapture(e.pointerId);
     if (nPointers() === 2 && els[sel]){
-      drag = null;
+      drag = null; laco = null;
       pinch = { d0: spread(), base: els[sel].kind === "text" ? els[sel].rowsTarget : els[sel].scale };
       return;
     }
-    if (i >= 0){
+    if (pega){
+      drag = pegaLaco(pt);
+    } else if (i >= 0){
       drag = { kind:"el", i: sel, dx: pt.x - els[sel].x, dy: pt.y - els[sel].y };
-    } else if (pt.x >= photo.x && pt.x <= photo.x + photo.w && pt.y >= photo.y && pt.y <= photo.y + photo.h){
+    } else if (onPhoto){
       drag = { kind:"photo", dx: pt.x - photo.x, dy: pt.y - photo.y };
+    } else {
+      // no vazio, o botão apertado desenha o laço
+      laco = { x0: pt.x, y0: pt.y, x: pt.x, y: pt.y, soma: soma };
     }
   });
 
   cv.addEventListener("pointermove", function(e){
     if (cpts[e.pointerId]) cpts[e.pointerId] = { x: e.clientX, y: e.clientY };
+    if (pinta){
+      if (e.pointerId !== pinta.id) return;
+      e.preventDefault();
+      if (pintaAte(evPos(e))) draw();
+      return;
+    }
+    if (laco){
+      e.preventDefault();
+      var l = evPos(e);
+      laco.x = l.x; laco.y = l.y;
+      draw();
+      return;
+    }
     if (pinch && pinch.vista && nPointers() === 2){
       e.preventDefault();
       var m = cmid();
@@ -3018,6 +3317,18 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   function endDrag(e){
     var mexeu = !!(drag || (pinch && !pinch.vista));
+    if (laco){
+      var r = lacoRect();
+      // retângulo de nada é clique no vazio, e clique no vazio já largou a
+      // seleção quando o botão desceu
+      if (r.w > 1 || r.h > 1) fechaLaco(r, laco.soma);
+      laco = null;
+      syncControls(); renderChips(); draw();
+    }
+    if (pinta && (!e || e.pointerId === pinta.id)){
+      if (pinta.mudou) mexeu = true;         // traço que não mudou nada não é passo
+      pinta = null;
+    }
     if (e && pointers[e.pointerId]) delete pointers[e.pointerId];
     if (e && cpts[e.pointerId]) delete cpts[e.pointerId];
     if (nPointers() < 2) pinch = null;
@@ -3258,7 +3569,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         " mm da borda de cima do papel.",
       plano.tiled
         ? "Recorte pela moldura tracejada. As folhas vizinhas repetem uma faixa do desenho: sobreponha ate os furos coincidirem."
-        : "Sobra: " + fmt(pa.w - photo.x - photo.w) + " mm a direita, " + fmt(pa.h - photo.y - photo.h) + " mm embaixo.",
+        : (plano.folhaCheia ? "A moldura tracejada e a borda do papel. " : "") +
+          "Sobra: " + fmt(pa.w - photo.x - photo.w) + " mm a direita, " + fmt(pa.h - photo.y - photo.h) + " mm embaixo.",
       "Imprima em 100%, sem ajustar a pagina. Confira na regua abaixo antes de furar."
     ];
     // esta folha não leva molde nenhum: o que ela precisa dizer é onde ele está
@@ -3313,11 +3625,18 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     pdf.setLineWidth(0.4);
     pdf.rect(ox + (photo.x - vw.x), oy + (photo.y - vw.y), photo.w, photo.h);
 
+    /* A linha da borda do papel, onde esta folha alcança a borda. Com a
+       moldura tracejada valendo o papel inteiro as duas cairiam uma em cima da
+       outra, e o traço cheio por baixo apagaria o tracejado: aí a moldura já diz
+       onde o papel acaba, e esta linha não tem o que acrescentar. */
+    var cheia = vw.x <= 0.01 && vw.y <= 0.01 && folhaCheia(vw);
     var edges = [];
-    if (vw.x <= 0.01) edges.push(["v", 0]);
-    if (vw.y <= 0.01) edges.push(["h", 0]);
-    if (vw.x + vw.w >= pa.w - 0.01) edges.push(["v", pa.w]);
-    if (vw.y + vw.h >= pa.h - 0.01) edges.push(["h", pa.h]);
+    if (!cheia){
+      if (vw.x <= 0.01) edges.push(["v", 0]);
+      if (vw.y <= 0.01) edges.push(["h", 0]);
+      if (vw.x + vw.w >= pa.w - 0.01) edges.push(["v", pa.w]);
+      if (vw.y + vw.h >= pa.h - 0.01) edges.push(["h", pa.h]);
+    }
     pdf.setDrawColor(56, 73, 89);
     pdf.setLineWidth(0.6);
     edges.forEach(function(e){
@@ -3588,6 +3907,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function montaPDF(){
     var R = cropArea();
     var plano = pdfPlan(R, contentArea());
+    // o cabeçalho precisa saber se a moldura é a borda do papel ou a caixa do
+    // desenho: o que ele manda recortar muda de um caso para o outro
+    plano.folhaCheia = folhaCheia(R);
     /* `floatPrecision` e `compress` valem o molde inteiro: cada furo é um
        círculo de quatro curvas, e sem eles o jsPDF grava cada coordenada com
        dezessete casas decimais — 700 bytes por furo, megabytes por folha, que
@@ -4072,7 +4394,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     // dentro de um campo, a seta anda no texto e no número
     if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
     var passo = e.shiftKey ? 5 : 0.5;
-    if (focus === "photo"){
+    if (noLaco()){
+      andaLaco(d[0] * passo, d[1] * passo);
+    } else if (focus === "photo"){
       photo.x = Math.round((photo.x + d[0] * passo) * 10) / 10;
       photo.y = Math.round((photo.y + d[1] * passo) * 10) / 10;
       clampPhoto();
