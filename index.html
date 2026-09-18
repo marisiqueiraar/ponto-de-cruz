@@ -276,6 +276,14 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
 .mold .apaga{flex:0 0 auto;width:38px;border:0;border-left:1px solid var(--line);
   background:transparent;color:var(--ink-soft);font-size:17px;line-height:1}
 .mold .apaga:hover{background:var(--danger);color:#fff}
+/* o PDF já gerado usa a mesma fileira: a miniatura na frente é o que deixa
+   reconhecer um molde sem abrir, que é a única coisa que o nome não diz */
+.mold .thumb{width:40px;flex:0 0 auto;align-self:stretch;object-fit:contain;
+  background:#fff;border-right:1px solid var(--line);padding:3px}
+.mold .baixa{flex:0 0 auto;width:34px;border:0;border-left:1px solid var(--line);
+  background:transparent;color:var(--ink-soft);line-height:0}
+.mold .baixa svg{width:16px;height:16px;fill:currentColor}
+.mold .baixa:hover{background:var(--paper);color:var(--ink)}
 
 /* lista de peças */
 .chips{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
@@ -778,9 +786,16 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <button id="moldeAbrir" class="wide">abrir arquivo do molde</button>
     <input id="moldeArq" type="file" accept="application/json,.json" class="hide">
     <p class="note" id="moldeAviso"></p>
+
     <p class="note">O arquivo leva tudo: papel, foto, peças, linhas e os ajustes feitos ponto a
       ponto. É por ele que o trabalho vai para outro aparelho, ou volta depois de você limpar os
       dados do site — o navegador, sozinho, não leva nada para lugar nenhum.</p>
+
+    <div class="rule"></div>
+    <h2>pdf já gerados</h2>
+    <div class="moldes" id="pdfLista"></div>
+    <p class="note" id="pdfDica"></p>
+    <button id="pdfLimpar" class="wide hide">apagar os pdf guardados</button>
   </section>
 
   <section class="pane notes" data-pane="ajuda">
@@ -2962,6 +2977,192 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     pdf.setLineDashPattern([], 0);
   }
 
+  /* ---- os PDF já gerados ----------------------------------------------
+
+     A estante guarda o molde para continuar editando; isto guarda o PDF que
+     saiu dele — o arquivo pronto para imprimir, com a data e o tamanho do
+     papel que ele usou. Quem perdeu o download, ou quer a mesma folha de
+     novo, não precisa refazer nada.
+
+     Não há servidor: os arquivos ficam no IndexedDB deste navegador e não
+     saem do aparelho. IndexedDB e não localStorage porque um PDF de molde
+     grande tem megabytes, e a cota do localStorage é o que a estante e a
+     foto já disputam. */
+  var HIST_DB = "ponto-letra", HIST_STORE = "moldes", HIST_MAX = 20;
+  var histDB = null, histOff = false, histURLs = [];
+
+  function withHist(fn){
+    if (histOff){ fn(null); return; }
+    if (histDB){ fn(histDB); return; }
+    var req;
+    try { req = window.indexedDB && indexedDB.open(HIST_DB, 1); } catch(e){ req = null; }
+    if (!req){ histOff = true; fn(null); return; }
+    req.onupgradeneeded = function(){
+      var db = req.result;
+      if (!db.objectStoreNames.contains(HIST_STORE)) db.createObjectStore(HIST_STORE, { keyPath: "id" });
+    };
+    req.onsuccess = function(){ histDB = req.result; fn(histDB); };
+    req.onerror = req.onblocked = function(){ histOff = true; fn(null); };
+  }
+
+  function histWrite(job, ok, fail){
+    withHist(function(db){
+      if (!db){ if (fail) fail(); return; }
+      var tx;
+      try { tx = db.transaction(HIST_STORE, "readwrite"); } catch(e){ if (fail) fail(e); return; }
+      try { job(tx.objectStore(HIST_STORE)); } catch(e){ if (fail) fail(e); return; }
+      tx.oncomplete = function(){ if (ok) ok(); };
+      tx.onerror = tx.onabort = function(){ if (fail) fail(tx.error); };
+    });
+  }
+
+  // do mais recente para o mais antigo
+  function histAll(cb){
+    withHist(function(db){
+      if (!db){ cb(null); return; }
+      var out = [], tx;
+      try { tx = db.transaction(HIST_STORE, "readonly"); } catch(e){ cb(null); return; }
+      var cur = tx.objectStore(HIST_STORE).openCursor();
+      cur.onsuccess = function(){
+        var c = cur.result;
+        if (c){ out.push(c.value); c.continue(); }
+      };
+      tx.oncomplete = function(){
+        out.sort(function(a, b){ return b.at - a.at; });
+        cb(out);
+      };
+      tx.onerror = tx.onabort = function(){ cb(null); };
+    });
+  }
+
+  // a miniatura é o molde desenhado pequeno, não uma página do PDF: é o que
+  // deixa reconhecer um arranjo numa fileira de 40px sem abrir o arquivo
+  function histThumb(R){
+    try {
+      var k = Math.min(3, 150 / R.w);
+      var c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(R.w * k));
+      c.height = Math.max(1, Math.round(R.h * k));
+      paint(c.getContext("2d"), k, R, { photoAlpha: 1, outline: false });
+      return c.toDataURL("image/jpeg", 0.6);
+    } catch(e){ return ""; }
+  }
+
+  function histSave(blob, name, note, thumb){
+    // sem FileReader não há como virar bytes, e sem IndexedDB não há onde pôr:
+    // nos dois casos guardar é impossível, e o PDF segue para o download igual
+    if (histOff || !window.FileReader || !window.indexedDB) return;
+    var fr = new FileReader();
+    fr.onload = function(){
+      var rec = {
+        id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8),
+        at: Date.now(), name: name, size: blob.size, note: note, thumb: thumb, buf: fr.result
+      };
+      // cheio ou sem espaço: o mais antigo sai para o novo entrar
+      histAll(function(list){
+        var velhos = list && list.length > HIST_MAX - 1 ? list.slice(HIST_MAX - 1) : [];
+        histWrite(function(st){
+          velhos.forEach(function(v){ st.delete(v.id); });
+          st.put(rec);
+        }, histRender, function(){
+          if (list && list.length){
+            histWrite(function(st){ st.delete(list[list.length - 1].id); st.put(rec); }, histRender, histRender);
+          } else { histRender(); }
+        });
+      });
+    };
+    fr.onerror = function(){};
+    fr.readAsArrayBuffer(blob);
+  }
+
+  function histSize(n){
+    if (n >= 1048576) return (Math.round(n / 104857.6) / 10).toFixed(1).replace(".", ",") + " MB";
+    return Math.max(1, Math.round(n / 1024)) + " KB";
+  }
+
+  function histOpen(rec, baixar){
+    var href;
+    try { href = URL.createObjectURL(new Blob([rec.buf], { type: "application/pdf" })); }
+    catch(e){ return; }
+    histURLs.push(href);
+    var a = document.createElement("a");
+    a.href = href; a.target = "_blank"; a.rel = "noopener";
+    if (baixar) a.download = rec.name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+
+  var ICO_BAIXA = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>';
+
+  function histRow(rec){
+    var l = document.createElement("div");
+    l.className = "mold";
+
+    if (rec.thumb){
+      var img = document.createElement("img");
+      img.className = "thumb"; img.src = rec.thumb; img.alt = "";
+      l.appendChild(img);
+    }
+
+    var a = document.createElement("button");
+    a.type = "button"; a.className = "abre";
+    a.title = rec.note || rec.name;
+    var nm = document.createElement("span");
+    nm.className = "nm"; nm.textContent = rec.name;
+    var qd = document.createElement("span");
+    qd.className = "qd"; qd.textContent = quando(rec.at) + " · " + histSize(rec.size);
+    a.appendChild(nm); a.appendChild(qd);
+    a.addEventListener("click", function(){ histOpen(rec, false); });
+
+    var d = document.createElement("button");
+    d.type = "button"; d.className = "baixa";
+    d.innerHTML = ICO_BAIXA;
+    d.title = "baixar de novo";
+    d.setAttribute("aria-label", "baixar de novo " + rec.name);
+    d.addEventListener("click", function(){ histOpen(rec, true); });
+
+    var x = document.createElement("button");
+    x.type = "button"; x.className = "apaga";
+    x.textContent = "\u00D7";
+    x.title = "apagar este pdf";
+    x.setAttribute("aria-label", "apagar o pdf " + rec.name);
+    x.addEventListener("click", function(){
+      if (!confirm("Apagar \u201C" + rec.name + "\u201D dos pdf guardados? Isso n\u00E3o se desfaz.")) return;
+      histWrite(function(st){ st.delete(rec.id); }, histRender, histRender);
+    });
+
+    l.appendChild(a); l.appendChild(d); l.appendChild(x);
+    return l;
+  }
+
+  function histRender(){
+    var box = $("pdfLista"), dica = $("pdfDica"), limpar = $("pdfLimpar");
+    if (!box) return;
+    histURLs.splice(0).forEach(function(u){ try { URL.revokeObjectURL(u); } catch(e){} });
+    histAll(function(list){
+      box.innerHTML = "";
+      if (!list){
+        limpar.classList.add("hide");
+        dica.textContent = "Este navegador n\u00E3o guarda os pdf \u2014 em janela an\u00F4nima, ou com os dados " +
+                           "do site bloqueados, o arquivo s\u00F3 fica onde voc\u00EA o salvou.";
+        return;
+      }
+      if (!list.length){
+        limpar.classList.add("hide");
+        dica.textContent = "Nenhum pdf guardado ainda. O pr\u00F3ximo molde que voc\u00EA baixar aparece aqui.";
+        return;
+      }
+      limpar.classList.remove("hide");
+      dica.textContent = "Cada pdf que voc\u00EA baixa fica guardado aqui, neste navegador e neste aparelho. " +
+                         "Os " + HIST_MAX + " mais recentes; o " + (HIST_MAX + 1) + "\u00BA derruba o mais antigo.";
+      list.slice(0, HIST_MAX).forEach(function(rec){ box.appendChild(histRow(rec)); });
+    });
+  }
+
+  $("pdfLimpar").addEventListener("click", function(){
+    if (!confirm("Apagar todos os pdf guardados neste navegador? Isso n\u00E3o se desfaz.")) return;
+    histWrite(function(st){ st.clear(); }, histRender, histRender);
+  });
+
   $("pdf").addEventListener("click", function(){
     if (!window.jspdf || !window.jspdf.jsPDF){
       alert("O gerador de PDF não carregou. Recarregue a página.");
@@ -3002,7 +3203,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       if (plano.tiled) vizinhas(pdf, plano, i, ox, oy);
     }
 
-    deliver(pdf.output("blob"), saveName("pdf"), null);
+    var pa = paperMM();
+    var blob = pdf.output("blob"), nome = saveName("pdf");
+    histSave(blob, nome, "papel " + fmt(pa.w) + " × " + fmt(pa.h) + " mm · " +
+             totalCount + (totalCount === 1 ? " ponto" : " pontos") + " · " +
+             plano.cols * plano.rows + (plano.cols * plano.rows === 1 ? " folha" : " folhas"),
+             histThumb(R));
+    deliver(blob, nome, null);
   }
 
 
@@ -3520,6 +3727,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     restored = !!it && restoreState(it.dados);
     if (!restored) moldeEmBranco();
     renderMoldes();
+    histRender();
     montaMarcas();
     listaCatalogo();
     contaLinhas();

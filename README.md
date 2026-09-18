@@ -69,6 +69,12 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
 - **Contagem**: pontos e furos, com o tamanho da peça selecionada em centímetros. O rodapé diz o
   tempo todo se o molde sai numa folha ou em quantas, e avisa em vermelho quando alguma peça
   passou da borda do papel — o molde é recortado no papel, então o que está fora não sai no PDF.
+- **PDF já gerados**: cada molde que você baixa fica guardado no navegador, com miniatura,
+  data, tamanho e as medidas que usou. Dá para abrir, baixar de novo ou apagar um a um, na aba
+  **moldes**. São os 20 mais recentes, e o 21º derruba o mais antigo. Eles moram no IndexedDB,
+  não no `localStorage`: um molde grande em PDF tem megabytes, e a cota do `localStorage` já é
+  disputada pela estante e pela foto. Em janela anônima, ou com os dados do site bloqueados, a
+  lista diz isso em vez de sumir sem explicação.
 - **PDF do molde**: em tamanho real, recortado na área do bordado, com a moldura de recorte, o
   retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
   distância exata para colar a foto no papel e uma **régua de aferição de 50 mm** — se ela não
@@ -204,6 +210,11 @@ propósito. A foto é o único item capaz de estourar a cota do navegador, e ass
 arranjo junto na queda. As linhas ficam à parte porque são inventário, não desenho: a caixa de
 linhas continua a mesma quando você começa um molde do zero, e o molde não carrega a caixa
 junto.
+
+Os PDF já gerados são a exceção: eles ficam no **IndexedDB**, na base `ponto-letra`, store
+`moldes`. Um molde grande em PDF tem megabytes, e pôr isso no `localStorage` derrubaria o
+arranjo e a foto junto. Vinte registros no máximo, cada um com o arquivo, uma miniatura JPEG,
+o nome, a data, o tamanho e as medidas que ele usou.
 
 ## `sw.js`
 
