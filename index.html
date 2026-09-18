@@ -811,7 +811,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <li>Cole a foto no papel usando a medida que aparece no cabeçalho do PDF: distância da borda esquerda e da borda de cima. É essa posição que faz o molde bater.</li>
       <li>Antes de furar, meça a régua impressa no cabeçalho: se os 50 mm dela não derem 50 mm na sua régua, a impressora reduziu a página e nenhum furo vai bater. Imprima de novo em 100%, sem "ajustar à página".</li>
       <li>Recorte o molde impresso pela moldura tracejada e prenda sobre o conjunto alinhando o retângulo da foto com a foto de verdade, fita crepe nos quatro cantos.</li>
-      <li>Molde maior que uma A4 sai em várias folhas, todas em tamanho real. Cada uma diz qual é no cabeçalho, e as vizinhas repetem uma faixa do desenho: sobreponha uma na outra até os furos da faixa coincidirem, e só então prenda. As margens dizem qual folha continua de cada lado.</li>
+      <li>Molde que usa quase toda a folha não cabe embaixo do cabeçalho, então o PDF sai em duas páginas: a primeira só com as instruções, a régua e a legenda, e a segunda com o molde sozinho na folha, inteiro e em tamanho real. É só a segunda que você imprime e recorta.</li>
+      <li>Molde maior que a folha inteira sai em várias folhas, todas em tamanho real. Cada uma diz qual é no cabeçalho, e as vizinhas repetem uma faixa do desenho: sobreponha uma na outra até os furos da faixa coincidirem, e só então prenda. As margens dizem qual folha continua de cada lado.</li>
       <li>Fure ponto a ponto com agulha grossa, apoiado em EVA ou cortiça. Cada quadradinho usa quatro furos, compartilhados com os vizinhos — por isso o número de furos é menor que o dobro de pontos.</li>
       <li>Se o rodapé ficar vermelho dizendo <b>não coube na memória</b>, salve o arquivo do molde na aba <b>moldes</b> e apague um molde antigo. A partir desse momento o trabalho parou de ser guardado.</li>
       <li>Para o nome curvado por cima da foto, use o campo <b>arco</b> na barra de cima. Se a cursiva fechar demais em letra pequena, abra o <b>espaço</b> entre as letras — ele é contado em quadradinhos, os mesmos que viram furo.</li>
@@ -1674,7 +1675,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return n;
   }
 
-  function cropArea(){
+  /* A caixa do que vai ser furado: a foto e as peças, sem a folga em volta.
+     É ela que não pode encostar na borda que a impressora não alcança. A
+     folga pode: não tem furo nenhum ali, e perder um pedaço dela na margem
+     não custa um ponto sequer. */
+  function contentArea(){
     var pa = paperMM();
     var sa = stitchArea();
     var minX = photo.x, minY = photo.y, maxX = photo.x + photo.w, maxY = photo.y + photo.h;
@@ -1682,9 +1687,16 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       minX = Math.min(minX, sa.x); minY = Math.min(minY, sa.y);
       maxX = Math.max(maxX, sa.x + sa.w); maxY = Math.max(maxY, sa.y + sa.h);
     }
-    var pad = 8;
-    minX = Math.max(0, minX - pad); minY = Math.max(0, minY - pad);
-    maxX = Math.min(pa.w, maxX + pad); maxY = Math.min(pa.h, maxY + pad);
+    // o que passou da borda do papel é recortado fora de qualquer jeito
+    minX = Math.max(0, minX); minY = Math.max(0, minY);
+    maxX = Math.min(pa.w, maxX); maxY = Math.min(pa.h, maxY);
+    return { x: minX, y: minY, w: Math.max(0, maxX - minX), h: Math.max(0, maxY - minY) };
+  }
+
+  function cropArea(){
+    var pa = paperMM(), c = contentArea(), pad = 8;
+    var minX = Math.max(0, c.x - pad), minY = Math.max(0, c.y - pad);
+    var maxX = Math.min(pa.w, c.x + c.w + pad), maxY = Math.min(pa.h, c.y + c.h + pad);
     return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
   }
 
@@ -1729,6 +1741,46 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
      emendar topo a topo pede uma precisão de tesoura que ninguém tem. */
   var TILE_TOP = 49, SOBRA = 10;
 
+  /* ---- quando o texto é que não cabe ----------------------------------
+
+     O cabeçalho come 46 mm de altura e o rodapé mais 8. Um molde que ocupa
+     quase toda a folha na tela cabe no papel e não cabe embaixo do texto —
+     e saía repartido em duas folhas por causa das instruções, não do
+     desenho. Repartir aí é o pior dos mundos: obriga a emendar um molde que
+     era inteiro.
+
+     Então o texto muda de folha. A primeira leva o cabeçalho, a régua e a
+     legenda; a segunda leva o molde sozinho, inteiro e em tamanho real,
+     centrado na página. São duas páginas, mas uma folha de molde só.
+
+     PDF_BLEED é a borda que a impressora doméstica não alcança — 5 mm cobre
+     o que as comuns comem. Molde que não cabe nem nela continua repartido:
+     aí é o desenho que é maior que a folha, e não tem texto que resolva. */
+  var PDF_BLEED = 5;
+
+  /* `C` é a caixa do que vai ser furado, dentro de `R`. A região inteira
+     precisa caber na folha, e o furo mais de fora precisa ficar a PDF_BLEED
+     da borda — a folga em volta dele pode ser comida pela impressora à
+     vontade. Sem `C`, a conta é a conservadora: a região inteira é tratada
+     como se fosse toda furo.
+
+     Em pé primeiro; empatou, a folha acompanha a direção do molde. */
+  function cabeSolta(R, C){
+    if (!C) C = R;
+    var op = R.w > R.h ? [true, false] : [false, true];
+    for (var i = 0; i < op.length; i++){
+      var w = op[i] ? 297 : 210, h = op[i] ? 210 : 297;
+      if (R.w > w + 1e-9 || R.h > h + 1e-9) continue;
+      var cx = (w - R.w) / 2 + (C.x - R.x), cy = (h - R.h) / 2 + (C.y - R.y);
+      // a menor das quatro bordas até o furo, descontada a que a impressora come:
+      // é o que ainda sobra, e o número que a tela mostra
+      var folga = Math.min(cx, cy, w - cx - C.w, h - cy - C.h) - PDF_BLEED;
+      if (folga >= -1e-9)
+        return { land: op[i], pageW: w, pageH: h, folga: folga };
+    }
+    return null;
+  }
+
   function nFolhas(medida, util){
     if (medida <= util) return 1;
     return Math.ceil((medida - SOBRA) / (util - SOBRA));
@@ -1743,10 +1795,17 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return a;
   }
 
-  function pdfPlan(R){
+  function pdfPlan(R, C){
     var um = pdfFit(R);
     if (um.scale >= 1)
-      return { tiled: false, land: um.land, pageW: um.pageW, top: PDF_TOP,
+      return { tiled: false, capa: false, land: um.land, pageW: um.pageW, top: PDF_TOP,
+               cols: 1, rows: 1, tw: R.w, th: R.h, xs: [0], ys: [0] };
+
+    // não coube embaixo do cabeçalho, mas cabe na folha nua: o texto sai de cima
+    var solta = cabeSolta(R, C);
+    if (solta)
+      return { tiled: false, capa: true, land: solta.land, pageW: solta.pageW,
+               top: (solta.pageH - R.h) / 2, folga: solta.folga,
                cols: 1, rows: 1, tw: R.w, th: R.h, xs: [0], ys: [0] };
 
     function grade(land){
@@ -1759,7 +1818,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var ret = grade(false), dei = grade(true);
     var g = (dei.n < ret.n || (dei.n === ret.n && R.w > R.h)) ? dei : ret;
     return {
-      tiled: true, land: g.land, pageW: g.land ? 297 : 210, top: TILE_TOP,
+      tiled: true, capa: false, land: g.land, pageW: g.land ? 297 : 210, top: TILE_TOP,
       cols: g.cols, rows: g.rows,
       tw: Math.min(g.uw, R.w), th: Math.min(g.uh, R.h),
       xs: inicios(R.w, g.uw, g.cols), ys: inicios(R.h, g.uh, g.rows)
@@ -1844,12 +1903,19 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   /* O aviso de escala mora colado no botão de baixar, porque é sobre o que vai
      sair quando ele for apertado. Três estados: cabe, cabe por pouco, não cabe. */
+  var AVISO_CAPA = "O molde não cabe embaixo do cabeçalho, então o PDF sai em duas " +
+    "páginas: a primeira com as instruções, a régua e a legenda, a segunda com o molde " +
+    "sozinho na folha, inteiro e em tamanho real. Imprimir e usar é só a segunda.";
+
   function showFit(cr){
-    var plano = pdfPlan(cr);
-    var land = cr.w > cr.h;
-    var maxW = (land ? 297 : 210) - PDF_SIDE * 2;
-    var maxH = (land ? 210 : 297) - PDF_TOP - footMM();
-    var folga = Math.min(maxW - cr.w, maxH - cr.h);
+    var plano = pdfPlan(cr, contentArea());
+    var pageH = plano.land ? 210 : 297;
+    /* A folga é medida contra a folha que o PDF vai mesmo usar. Na folha de
+       instrução o molde ganha a página inteira, e aí quem manda é a distância
+       do furo à borda, não da região: a folga em volta do desenho pode encostar
+       na margem sem custar um ponto. O próprio plano já traz essa conta. */
+    var folga = plano.capa ? plano.folga
+      : Math.min(plano.pageW - PDF_SIDE * 2 - cr.w, pageH - PDF_TOP - footMM() - cr.h);
     var area = fmt(cr.w / 10) + " × " + fmt(cr.h / 10) + " cm";
     var box = $("fitHint"), txt = $("fitTxt"), state = "";
     var fora = pecasForaDoPapel();
@@ -1874,10 +1940,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       state = "tight";
       txt.textContent = "cabe em A4 · " + fmt(folga) + " mm de folga";
       box.title = "Área do molde: " + area + ". Cabe numa folha A4 em tamanho real, com " +
-        fmt(folga) + " mm de sobra até a margem.";
+        fmt(folga) + " mm de sobra até a margem." + (plano.capa ? " " + AVISO_CAPA : "");
     } else {
       txt.textContent = "cabe em A4 · tamanho real";
-      box.title = "Área do molde: " + area + ". Cabe numa folha A4 em tamanho real.";
+      box.title = "Área do molde: " + area + ". Cabe numa folha A4 em tamanho real." +
+        (plano.capa ? " " + AVISO_CAPA : "");
     }
     box.className = "fit" + (state ? " " + state : "");
     $("areaOut").textContent = "área do molde " + area;
@@ -2926,17 +2993,22 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
     pdf.setFontSize(9);
     pdf.setTextColor(80);
-    pdf.text("Papel " + fmt(pa.w) + " x " + fmt(pa.h) + " mm   |   foto " + fmt(photo.w) + " x " + fmt(photo.h) +
-             " mm   |   furos de " + fmt(P()) + " mm   |   " + totalCount.toLocaleString("pt-BR") +
-             " pontos, " + totalHoles.toLocaleString("pt-BR") + " furos", 12, y);
-    pdf.text("Cole a foto a " + fmt(photo.x) + " mm da borda esquerda e " + fmt(photo.y) +
-             " mm da borda de cima do papel.", 12, y + 5);
-    pdf.text(plano.tiled
-      ? "Recorte pela moldura tracejada. As folhas vizinhas repetem uma faixa do desenho: sobreponha ate os furos coincidirem."
-      : "Sobra: " + fmt(pa.w - photo.x - photo.w) + " mm a direita, " + fmt(pa.h - photo.y - photo.h) + " mm embaixo.",
-      12, y + 10);
-    pdf.text("Imprima em 100%, sem ajustar a pagina. Confira na regua abaixo antes de furar.", 12, y + 15);
-    reguaAfericao(pdf, 12, y + 20);
+    var linhas = [
+      "Papel " + fmt(pa.w) + " x " + fmt(pa.h) + " mm   |   foto " + fmt(photo.w) + " x " + fmt(photo.h) +
+        " mm   |   furos de " + fmt(P()) + " mm   |   " + totalCount.toLocaleString("pt-BR") +
+        " pontos, " + totalHoles.toLocaleString("pt-BR") + " furos",
+      "Cole a foto a " + fmt(photo.x) + " mm da borda esquerda e " + fmt(photo.y) +
+        " mm da borda de cima do papel.",
+      plano.tiled
+        ? "Recorte pela moldura tracejada. As folhas vizinhas repetem uma faixa do desenho: sobreponha ate os furos coincidirem."
+        : "Sobra: " + fmt(pa.w - photo.x - photo.w) + " mm a direita, " + fmt(pa.h - photo.y - photo.h) + " mm embaixo.",
+      "Imprima em 100%, sem ajustar a pagina. Confira na regua abaixo antes de furar."
+    ];
+    // esta folha não leva molde nenhum: o que ela precisa dizer é onde ele está
+    if (plano.capa)
+      linhas.splice(2, 0, "Esta folha e so instrucao. O molde esta inteiro na folha 2, em tamanho real; recorte pela moldura tracejada.");
+    for (var i = 0; i < linhas.length; i++) pdf.text(linhas[i], 12, y + i * 5);
+    reguaAfericao(pdf, 12, y + linhas.length * 5);
   }
 
   // qual folha continua de cada lado, escrito na margem. Com o texto girado o
@@ -3258,7 +3330,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   function montaPDF(){
     var R = cropArea();
-    var plano = pdfPlan(R);
+    var plano = pdfPlan(R, contentArea());
     /* `floatPrecision` e `compress` valem o molde inteiro: cada furo é um
        círculo de quatro curvas, e sem eles o jsPDF grava cada coordenada com
        dezessete casas decimais — 700 bytes por furo, megabytes por folha, que
@@ -3269,22 +3341,35 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       compress: true, floatPrecision: 2
     });
 
-    for (var i = 0; i < plano.cols * plano.rows; i++){
-      if (i) pdf.addPage("a4", plano.land ? "landscape" : "portrait");
-      var vw = { x: R.x + plano.xs[i % plano.cols], y: R.y + plano.ys[Math.floor(i / plano.cols)],
-                 w: plano.tw, h: plano.th };
-      var ox = (plano.pageW - plano.tw) / 2, oy = plano.top;
-      cabecalho(pdf, plano, i);
-      moldeNaFolha(pdf, vw, ox, oy);
+    if (plano.capa){
+      // a folha de instrução vem primeiro, e não leva molde: sem ela, o molde
+      // inteiro não caberia numa folha só
+      cabecalho(pdf, plano, 0);
       legenda(pdf, plano);
-      if (plano.tiled) vizinhas(pdf, plano, i, ox, oy);
+      pdf.addPage("a4", plano.land ? "landscape" : "portrait");
+      moldeNaFolha(pdf, { x: R.x, y: R.y, w: plano.tw, h: plano.th },
+                   (plano.pageW - plano.tw) / 2, plano.top);
+    } else {
+      for (var i = 0; i < plano.cols * plano.rows; i++){
+        if (i) pdf.addPage("a4", plano.land ? "landscape" : "portrait");
+        var vw = { x: R.x + plano.xs[i % plano.cols], y: R.y + plano.ys[Math.floor(i / plano.cols)],
+                   w: plano.tw, h: plano.th };
+        var ox = (plano.pageW - plano.tw) / 2, oy = plano.top;
+        cabecalho(pdf, plano, i);
+        moldeNaFolha(pdf, vw, ox, oy);
+        legenda(pdf, plano);
+        if (plano.tiled) vizinhas(pdf, plano, i, ox, oy);
+      }
     }
 
     var pa = paperMM();
+    var folhas = plano.cols * plano.rows;
+    var quantas = plano.capa
+      ? "1 folha de molde + instruções"
+      : folhas + (folhas === 1 ? " folha" : " folhas");
     var blob = pdf.output("blob"), nome = saveName("pdf");
     histSave(blob, nome, "papel " + fmt(pa.w) + " × " + fmt(pa.h) + " mm · " +
-             totalCount + (totalCount === 1 ? " ponto" : " pontos") + " · " +
-             plano.cols * plano.rows + (plano.cols * plano.rows === 1 ? " folha" : " folhas"),
+             totalCount + (totalCount === 1 ? " ponto" : " pontos") + " · " + quantas,
              histThumb(R));
     deliver(blob, nome, null);
   }
