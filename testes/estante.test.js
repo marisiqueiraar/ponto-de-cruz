@@ -44,7 +44,7 @@ function monta(inicial){
     moldeEmBranco: () => { reg.abriu.push("branco"); },
     saveState: () => { reg.gravou = (reg.gravou || 0) + 1; },
     renderChips(){}, syncControls(){}, restorePhoto(){}, mostraFonte(){},
-    draw(){}, mostraZoom(){}, resetHist(){},
+    draw(){}, mostraZoom(){}, guiasSync(){}, resetHist(){},
     saveName: ext => "molde-teste." + ext,
     deliver: (blob, nome) => { reg.baixou = { nome, blob }; },
     els: [], restored: false, photoImg: null, photoURL: null,
