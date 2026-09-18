@@ -85,6 +85,15 @@ Abra `index.html` no navegador. Não há passo de build. Para servir localmente:
 python3 -m http.server
 ```
 
+Os testes rodam em `node`, sem instalar nada: `testes/roda.sh`. O que eles
+cobrem, e o que não cobrem, está em [`testes/LEIAME.md`](testes/LEIAME.md).
+
+## O que está em aberto
+
+[`REVISAR.md`](REVISAR.md) — o que precisa de decisão, incluindo uma fonte que
+o seletor oferece e o repositório não tem. [`BACKLOG.md`](BACKLOG.md) — o que
+falta construir.
+
 ## Dependências externas
 
 Nenhuma. Tudo que o app precisa está no repositório, e ele funciona sem rede:

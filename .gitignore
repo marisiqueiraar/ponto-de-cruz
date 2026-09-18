@@ -2,3 +2,11 @@
 *.log
 .vercel
 .env*
+
+# gerados pela extração dos testes
+testes/geo.js
+testes/pdfcode.js
+testes/estante.js
+testes/app.js
+testes/*.pdf
+testes/*.png

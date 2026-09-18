@@ -1,0 +1,144 @@
+# Revisar
+
+O que precisa do seu olho antes de virar coisa fechada, em 18/09/2026, depois
+das três levas desta sessão (`8841ad9` folhas, `2d6b7f8` cor por peça,
+`f515c68` estante e arquivo).
+
+Nada aqui é bug conhecido — bug conhecido está no [BACKLOG.md](BACKLOG.md).
+Aqui é o que eu decidi sozinho e você pode querer diferente, e o que nenhum
+teste meu consegue responder.
+
+---
+
+## 1. A fonte CS Norman Mono não está no repositório
+
+**É o item mais urgente da lista.**
+
+O seletor de fontes oferece `CS Norman Mono (arquivo seu)`, no grupo **Pixel e
+bloco**. O `@font-face` aponta para `./CSNormanMono.woff2`, `.woff` e `.otf`, na
+raiz — e nenhum dos três existe aqui. Medido no Chromium:
+
+```
+CS Norman Mono  carregou: false   largura de "AMOR": 300 px
+cursiva pura                      largura de "AMOR": 300 px   ← o mesmo
+Silkscreen      carregou: true    largura de "AMOR": 313 px
+```
+
+Ou seja: quem escolhe essa fonte recebe **uma cursiva genérica rotulada como
+pixel**. O cartão da lista mostra a cursiva honestamente (a amostra em
+quadradinhos é gerada do traço que chegou), então não é invisível — mas o rótulo
+promete outra coisa, e o molde sai com o desenho de outra fonte.
+
+O `--display` da interface inteira também pede essa fonte primeiro, e cai na
+Silkscreen. É por isso que os títulos e botões aparecem em Silkscreen hoje.
+
+**A decisão é sua, e são só duas:**
+
+- **Você tem o arquivo.** Mande, eu coloco em `fonts/` como as outras 40, com a
+  licença registrada em `fonts/LICENCAS.txt`. Era claramente a intenção do
+  rótulo "(arquivo seu)".
+- **Você não vai usar.** Eu tiro a opção do seletor e o `@font-face`, e o
+  `--display` passa a pedir a Silkscreen direto — que é o que já acontece na
+  prática, só que sem três requisições que falham a cada abertura.
+
+Enquanto não se decide, o `testes/tela.js` conhece esse buraco pelo nome e
+avisa se **outro** arquivo passar a faltar. Arquivo faltando aqui quer dizer
+molde desenhado com a fonte errada, que é o modo de falhar que o README inteiro
+foi escrito para evitar.
+
+---
+
+## 2. O que nenhum teste meu alcança: imprimir
+
+Verifiquei muita coisa lendo os operadores de dentro do PDF, mas papel de
+verdade responde três perguntas que o node não responde:
+
+- **A régua de aferição.** Imprima uma folha em 100% e meça os 50 mm com uma
+  régua. Se não der 50 mm, a régua está errada ou a impressora mentiu — e é
+  justamente para separar esses dois casos que ela existe.
+- **A emenda.** Faça um molde maior que uma A4, recorte duas folhas vizinhas
+  pela moldura tracejada e sobreponha até os furos coincidirem. Eu provei que
+  as duas folhas desenham os mesmos pontos nas mesmas coordenadas de papel; o
+  que não sei é se a faixa repetida é **larga o bastante para a mão**.
+- **O furo.** O círculo de 0,3 mm de raio, impresso, é visível o suficiente
+  para furar em cima? Era 0,3 mm antes também, mas antes nunca tinha saído em
+  tamanho real numa folha grande.
+
+Mandei dois PDFs de amostra no chat da sessão. `testes/amostra.js` gera outros.
+
+---
+
+## 3. Decisões que tomei sozinho
+
+Cada uma tem uma alternativa defensável. Se alguma estiver errada para você, é
+barato trocar.
+
+### 3.1 A sobra entre folhas é distribuída por igual
+
+As folhas ficam espalhadas por igual sobre o molde, então toda emenda repete a
+mesma faixa. Num molde de 42 cm em duas folhas, isso deu **59 mm repetidos** —
+generoso para emendar, gasto de tinta e papel.
+
+A alternativa é empilhar as folhas num canto com o mínimo de 10 mm em cada
+emenda, e deixar a última sobrando quase vazia. Menos tinta, emenda mais
+apertada. Escolhi a folga porque o erro caro aqui é a emenda que não fecha.
+
+### 3.2 A orientação é escolhida pelo número de folhas
+
+Ganha quem gastar menos folha; empatou, a folha acompanha a direção do molde.
+Um molde A4 inteiro, por exemplo, sai em **3 folhas deitadas** em vez de 4 em
+pé. Se você preferir sempre em pé, é uma linha.
+
+### 3.3 A legenda das linhas se repete em toda folha
+
+Porque cada folha é recortada e usada sozinha. Se achar poluição, dá para
+deixar só na primeira.
+
+### 3.4 Apagar um molde usa o `confirm()` do navegador
+
+O app tem modal próprio (o do Recalcular), mas ele é feito sob medida para três
+botões daquele caso. Usei o `confirm()` nativo, como o `alert()` que já existe
+no caminho do PDF. Se quiser o modal do app, é mais trabalho e fica bonito.
+
+### 3.5 Molde novo herda papel e foto do anterior
+
+Só as peças e a posição zeram. Começar outro molde no mesmo papel me pareceu o
+caso comum. Se preferir tudo em branco, é fácil.
+
+### 3.6 A cor no PDF perde duas casas decimais
+
+As mesmas duas casas que derrubaram o arquivo de 4 MB para 289 KB arredondam a
+cor: `190` volta como `191` num canal. É 0,4%, invisível, e a legenda leva o
+código da marca de qualquer jeito. Registro porque é perda de informação real,
+ainda que sem consequência.
+
+### 3.7 Subi os testes para dentro do repositório
+
+**Esta é a decisão que mais quero que você confirme.** Escrevi os testes numa
+pasta temporária da sessão, que some quando o contêiner é recolhido — e os
+commits que eu já tinha subido afirmam "verifiquei rodando no node". Afirmação
+que ninguém pode conferir não vale nada, então trouxe tudo para `testes/`.
+
+Isso muda o caráter do projeto: era um arquivo só, sem build e sem pasta de
+teste. Agora tem uma pasta com nove arquivos de node. Se você não quiser esse
+peso, `rm -rf testes/` e uma linha no `.gitignore` resolvem, e o app continua
+exatamente o mesmo — nada em `index.html` depende deles.
+
+---
+
+## 4. Risco conhecido que virou maior
+
+**Gravar pode falhar em silêncio, e agora falha mais fácil.**
+
+O `saveState()` sempre engoliu o erro de cota (`catch (e){ return; }`), o que
+fazia sentido quando havia um molde só. Com vários moldes, cada um com a sua
+foto de 300–500 KB, os 5 MB típicos do `localStorage` dão para **oito ou dez
+moldes** — e ao estourar, o trabalho simplesmente para de ser gravado sem
+ninguém avisar.
+
+Não consertei porque a correção é uma decisão de interface, não de código:
+avisar onde, com que palavras, e o que oferecer (apagar um molde antigo?
+salvar o arquivo primeiro?). Está no backlog como item 1.
+
+Enquanto isso, o conselho honesto é o que a ajuda já diz: **salve o arquivo do
+molde** antes de acumular muitos.
