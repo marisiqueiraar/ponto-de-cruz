@@ -34,14 +34,21 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
   não por nome: cada linha mostra a sua palavra escrita naquela fonte e, ao lado, a mesma
   palavra já em quadradinhos, que é o que vira furo. Com busca e filtro por grupo. Os cartões
   pedem a fonte só quando chegam à vista, então abrir a lista não baixa as 40 famílias.
-- **Linhas**: oito paletas de quatro cores cada, mais os catálogos das marcas — 391 cores da
-  Anchor e 455 da DMC. **Cada peça tem a sua linha**: escolher uma cor pinta a peça selecionada,
-  e a lista de peças mostra um ponto da cor de cada uma, para ver o arranjo inteiro de uma vez.
-  Sem isso o catálogo só servia para uma cor de cada vez, e é comparando duas linhas lado a lado
-  no arranjo que a escolha se decide. Na aba **catálogo** você toca nas cores que tem na caixa;
-  elas viram a paleta **minhas linhas**, e marcar uma já pinta a peça com ela, que é o jeito de
-  ver a cor real antes de gastar meada. A busca aceita código ou nome. O que você marcou fica
-  guardado no navegador à parte do molde, e não some quando você recomeça um desenho.
+- **Linhas**: o painel é o catálogo das marcas — 391 cores da Anchor e 455 da DMC — numa
+  fileira de marcas e uma grade. Cada quadradinho traz o **código impresso dentro**, que é o
+  que se pede na loja. **Cada peça tem a sua linha**: tocar num quadradinho diz que você tem
+  aquela linha e já pinta a peça selecionada com ela, e a lista de peças mostra um ponto da cor
+  de cada uma, para ver o arranjo inteiro de uma vez. É comparando duas linhas lado a lado no
+  arranjo que a escolha se decide. Tocar de novo desmarca. A busca aceita código ou nome.
+
+  As cores saem **por tom**, não por número: a família vem do matiz, em faixas de 15°, e
+  dentro dela a escala vai do claro ao escuro, com os neutros no fim — é o que faz a grade
+  ler como cartela e deixa os tons vizinhos lado a lado. O botão **por código** troca para a
+  ordem numérica quando você já sabe o número que procura.
+
+  O que você marcou vira a marca **minhas**, a primeira da fileira; ali tocar numa cor só a
+  põe na peça, sem tirar da caixa — tirar se faz na marca de onde ela veio. Fica guardado no
+  navegador à parte do molde, e não some quando você recomeça um desenho.
 - **Posicionar com precisão**: as setas do teclado movem a peça selecionada de meio milímetro, ou
   de cinco com Shift — com a foto selecionada, movem a foto. Na aba peças, três botões alinham a
   peça: centralizar na foto, centralizar no papel, alinhar pela base da foto. Eles movem a caixa

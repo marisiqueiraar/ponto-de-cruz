@@ -84,7 +84,7 @@ const num = t => parseFloat(String(t).replace(",", "."));
   await pg.waitForTimeout(600);
   await pg.click('.rail button[data-pane="linha"]');
   await pg.waitForTimeout(400);
-  await pg.click(".swrow .sw:nth-child(2)");     // outra cor para o símbolo
+  await pg.click(".grade .cat:nth-child(2)");   // outra cor, tirada da cartela
   await pg.waitForTimeout(600);
   await pg.click('.rail button[data-pane="molde"]');
   const r3 = await lido();
