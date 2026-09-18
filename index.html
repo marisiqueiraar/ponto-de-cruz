@@ -234,6 +234,13 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
 .num span{font-size:13px;color:var(--ink-soft)}
 .num strong{font-family:var(--display);font-weight:400;font-size:14px}
 
+/* alinhar a peça */
+.alinha{margin:0 0 12px}
+.alinha button{width:100%;min-height:38px;margin-bottom:6px;padding:0 10px;
+  border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);
+  font-size:13.5px;text-align:left}
+.alinha button:hover{border-color:var(--mat);background:var(--paper)}
+
 /* estante de moldes */
 .moldes{display:flex;flex-direction:column;gap:6px;margin-bottom:4px}
 .mold{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:6px;
@@ -600,6 +607,17 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <h2>peças</h2>
     <button id="addText" class="wide">nova palavra</button>
     <button id="addSym" class="wide">novo símbolo</button>
+
+    <div class="alinha hide" id="alinha">
+      <label>Alinhar a peça selecionada</label>
+      <button type="button" id="alFoto">centralizar na foto</button>
+      <button type="button" id="alPapel">centralizar no papel</button>
+      <button type="button" id="alBase">pela base da foto</button>
+    </div>
+
+    <p class="note" id="setasDica">As setas do teclado movem a peça selecionada de meio milímetro.
+      Com Shift, de cinco.</p>
+
     <div class="rule"></div>
     <div class="chips" id="chips"></div>
     <p class="note">Toque numa peça para selecioná-la: os ajustes dela aparecem na barra de cima.
@@ -697,6 +715,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <li>Recorte o molde impresso pela moldura tracejada e prenda sobre o conjunto alinhando o retângulo da foto com a foto de verdade, fita crepe nos quatro cantos.</li>
       <li>Molde maior que uma A4 sai em várias folhas, todas em tamanho real. Cada uma diz qual é no cabeçalho, e as vizinhas repetem uma faixa do desenho: sobreponha uma na outra até os furos da faixa coincidirem, e só então prenda. As margens dizem qual folha continua de cada lado.</li>
       <li>Fure ponto a ponto com agulha grossa, apoiado em EVA ou cortiça. Cada quadradinho usa quatro furos, compartilhados com os vizinhos — por isso o número de furos é menor que o dobro de pontos.</li>
+      <li>Para posicionar fino, use as setas do teclado: meio milímetro por toque, cinco com Shift. Os três botões na aba <b>peças</b> centralizam a peça na foto ou no papel, e encostam ela na base da foto.</li>
       <li>Guarde o arquivo do molde na aba <b>moldes</b> antes de mudar de aparelho ou limpar o navegador. O que fica só no navegador não vai a lugar nenhum e some com os dados do site.</li>
       <li>Cada peça pode ter a sua linha: selecione a peça e toque na cor. O rodapé do PDF lista as linhas usadas com o código da marca — a cor impressa é referência de tela, o código é o que se compra.</li>
       <li>Borde com 2 ou 3 fios de meada. Em furo que atravessa foto e papel, puxe devagar: papel fotográfico não fecha depois de rasgar.</li>
@@ -1323,6 +1342,18 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
   }
 
+  /* Peça arrastada para fora do papel some do PDF sem dizer nada: o
+     `cropArea()` recorta nas bordas do papel e o que ficou de fora não
+     aparece. Contar quantas são é o que permite avisar antes de imprimir. */
+  function pecasForaDoPapel(){
+    var pa = paperMM(), n = 0;
+    els.forEach(function(el){
+      var b = elPaperBox(el);
+      if (b.x < -0.01 || b.y < -0.01 || b.x + b.w > pa.w + 0.01 || b.y + b.h > pa.h + 0.01) n++;
+    });
+    return n;
+  }
+
   function cropArea(){
     var pa = paperMM();
     var sa = stitchArea();
@@ -1501,8 +1532,17 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var folga = Math.min(maxW - cr.w, maxH - cr.h);
     var area = fmt(cr.w / 10) + " × " + fmt(cr.h / 10) + " cm";
     var box = $("fitHint"), txt = $("fitTxt"), state = "";
+    var fora = pecasForaDoPapel();
 
-    if (plano.tiled){
+    if (fora){
+      // vem antes de tudo: não adianta saber em quantas folhas sai um molde
+      // a que está faltando meia palavra
+      state = "over";
+      txt.textContent = fora === 1 ? "1 peça fora do papel" : fora + " peças fora do papel";
+      box.title = (fora === 1 ? "Uma peça passou" : fora + " peças passaram") + " da borda do papel. " +
+        "O molde é recortado no papel, então o que está fora não vai sair no PDF. " +
+        "Arraste de volta, ou use os botões de alinhar na aba peças.";
+    } else if (plano.tiled){
       var n = plano.cols * plano.rows;
       state = "multi";
       txt.textContent = "tamanho real em " + n + " folhas";
@@ -1856,6 +1896,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       ? "Linha de " + (el.kind === "text" ? "“" + (el.text || "texto") + "”" : "símbolo")
       : "Linha da próxima peça";
     renderSwatches();
+    $("alinha").classList.toggle("hide", !piece);
     $("ctlPhoto").classList.toggle("hide", focus !== "photo");
     $("ctlPiece").classList.toggle("hide", !piece);
     $("ctlActs").classList.toggle("hide", !piece);
@@ -2820,6 +2861,55 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     renderSwatches();
     listaCatalogo();
     contaLinhas();
+  });
+
+  /* ---- alinhar e empurrar a peça --------------------------------------
+
+     Arrastando com o mouse, acertar milímetro é sorte, e a foto já tinha três
+     botões de posicionar na barra enquanto a peça não tinha nenhum.
+
+     O que se move é a caixa JÁ GIRADA: centralizar uma palavra inclinada pelo
+     canto de cima dela deixaria o texto visivelmente torto no papel. */
+  function moveEl(el, dx, dy){
+    el.x = Math.round((el.x + dx) * 10) / 10;
+    el.y = Math.round((el.y + dy) * 10) / 10;
+  }
+
+  function alinha(modo){
+    var el = els[sel];
+    if (!el) return;
+    var b = elPaperBox(el), pa = paperMM();
+    if (modo === "foto")  moveEl(el, (photo.x + photo.w / 2) - (b.x + b.w / 2), 0);
+    if (modo === "papel") moveEl(el, (pa.w / 2) - (b.x + b.w / 2), 0);
+    if (modo === "base")  moveEl(el, 0, (photo.y + photo.h) - (b.y + b.h));
+    draw(); pushHist();
+  }
+
+  $("alFoto").addEventListener("click", function(){ alinha("foto"); });
+  $("alPapel").addEventListener("click", function(){ alinha("papel"); });
+  $("alBase").addEventListener("click", function(){ alinha("base"); });
+
+  var SETAS = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+
+  document.addEventListener("keydown", function(e){
+    var d = SETAS[e.key];
+    if (!d || e.ctrlKey || e.metaKey || e.altKey) return;
+    var tag = ((e.target || {}).tagName || "").toUpperCase();
+    // dentro de um campo, a seta anda no texto e no número
+    if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+    var passo = e.shiftKey ? 5 : 0.5;
+    if (focus === "photo"){
+      photo.x = Math.round((photo.x + d[0] * passo) * 10) / 10;
+      photo.y = Math.round((photo.y + d[1] * passo) * 10) / 10;
+      clampPhoto();
+    } else {
+      var el = els[sel];
+      if (!el || focus !== "el") return;
+      moveEl(el, d[0] * passo, d[1] * passo);
+    }
+    e.preventDefault();      // senão a seta rola a mesa junto
+    draw();
+    pushLater();             // uma rajada de setas vira um passo só no desfazer
   });
 
   /* ---- a estante na tela ---------------------------------------------- */

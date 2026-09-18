@@ -36,8 +36,13 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
   elas viram a paleta **minhas linhas**, e marcar uma já pinta a peça com ela, que é o jeito de
   ver a cor real antes de gastar meada. A busca aceita código ou nome. O que você marcou fica
   guardado no navegador à parte do molde, e não some quando você recomeça um desenho.
+- **Posicionar com precisão**: as setas do teclado movem a peça selecionada de meio milímetro, ou
+  de cinco com Shift — com a foto selecionada, movem a foto. Na aba peças, três botões alinham a
+  peça: centralizar na foto, centralizar no papel, alinhar pela base da foto. Eles movem a caixa
+  já girada, porque alinhar uma palavra inclinada pelo canto de cima dela a deixaria torta.
 - **Contagem**: pontos e furos, com o tamanho da peça selecionada em centímetros. O rodapé diz o
-  tempo todo se o molde sai numa folha ou em quantas.
+  tempo todo se o molde sai numa folha ou em quantas, e avisa em vermelho quando alguma peça
+  passou da borda do papel — o molde é recortado no papel, então o que está fora não sai no PDF.
 - **PDF do molde**: em tamanho real, recortado na área do bordado, com a moldura de recorte, o
   retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
   distância exata para colar a foto no papel e uma **régua de aferição de 50 mm** — se ela não

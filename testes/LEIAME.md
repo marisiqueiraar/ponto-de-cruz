@@ -6,8 +6,12 @@ um Chromium e se pula sozinho quando não acha um.
 
 ```sh
 testes/roda.sh        # todos, com a extração refeita antes
-node testes/tela.js   # a tela de verdade, num Chromium
 ```
+
+Os dois últimos (`tela.js` e `posicao.js`) dirigem um Chromium e se pulam
+sozinhos quando não acham um. O `posicao.js` mede as posições lendo o que o app
+grava no `localStorage`, em vez de olhar a tela: assim dá para afirmar "andou
+0,5 mm" em vez de "alguma coisa mudou".
 
 `extrai.py` puxa do `index.html` os trechos que cada teste exercita e grava
 `geo.js`, `pdfcode.js`, `estante.js` e `app.js` aqui ao lado (todos ignorados
@@ -29,6 +33,7 @@ em todas as folhas.
 | `cor.test.js` | cada peça sai na sua linha, a legenda não repete cor, e o rodapé mais alto não empurra o molde para fora da folha |
 | `estante.test.js` | o molde antigo migra sem nada ser copiado, apagar tira só as chaves daquele molde, trocar grava antes, e o arquivo sobrevive à volta num navegador zerado |
 | `tela.js` | o app monta num Chromium de verdade, sem erro de JavaScript, e o trilho de sete botões cabe numa tela de 360 px |
+| `posicao.js` | as setas andam 0,5 mm (5 com Shift), a rajada vira um passo só no desfazer, a seta dentro de um campo não empurra a peça, e os três botões de alinhar acertam o centro da caixa já girada |
 
 `amostra.js` não testa nada: gera um PDF de várias folhas, com quatro linhas
 diferentes, para olhar.

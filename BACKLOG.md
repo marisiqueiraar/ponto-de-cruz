@@ -24,24 +24,23 @@ pode aproveitar isso e oferecer "manter o molde, largar a foto".
 
 ---
 
-## 2. Ajustes finos de posição
+## 2. ~~Ajustes finos de posição~~ — feito
 
-Era o item 4 da lista que combinamos. Nada disso existe hoje.
+Era o item 4 da lista que combinamos, e saiu inteiro:
 
-- **Setas do teclado** movem a peça selecionada, 0,5 mm; com Shift, 5 mm. Hoje
-  o `keydown` só trata Ctrl+Z e Escape, e acertar 0,1 mm arrastando com o mouse
-  é sorte.
-- **Centralizar a peça na foto**, e alinhar uma peça com a outra. A foto tem
-  três botões desses na barra (`girar`, `centralizar`, `centralizar em cima`);
-  as peças não têm nenhum.
-- **Aviso de peça fora do papel.** A peça não é presa às bordas como a foto é
-  (`clampPhoto()` só cuida da foto), e o `cropArea()` corta na borda do papel —
-  então **uma peça arrastada para fora é silenciosamente cortada do PDF**. O
-  rodapé avisa em quantas folhas o molde sai, mas não avisa que metade de uma
-  palavra ficou de fora.
-  O CSS `.fit.over` (o aviso vermelho) está reservado para isso: ele ficou sem
-  uso quando "não cabe em A4" deixou de ser erro, e não apaguei por causa deste
-  item. Se este item morrer, o CSS morre junto.
+- **Setas do teclado** movem a peça selecionada de 0,5 mm, ou 5 mm com Shift.
+  Com a foto selecionada, movem a foto. Uma rajada de setas vira um passo só no
+  desfazer, e seta dentro de um campo continua andando no texto.
+- **Três botões de alinhar** na aba peças: centralizar na foto, centralizar no
+  papel, alinhar pela base da foto. Eles movem a caixa **já girada** — alinhar
+  uma palavra inclinada pelo canto de cima dela a deixaria visivelmente torta.
+- **Aviso de peça fora do papel**, em vermelho, colado no botão de baixar. Era
+  o buraco mais feio: o molde é recortado no papel, então peça arrastada para
+  fora sumia do PDF sem dizer nada. O CSS `.fit.over`, que tinha ficado sem uso,
+  voltou a ter dono.
+
+Falta deste conjunto: **alinhar uma peça com a outra**, que serve para nome em
+duas linhas. Não entrou porque pede escolher com qual, e aí é mais interface.
 
 ---
 
@@ -103,11 +102,15 @@ mudança de aplicativo:
 ## 6. Sobre os testes
 
 `testes/` cobre o repartir em folhas, a posição em cada folha, a emenda, a cor
-por peça, a estante e a montagem da tela no Chromium. O que **não** existe:
+por peça, a estante, a montagem da tela no Chromium e as setas e botões de
+alinhar. O que **não** existe:
 
 - Nada que exercite o desenho no canvas — `textMatrix()`, que transforma o
   traço da fonte em quadradinhos, é o coração do app e não tem teste nenhum.
-- Nada que exercite arrastar, a pinça de dois dedos, o modo ponto a ponto ou o
-  desfazer. `tela.js` abre a página e confere que ela monta; não mexe nela.
+  Um teste dele não é óbvio: o resultado depende de como o navegador rasteriza
+  a fonte, então comparar com uma matriz fixa quebraria sozinho.
+- Nada que exercite arrastar com o dedo ou o mouse, a pinça de dois dedos, nem
+  o modo ponto a ponto. `posicao.js` mexe na página, mas pelo teclado e pelos
+  botões.
 - Nada compara o PDF com uma imagem de referência. Os testes leem coordenadas
   de dentro do arquivo, o que pega o molde no lugar errado, mas não pega feio.
