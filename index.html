@@ -410,6 +410,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 .app.editando #ctlNone{display:none!important}
 .app.editando #ctlEdit{display:flex!important}
 .app.editando #ctlEditTxt{color:var(--ink)}
+/* a mira diz que dá para arrastar; com a mãozinha ligada quem manda é ela */
+.app.editando .stage:not(.mao) canvas{cursor:crosshair}
 .app.editando .tbtn,
 .app.editando #pdf{background:#fff}
 .app.editando .fit{background:#fff}
@@ -693,7 +695,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <div class="chips" id="chips"></div>
     <p class="note">Toque numa peça para selecioná-la: os ajustes dela aparecem na barra de cima.
     O botão <b>ajustar</b> abre o modo ponto a ponto, onde cada toque acende ou apaga um
-    quadradinho.</p>
+    quadradinho — e arrastar sem soltar acende ou apaga a fileira inteira por onde passa,
+    do jeito que o primeiro quadradinho do traço mandou.</p>
   </section>
 
   <section class="pane" data-pane="linha">
@@ -2567,7 +2570,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     $("editLabel").textContent = editing ? "terminar" : "ajustar";
     draw();   // a grade ganha ou devolve a altura do painel
     $("modeHint").textContent = editing
-      ? "Toque num quadradinho da peça selecionada para acender ou apagar."
+      ? "Toque num quadradinho da peça selecionada para acender ou apagar. Arrastando sem soltar, o traço inteiro segue o primeiro."
       : "Arraste a palavra ou a foto para posicionar. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.";
   });
 
@@ -2675,6 +2678,58 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return -1;
   }
 
+  /* ---- acender e apagar em traço -------------------------------------
+     Um toque acende ou apaga um quadradinho; o dedo (ou o botão do mouse)
+     apertado e arrastando acende ou apaga a fileira inteira por onde passa.
+     Três decisões moram aqui:
+
+     o primeiro quadradinho do traço decide se o traço inteiro acende ou
+     apaga, e não cada quadradinho por si — senão passar de volta por cima do
+     próprio traço ficaria piscando, e numa curva, onde o dedo cruza o que
+     acabou de acender, o resultado seria adivinhação;
+
+     entre um evento e o outro o ponteiro pula vários quadradinhos, então o
+     traço liga o de agora ao de antes em linha reta — sem isso um arraste
+     rápido sai furado, e furo no molde é ponto que falta no pano;
+
+     e o traço inteiro é um passo só no desfazer, como o arraste do controle
+     deslizante já era. */
+  var pinta = null;
+
+  function celulaEm(el, pt){
+    var l = paperToLocal(el, pt.x, pt.y);
+    var p = P();
+    return { q: Math.floor(l.x / p), r: Math.floor(l.y / p) };
+  }
+
+  // devolve 1 quando o quadradinho mudou de fato: é o que conta no rodapé
+  function pintaCelula(q, r){
+    var el = pinta.el;
+    if (!el.cells[r] || el.cells[r][q] === undefined) return 0;
+    if (pinta.val < 0) pinta.val = el.cells[r][q] ? 0 : 1;
+    if (el.cells[r][q] === pinta.val) return 0;
+    el.cells[r][q] = pinta.val;
+    el.manual = (el.manual || 0) + 1;
+    return 1;
+  }
+
+  function pintaAte(pt){
+    var c = celulaEm(pinta.el, pt), n = 0;
+    if (pinta.q === null){
+      n = pintaCelula(c.q, c.r);
+    } else {
+      var dq = c.q - pinta.q, dr = c.r - pinta.r;
+      var passos = Math.max(Math.abs(dq), Math.abs(dr));
+      for (var i = 1; i <= passos; i++){
+        n += pintaCelula(pinta.q + Math.round(dq * i / passos),
+                         pinta.r + Math.round(dr * i / passos));
+      }
+    }
+    pinta.q = c.q; pinta.r = c.r;
+    pinta.mudou += n;
+    return n;
+  }
+
   cv.addEventListener("pointerdown", function(e){
     e.preventDefault();
     var pt = evPos(e);
@@ -2700,14 +2755,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     if (want !== focus || i >= 0){ focus = want; syncControls(); renderChips(); }
     if (editing){
       var el = els[sel]; if (!el) return;
-      var l = paperToLocal(el, pt.x, pt.y);
-      var p = P();
-      var q = Math.floor(l.x / p), r = Math.floor(l.y / p);
-      if (el.cells[r] && el.cells[r][q] !== undefined){
-        el.cells[r][q] = el.cells[r][q] ? 0 : 1;
-        el.manual = (el.manual || 0) + 1;
-        draw(); pushHist();
-      }
+      if (pinta) return;                     // um dedo por traço: o segundo espera
+      // a captura mantém o traço vivo se o ponteiro sair da grade e voltar
+      cv.setPointerCapture(e.pointerId);
+      pinta = { id: e.pointerId, el: el, val: -1, q: null, r: null, mudou: 0 };
+      if (pintaAte(pt)) draw();
       return;
     }
     cv.setPointerCapture(e.pointerId);
@@ -2725,6 +2777,12 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   cv.addEventListener("pointermove", function(e){
     if (cpts[e.pointerId]) cpts[e.pointerId] = { x: e.clientX, y: e.clientY };
+    if (pinta){
+      if (e.pointerId !== pinta.id) return;
+      e.preventDefault();
+      if (pintaAte(evPos(e))) draw();
+      return;
+    }
     if (pinch && pinch.vista && nPointers() === 2){
       e.preventDefault();
       var m = cmid();
@@ -2761,6 +2819,10 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   function endDrag(e){
     var mexeu = !!(drag || (pinch && !pinch.vista));
+    if (pinta && (!e || e.pointerId === pinta.id)){
+      if (pinta.mudou) mexeu = true;         // traço que não mudou nada não é passo
+      pinta = null;
+    }
     if (e && pointers[e.pointerId]) delete pointers[e.pointerId];
     if (e && cpts[e.pointerId]) delete cpts[e.pointerId];
     if (nPointers() < 2) pinch = null;

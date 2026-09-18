@@ -173,16 +173,18 @@ mudança de aplicativo:
 
 `testes/` cobre o repartir em folhas, a posição em cada folha, a emenda, a cor
 por peça, a estante, a montagem da tela no Chromium, as setas e botões de
-alinhar, o arco e o espaçamento das letras, e a conta de fio. São dez
-conjuntos; `testes/roda.sh` roda todos. O que **não** existe:
+alinhar, o arco e o espaçamento das letras, a conta de fio, e o arraste que
+acende quadradinho. São treze conjuntos; `testes/roda.sh` roda todos. O que
+**não** existe:
 
 - Nada que exercite o desenho no canvas — `textMatrix()`, que transforma o
   traço da fonte em quadradinhos, é o coração do app e não tem teste nenhum.
   Um teste dele não é óbvio: o resultado depende de como o navegador rasteriza
   a fonte, então comparar com uma matriz fixa quebraria sozinho.
-- Nada que exercite arrastar com o dedo ou o mouse, a pinça de dois dedos, nem
-  o modo ponto a ponto. `posicao.js` mexe na página, mas pelo teclado e pelos
-  botões.
+- Nada que exercite o arraste que posiciona a peça nem a pinça de dois dedos.
+  O arraste do modo ponto a ponto saiu desta lista: `traco.js` desenha uma
+  fileira com o botão apertado e confere quadradinho por quadradinho no que o
+  app gravou.
 - Nada compara o PDF com uma imagem de referência. Os testes leem coordenadas
   de dentro do arquivo, o que pega o molde no lugar errado, mas não pega feio.
 - Nada roda num navegador de celular de verdade. `tela.js` usa um Chromium de

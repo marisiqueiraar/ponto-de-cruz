@@ -102,7 +102,11 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   "posicionar a peça" para "mover a vista" — no toque, com ela ligada, a pinça muda o zoom. A
   porcentagem é relativa ao encaixe do papel na tela: **100% é o papel inteiro visível**, não
   tamanho físico. Tamanho real é promessa do PDF, que a tela não tem como garantir.
-- **Modo ponto a ponto**: enquanto se acende e apaga quadradinho, a barra fica amarela e os
+- **Modo ponto a ponto**: um toque acende ou apaga um quadradinho, e arrastar sem soltar
+  acende ou apaga a fileira inteira por onde o dedo (ou o botão) passa — quem decide se o
+  traço acende ou apaga é o primeiro quadradinho dele, então voltar por cima do próprio
+  traço não desfaz o que acabou de sair, e o traço inteiro é um passo só no desfazer.
+  Enquanto se acende e apaga quadradinho, a barra fica amarela e os
   campos da peça saem dela — no celular eles roubam a altura de que a grade precisa, e em
   qualquer tela mexer na altura ou na sensibilidade refaz a peça e joga fora justamente o que
   se está ajustando à mão. No celular o painel e as abas recolhem: a grade passa de 164 × 232
