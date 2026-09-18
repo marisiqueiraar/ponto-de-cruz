@@ -8,11 +8,12 @@ um Chromium e se pula sozinho quando não acha um.
 testes/roda.sh        # todos, com a extração refeita antes
 ```
 
-Os de navegador (`tela.js`, `posicao.js`, `traco.js`, `laco.js`, `letra.js`,
-`ajuste.js`, `teto.js` e `cota.js`) dirigem um Chromium e se pulam sozinhos quando
-não acham um. O `posicao.js` mede as posições lendo o que o app
+Três deles (`tela.js`, `posicao.js` e `guias.js`) dirigem um Chromium e se pulam
+sozinhos quando não acham um. O `posicao.js` mede as posições lendo o que o app
 grava no `localStorage`, em vez de olhar a tela: assim dá para afirmar "andou
-0,5 mm" em vez de "alguma coisa mudou".
+0,5 mm" em vez de "alguma coisa mudou". O `guias.js` confere as duas medidas ao
+mesmo tempo — os milímetros gravados e os pixels do risco na tela —, porque
+guia no lugar certo com o número errado engana mais do que guia nenhuma.
 
 `extrai.py` puxa do `index.html` os trechos que cada teste exercita e grava
 `geo.js`, `pdfcode.js`, `estante.js` e `app.js` aqui ao lado (todos ignorados
@@ -42,6 +43,7 @@ em todas as folhas.
 | `laco.js` | o laço pega o que couber inteiro dentro dele, a barra diz o que está laçado, as setas e o arraste movem foto e peças sem mudar as distâncias entre elas, a foto segura o bloco na borda do papel, o arraste do bloco é um passo só no desfazer, e o botão apaga as peças laçadas de uma vez sem levar a moldura da foto |
 | `traco.js` | o arraste no modo ponto a ponto acende a fileira inteira sem furo mesmo quando o ponteiro pula de uma vez, o primeiro quadradinho decide se o traço acende ou apaga, o traço todo é um passo só no desfazer, e cada quadradinho entra um a um na lista de ajustes que o `ajuste.js` guarda |
 | `posicao.js` | as setas andam 0,5 mm (5 com Shift), a rajada vira um passo só no desfazer, a seta dentro de um campo não empurra a peça, e os três botões de alinhar acertam o centro da caixa já girada |
+| `guias.js` | a opção abre a cruz no meio do papel, a guia puxada da régua para em milímetro inteiro e some quando volta para a régua, o ímã encosta a peça na guia (e não encosta com a opção desligada), e papel menor não deixa guia medindo mentira |
 
 `amostra.js` não testa nada: gera um PDF de várias folhas, com quatro linhas
 diferentes, para olhar.
