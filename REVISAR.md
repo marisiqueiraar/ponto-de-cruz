@@ -1,8 +1,21 @@
 # Revisar
 
 O que precisa do seu olho antes de virar coisa fechada, em 18/09/2026, depois
-das três levas desta sessão (`8841ad9` folhas, `2d6b7f8` cor por peça,
-`f515c68` estante e arquivo).
+das dez levas desta sessão:
+
+| | |
+|---|---|
+| `8841ad9` | molde em várias folhas + régua de aferição |
+| `2d6b7f8` | cor por peça + legenda no PDF |
+| `f515c68` | estante de moldes + arquivo `.json` |
+| `70413d7` | este documento e o `BACKLOG.md` |
+| `a88fa84` | fonte fantasma removida |
+| `d036d8a` | setas, alinhar, aviso de peça fora do papel |
+| `3d09ea8` | arco, espaçamento, espelhar, seis símbolos |
+| `621b11f` | fio por linha, com a conta à mostra |
+| `3edfdc9` | a revisão do backlog, com o que ela mediu |
+| `94eb73e` | teto do rascunho, aviso de memória, flor, alinhar com a de cima |
+| `41217c9` | esses quatro descritos no README e na ajuda |
 
 Nada aqui é bug conhecido — bug conhecido está no [BACKLOG.md](BACKLOG.md).
 Aqui é o que eu decidi sozinho e você pode querer diferente, e o que nenhum
@@ -129,84 +142,27 @@ commits que eu já tinha subido afirmam "verifiquei rodando no node". Afirmaçã
 que ninguém pode conferir não vale nada, então trouxe tudo para `testes/`.
 
 Isso muda o caráter do projeto: era um arquivo só, sem build e sem pasta de
-teste. Agora tem uma pasta com nove arquivos de node. Se você não quiser esse
-peso, `rm -rf testes/` e uma linha no `.gitignore` resolvem, e o app continua
-exatamente o mesmo — nada em `index.html` depende deles.
+teste. Agora tem uma pasta com quinze arquivos — dez conjuntos de teste, o
+extrator, o runner e um leia-me. Se você não quiser esse peso, `rm -rf testes/`
+e as linhas dele no `.gitignore` resolvem, e o app continua exatamente o mesmo:
+nada em `index.html` depende deles.
 
 ---
 
-## 4. Risco conhecido que virou maior
+## 4. ~~Risco conhecido que virou maior~~ — consertado
 
-**Gravar pode falhar em silêncio, e agora falha mais fácil.**
+**Gravar falhava em silêncio, e com vários moldes falhava mais fácil.**
 
-O `saveState()` sempre engoliu o erro de cota (`catch (e){ return; }`), o que
-fazia sentido quando havia um molde só. Com vários moldes, cada um com a sua
-foto de 300–500 KB, os 5 MB típicos do `localStorage` dão para **oito ou dez
-moldes** — e ao estourar, o trabalho simplesmente para de ser gravado sem
-ninguém avisar.
+O `saveState()` engolia o erro de cota (`catch (e){ return; }`), o que fazia
+sentido quando havia um molde só. Com vários, cada um com a sua foto de
+300–500 KB, os 5 MB típicos do `localStorage` dão para oito ou dez moldes — e ao
+estourar, o trabalho simplesmente parava de ser gravado sem ninguém avisar.
 
-Não consertei porque a correção é uma decisão de interface, não de código:
-avisar onde, com que palavras, e o que oferecer (apagar um molde antigo?
-salvar o arquivo primeiro?). Está no backlog como item 1.
+Você mandou seguir, e está feito: o rodapé fica vermelho dizendo "não coube na
+memória" e a aba moldes escreve o caminho. Os detalhes estão no
+[BACKLOG.md](BACKLOG.md), item 2.
 
-Enquanto isso, o conselho honesto é o que a ajuda já diz: **salve o arquivo do
-molde** antes de acumular muitos.
-
----
-
-## 5. O que ficou preso em branches, e a regra que faltava
-
-Três levas de trabalho nunca chegaram ao `master`. Não foram revertidas: elas
-foram empurradas para branches cujo PR **já estava mergeado**, e um PR mergeado
-não volta a acompanhar o branch. O `master` seguiu sem elas, e os PRs seguintes
-saíram desse `master`.
-
-O caso mais visível foi o painel de linha: o `ee5a9ab` tirava as oito paletas de
-fantasia e punha o código dentro do quadradinho, e ficou parado no
-`claude/tender-turing-btqvak` — 42 minutos depois de o PR #10 daquele branch
-fechar. Quem abria o app via as paletas de volta e achava que alguém as tinha
-trazido de volta. Ninguém trouxe: elas nunca saíram.
-
-**A regra, para não repetir:** PR mergeado é branch morto. Trabalho novo começa
-num branch novo, tirado do `master` já atualizado:
-
-```
-git fetch origin master
-git checkout -B claude/nome-novo origin/master
-```
-
-E apagar o branch no merge — o GitHub oferece o botão. Branch apagado não aceita
-push por engano, o que transforma este erro silencioso em erro impossível.
-
-### O que voltou nesta leva
-
-Tudo o que estava preso, um commit por vez:
-
-- `ee5a9ab` — painel de linha vira cartela: sem paletas, código dentro da cor,
-  ordem por tom. Adaptado à cor por peça e ao consumo de linha, que vieram
-  depois.
-- `6427eed` e `89826a3` — os dois acertos das réguas. Aplicaram limpo.
-- `2bb1303` e `42991ea` — o `cartela.html` e a linha avulsa. O conflito era com
-  o painel refeito; resolvido a favor dos dois.
-- `dd0555c` — o histórico de PDF, do `claude/nifty-gauss-v0c2xh`. Ver a ressalva
-  no corpo do commit: ele se sobrepõe em parte à estante de moldes.
-
-### O que decidi NÃO trazer
-
-`8cbc66a`, do mesmo `nifty-gauss`, punha a tela em duas colunas no computador e
-prendia a prévia no topo do celular. Ele reescrevia uma coluna única de 660px
-que não existe mais: o `34e5710` rearranjou a tela inteira em trilho, painel e
-mesa, que já é a tela em duas colunas que aquele commit queria. Aplicá-lo
-brigaria com o layout de hoje.
-
-Do que ele tinha e ainda valia — margem segura, anel de foco, `aria-live` nos
-números, `aria-pressed` nas peças, "gerando…" no botão do PDF — veio tudo, no
-commit `53ecc0f`. A margem segura é o único item que não consegui medir: aqui
-não há aparelho com entalhe, e `env(safe-area-inset-*)` vale zero no Chromium
-de mesa. O código é conservador (padding no `body`, que já é `border-box`), mas
-quem confirma é você, num telefone.
-
-### Ainda fora
-
-O PR #1 (`claude/continuacion-aqui-e10m9k`) continua aberto, com dois commits de
-02/09 — de antes de o app atual substituir o anterior. Não mexi nele.
+**O que sobrou para você decidir:** a cota continua sendo a cota. O aviso diz
+que encheu, mas ninguém aumenta 5 MB. A saída de verdade é o arquivo do molde,
+e vale pensar se o app deveria insistir mais nisso — oferecer o download
+sozinho quando a memória encher, por exemplo, em vez de só recomendar.

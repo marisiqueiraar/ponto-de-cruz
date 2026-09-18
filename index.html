@@ -390,6 +390,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   font-size:12.5px;color:var(--ink-soft);overflow:hidden;white-space:nowrap}
 .foot #modeHint{margin:0;overflow:hidden;text-overflow:ellipsis}
 .foot .saved{flex:0 0 auto;font-family:var(--display);font-size:10px}
+.foot .saved.cheia{background:var(--danger);color:#fff;padding:0 8px;border-radius:4px;
+  height:18px;display:inline-flex;align-items:center}
 .foot #areaOut{margin-left:auto}
 #out:not(:empty){padding-top:12px}
 #out img{max-width:100%;border:1px solid var(--line);border-radius:6px}
@@ -469,6 +471,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   .foot{gap:8px;font-size:11.5px}
   .foot #areaOut,.foot .saved{display:none}
+  /* o aviso de memória cheia é a exceção: é no celular que a cota estoura
+     primeiro, e o rodapé escondido é o mesmo silêncio de antes */
+  .foot #gravado.cheia{display:inline-flex}
 }
 @media (max-width:420px){
   .brand{display:none}
@@ -558,6 +563,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         <option value="heartOutline">Coração vazado</option>
         <option value="star">Estrela</option>
         <option value="arrow">Seta</option>
+        <option value="flor">Flor</option>
         <option value="folha">Folha</option>
         <option value="coroa">Coroa</option>
         <option value="lua">Lua</option>
@@ -677,6 +683,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <button type="button" id="alFoto">centralizar na foto</button>
       <button type="button" id="alPapel">centralizar no papel</button>
       <button type="button" id="alBase">pela base da foto</button>
+      <button type="button" id="alAcima" class="hide">alinhar com a peça de cima</button>
     </div>
 
     <p class="note" id="setasDica">As setas do teclado movem a peça selecionada de meio milímetro.
@@ -806,6 +813,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <li>Recorte o molde impresso pela moldura tracejada e prenda sobre o conjunto alinhando o retângulo da foto com a foto de verdade, fita crepe nos quatro cantos.</li>
       <li>Molde maior que uma A4 sai em várias folhas, todas em tamanho real. Cada uma diz qual é no cabeçalho, e as vizinhas repetem uma faixa do desenho: sobreponha uma na outra até os furos da faixa coincidirem, e só então prenda. As margens dizem qual folha continua de cada lado.</li>
       <li>Fure ponto a ponto com agulha grossa, apoiado em EVA ou cortiça. Cada quadradinho usa quatro furos, compartilhados com os vizinhos — por isso o número de furos é menor que o dobro de pontos.</li>
+      <li>Se o rodapé ficar vermelho dizendo <b>não coube na memória</b>, salve o arquivo do molde na aba <b>moldes</b> e apague um molde antigo. A partir desse momento o trabalho parou de ser guardado.</li>
       <li>Para o nome curvado por cima da foto, use o campo <b>arco</b> na barra de cima. Se a cursiva fechar demais em letra pequena, abra o <b>espaço</b> entre as letras — ele é contado em quadradinhos, os mesmos que viram furo.</li>
       <li>Para posicionar fino, use as setas do teclado: meio milímetro por toque, cinco com Shift. Os três botões na aba <b>peças</b> centralizam a peça na foto ou no papel, e encostam ela na base da foto.</li>
       <li>Guarde o arquivo do molde na aba <b>moldes</b> antes de mudar de aparelho ou limpar o navegador. O que fica só no navegador não vai a lugar nenhum e some com os dados do site.</li>
@@ -837,7 +845,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   <p class="hint" id="modeHint">Arraste a palavra ou a foto para posicionar. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.</p>
   <span class="saved" id="manualOut"></span>
   <span class="saved" id="areaOut"></span>
-  <span class="saved">salvo neste navegador</span>
+  <span class="saved" id="gravado">salvo neste navegador</span>
 </div>
 
 </div>
@@ -866,7 +874,23 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 <script>
 (function(){
   var $ = function(id){ return document.getElementById(id); };
-  var S = 6;
+  var SUPER = 6;   // pixels por quadradinho no rascunho, quando cabe
+
+  /* Teto do canvas de rascunho, em pixels.
+
+     O arco desenha a palavra inteira num canvas e depois o dobra, e esse canvas
+     cresce com o tamanho da palavra: nos extremos que a interface permite —
+     altura 60, arco 120°, uma frase de 46 letras — ele passava de 4 500 px de
+     largura e 25 MB. Alguns navegadores de celular recusam canvas acima de
+     4 096 px numa dimensão, e o que sai de um canvas recusado é vazio: a peça
+     sairia em branco sem nada avisar, que é justamente o modo de falhar que
+     este app não pode ter.
+
+     Passando do teto, o rascunho é desenhado com menos pixels por quadradinho.
+     A grade de quadradinhos não muda com isso — ela vem da altura escolhida, e
+     não da resolução do rascunho —, só o traço fica um pouco mais grosseiro
+     antes de virar furo. Melhor um traço mais grosseiro do que uma peça vazia. */
+  var TETO_CANVAS = 4000;
   var ITALIC = { "Cormorant Garamond":1, "EB Garamond":1, "Playfair Display":1 };
   function fontStr(size, fam){ return (ITALIC[fam] ? "italic " : "") + size + 'px "' + fam + '", cursive'; }
   function fmt(v){ return (Math.round(v * 10) / 10).toFixed(1).replace(".", ","); }
@@ -881,7 +905,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     lua: ["...XXX...","..XXXXX..",".XXXX....",".XXX.....",".XXX.....",".XXX.....",".XXXX....","..XXXXX..","...XXX..."],
     sol: ["X...X...X",".X..X..X.","..XXXXX..","..XXXXX..","XXXXXXXXX","..XXXXX..","..XXXXX..",".X..X..X.","X...X...X"],
     infinito: [".XX...XX.","X..X.X..X","X...X...X","X..X.X..X",".XX...XX."],
-    casa: ["....X....","...XXX...","..XXXXX..",".XXXXXXX.","XXXXXXXXX",".XX...XX.",".XX.X.XX.",".XX.X.XX.",".XXXXXXX."]
+    casa: ["....X....","...XXX...","..XXXXX..",".XXXXXXX.","XXXXXXXXX",".XX...XX.",".XX.X.XX.",".XX.X.XX.",".XXXXXXX."],
+    // a flor é a única de 11 × 13: em 9 × 9 desenhei quatro e nenhuma lia como
+    // flor — saíram laço, balão, máscara e rosquinha. Nada no código obriga os
+    // 9 × 9; só os desenhos antigos é que eram assim.
+    flor: ["...XXXXX...","..XXXXXXX..",".XX.XXX.XX.","XX...X...XX","XX..XXX..XX","XX...X...XX",".XX.XXX.XX.","..XXXXXXX..","...XXXXX...",".....X.....","..XX.X.XX..",".XX..X..XX.",".....X....."]
   };
 
   // o nome de cada desenho mora aqui, e não espalhado entre o seletor e a
@@ -889,7 +917,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   // deixa a peça na lista chamada "undefined"
   var NOMES_SYM = {
     heart: "coração", heartOutline: "coração vazado", star: "estrela", arrow: "seta",
-    folha: "folha", coroa: "coroa", lua: "lua", sol: "sol",
+    flor: "flor", folha: "folha", coroa: "coroa", lua: "lua", sol: "sol",
     infinito: "infinito", casa: "casa"
   };
 
@@ -1434,6 +1462,21 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var dsc = m0.actualBoundingBoxDescent || 28;
     var h = asc + dsc;
     if (h <= 0) return [[0]];
+
+    /* Quantos pixels por quadradinho cabem no teto. A conta é feita em
+       quadradinhos, que é a única medida que não depende da resposta. */
+    var porQuadradinho = targetRows / h;
+    var colsQ = Math.ceil(m0.width * porQuadradinho) + 6;
+    var linhasQ = targetRows + 6;
+    var largQ = colsQ, altQ = linhasQ;
+    if (arco){
+      var angQ = Math.abs(arco) * Math.PI / 180;
+      var raioQ = (colsQ - 6) / angQ;
+      largQ = colsQ + linhasQ;                       // as pontas giradas avançam
+      altQ = linhasQ + raioQ * (1 - Math.cos(angQ / 2));
+    }
+    var S = Math.max(2, Math.min(SUPER, Math.floor(TETO_CANVAS / Math.max(largQ, altQ, 1))));
+
     var k = (targetRows * S) / h;
 
     /* O espaçamento vai em quadradinhos, e não em pixels ou em por cento: dois
@@ -1968,6 +2011,36 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return el;
   }
 
+  /* A cota do navegador estourando era o pior silêncio que sobrava: o
+     `saveState()` engolia o erro e o trabalho parava de ser gravado sem
+     ninguém avisar. Com vários moldes, cada um com a sua foto, deixou de ser
+     hipótese — cabem oito ou dez moldes nos 5 MB típicos.
+
+     O aviso vai no rodapé, onde já se diz que está gravado, e o que fazer fica
+     escrito na aba moldes, junto da lista que a pessoa vai usar para apagar um.
+     A foto é o único item capaz de estourar a cota sozinho, e ela mora numa
+     chave separada de propósito: quando é ela que não cabe, o molde continua
+     gravado e o aviso diz isso. */
+  var memoriaCheia = false;
+  function marcaMemoria(cheia, oQue){
+    if (!cheia && !memoriaCheia) return;
+    memoriaCheia = cheia;
+    var g = $("gravado");
+    if (g){
+      g.textContent = cheia ? "não coube na memória" : "salvo neste navegador";
+      g.classList.toggle("cheia", cheia);
+      g.title = cheia
+        ? "O navegador ficou sem espaço. Salve o arquivo do molde na aba moldes e apague um molde antigo."
+        : "";
+    }
+    var a = $("moldeAviso");
+    if (!a) return;
+    if (cheia)
+      a.textContent = "A memória do navegador encheu" + (oQue ? " ao gravar " + oQue : "") +
+        ". Salve o arquivo do molde agora — e apague um molde da lista acima para abrir espaço.";
+    else if (/memória do navegador encheu/.test(a.textContent)) a.textContent = "";
+  }
+
   function saveState(){
     var it = itemAtual() || criaMolde(nomeSugerido());
     try {
@@ -1981,7 +2054,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         mm: $("mm").value, thread: thread, sel: sel,
         els: els.map(packEl)
       }));
-    } catch (e){ /* janela anônima ou cota cheia: seguir sem memória */ return; }
+    } catch (e){ marcaMemoria(true, "o molde"); return; }
+    marcaMemoria(false);
     it.em = Date.now();
     it.pecas = els.length;
     if (!it.nome) it.nome = nomeSugerido();
@@ -2065,7 +2139,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
       localStorage.setItem(it.foto, c.toDataURL("image/jpeg", 0.85));
     } catch (e){
+      // sem a foto o molde continua inteiro: ela é guia de posição, não furo
       try { localStorage.removeItem(it.foto); } catch (e2){}
+      marcaMemoria(true, "a foto");
     }
   }
 
@@ -2215,6 +2291,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     // pintando — senão o quadradinho marcado vira adivinhação
     mostraThread();
     $("alinha").classList.toggle("hide", !piece);
+    $("alAcima").classList.toggle("hide", !piece || sel < 1);
     $("flipEl").classList.toggle("on", !!(el && el.flip));
     $("ctlPhoto").classList.toggle("hide", focus !== "photo");
     $("ctlPiece").classList.toggle("hide", !piece);
@@ -3488,12 +3565,18 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     if (modo === "foto")  moveEl(el, (photo.x + photo.w / 2) - (b.x + b.w / 2), 0);
     if (modo === "papel") moveEl(el, (pa.w / 2) - (b.x + b.w / 2), 0);
     if (modo === "base")  moveEl(el, 0, (photo.y + photo.h) - (b.y + b.h));
+    // nome em duas linhas: a de baixo centraliza pela de cima, não pela foto
+    if (modo === "acima" && sel > 0){
+      var c = elPaperBox(els[sel - 1]);
+      moveEl(el, (c.x + c.w / 2) - (b.x + b.w / 2), 0);
+    }
     draw(); pushHist();
   }
 
   $("alFoto").addEventListener("click", function(){ alinha("foto"); });
   $("alPapel").addEventListener("click", function(){ alinha("papel"); });
   $("alBase").addEventListener("click", function(){ alinha("base"); });
+  $("alAcima").addEventListener("click", function(){ alinha("acima"); });
 
   var SETAS = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
 
