@@ -76,12 +76,20 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   não no `localStorage`: um molde grande em PDF tem megabytes, e a cota do `localStorage` já é
   disputada pela estante e pela foto. Em janela anônima, ou com os dados do site bloqueados, a
   lista diz isso em vez de sumir sem explicação.
-- **PDF do molde**: em tamanho real, recortado na área do bordado, com a moldura de recorte, o
+- **PDF do molde**: em tamanho real, com a moldura de recorte, o
   retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
   distância exata para colar a foto no papel e uma **régua de aferição de 50 mm** — se ela não
   medir 50 mm na régua de verdade, a impressora reduziu a página e nenhum furo vai bater. No
   rodapé de cada folha vai a legenda das linhas usadas, com o código da marca — cor de tela não
   é código de meada, e sem a legenda o molde impresso não diz o que comprar de novo.
+- **A moldura de recorte é a folha inteira**: e não a caixa do desenho. Molde recortado rente
+  ao bordado só se prende mirando o retângulo da foto; molde do tamanho do papel se prende
+  borda com borda, que é a mira que a mão acerta. Numa A4 isso nunca cabe embaixo do
+  cabeçalho, então o texto sai na página 1 e o papel inteiro na 2 — a folha impressa **é** o
+  molde, sem tesoura. O que não se paga é folha de molde a mais: se houver furo perto demais
+  da borda do papel, a folha inteira sairia repartida onde o desenho sozinho sai inteiro, e aí
+  a moldura volta a cercar o bordado com 8 mm de folga. O aviso ao lado do botão de baixar diz
+  quando isso acontece.
 - **Folha de instrução**: o cabeçalho ocupa 46 mm de altura e o rodapé mais 8. Um molde que
   usa quase toda a folha cabe no papel e não cabe embaixo desse texto — e era repartido em duas
   folhas por causa das instruções, não do desenho. Quando isso acontece o texto é que muda de

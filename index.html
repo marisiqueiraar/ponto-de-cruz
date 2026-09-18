@@ -810,8 +810,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <ul>
       <li>Cole a foto no papel usando a medida que aparece no cabeçalho do PDF: distância da borda esquerda e da borda de cima. É essa posição que faz o molde bater.</li>
       <li>Antes de furar, meça a régua impressa no cabeçalho: se os 50 mm dela não derem 50 mm na sua régua, a impressora reduziu a página e nenhum furo vai bater. Imprima de novo em 100%, sem "ajustar à página".</li>
-      <li>Recorte o molde impresso pela moldura tracejada e prenda sobre o conjunto alinhando o retângulo da foto com a foto de verdade, fita crepe nos quatro cantos.</li>
-      <li>Molde que usa quase toda a folha não cabe embaixo do cabeçalho, então o PDF sai em duas páginas: a primeira só com as instruções, a régua e a legenda, e a segunda com o molde sozinho na folha, inteiro e em tamanho real. É só a segunda que você imprime e recorta.</li>
+      <li>Recorte o molde impresso pela moldura tracejada: ela é a borda do papel da peça, então a folha recortada sai do tamanho exato dele. Se o papel da peça for A4 e você imprimir em A4, a moldura cai na borda da própria folha impressa e não há o que recortar — a folha já é o molde. Prenda sobre o conjunto encostando borda com borda, que o retângulo impresso cai em cima da foto de verdade, fita crepe nos quatro cantos. (Só quando há furo perto demais da borda do papel a moldura encolhe para a caixa do desenho, e aí a mira volta a ser o retângulo da foto.)</li>
+      <li>O cabeçalho do PDF ocupa 46 mm da página, e uma moldura do tamanho da folha não cabe embaixo dele — nem um molde que use quase toda a folha. Quando isso acontece o PDF sai em duas páginas: a primeira só com as instruções, a régua e a legenda, e a segunda com o molde sozinho na folha, inteiro e em tamanho real. É só a segunda que você imprime e recorta.</li>
       <li>Molde maior que a folha inteira sai em várias folhas, todas em tamanho real. Cada uma diz qual é no cabeçalho, e as vizinhas repetem uma faixa do desenho: sobreponha uma na outra até os furos da faixa coincidirem, e só então prenda. As margens dizem qual folha continua de cada lado.</li>
       <li>Fure ponto a ponto com agulha grossa, apoiado em EVA ou cortiça. Cada quadradinho usa quatro furos, compartilhados com os vizinhos — por isso o número de furos é menor que o dobro de pontos.</li>
       <li>Se o rodapé ficar vermelho dizendo <b>não coube na memória</b>, salve o arquivo do molde na aba <b>moldes</b> e apague um molde antigo. A partir desse momento o trabalho parou de ser guardado.</li>
@@ -1693,11 +1693,50 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return { x: minX, y: minY, w: Math.max(0, maxX - minX), h: Math.max(0, maxY - minY) };
   }
 
-  function cropArea(){
+  /* ---- o que a moldura tracejada cerca ---------------------------------
+
+     A folha inteira, e não a caixa do desenho. Molde recortado rente ao
+     desenho só se prende mirando o retângulo da foto; molde do tamanho do
+     papel se prende borda com borda, que é a mira que a mão acerta.
+
+     O preço é o cabeçalho: ele come 46 mm da página, e uma moldura do tamanho
+     da folha nunca cabe embaixo dele. Então o texto passa a sair numa página
+     só dele e o molde fica sozinho na seguinte — duas páginas, uma folha de
+     molde só, a mesma troca que o molde grande já fazia.
+
+     O que não se paga é folha de molde a mais. Furo colado na borda do papel
+     não cabe nem na folha nua, e aí o papel inteiro sairia repartido onde o
+     desenho sozinho saía inteiro: emendar duas folhas com a mão é pior do que
+     recortar mirando a foto. Só nesse caso a moldura volta a ser a caixa do
+     desenho com 8 mm de folga, que é como sempre foi. */
+  function cropJusto(){
     var pa = paperMM(), c = contentArea(), pad = 8;
     var minX = Math.max(0, c.x - pad), minY = Math.max(0, c.y - pad);
     var maxX = Math.min(pa.w, c.x + c.w + pad), maxY = Math.min(pa.h, c.y + c.h + pad);
     return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+  }
+
+  function cropFolha(){
+    var pa = paperMM();
+    return { x: 0, y: 0, w: pa.w, h: pa.h };
+  }
+
+  function folhasDe(R){
+    var pl = pdfPlan(R, contentArea());
+    return pl.cols * pl.rows;
+  }
+
+  function cropArea(){
+    var justo = cropJusto();
+    if (justo.w <= 0 || justo.h <= 0) return justo;   // nada para imprimir
+    var folha = cropFolha();
+    return folhasDe(folha) <= folhasDe(justo) ? folha : justo;
+  }
+
+  // a moldura pegou o papel todo: quem recorta está cortando na borda da folha
+  function folhaCheia(R){
+    var pa = paperMM();
+    return R.w >= pa.w - 0.01 && R.h >= pa.h - 0.01;
   }
 
   // a folha do PDF: 10 mm de margem lateral, 46 mm de cabeçalho e 8 mm embaixo.
@@ -1903,7 +1942,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   /* O aviso de escala mora colado no botão de baixar, porque é sobre o que vai
      sair quando ele for apertado. Três estados: cabe, cabe por pouco, não cabe. */
-  var AVISO_CAPA = "O molde não cabe embaixo do cabeçalho, então o PDF sai em duas " +
+  var AVISO_CAPA = "O que vai ser recortado não cabe embaixo do cabeçalho, então o PDF sai em duas " +
     "páginas: a primeira com as instruções, a régua e a legenda, a segunda com o molde " +
     "sozinho na folha, inteiro e em tamanho real. Imprimir e usar é só a segunda.";
 
@@ -1916,7 +1955,16 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
        na margem sem custar um ponto. O próprio plano já traz essa conta. */
     var folga = plano.capa ? plano.folga
       : Math.min(plano.pageW - PDF_SIDE * 2 - cr.w, pageH - PDF_TOP - footMM() - cr.h);
-    var area = fmt(cr.w / 10) + " × " + fmt(cr.h / 10) + " cm";
+    /* A área continua sendo a do desenho, e não a da moldura: com a moldura
+       valendo a folha inteira, esse número viraria "21 × 29,7 cm" em todo molde
+       e deixaria de dizer o tamanho da peça, que é para o que se olha. */
+    var ju = cropJusto();
+    var area = fmt(ju.w / 10) + " × " + fmt(ju.h / 10) + " cm";
+    // a moldura só encolhe para o desenho quando a folha inteira custaria uma
+    // folha de molde a mais; dizer isso evita a pergunta
+    var recorte = folhaCheia(cr) ? "" :
+      " A moldura de recorte sai no tamanho do desenho, e não na folha inteira: " +
+      "há furo perto demais da borda do papel, e a folha inteira sairia repartida.";
     var box = $("fitHint"), txt = $("fitTxt"), state = "";
     var fora = pecasForaDoPapel();
 
@@ -1940,11 +1988,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       state = "tight";
       txt.textContent = "cabe em A4 · " + fmt(folga) + " mm de folga";
       box.title = "Área do molde: " + area + ". Cabe numa folha A4 em tamanho real, com " +
-        fmt(folga) + " mm de sobra até a margem." + (plano.capa ? " " + AVISO_CAPA : "");
+        fmt(folga) + " mm de sobra até a margem." + recorte + (plano.capa ? " " + AVISO_CAPA : "");
     } else {
       txt.textContent = "cabe em A4 · tamanho real";
       box.title = "Área do molde: " + area + ". Cabe numa folha A4 em tamanho real." +
-        (plano.capa ? " " + AVISO_CAPA : "");
+        recorte + (plano.capa ? " " + AVISO_CAPA : "");
     }
     box.className = "fit" + (state ? " " + state : "");
     $("areaOut").textContent = "área do molde " + area;
@@ -3001,7 +3049,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         " mm da borda de cima do papel.",
       plano.tiled
         ? "Recorte pela moldura tracejada. As folhas vizinhas repetem uma faixa do desenho: sobreponha ate os furos coincidirem."
-        : "Sobra: " + fmt(pa.w - photo.x - photo.w) + " mm a direita, " + fmt(pa.h - photo.y - photo.h) + " mm embaixo.",
+        : (plano.folhaCheia ? "A moldura tracejada e a borda do papel. " : "") +
+          "Sobra: " + fmt(pa.w - photo.x - photo.w) + " mm a direita, " + fmt(pa.h - photo.y - photo.h) + " mm embaixo.",
       "Imprima em 100%, sem ajustar a pagina. Confira na regua abaixo antes de furar."
     ];
     // esta folha não leva molde nenhum: o que ela precisa dizer é onde ele está
@@ -3056,11 +3105,18 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     pdf.setLineWidth(0.4);
     pdf.rect(ox + (photo.x - vw.x), oy + (photo.y - vw.y), photo.w, photo.h);
 
+    /* A linha da borda do papel, onde esta folha alcança a borda. Com a
+       moldura tracejada valendo o papel inteiro as duas cairiam uma em cima da
+       outra, e o traço cheio por baixo apagaria o tracejado: aí a moldura já diz
+       onde o papel acaba, e esta linha não tem o que acrescentar. */
+    var cheia = vw.x <= 0.01 && vw.y <= 0.01 && folhaCheia(vw);
     var edges = [];
-    if (vw.x <= 0.01) edges.push(["v", 0]);
-    if (vw.y <= 0.01) edges.push(["h", 0]);
-    if (vw.x + vw.w >= pa.w - 0.01) edges.push(["v", pa.w]);
-    if (vw.y + vw.h >= pa.h - 0.01) edges.push(["h", pa.h]);
+    if (!cheia){
+      if (vw.x <= 0.01) edges.push(["v", 0]);
+      if (vw.y <= 0.01) edges.push(["h", 0]);
+      if (vw.x + vw.w >= pa.w - 0.01) edges.push(["v", pa.w]);
+      if (vw.y + vw.h >= pa.h - 0.01) edges.push(["h", pa.h]);
+    }
     pdf.setDrawColor(56, 73, 89);
     pdf.setLineWidth(0.6);
     edges.forEach(function(e){
@@ -3331,6 +3387,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function montaPDF(){
     var R = cropArea();
     var plano = pdfPlan(R, contentArea());
+    // o cabeçalho precisa saber se a moldura é a borda do papel ou a caixa do
+    // desenho: o que ele manda recortar muda de um caso para o outro
+    plano.folhaCheia = folhaCheia(R);
     /* `floatPrecision` e `compress` valem o molde inteiro: cada furo é um
        círculo de quatro curvas, e sem eles o jsPDF grava cada coordenada com
        dezessete casas decimais — 700 bytes por furo, megabytes por folha, que
