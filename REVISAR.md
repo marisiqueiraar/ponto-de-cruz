@@ -1,8 +1,18 @@
 # Revisar
 
 O que precisa do seu olho antes de virar coisa fechada, em 18/09/2026, depois
-das três levas desta sessão (`8841ad9` folhas, `2d6b7f8` cor por peça,
-`f515c68` estante e arquivo).
+das sete levas desta sessão:
+
+| | |
+|---|---|
+| `8841ad9` | molde em várias folhas + régua de aferição |
+| `2d6b7f8` | cor por peça + legenda no PDF |
+| `f515c68` | estante de moldes + arquivo `.json` |
+| `70413d7` | este documento e o `BACKLOG.md` |
+| `a88fa84` | fonte fantasma removida |
+| `d036d8a` | setas, alinhar, aviso de peça fora do papel |
+| `3d09ea8` | arco, espaçamento, espelhar, seis símbolos |
+| `621b11f` | fio por linha, com a conta à mostra |
 
 Nada aqui é bug conhecido — bug conhecido está no [BACKLOG.md](BACKLOG.md).
 Aqui é o que eu decidi sozinho e você pode querer diferente, e o que nenhum
@@ -129,9 +139,10 @@ commits que eu já tinha subido afirmam "verifiquei rodando no node". Afirmaçã
 que ninguém pode conferir não vale nada, então trouxe tudo para `testes/`.
 
 Isso muda o caráter do projeto: era um arquivo só, sem build e sem pasta de
-teste. Agora tem uma pasta com nove arquivos de node. Se você não quiser esse
-peso, `rm -rf testes/` e uma linha no `.gitignore` resolvem, e o app continua
-exatamente o mesmo — nada em `index.html` depende deles.
+teste. Agora tem uma pasta com quinze arquivos — dez conjuntos de teste, o
+extrator, o runner e um leia-me. Se você não quiser esse peso, `rm -rf testes/`
+e as linhas dele no `.gitignore` resolvem, e o app continua exatamente o mesmo:
+nada em `index.html` depende deles.
 
 ---
 

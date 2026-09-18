@@ -46,7 +46,7 @@ duas linhas. Não entrou porque pede escolher com qual, e aí é mais interface.
 
 ## 3. O que o ofício pede — parcialmente feito
 
-Era o item 5 da lista. Saíram quatro dos cinco:
+Era o item 5 da lista. Saiu inteiro, menos uma flor:
 
 - ~~**Texto em arco**~~ — de −120° a 120°. Dobra a imagem da palavra fatia por
   fatia em vez de escrever letra por letra sobre a curva, para as ligaduras da
@@ -58,7 +58,6 @@ Era o item 5 da lista. Saíram quatro dos cinco:
   em por cento, porque quadradinho é como quem borda conta.
 - ~~**Mais símbolos**~~ — de quatro para dez: entraram folha, coroa, lua, sol,
   infinito e casa.
-
 - ~~**Estimativa de consumo de linha**~~ — metros por cor, na aba molde e na
   legenda do PDF, com a conta escrita ao lado e com os números do espaçamento
   escolhido. Frente exata, avesso e perda declarados como suposição. Sem
@@ -114,8 +113,9 @@ mudança de aplicativo:
 ## 6. Sobre os testes
 
 `testes/` cobre o repartir em folhas, a posição em cada folha, a emenda, a cor
-por peça, a estante, a montagem da tela no Chromium e as setas e botões de
-alinhar. O que **não** existe:
+por peça, a estante, a montagem da tela no Chromium, as setas e botões de
+alinhar, o arco e o espaçamento das letras, e a conta de fio. São dez
+conjuntos; `testes/roda.sh` roda todos. O que **não** existe:
 
 - Nada que exercite o desenho no canvas — `textMatrix()`, que transforma o
   traço da fonte em quadradinhos, é o coração do app e não tem teste nenhum.
