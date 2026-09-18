@@ -493,6 +493,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <span class="t"><span>altura</span><input id="rows" type="number" min="8" max="60" step="1" value="18"><b id="rowsOut" class="hide">18</b></span>
       <span class="t"><span>traço</span><input id="thick" type="number" min="0" max="12" step="1" value="2"><b id="thickOut" class="hide">2</b></span>
       <span class="t"><span>sens.</span><input id="thr" type="number" min="10" max="80" step="5" value="35"><b id="thrOut" class="hide">35</b></span>
+      <span class="t"><span>espaço</span><input id="esp" type="number" min="0" max="8" step="1" value="0"><b id="espOut" class="hide">0</b></span>
+      <span class="t"><span>arco</span><input id="arc" type="number" min="-120" max="120" step="5" value="0"><b id="arcOut" class="hide">0</b></span>
     </fieldset>
 
     <fieldset id="ctlSym" class="hide">
@@ -501,6 +503,12 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         <option value="heartOutline">Coração vazado</option>
         <option value="star">Estrela</option>
         <option value="arrow">Seta</option>
+        <option value="folha">Folha</option>
+        <option value="coroa">Coroa</option>
+        <option value="lua">Lua</option>
+        <option value="sol">Sol</option>
+        <option value="infinito">Infinito</option>
+        <option value="casa">Casa</option>
       </select></span>
       <span class="t"><span>tamanho</span><input id="symScale" type="number" min="1" max="6" step="1" value="1"><b id="symScaleOut" class="hide">1</b></span>
     </fieldset>
@@ -523,6 +531,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     </span>
     <span class="grp hide" id="ctlActs">
       <button id="edit" class="tbtn" title="ajustar ponto a ponto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18V3H3zm8 16H5v-6h6v6zm0-8H5V5h6v6zm8 8h-6v-6h6v6zm0-8h-6V5h6v6z"/></svg><span id="editLabel">ajustar</span></button>
+      <button id="flipEl" class="tbtn icon" title="espelhar a peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18"/><path d="M9 7L4 12l5 5z" fill="currentColor"/><path d="M15 7l5 5-5 5z"/></svg></button>
       <button id="dupEl" class="tbtn icon" title="duplicar peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 1H4a2 2 0 00-2 2v12h2V3h11V1zm4 4H8a2 2 0 00-2 2v14a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2zm0 16H8V7h11v14z"/></svg></button>
       <button id="delEl" class="tbtn danger"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg title="excluir peça"><span class="hide">excluir</span></button>
     </span>
@@ -715,6 +724,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <li>Recorte o molde impresso pela moldura tracejada e prenda sobre o conjunto alinhando o retângulo da foto com a foto de verdade, fita crepe nos quatro cantos.</li>
       <li>Molde maior que uma A4 sai em várias folhas, todas em tamanho real. Cada uma diz qual é no cabeçalho, e as vizinhas repetem uma faixa do desenho: sobreponha uma na outra até os furos da faixa coincidirem, e só então prenda. As margens dizem qual folha continua de cada lado.</li>
       <li>Fure ponto a ponto com agulha grossa, apoiado em EVA ou cortiça. Cada quadradinho usa quatro furos, compartilhados com os vizinhos — por isso o número de furos é menor que o dobro de pontos.</li>
+      <li>Para o nome curvado por cima da foto, use o campo <b>arco</b> na barra de cima. Se a cursiva fechar demais em letra pequena, abra o <b>espaço</b> entre as letras — ele é contado em quadradinhos, os mesmos que viram furo.</li>
       <li>Para posicionar fino, use as setas do teclado: meio milímetro por toque, cinco com Shift. Os três botões na aba <b>peças</b> centralizam a peça na foto ou no papel, e encostam ela na base da foto.</li>
       <li>Guarde o arquivo do molde na aba <b>moldes</b> antes de mudar de aparelho ou limpar o navegador. O que fica só no navegador não vai a lugar nenhum e some com os dados do site.</li>
       <li>Cada peça pode ter a sua linha: selecione a peça e toque na cor. O rodapé do PDF lista as linhas usadas com o código da marca — a cor impressa é referência de tela, o código é o que se compra.</li>
@@ -782,7 +792,22 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     heart: [".XX...XX.","XXXX.XXXX","XXXXXXXXX","XXXXXXXXX",".XXXXXXX.","..XXXXX..","...XXX...","....X...."],
     heartOutline: [".XX...XX.","X..X.X..X","X...X...X","X.......X",".X.....X.","..X...X..","...X.X...","....X...."],
     star: ["....X....","...XXX...","...XXX...","XXXXXXXXX",".XXXXXXX.","..XXXXX..","..XX.XX..",".XX...XX.","XX.....XX"],
-    arrow: ["....X....","...XX....","..X.X....",".X..X....","XXXXXXXXX",".X..X....","..X.X....","...XX....","....X...."]
+    arrow: ["....X....","...XX....","..X.X....",".X..X....","XXXXXXXXX",".X..X....","..X.X....","...XX....","....X...."],
+    folha: [".....XXXX","...XXXXXX","..XXXXXXX",".XXXXXXX.",".XXXXXX..","XXXXXX...","XXXXX....",".XXX.....","X........"],
+    coroa: ["X...X...X","X...X...X","XX.XXX.XX","XXXXXXXXX",".XXXXXXX.",".XXXXXXX."],
+    lua: ["...XXX...","..XXXXX..",".XXXX....",".XXX.....",".XXX.....",".XXX.....",".XXXX....","..XXXXX..","...XXX..."],
+    sol: ["X...X...X",".X..X..X.","..XXXXX..","..XXXXX..","XXXXXXXXX","..XXXXX..","..XXXXX..",".X..X..X.","X...X...X"],
+    infinito: [".XX...XX.","X..X.X..X","X...X...X","X..X.X..X",".XX...XX."],
+    casa: ["....X....","...XXX...","..XXXXX..",".XXXXXXX.","XXXXXXXXX",".XX...XX.",".XX.X.XX.",".XX.X.XX.",".XXXXXXX."]
+  };
+
+  // o nome de cada desenho mora aqui, e não espalhado entre o seletor e a
+  // lista de peças: são os dois lugares que precisam dele, e desencontrado
+  // deixa a peça na lista chamada "undefined"
+  var NOMES_SYM = {
+    heart: "coração", heartOutline: "coração vazado", star: "estrela", arrow: "seta",
+    folha: "folha", coroa: "coroa", lua: "lua", sol: "sol",
+    infinito: "infinito", casa: "casa"
   };
 
   var els = [];
@@ -1206,32 +1231,86 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return out;
   }
 
-  function textMatrix(text, fam, targetRows, thick, thr){
+  function textMatrix(text, fam, targetRows, thick, thr, esp, arco){
     text = text || " ";
+    esp = +esp || 0;
+    arco = +arco || 0;
     var c = document.createElement("canvas");
     var x = c.getContext("2d");
     x.font = fontStr(100, fam);
+    var m0 = x.measureText(text);
+    var asc = m0.actualBoundingBoxAscent || 72;
+    var dsc = m0.actualBoundingBoxDescent || 28;
+    var h = asc + dsc;
+    if (h <= 0) return [[0]];
+    var k = (targetRows * S) / h;
+
+    /* O espaçamento vai em quadradinhos, e não em pixels ou em por cento: dois
+       quadradinhos entre as letras são dois quadradinhos em qualquer altura de
+       peça, que é como quem borda conta. Ele entra antes de medir, senão a
+       largura sai errada e a palavra nasce cortada. */
+    var espPx = esp * S;
+    if (espPx && "letterSpacing" in x) x.letterSpacing = (espPx / k) + "px";
+
     var m = x.measureText(text);
-    var asc = m.actualBoundingBoxAscent || 72;
-    var dsc = m.actualBoundingBoxDescent || 28;
     var left = m.actualBoundingBoxLeft || 0;
     var right = m.actualBoundingBoxRight || m.width;
-    var h = asc + dsc, w = left + right;
-    if (h <= 0 || w <= 0) return [[0]];
-    var k = (targetRows * S) / h;
+    var w = left + right;
+    if (w <= 0) return [[0]];
+
     var pad = S * 3;
-    c.width = Math.ceil(w * k) + pad * 2;
-    c.height = Math.ceil(targetRows * S) + pad * 2;
-    x = c.getContext("2d");
-    x.font = fontStr(100 * k, fam);
-    x.textBaseline = "alphabetic";
-    x.fillStyle = "#000"; x.strokeStyle = "#000";
-    x.lineJoin = "round"; x.lineCap = "round";
+    var W = Math.ceil(w * k);
+    var reto = document.createElement("canvas");
+    reto.width = W + pad * 2;
+    reto.height = Math.ceil(targetRows * S) + pad * 2;
+    var rx = reto.getContext("2d");
+    rx.font = fontStr(100 * k, fam);
+    if (espPx && "letterSpacing" in rx) rx.letterSpacing = espPx + "px";
+    rx.textBaseline = "alphabetic";
+    rx.fillStyle = "#000"; rx.strokeStyle = "#000";
+    rx.lineJoin = "round"; rx.lineCap = "round";
     var bx = pad + left * k, by = pad + asc * k;
-    if (thick > 0){ x.lineWidth = thick * k * 0.55; x.strokeText(text, bx, by); }
-    x.fillText(text, bx, by);
-    var cols = Math.floor(c.width / S), rowsN = Math.floor(c.height / S);
-    var data = x.getImageData(0, 0, c.width, c.height).data;
+    if (thick > 0){ rx.lineWidth = thick * k * 0.55; rx.strokeText(text, bx, by); }
+    rx.fillText(text, bx, by);
+
+    var alvo = reto, ax = rx;
+    if (arco){
+      /* O arco dobra a IMAGEM da palavra, fatia por fatia, em vez de escrever
+         letra por letra sobre a curva. Letra por letra é o jeito comum, e numa
+         cursiva ele rompe as ligaduras — e ligadura é o que faz a palavra
+         parecer escrita à mão, que é a razão de existir da lista de fontes
+         deste app. Dobrando a imagem, a ligação entre as letras acompanha a
+         curva junto com o resto do traço. */
+      var ang = Math.abs(arco) * Math.PI / 180;
+      var R = W / ang;                              // raio que faz a palavra ocupar o arco
+      var flecha = R * (1 - Math.cos(ang / 2));     // o quanto o meio sobe ou desce
+      alvo = document.createElement("canvas");
+      alvo.width = Math.ceil(W + reto.height + pad * 2);
+      alvo.height = Math.ceil(reto.height + flecha);
+      ax = alvo.getContext("2d");
+      var dcx = alvo.width / 2;
+      var dby = arco > 0 ? by : by + flecha;        // a linha de base no meio da palavra
+      var dcy = arco > 0 ? dby + R : dby - R;       // centro do círculo, abaixo ou acima
+      var cxSrc = bx + W / 2;
+      for (var sx = 0; sx < W + 2; sx++){
+        var phi = ((bx + sx) - cxSrc) / R;
+        ax.save();
+        if (arco > 0){
+          ax.translate(dcx + R * Math.sin(phi), dcy - R * Math.cos(phi));
+          ax.rotate(phi);
+        } else {
+          ax.translate(dcx + R * Math.sin(phi), dcy + R * Math.cos(phi));
+          ax.rotate(-phi);
+        }
+        // duas colunas de largura, uma de sobra: fatia de um pixel só deixa
+        // falha entre as vizinhas assim que o arco abre
+        ax.drawImage(reto, bx + sx, 0, 2, reto.height, -1, -by, 2, reto.height);
+        ax.restore();
+      }
+    }
+
+    var cols = Math.floor(alvo.width / S), rowsN = Math.floor(alvo.height / S);
+    var data = ax.getImageData(0, 0, alvo.width, alvo.height).data;
     var cells = [];
     for (var r = 0; r < rowsN; r++){
       var line = [];
@@ -1239,7 +1318,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         var on = 0;
         for (var yy = 0; yy < S; yy++){
           for (var xx = 0; xx < S; xx++){
-            var i = (((r * S + yy) * c.width) + (q * S + xx)) * 4 + 3;
+            var i = (((r * S + yy) * alvo.width) + (q * S + xx)) * 4 + 3;
             if (data[i] > 90) on++;
           }
         }
@@ -1248,6 +1327,12 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       cells.push(line);
     }
     return trim(cells);
+  }
+
+  // espelhar troca a ordem das colunas, e mais nada: as células acesas à mão
+  // viram junto, então espelhar uma peça ajustada não descarta o ajuste
+  function espelha(cells){
+    return cells.map(function(row){ return row.slice().reverse(); });
   }
 
   /* Fonte que o seletor não oferece é fonte que não chega, e fonte que não
@@ -1262,7 +1347,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     el.manual = 0;   // refazer a peça descarta o que foi aceso ou apagado à mão
     el.cells = el.kind === "sym"
       ? matrixFromStrings(SYMS[el.sym], el.scale)
-      : textMatrix(el.text, el.font, el.rowsTarget, el.thick, el.thr);
+      : textMatrix(el.text, el.font, el.rowsTarget, el.thick, el.thr, el.esp, el.arc);
+    if (el.flip) el.cells = espelha(el.cells);
   }
 
   function bboxMM(el){
@@ -1640,6 +1726,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     if (el.kind === "text"){
       r.text = el.text; r.font = el.font;
       r.rowsTarget = el.rowsTarget; r.thick = el.thick; r.thr = el.thr;
+      r.esp = el.esp || 0; r.arc = el.arc || 0; r.flip = el.flip || 0;
     } else {
       r.sym = el.sym; r.scale = el.scale;
     }
@@ -1667,6 +1754,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       el.rowsTarget = +r.rowsTarget || 18;
       el.thick = r.thick == null ? 2 : +r.thick;
       el.thr = +r.thr || 0.35;
+      el.esp = +r.esp || 0;
+      el.arc = +r.arc || 0;
+      el.flip = r.flip ? 1 : 0;
     } else {
       el.sym = SYMS[r.sym] ? r.sym : "heart";
       el.scale = +r.scale || 1;
@@ -1879,7 +1969,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       pt.title = cor.nome;
       b.appendChild(pt);
       b.appendChild(document.createTextNode(el.kind === "text" ? (el.text || "texto")
-        : ({heart:"coração", heartOutline:"coração vazado", star:"estrela", arrow:"seta"})[el.sym]));
+        : (NOMES_SYM[el.sym] || "símbolo")));
       b.addEventListener("click", function(){ sel = i; focus = "el"; syncControls(); draw(); renderChips(); });
       box.appendChild(b);
     });
@@ -1897,6 +1987,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       : "Linha da próxima peça";
     renderSwatches();
     $("alinha").classList.toggle("hide", !piece);
+    $("flipEl").classList.toggle("on", !!(el && el.flip));
     $("ctlPhoto").classList.toggle("hide", focus !== "photo");
     $("ctlPiece").classList.toggle("hide", !piece);
     $("ctlActs").classList.toggle("hide", !piece);
@@ -1914,6 +2005,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       $("rows").value = el.rowsTarget; $("rowsOut").textContent = el.rowsTarget;
       $("thick").value = el.thick; $("thickOut").textContent = el.thick;
       $("thr").value = Math.round(el.thr * 100); $("thrOut").textContent = Math.round(el.thr * 100);
+      $("esp").value = el.esp || 0; $("espOut").textContent = el.esp || 0;
+      $("arc").value = el.arc || 0; $("arcOut").textContent = el.arc || 0;
     } else {
       $("ctlText").classList.add("hide"); $("ctlSym").classList.remove("hide");
       $("sym").value = el.sym;
@@ -1931,6 +2024,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   function addText(){
     var el = { kind:"text", text:"champ", font:"Great Vibes", rowsTarget:18, thick:2, thr:0.35, rot:-4,
+               esp:0, arc:0, flip:0,
                x: photo.x, y: photo.y + photo.h - 14, cells:[[0]],
                color: thread, colorName: threadLabel(thread) || thread };
     rebuild(el);
@@ -1940,7 +2034,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   function addSym(){
     var el = { kind:"sym", sym:"heart", scale:2, rot:0, x: photo.x + photo.w - 20, y: photo.y + photo.h - 20,
-               cells:[[0]], color: thread, colorName: threadLabel(thread) || thread };
+               flip:0, cells:[[0]], color: thread, colorName: threadLabel(thread) || thread };
     rebuild(el);
     els.push(el); sel = els.length - 1; focus = "el";
     renderChips(); syncControls(); draw(); pushHist();
@@ -1954,6 +2048,18 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     sel = Math.max(0, sel - 1);
     if (!els.length) focus = "none";
     renderChips(); syncControls(); draw(); pushHist();
+  });
+
+  /* Espelhar mexe nas células como elas estão, e não refaz a peça: quem
+     acendeu quadradinho à mão vê o ajuste virar junto em vez de sumir. A marca
+     fica gravada para o próximo Recalcular espelhar também. */
+  $("flipEl").addEventListener("click", function(){
+    var el = els[sel];
+    if (!el) return;
+    el.flip = el.flip ? 0 : 1;
+    el.cells = espelha(el.cells);
+    this.classList.toggle("on", !!el.flip);
+    renderChips(); draw(); pushHist();
   });
 
   $("dupEl").addEventListener("click", function(){
@@ -1982,9 +2088,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       el.rowsTarget = parseInt($("rows").value, 10);
       el.thick = parseInt($("thick").value, 10);
       el.thr = parseInt($("thr").value, 10) / 100;
+      el.esp = parseInt($("esp").value, 10) || 0;
+      el.arc = parseInt($("arc").value, 10) || 0;
       $("rowsOut").textContent = el.rowsTarget;
       $("thickOut").textContent = el.thick;
       $("thrOut").textContent = $("thr").value;
+      $("espOut").textContent = el.esp;
+      $("arcOut").textContent = el.arc;
       loadFontThen(function(){ rebuild(el); renderChips(); draw(); pushLater(); });
       return;
     }
@@ -1995,7 +2105,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     renderChips(); draw(); pushLater();
   }
 
-  ["txt","font","rows","thick","thr","sym","symScale"].forEach(function(id){
+  ["txt","font","rows","thick","thr","esp","arc","sym","symScale"].forEach(function(id){
     $(id).addEventListener("input", updateSelected);
   });
   $("rot").addEventListener("input", function(){

@@ -18,11 +18,17 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
 - **Papel**: A4, A5, A3, quadrado, 20×30, 15×20 ou medidas próprias, em retrato ou paisagem.
 - **Foto**: tamanhos de revelação comuns (10×15, 9×13, 13×18, 15×21, quadrado, polaroid) ou
   medida própria, arrastável sobre o papel, com imagem opcional só para visualizar.
-- **Peças bordadas**: quantas quiser, cada uma sendo uma palavra ou um símbolo (coração cheio,
-  coração vazado, estrela, seta). Arraste para posicionar, incline de -45° a 45°, redimensione
-  com dois dedos, e ajuste ponto a ponto no modo de edição. Duplicar copia a peça com as
+- **Peças bordadas**: quantas quiser, cada uma sendo uma palavra ou um símbolo — dez desenhos:
+  coração cheio, coração vazado, estrela, seta, folha, coroa, lua, sol, infinito e casa. Arraste
+  para posicionar, incline de -45° a 45°, redimensione com dois dedos, espelhe, e ajuste ponto a
+  ponto no modo de edição. Duplicar copia a peça com as
   células como estão, então a cópia nasce com os ajustes manuais da original e segue a vida
   dela própria a partir dali.
+- **Palavra em arco**: de -120° a 120°, que é o nome curvado por cima da foto. O arco dobra a
+  **imagem** da palavra, fatia por fatia, em vez de escrever letra por letra sobre a curva —
+  letra por letra é o jeito comum e rompe as ligaduras da cursiva, e ligadura é o que faz a
+  palavra parecer escrita à mão. Há também **espaçamento entre letras**, contado em
+  quadradinhos, que é o que resolve cursiva fechando em letra pequena.
 - **Fontes**: 40 famílias do Google Fonts agrupadas por caráter — caligrafia fina, cursiva
   encorpada, letra de mão, serifada itálica, gótica, pixel e bloco. A escolha é por amostra,
   não por nome: cada linha mostra a sua palavra escrita naquela fonte e, ao lado, a mesma

@@ -44,21 +44,35 @@ duas linhas. Não entrou porque pede escolher com qual, e aí é mais interface.
 
 ---
 
-## 3. O que o ofício pede
+## 3. O que o ofício pede — parcialmente feito
 
-Era o item 5 da lista.
+Era o item 5 da lista. Saíram quatro dos cinco:
 
-- **Texto em arco.** Nome curvado por cima da foto é o arranjo mais comum desse
-  tipo de bordado, e hoje só existe inclinação de −45° a 45°. É o mais caro da
-  lista: exige reamostrar a forma na grade seguindo uma curva, não só girar a
-  caixa.
-- **Espelhar a peça** e **espaçamento entre letras**. Dois controles baratos, e
-  o espaçamento é o que resolve cursiva que se fecha em letra pequena.
-- **Estimativa de consumo de linha** em metros ou meadas, a partir da contagem
-  de pontos que já existe. Útil na hora de comprar. Atenção: é estimativa, e
-  varia com a tensão do ponto — se entrar, entra dizendo isso.
-- **Mais símbolos.** Hoje são quatro: coração cheio, coração vazado, estrela e
-  seta.
+- ~~**Texto em arco**~~ — de −120° a 120°. Dobra a imagem da palavra fatia por
+  fatia em vez de escrever letra por letra sobre a curva, para as ligaduras da
+  cursiva acompanharem a curva junto com o resto do traço.
+- ~~**Espelhar a peça**~~ — botão na barra. Inverte as células como elas estão,
+  então ajuste feito à mão vira junto em vez de sumir, e a marca fica gravada
+  para o próximo Recalcular espelhar também.
+- ~~**Espaçamento entre letras**~~ — contado em quadradinhos, não em pixels nem
+  em por cento, porque quadradinho é como quem borda conta.
+- ~~**Mais símbolos**~~ — de quatro para dez: entraram folha, coroa, lua, sol,
+  infinito e casa.
+
+Falta:
+
+- **Estimativa de consumo de linha**, em metros ou meadas, a partir da contagem
+  de pontos que já existe. Não entrou porque a conta honesta depende de coisas
+  que o app não sabe — quantos fios da meada, como o avesso é percorrido — e
+  número inventado aqui faz alguém comprar linha errada. O caminho: calcular a
+  frente pela geometria (duas diagonais de p√2 por ponto), assumir o avesso e a
+  perda com margem declarada, mostrar em metros para 2 fios, e dizer na tela de
+  que conta veio.
+- **Uma flor.** Desenhei quatro e nenhuma lia como flor em 9 × 9 — saíram laço,
+  balão, máscara e rosquinha. Símbolo que parece outra coisa é pior que símbolo
+  nenhum, então não entrou. Uma flor legível pede grade maior (11 × 11 ou mais);
+  nada no código obriga os 9 × 9, só os desenhos de hoje é que são assim.
+- **Alinhar uma peça com a outra**, para nome em duas linhas.
 
 ---
 
