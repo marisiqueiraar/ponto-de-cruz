@@ -9,8 +9,9 @@ Ordem: quanto mais alto, mais muda a vida de quem borda.
 
 ## 1. ~~O canvas do arco pode passar do que um celular aceita~~ — feito
 
-**É o único item desta lista que faria o app entregar um molde errado em
-silêncio, que é o modo de falhar contra o qual o README inteiro foi escrito.**
+Era o único item da lista que faria o app entregar um molde errado em
+silêncio, que é o modo de falhar contra o qual o README inteiro foi escrito —
+por isso subiu ao topo assim que apareceu.
 
 O arco desenha a palavra num canvas intermediário e depois o dobra. Esse canvas
 tem seis pixels por quadradinho, então a largura dele cresce com o tamanho da
@@ -81,14 +82,14 @@ Era o item 4 da lista que combinamos, e saiu inteiro:
   fora sumia do PDF sem dizer nada. O CSS `.fit.over`, que tinha ficado sem uso,
   voltou a ter dono.
 
-Falta deste conjunto: **alinhar uma peça com a outra**, que serve para nome em
-duas linhas. Não entrou porque pede escolher com qual, e aí é mais interface.
+Faltava deste conjunto o **alinhar uma peça com a outra**, que entrou depois e
+está no item 4.
 
 ---
 
-## 4. O que o ofício pede — parcialmente feito
+## 4. ~~O que o ofício pede~~ — feito
 
-Era o item 5 da lista. Saiu inteiro, menos uma flor:
+Era o item 5 da lista, e saiu inteiro:
 
 - ~~**Texto em arco**~~ — de −120° a 120°. Dobra a imagem da palavra fatia por
   fatia em vez de escrever letra por letra sobre a curva, para as ligaduras da

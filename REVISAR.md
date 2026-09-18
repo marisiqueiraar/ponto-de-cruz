@@ -1,7 +1,7 @@
 # Revisar
 
 O que precisa do seu olho antes de virar coisa fechada, em 18/09/2026, depois
-das sete levas desta sessão:
+das dez levas desta sessão:
 
 | | |
 |---|---|
@@ -13,6 +13,9 @@ das sete levas desta sessão:
 | `d036d8a` | setas, alinhar, aviso de peça fora do papel |
 | `3d09ea8` | arco, espaçamento, espelhar, seis símbolos |
 | `621b11f` | fio por linha, com a conta à mostra |
+| `3edfdc9` | a revisão do backlog, com o que ela mediu |
+| `94eb73e` | teto do rascunho, aviso de memória, flor, alinhar com a de cima |
+| `41217c9` | esses quatro descritos no README e na ajuda |
 
 Nada aqui é bug conhecido — bug conhecido está no [BACKLOG.md](BACKLOG.md).
 Aqui é o que eu decidi sozinho e você pode querer diferente, e o que nenhum
@@ -146,19 +149,20 @@ nada em `index.html` depende deles.
 
 ---
 
-## 4. Risco conhecido que virou maior
+## 4. ~~Risco conhecido que virou maior~~ — consertado
 
-**Gravar pode falhar em silêncio, e agora falha mais fácil.**
+**Gravar falhava em silêncio, e com vários moldes falhava mais fácil.**
 
-O `saveState()` sempre engoliu o erro de cota (`catch (e){ return; }`), o que
-fazia sentido quando havia um molde só. Com vários moldes, cada um com a sua
-foto de 300–500 KB, os 5 MB típicos do `localStorage` dão para **oito ou dez
-moldes** — e ao estourar, o trabalho simplesmente para de ser gravado sem
-ninguém avisar.
+O `saveState()` engolia o erro de cota (`catch (e){ return; }`), o que fazia
+sentido quando havia um molde só. Com vários, cada um com a sua foto de
+300–500 KB, os 5 MB típicos do `localStorage` dão para oito ou dez moldes — e ao
+estourar, o trabalho simplesmente parava de ser gravado sem ninguém avisar.
 
-Não consertei porque a correção é uma decisão de interface, não de código:
-avisar onde, com que palavras, e o que oferecer (apagar um molde antigo?
-salvar o arquivo primeiro?). Está no backlog como item 1.
+Você mandou seguir, e está feito: o rodapé fica vermelho dizendo "não coube na
+memória" e a aba moldes escreve o caminho. Os detalhes estão no
+[BACKLOG.md](BACKLOG.md), item 2.
 
-Enquanto isso, o conselho honesto é o que a ajuda já diz: **salve o arquivo do
-molde** antes de acumular muitos.
+**O que sobrou para você decidir:** a cota continua sendo a cota. O aviso diz
+que encheu, mas ninguém aumenta 5 MB. A saída de verdade é o arquivo do molde,
+e vale pensar se o app deveria insistir mais nisso — oferecer o download
+sozinho quando a memória encher, por exemplo, em vez de só recomendar.
