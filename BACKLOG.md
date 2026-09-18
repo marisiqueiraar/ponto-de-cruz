@@ -7,7 +7,7 @@ Ordem: quanto mais alto, mais muda a vida de quem borda.
 
 ---
 
-## 1. O canvas do arco pode passar do que um celular aceita
+## 1. ~~O canvas do arco pode passar do que um celular aceita~~ — feito
 
 **É o único item desta lista que faria o app entregar um molde errado em
 silêncio, que é o modo de falhar contra o qual o README inteiro foi escrito.**
@@ -30,27 +30,39 @@ canvas recusado é vazio — ou seja, a peça sairia em branco sem nada avisar.
 **Não consegui reproduzir num celular de verdade**: no Chromium de mesa os 25 MB
 passam sem erro. É risco medido de um lado e não confirmado do outro.
 
-O conserto é contido: calcular o tamanho do canvas antes de criar e, se passar
-de um teto seguro, amostrar com menos pixels por quadradinho. A grade de
-quadradinhos não muda — ela vem da altura escolhida, não da resolução do
-rascunho —, só o traço fica um pouco mais grosseiro antes de virar furo.
+**Consertado.** O tamanho do rascunho passou a ser calculado em quadradinhos
+antes de o canvas existir, e acima de 4 000 px ele é desenhado com menos pixels
+por quadradinho. A grade não muda: o pior caso dava 763 × 243 quadradinhos antes
+do teto e dá 764 × 243 depois. `testes/teto.js` mede o degrau na fronteira do
+teto (1,5%) contra a variação natural entre dois casos vizinhos (6,3%), que é
+como se prova que o teto não deforma o molde.
+
+Continua valendo a ressalva: não há celular de verdade nesta bancada. O teto
+protege contra o limite conhecido, mas quem confirma é um aparelho.
 
 ---
 
-## 2. Avisar quando a memória do navegador encher
+## 2. ~~Avisar quando a memória do navegador encher~~ — feito
 
 Gravar falha em silêncio quando o `localStorage` estoura — o `saveState()`
 engole o erro. Com vários moldes e uma foto em cada, isso deixou de ser
 hipótese: cabem oito ou dez moldes nos 5 MB típicos.
 
-O código já sabe a hora exata em que falha. Falta decidir o que dizer e o que
-oferecer: apagar um molde antigo, salvar o arquivo primeiro, largar a foto e
-ficar com o desenho. Enquanto não existe, o trabalho pode parar de ser gravado
-sem ninguém perceber — que é a pior forma de perder trabalho.
+**Consertado.** O rodapé, que dizia "salvo neste navegador", passa a dizer
+**"não coube na memória"** em vermelho, e a aba moldes escreve o caminho: salvar
+o arquivo agora e apagar um molde da lista logo acima. Quando volta a caber, os
+dois somem sozinhos.
 
-Detalhe: a foto é o único item capaz de estourar a cota, e ela já mora numa
-chave separada justamente para nunca levar o arranjo junto na queda. O aviso
-pode aproveitar isso e oferecer "manter o molde, largar a foto".
+Duas decisões dentro disso. O rodapé inteiro fica escondido no celular — e o
+celular é onde a cota estoura primeiro —, então este aviso é a única exceção
+à regra. E a foto, que é o único item capaz de estourar a cota sozinho, mora
+numa chave separada de propósito: quando é ela que não cabe, o molde continua
+gravado e o aviso diz "ao gravar a foto".
+
+`testes/cota.js` faz o `localStorage` recusar a escrita, que é o que ele faz de
+verdade quando a cota estoura, e confere os dois estados — inclusive numa
+janela de 360 px, para provar que o aviso aparece onde o resto do rodapé não
+aparece.
 
 ---
 
@@ -93,13 +105,16 @@ Era o item 5 da lista. Saiu inteiro, menos uma flor:
   escolhido. Frente exata, avesso e perda declarados como suposição. Sem
   conversão para meadas, que depende da marca.
 
-Falta:
+- ~~**Uma flor**~~ — entrou, em 11 × 13. Em 9 × 9 eu tinha desenhado quatro e
+  nenhuma lia como flor; numa grade maior a cabeça redonda com miolo em cruz,
+  haste e duas folhas lê. Desenhei mais oito candidatas e olhei todas em
+  quadradinhos antes de escolher. É o único símbolo que não é 9 × 9, e nada no
+  código obrigava isso — só os desenhos antigos.
+- ~~**Alinhar uma peça com a outra**~~ — "alinhar com a peça de cima", na aba
+  peças, que aparece quando há uma peça acima na lista. É o que resolve nome em
+  duas linhas.
 
-- **Uma flor.** Desenhei quatro e nenhuma lia como flor em 9 × 9 — saíram laço,
-  balão, máscara e rosquinha. Símbolo que parece outra coisa é pior que símbolo
-  nenhum, então não entrou. Uma flor legível pede grade maior (11 × 11 ou mais);
-  nada no código obriga os 9 × 9, só os desenhos de hoje é que são assim.
-- **Alinhar uma peça com a outra**, para nome em duas linhas.
+Nada falta deste item.
 
 ---
 

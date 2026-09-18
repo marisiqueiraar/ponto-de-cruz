@@ -143,6 +143,36 @@ function caixa(el, mm){
      "pela base da foto: pé da peça em " + (cx.y + cx.h).toFixed(2) +
      " mm, pé da foto em " + (s.foto.y + s.foto.h).toFixed(2));
 
+  // ---- alinhar com a peça de cima ----------------------------------------
+  ok(!(await pg.locator("#alAcima").isVisible()),
+     "com uma peça só, não há peça de cima para alinhar");
+  await pg.click("#addText");
+  await pg.waitForTimeout(800);
+  ok(await pg.locator("#alAcima").isVisible(), "com duas, o botão aparece");
+  // afasta a de baixo para o alinhamento ter o que fazer
+  await pg.click(".mesa"); await pg.waitForTimeout(200);
+  await pg.click(".chip:last-child"); await pg.waitForTimeout(300);
+  await seta("Shift+ArrowRight", 6);
+  let par = await estado();
+  let cima = caixa(par.els[0], par.mm), baixo = caixa(par.els[1], par.mm);
+  ok(Math.abs((cima.x + cima.w/2) - (baixo.x + baixo.w/2)) > 5,
+     "as duas estão desalinhadas antes (" + (cima.x+cima.w/2).toFixed(1) + " e " +
+     (baixo.x+baixo.w/2).toFixed(1) + " mm)");
+  await pg.click('.rail button[data-pane="pecas"]');
+  await pg.waitForTimeout(300);
+  const antesY = par.els[1].y;
+  await pg.click("#alAcima");
+  par = await estado();
+  cima = caixa(par.els[0], par.mm); baixo = caixa(par.els[1], par.mm);
+  ok(perto(baixo.x + baixo.w/2, cima.x + cima.w/2, 0.11),
+     "e depois os centros coincidem (" + (baixo.x+baixo.w/2).toFixed(2) + " contra " +
+     (cima.x+cima.w/2).toFixed(2) + " mm)");
+  ok(perto(par.els[1].y, antesY),
+     "sem mexer na altura (y segue " + par.els[1].y + ")");
+  // volta a ter uma peça só
+  await pg.click("#delEl");
+  await pg.waitForTimeout(600);
+
   // ---- o aviso de peça fora do papel ---------------------------------------
   ok(!/fora do papel/.test(await aviso()), "dentro do papel, sem aviso vermelho");
   await pg.click(".mesa"); await pg.waitForTimeout(200);
