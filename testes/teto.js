@@ -82,13 +82,18 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
      "%) não é maior que a variação natural (" +
      semTeto.map(x => (x * 100).toFixed(1) + "%").join(", ") + ")");
 
-  /* E a prova direta: antes do teto existir, este mesmo pior caso dava uma
-     grade de 763 × 243 quadradinhos, medida no Chromium. Com o rascunho
-     reduzido ela precisa continuar a mesma, a menos de arredondamento. */
+  /* E a prova direta: com o teto desligado, este mesmo pior caso dá uma grade
+     de 867 × 276 quadradinhos, medida no Chromium. Com o rascunho reduzido ela
+     precisa continuar a mesma, a menos de arredondamento.
+
+     Eram 763 × 243 enquanto a altura era a caixa de tinta da palavra. Desde que
+     ela passou a ser a altura da maiúscula da fonte, a mesma altura 60 desenha
+     letra maior — e o número de referência foi medido de novo, com o teto
+     desligado, em vez de afrouxado até passar. */
   const pior = medidas[medidas.length - 1].g;
-  ok(Math.abs(pior.c - 763) <= 3 && Math.abs(pior.l - 243) <= 3,
+  ok(Math.abs(pior.c - 867) <= 3 && Math.abs(pior.l - 276) <= 3,
      "o pior caso mantém a grade que tinha sem o teto: " + pior.c + " × " + pior.l +
-     " contra 763 × 243");
+     " contra 867 × 276");
 
   // ---- e a altura da peça segue a altura pedida ---------------------------
   await põe("txt", "amorosa para sempre e um dia inteiro alem disso");

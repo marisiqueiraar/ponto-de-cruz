@@ -44,6 +44,12 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   await pg.waitForTimeout(300);
   await campo("txt", "amorosa");
   await campo("rot", 0);                       // reta, para o arco ser o único efeito
+  /* "amorosa" não tem ascendente nem descendente, e a altura é contada pela
+     maiúscula da fonte: na altura de fábrica a palavra cabe em nove linhas, e
+     nove linhas não medem curvatura nenhuma — o arco ficaria menor que o
+     arredondamento da grade. 40 devolve a esta palavra a grade em que o resto
+     do teste foi escrito. */
+  await campo("rows", 40);
   const base = await celulas();
   ok(base.cols > 10 && base.rows > 5, "a palavra virou grade (" + base.cols + " × " + base.rows + ")");
 
