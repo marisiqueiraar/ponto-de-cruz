@@ -41,6 +41,12 @@ como se prova que o teto não deforma o molde.
 Continua valendo a ressalva: não há celular de verdade nesta bancada. O teto
 protege contra o limite conhecido, mas quem confirma é um aparelho.
 
+Os números da tabela são da época em que a altura era a caixa de tinta da
+palavra. Desde que ela passou a ser a altura da maiúscula da fonte, a mesma
+altura 60 desenha letra maior: o pior caso dá 867 × 276 quadradinhos com o teto
+e 867 × 276 sem ele — medido de novo no Chromium, com o teto desligado, e é esse
+o número que `testes/teto.js` cobra.
+
 ---
 
 ## 2. ~~Avisar quando a memória do navegador encher~~ — feito
