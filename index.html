@@ -74,17 +74,29 @@
   --panel:300px;
   --top:56px;
   --foot:36px;
-  --rule:22px;
+  /* espessura das réguas: o tique grande (9px), 2px de respiro e o rótulo de
+     dois dígitos (~14px na Silkscreen de 9px) — abaixo disso o número da
+     régua da esquerda sai cortado */
+  --rule:26px;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 html,body{height:100%}
+/* O app ocupa a tela inteira, então é o body que precisa recuar do entalhe e
+   da barra de gestos: com box-sizing:border-box o height:100% já desconta o
+   padding, e num aparelho sem recorte os quatro env() valem zero. */
 body{
   margin:0;background:var(--paper);color:var(--ink);
+  padding:env(safe-area-inset-top) env(safe-area-inset-right)
+          env(safe-area-inset-bottom) env(safe-area-inset-left);
   font-family:"Segoe UI",Roboto,-apple-system,system-ui,sans-serif;
   font-size:15px;line-height:1.5;overflow:hidden;
 }
 button{font-family:inherit;color:inherit;cursor:pointer}
+/* :focus-visible e não :focus — o anel é para quem anda de Tab, não para quem
+   acabou de clicar. Vem depois das regras de cada botão para vencer no empate. */
+button:focus-visible,.chip:focus-visible,.cat:focus-visible,.rail button:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px}
 .hide{display:none!important}
 
 .app{
@@ -111,16 +123,19 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .tools .sep{width:1px;height:26px;background:var(--line);flex:0 0 auto}
 .tools .none{font-family:var(--display);font-size:12px;color:var(--ink-soft);white-space:nowrap}
 
-.t{display:inline-flex;align-items:center;gap:5px;height:36px;padding:0 7px;flex:0 0 auto;
+/* Os campos da barra de cima. O seletor mora preso a .tools porque a régua
+   também chama os seus tiques de .t: solto, o padding, a borda e o raio daqui
+   caíam em cima deles e cada tique virava uma pastilha de 16px. */
+.tools .t{display:inline-flex;align-items:center;gap:5px;height:36px;padding:0 7px;flex:0 0 auto;
   background:#fff;border:1px solid var(--line);border-radius:6px;white-space:nowrap}
-.t > span{font-family:var(--display);font-size:10px;color:var(--ink-soft);letter-spacing:0}
-.t input[type=number]{width:44px;height:26px;padding:0 4px;border:0;background:transparent;
+.tools .t > span{font-family:var(--display);font-size:10px;color:var(--ink-soft);letter-spacing:0}
+.tools .t input[type=number]{width:44px;height:26px;padding:0 4px;border:0;background:transparent;
   font-family:var(--display);font-size:13px;color:var(--ink);text-align:right}
-.t input[type=number]:focus{outline:2px solid var(--accent);border-radius:3px}
-.t select{height:26px;border:0;background:transparent;font-size:14px;color:var(--ink);max-width:150px}
-.t.txt input[type=text]{width:96px;height:26px;border:0;background:transparent;font-size:15px;color:var(--ink)}
-.t.fnt{padding:0 9px}
-.t.fnt select{font-size:16px;max-width:118px}
+.tools .t input[type=number]:focus{outline:2px solid var(--accent);border-radius:3px}
+.tools .t select{height:26px;border:0;background:transparent;font-size:14px;color:var(--ink);max-width:150px}
+.tools .t.txt input[type=text]{width:96px;height:26px;border:0;background:transparent;font-size:15px;color:var(--ink)}
+.tools .t.fnt{padding:0 9px}
+.tools .t.fnt select{font-size:16px;max-width:118px}
 #fontBtn{height:26px;max-width:130px;border:0;background:transparent;padding:0;
   font-size:17px;line-height:1;color:var(--ink);white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis;text-align:left}
@@ -261,6 +276,14 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
 .mold .apaga{flex:0 0 auto;width:38px;border:0;border-left:1px solid var(--line);
   background:transparent;color:var(--ink-soft);font-size:17px;line-height:1}
 .mold .apaga:hover{background:var(--danger);color:#fff}
+/* o PDF já gerado usa a mesma fileira: a miniatura na frente é o que deixa
+   reconhecer um molde sem abrir, que é a única coisa que o nome não diz */
+.mold .thumb{width:40px;flex:0 0 auto;align-self:stretch;object-fit:contain;
+  background:#fff;border-right:1px solid var(--line);padding:3px}
+.mold .baixa{flex:0 0 auto;width:34px;border:0;border-left:1px solid var(--line);
+  background:transparent;color:var(--ink-soft);line-height:0}
+.mold .baixa svg{width:16px;height:16px;fill:currentColor}
+.mold .baixa:hover{background:var(--paper);color:var(--ink)}
 
 /* lista de peças */
 .chips{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
@@ -270,10 +293,12 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
 .chip .pt{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;
   vertical-align:-1px;border:1px solid rgba(0,0,0,.2)}
 
-/* cores da linha */
-.swrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;min-height:44px}
-.sw{width:34px;height:34px;flex:0 0 auto;padding:0;border-radius:50%;border:2px solid var(--line)}
-.sw.on{border-color:var(--ink);box-shadow:0 0 0 3px #fff inset}
+/* a cor que está na peça agora, no alto do painel */
+.atual{display:flex;align-items:center;gap:9px;margin:0 0 14px;font-size:13px;
+  color:var(--ink-soft);flex-wrap:wrap}
+.atual i{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1px solid var(--line)}
+.atual b{font-family:var(--display);font-weight:400;font-size:11px;color:var(--ink);
+  overflow-wrap:anywhere}
 
 /* abas dentro do painel: a linha passou a ter duas telas — a cor que está no
    molde agora e o catálogo inteiro das marcas, que tem centenas de cores e
@@ -284,21 +309,38 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
   letter-spacing:.02em;color:var(--ink-soft)}
 .abas button.on{background:var(--mat);border-color:var(--mat);color:#fff}
 
-/* catálogo das marcas: num painel de 300 px a bolinha de 34 px da paleta não
-   cabe 400 vezes, então aqui a cor vira quadradinho em grade. O visto fica
-   numa tarja branca, que é o único fundo que se enxerga sobre qualquer cor. */
-.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(30px,1fr));gap:6px}
-.cat{position:relative;height:30px;padding:0;border-radius:5px;
-  border:1px solid rgba(56,73,89,.22)}
+/* catálogo das marcas: num painel de 300 px uma bolinha de 34 px não cabe 400
+   vezes, então aqui a cor vira quadradinho em grade, com o código impresso
+   dentro. O visto fica numa tarja branca, que é o único fundo que se enxerga
+   sobre qualquer cor. */
+.ordem{margin:-4px 0 12px}
+.ordem button{flex:0 0 auto;padding:0 13px}
+.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:6px}
+.cat{position:relative;height:36px;padding:0;border-radius:5px;
+  border:1px solid rgba(56,73,89,.22);
+  font-family:var(--display);font-size:9px;letter-spacing:.02em;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  text-shadow:0 1px 2px rgba(0,0,0,.28)}
 .cat.on{border-color:var(--mat);box-shadow:0 0 0 2px var(--mat)}
-.cat.on::after{content:"\2713";position:absolute;right:1px;bottom:0;padding:0 1px;
-  font-size:10px;line-height:1.2;color:var(--mat);background:#fff;border-radius:3px}
+.cat.on::after{content:"\2713";position:absolute;right:1px;top:0;padding:0 1px;
+  font-size:9px;line-height:1.3;color:var(--mat);background:#fff;border-radius:3px;
+  text-shadow:none}
 .grade .vazio{grid-column:1/-1;font-size:12.5px;color:var(--ink-soft);margin:6px 0}
 .catfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;
   margin-top:14px;font-size:12.5px;color:var(--ink-soft)}
 .catfoot button{flex:0 0 auto;height:30px;padding:0 12px;border:1px solid var(--line);
   border-radius:6px;background:#fff;font-family:var(--display);font-size:9px;color:var(--ink-soft)}
 .catfoot button.perigo{border-color:var(--danger);color:var(--danger)}
+
+/* cadastro de uma linha fora de cartela */
+.subtit{font-family:var(--display);font-weight:400;font-size:10px;letter-spacing:.03em;
+  color:var(--ink-soft);margin:0 0 9px}
+.avulsa{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.avulsa input[type=color]{width:100%;height:40px;padding:2px;border:1px solid var(--line);
+  border-radius:6px;background:#fff}
+.avulsa button{height:40px;border:1px solid var(--mat);border-radius:6px;background:#fff;
+  color:var(--mat);font-family:var(--display);font-size:10px;letter-spacing:.02em}
+.avulsa button:hover{background:var(--lemon);border-color:var(--lemon-deep)}
 
 .notes{font-size:14px;color:var(--ink-soft)}
 .notes ul{padding-left:18px;margin:0}
@@ -309,13 +351,18 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
 .ruler{position:absolute;background:#fff;color:var(--ink-soft);font-size:9px;z-index:2;overflow:hidden}
 .ruler.h{top:0;left:var(--rule);right:0;height:var(--rule);border-bottom:1px solid var(--line)}
 .ruler.v{top:var(--rule);left:0;bottom:0;width:var(--rule);border-right:1px solid var(--line)}
-.ruler .t{position:absolute;background:var(--line)}
+/* Os dois eixos seguem a mesma regra, senão o número de um deles descola do
+   seu tique: centrado no tique ao longo da régua, e a 11px da borda onde os
+   tiques nascem — 9px do tique grande mais 2px de respiro. */
+.ruler .t{position:absolute;display:block;padding:0;border:0;border-radius:0;
+  background:var(--line)}
+.ruler .l{position:absolute;font-family:var(--display);line-height:1;white-space:nowrap}
 .ruler.h .t{bottom:0;width:1px;height:5px}
 .ruler.h .t.big{height:9px}
-.ruler.h .l{position:absolute;bottom:8px;transform:translateX(2px);font-family:var(--display)}
+.ruler.h .l{bottom:11px;transform:translateX(-50%)}
 .ruler.v .t{right:0;height:1px;width:5px}
 .ruler.v .t.big{width:9px}
-.ruler.v .l{position:absolute;right:9px;font-family:var(--display);transform:translateY(-1px)}
+.ruler.v .l{right:11px;transform:translateY(-50%)}
 .corner{position:absolute;top:0;left:0;width:var(--rule);height:var(--rule);background:#fff;
   border-right:1px solid var(--line);border-bottom:1px solid var(--line);z-index:3}
 /* a mesa rola quando o papel cresce; margin:auto no filho centraliza sem
@@ -549,7 +596,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <button id="dupEl" class="tbtn icon" title="duplicar peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 1H4a2 2 0 00-2 2v12h2V3h11V1zm4 4H8a2 2 0 00-2 2v14a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2zm0 16H8V7h11v14z"/></svg></button>
       <button id="delEl" class="tbtn danger"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg title="excluir peça"><span class="hide">excluir</span></button>
     </span>
-    <span class="fit" id="fitHint"><span class="dot"></span><span id="fitTxt">&nbsp;</span></span>
+    <span class="fit" id="fitHint"><span class="dot"></span><span id="fitTxt" aria-live="polite">&nbsp;</span></span>
     <button id="pdf"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg>baixar molde pdf</button>
   </div>
 </header>
@@ -652,42 +699,51 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   <section class="pane" data-pane="linha">
     <h2>linha</h2>
 
-    <div class="abas" id="linhaAbas">
-      <button type="button" class="on" data-aba="usar">no molde</button>
-      <button type="button" data-aba="catalogo">catálogo</button>
-    </div>
+    <p class="atual"><i id="threadDot"></i><span id="threadAlvo">Linha da próxima peça</span>
+      <b id="threadName">—</b></p>
 
-    <div data-aba="usar">
-      <div class="field">
-        <label for="palette">Paleta</label>
-        <select id="palette"></select>
-      </div>
-      <div class="field">
-        <label><span id="threadAlvo">Cor da linha</span> <b id="threadName">Limao escuro</b></label>
-        <div class="swrow" id="swatches"></div>
-      </div>
-      <p class="note">A cor vale para a tela e para a prévia em PNG. O molde em PDF sai sempre
-      em preto, porque é gabarito de furo.</p>
-    </div>
-
-    <div data-aba="catalogo" class="hide">
+    <div>
       <div class="abas" id="marcas"></div>
       <div class="field">
         <label for="catBusca">Buscar</label>
         <input id="catBusca" type="text" placeholder="código ou nome da cor" autocomplete="off"
                spellcheck="false">
       </div>
+      <div class="abas ordem" id="catOrdem" role="group" aria-label="ordem das cores">
+        <button type="button" class="on" data-ordem="tom">por tom</button>
+        <button type="button" data-ordem="codigo">por código</button>
+      </div>
       <div class="grade" id="catGrade"></div>
       <div class="catfoot">
         <span id="catConta">nenhuma linha marcada</span>
         <button type="button" id="catLimpar" class="hide">limpar</button>
       </div>
-      <p class="note">Toque numa cor para dizer que você tem essa linha. Ela entra na paleta
-      <b>minhas linhas</b> e já passa a ser a cor do molde na tela, que é o jeito de
-      experimentar a cor no arranjo antes de gastar meada. Tocar de novo desmarca.</p>
+      <p class="note">Toque numa cor para dizer que você tem essa linha. Ela entra na marca
+      <b>minhas</b>, a primeira da fileira, e já passa a ser a cor da peça selecionada, que é o
+      jeito de experimentar a cor no arranjo antes de gastar meada. Tocar de novo desmarca —
+      dentro de <b>minhas</b>, tocar só usa a cor; para tirar da caixa, volte à marca de onde
+      ela veio.</p>
+
+      <div class="rule"></div>
+      <h3 class="subtit">uma linha fora de cartela</h3>
+      <div class="avulsa">
+        <input id="avMarca" type="text" placeholder="marca" autocomplete="off" maxlength="24"
+               aria-label="Marca da linha">
+        <input id="avCode" type="text" placeholder="código" autocomplete="off" maxlength="12"
+               aria-label="Código da linha">
+        <input id="avCor" type="color" value="#B3B347" aria-label="Cor da linha">
+        <button type="button" id="avAdd">guardar</button>
+      </div>
+      <p class="note" id="avAviso"></p>
+      <p class="note">Para a meada que você tem e não está em cartela nenhuma. Ela nasce
+      marcada, entra na marca <b>minhas</b> junto com as outras e aparece também na marca
+      <b>avulsas</b> — onde desmarcar apaga de vez, porque ela só existe porque você a
+      cadastrou.</p>
+
       <p class="note">As cores são referência de tela. A da Anchor sai da cartela da própria
       marca; a da DMC vem de tabela pública e é mais aproximada. Monitor, luz e lote mudam o
-      que você vê na mão.</p>
+      que você vê na mão. Na tela e na prévia em PNG o molde sai na cor escolhida; em PDF sai
+      sempre em preto, porque é gabarito de furo.</p>
     </div>
   </section>
 
@@ -700,9 +756,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       3 mm é o mais seguro neste material.</p>
     </div>
     <div class="rule"></div>
-    <div class="num"><span>Pontos</span><strong id="count">—</strong></div>
-    <div class="num"><span>Furos</span><strong id="holes">—</strong></div>
-    <div class="num"><span>Peça selecionada</span><strong id="size">—</strong></div>
+    <div class="num"><span>Pontos</span><strong id="count" aria-live="polite">—</strong></div>
+    <div class="num"><span>Furos</span><strong id="holes" aria-live="polite">—</strong></div>
+    <div class="num"><span>Peça selecionada</span><strong id="size" aria-live="polite">—</strong></div>
 
     <div class="rule"></div>
     <h2>fio por linha</h2>
@@ -737,9 +793,16 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <button id="moldeAbrir" class="wide">abrir arquivo do molde</button>
     <input id="moldeArq" type="file" accept="application/json,.json" class="hide">
     <p class="note" id="moldeAviso"></p>
+
     <p class="note">O arquivo leva tudo: papel, foto, peças, linhas e os ajustes feitos ponto a
       ponto. É por ele que o trabalho vai para outro aparelho, ou volta depois de você limpar os
       dados do site — o navegador, sozinho, não leva nada para lugar nenhum.</p>
+
+    <div class="rule"></div>
+    <h2>pdf já gerados</h2>
+    <div class="moldes" id="pdfLista"></div>
+    <p class="note" id="pdfDica"></p>
+    <button id="pdfLimpar" class="wide hide">apagar os pdf guardados</button>
   </section>
 
   <section class="pane notes" data-pane="ajuda">
@@ -868,63 +931,65 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   var totalCount = 0, totalHoles = 0;
   var lastPaper = null;
 
-  var PALETTES = [
-    { name: "Zesty lemon", colors: [
-      ["#FFFF66","Limao claro"],["#FFE566","Limao"],["#D6D58B","Limao seco"],["#B3B347","Limao escuro"]
-    ]},
-    { name: "Golden taupe", colors: [
-      ["#D4AF37","Dourado"],["#BDB76B","Taupe verde"],["#FDFBD4","Creme"],["#CE8946","Caramelo"]
-    ]},
-    { name: "Retro sunset", colors: [
-      ["#BE5103","Terracota"],["#FFCE1B","Mostarda"],["#069494","Verde agua"],["#B7410E","Ferrugem"]
-    ]},
-    { name: "Stormy morning", colors: [
-      ["#384959","Azul noite"],["#6A89A7","Azul fumaca"],["#88BDF2","Azul claro"],["#BDDDFC","Azul gelo"]
-    ]},
-    { name: "Mossy hollow", colors: [
-      ["#636B2F","Musgo"],["#BAC095","Salvia"],["#D4DE95","Verde broto"],["#3D4127","Oliva escuro"]
-    ]},
-    { name: "Blue eclipse", colors: [
-      ["#272757","Meia-noite"],["#8686AC","Lavanda fria"],["#505081","Violeta fumaca"],["#0F0E47","Tinta"]
-    ]},
-    { name: "Chili spice", colors: [
-      ["#CD1C18","Pimenta"],["#FFA896","Salmao"],["#9B1313","Vermelho seco"],["#38000A","Vinho"]
-    ]},
-    { name: "Chocolate truffle", colors: [
-      ["#713600","Cacau"],["#C05800","Caramelo queimado"],["#FDFBD4","Creme"],["#38240D","Chocolate amargo"]
-    ]}
-  ];
   var thread = "#B3B347";
-  var curPal = 0;   /* índice em PALETTES, ou "minhas" */
 
   /* ---- catálogos das marcas e as linhas que você tem -------------------
      O catálogo vem de catalogos.js, que é dado puro: marca, código e cor.
      Daqui para baixo fica só o que é seu — a lista do que já está na caixa,
-     por chave "marca:codigo". Ela vira uma paleta como as outras, e é assim
-     que a cor de uma linha de verdade entra no molde para ser testada. */
-  var CAT = window.CATALOGOS || [];
+     por chave "marca:codigo". Ela vira a marca "minhas", a primeira da fileira,
+     e é assim que a cor de uma linha de verdade entra no molde para ser testada. */
+  var CAT = [];
   var catIdx = {};
-  CAT.forEach(function(m){
-    m.cores.forEach(function(c){
-      catIdx[m.id + ":" + c[0]] = { marca: m.marca, code: c[0], hex: c[1], nome: c[2] || "" };
-    });
-  });
   var minhas = [];                                   /* chaves, na ordem em que foram marcadas */
-  var marcaAtiva = CAT.length ? CAT[0].id : "";
+  var avulsas = {};        /* "avulsa:3" -> {marca, code, hex} — linha que você cadastrou */
+  var proxAvulsa = 1;
+  var marcaAtiva = "";
+
+  /* O índice é refeito toda vez que as avulsas mudam, e elas entram nele como
+     qualquer cor de marca. É por isso que o resto do painel não precisa saber
+     que existem: a paleta, a busca e as amostras leem daqui. A marca "avulsas"
+     é montada na hora só para elas aparecerem na grade e poderem sair de lá. */
+  function montaIndice(){
+    CAT = (window.CATALOGOS || []).slice();
+    catIdx = {};
+    var chaves = Object.keys(avulsas);
+    if (chaves.length){
+      CAT.push({ id: "avulsa", marca: "avulsas", cores: chaves.map(function(k){
+        return [k.split(":")[1], avulsas[k].hex];
+      })});
+    }
+    CAT.forEach(function(m){
+      m.cores.forEach(function(c){
+        catIdx[m.id + ":" + c[0]] = { marca: m.marca, code: c[0], hex: c[1], nome: c[2] || "" };
+      });
+    });
+    chaves.forEach(function(k){          // a avulsa mostra a marca e o código que você escreveu
+      catIdx[k] = { marca: avulsas[k].marca, code: avulsas[k].code, hex: avulsas[k].hex, nome: "" };
+    });
+    // "minhas" é a caixa, não uma marca do catálogo: ela não está no CAT e
+    // mesmo assim é uma vista válida da grade
+    if (marcaAtiva !== "minhas" &&
+        !CAT.filter(function(m){ return m.id === marcaAtiva; }).length)
+      marcaAtiva = CAT.length ? CAT[0].id : "";
+  }
+  montaIndice();
 
   /* Chave à parte da do molde de propósito, como a da foto: o que você tem na
      caixa é inventário, não desenho. Começar um molde do zero não pode apagar
      a caixa de linhas, e a caixa não deve viajar junto com o arranjo. */
   var LINHAS_STORE = "ponto-e-letra/linhas/v1";
 
-  function nomeLinha(k){
-    var c = catIdx[k];
-    return c ? c.marca + " " + c.code : "";
+  // marca e código, sem sobrar espaço quando um dos dois vier vazio numa avulsa
+  function rotulo(reg){
+    return reg ? (reg.marca + " " + reg.code).trim() : "";
   }
+
+  function nomeLinha(k){ return rotulo(catIdx[k]); }
 
   function salvaLinhas(){
     try {
-      localStorage.setItem(LINHAS_STORE, JSON.stringify({ v: 1, tenho: minhas }));
+      localStorage.setItem(LINHAS_STORE,
+        JSON.stringify({ v: 1, tenho: minhas, avulsas: avulsas }));
     } catch (e){ /* janela anônima ou cota cheia: seguir sem memória */ }
   }
 
@@ -934,10 +999,20 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     if (!raw) return;
     var s;
     try { s = JSON.parse(raw); } catch (e){ return; }
-    if (!s || s.v !== 1 || !s.tenho || !s.tenho.length) return;
+    if (!s || s.v !== 1) return;
+    if (s.avulsas) Object.keys(s.avulsas).forEach(function(k){
+      var a = s.avulsas[k];
+      if (!a || !/^#[0-9A-Fa-f]{6}$/.test(a.hex || "")) return;
+      avulsas[k] = { marca: String(a.marca || "").slice(0, 24),
+                     code: String(a.code || "").slice(0, 12),
+                     hex: a.hex.toUpperCase() };
+      var n = parseInt(String(k).split(":")[1], 10);
+      if (n >= proxAvulsa) proxAvulsa = n + 1;
+    });
+    montaIndice();
     // um código que saiu do catálogo entre uma versão e outra é descartado na
     // volta: sem cor no índice não há o que mostrar nem o que pintar
-    minhas = s.tenho.filter(function(k){ return !!catIdx[k]; });
+    if (s.tenho) minhas = s.tenho.filter(function(k){ return !!catIdx[k]; });
   }
 
   /* ---- memória local -------------------------------------------------
@@ -1083,67 +1158,30 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return lista;
   }
 
-  // a lista é montada de novo toda vez que a caixa de linhas muda de tamanho,
-  // porque é ela que traz — ou tira — a opção "minhas linhas" da frente
-  function renderPaletteList(){
-    var selEl = $("palette");
-    var alvo = String(curPal);
-    selEl.innerHTML = "";
-    if (minhas.length){
-      var om = document.createElement("option");
-      om.value = "minhas";
-      om.textContent = "minhas linhas (" + minhas.length + ")";
-      selEl.appendChild(om);
-    }
-    PALETTES.forEach(function(pal, i){
-      var o = document.createElement("option");
-      o.value = String(i);
-      o.textContent = pal.name;
-      selEl.appendChild(o);
-    });
-    if (!selEl.querySelector('option[value="' + alvo + '"]')){ curPal = 0; alvo = "0"; }
-    selEl.value = alvo;
+  // A caixa de linhas é uma marca como as outras na fileira, e a primeira
+  // quando tem algo dentro: é a lista de onde se escolhe cor para o molde.
+  function chavesDaVista(){
+    if (marcaAtiva === "minhas") return minhas.slice();
+    var m = CAT.filter(function(x){ return x.id === marcaAtiva; })[0];
+    return m ? m.cores.map(function(c){ return m.id + ":" + c[0]; }) : null;
   }
 
-  function coresDaPaleta(){
-    if (curPal === "minhas"){
-      return minhas.map(function(k){
-        var c = catIdx[k];
-        return [c.hex, c.marca + " " + c.code];
-      });
-    }
-    return PALETTES[curPal].colors;
-  }
-
-  function renderSwatches(){
-    var box = $("swatches");
-    box.innerHTML = "";
-    var cores = coresDaPaleta();
-    if (!cores.length){
-      box.innerHTML = '<p class="note">Nenhuma linha marcada ainda. Abra a aba <b>catálogo</b> ' +
-                      'e toque nas cores que você tem.</p>';
-      return;
-    }
-    var atual = corDe(els[sel]).hex;
-    cores.forEach(function(c){
-      var b = document.createElement("button");
-      b.className = "sw" + (c[0] === atual ? " on" : "");
-      b.style.background = c[0];
-      b.title = c[1] + " " + c[0];
-      b.setAttribute("aria-label", "Linha " + c[1]);
-      b.addEventListener("click", function(){
-        usaCor(c[0], c[1]);
-        renderSwatches();
-      });
-      box.appendChild(b);
-    });
+  // o alto do painel diz duas coisas: que peça está sendo pintada e com quê
+  function mostraThread(){
+    var el = els[sel];
+    var cor = corDe(el);
+    $("threadDot").style.background = cor.hex;
+    $("threadName").textContent = cor.nome;
+    $("threadAlvo").textContent = el
+      ? "Linha de " + (el.kind === "text" ? "“" + (el.text || "texto") + "”" : "símbolo")
+      : "Linha da próxima peça";
   }
 
   function usaCor(hex, nome){
     thread = hex;                       // a cor corrente, com que a próxima peça nasce
     var el = els[sel];
     if (el){ el.color = hex; el.colorName = nome; }
-    $("threadName").textContent = nome;
+    mostraThread();
     renderChips();
     draw();          // draw() é quem agenda a gravação, inclusive da cor
     if (el) pushHist();   // trocar a linha se desfaz como qualquer outro passo
@@ -1154,13 +1192,18 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function montaMarcas(){
     var box = $("marcas");
     box.innerHTML = "";
-    CAT.forEach(function(m){
+    var vistas = CAT.map(function(m){
+      return { id: m.id, nome: m.marca.toLowerCase(), n: m.cores.length };
+    });
+    if (minhas.length) vistas.unshift({ id: "minhas", nome: "minhas", n: minhas.length });
+    if (marcaAtiva === "minhas" && !minhas.length) marcaAtiva = CAT.length ? CAT[0].id : "";
+    vistas.forEach(function(v){
       var b = document.createElement("button");
       b.type = "button";
-      b.className = m.id === marcaAtiva ? "on" : "";
-      b.textContent = m.marca.toLowerCase() + " (" + m.cores.length + ")";
+      b.className = v.id === marcaAtiva ? "on" : "";
+      b.textContent = v.nome + " (" + v.n + ")";
       b.addEventListener("click", function(){
-        marcaAtiva = m.id;
+        marcaAtiva = v.id;
         montaMarcas();
         listaCatalogo();
       });
@@ -1168,42 +1211,103 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     });
   }
 
+  /* ---- ordem por tom --------------------------------------------------
+     Uma cartela impressa não vem por número: vem por família, e dentro da
+     família do claro ao escuro. Aqui a família sai do matiz, em faixas de 15°,
+     e a escala sai da luminância — o cinza, o cru e o preto não têm matiz que
+     preste, então vão juntos no fim, do mais claro ao mais escuro. */
+  function matizEscala(hex){
+    var r = parseInt(hex.substr(1, 2), 16) / 255,
+        g = parseInt(hex.substr(3, 2), 16) / 255,
+        b = parseInt(hex.substr(5, 2), 16) / 255;
+    var mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+    var h = 0;
+    if (d > 0){
+      if (mx === r) h = ((g - b) / d + (g < b ? 6 : 0));
+      else if (mx === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h *= 60;
+    }
+    var lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    var sat = (mx + mn === 0 || mx + mn === 2) ? 0 : d / (1 - Math.abs(mx + mn - 1));
+    // pouca cor, ou escuro demais para a cor significar algo: é neutro
+    var neutro = sat < 0.16 || mx < 0.10;
+    return { faixa: neutro ? 99 : Math.floor(h / 15), lum: lum };
+  }
+
+  var ordemModo = "tom";
+  var ordemCache = {};
+
+  function ordena(chaves, marca){
+    if (ordemModo === "codigo"){
+      return chaves.slice().sort(function(a, b){
+        var x = parseInt(catIdx[a].code, 10), y = parseInt(catIdx[b].code, 10);
+        if (isNaN(x) && isNaN(y)) return catIdx[a].code.localeCompare(catIdx[b].code);
+        if (isNaN(x)) return 1;                       // Blanc, Ecru e afins no fim
+        if (isNaN(y)) return -1;
+        return x - y;
+      });
+    }
+    var cache = ordemCache[marca];
+    if (cache && cache.n === chaves.length) return cache.ordem;
+    var ordem = chaves.slice().sort(function(a, b){
+      var p = matizEscala(catIdx[a].hex), q = matizEscala(catIdx[b].hex);
+      if (p.faixa !== q.faixa) return p.faixa - q.faixa;
+      return q.lum - p.lum;                           // do claro ao escuro
+    });
+    ordemCache[marca] = { n: chaves.length, ordem: ordem };
+    return ordem;
+  }
+
+  // Preto ou branco por cima da cor, conforme ela seja clara ou escura: o
+  // código tem de ser lido em cima de qualquer amostra da cartela.
+  function tinta(hex){
+    var r = parseInt(hex.substr(1, 2), 16),
+        g = parseInt(hex.substr(3, 2), 16),
+        b = parseInt(hex.substr(5, 2), 16);
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > 0.55 ? "#26323D" : "#FFFFFF";
+  }
+
   // são centenas de botões por marca: eles nascem num fragmento e dividem um
   // ouvinte só, no pai, senão cada letra digitada na busca custa uma enxurrada
   function listaCatalogo(){
     var grade = $("catGrade");
-    var m = CAT.filter(function(x){ return x.id === marcaAtiva; })[0];
     grade.innerHTML = "";
-    if (!m){
+    var chaves = chavesDaVista();
+    if (!chaves){
       // sem catalogos.js não há catálogo nenhum: dizer isso é melhor do que
-      // deixar a aba vazia, que passa por painel quebrado
+      // deixar o painel vazio, que passa por painel quebrado
       grade.innerHTML = '<p class="vazio">Os catálogos das marcas não carregaram. ' +
                         'Falta o arquivo <b>catalogos.js</b> ao lado do index.html.</p>';
       return;
     }
+    chaves = ordena(chaves, marcaAtiva);
     var q = ($("catBusca").value || "").trim().toLowerCase();
-    var vistas = m.cores.filter(function(c){
-      if (!q) return true;
-      return c[0].toLowerCase().indexOf(q) >= 0 ||
-             (c[2] && c[2].toLowerCase().indexOf(q) >= 0);
+    var vistas = chaves.filter(function(k){
+      var r = catIdx[k];
+      if (!r) return false;
+      return !q || (rotulo(r) + " " + r.nome).toLowerCase().indexOf(q) >= 0;
     });
     if (!vistas.length){
-      grade.innerHTML = '<p class="vazio">Nenhuma cor da ' + m.marca + ' com esse código ou nome.</p>';
+      grade.innerHTML = '<p class="vazio">Nenhuma cor com esse código ou nome.</p>';
       return;
     }
+    var naCaixa = marcaAtiva === "minhas";
     var frag = document.createDocumentFragment();
-    vistas.forEach(function(c){
-      var k = m.id + ":" + c[0];
+    vistas.forEach(function(k){
+      var reg = catIdx[k];
       var tem = minhas.indexOf(k) >= 0;
-      var rot = m.marca + " " + c[0] + (c[2] ? " — " + c[2] : "");
+      var rot = rotulo(reg) + (reg.nome ? " — " + reg.nome : "");
       var b = document.createElement("button");
       b.type = "button";
-      b.className = "cat" + (tem ? " on" : "");
-      b.style.background = c[1];
+      b.className = "cat" + (tem && !naCaixa ? " on" : "");
+      b.style.background = reg.hex;
+      b.style.color = tinta(reg.hex);
       b.dataset.k = k;
-      b.title = rot + " " + c[1];
+      b.textContent = reg.code || "—";
+      b.title = rot + " " + reg.hex;
       b.setAttribute("aria-label", rot);
-      b.setAttribute("aria-pressed", tem ? "true" : "false");
+      if (!naCaixa) b.setAttribute("aria-pressed", tem ? "true" : "false");
       frag.appendChild(b);
     });
     grade.appendChild(frag);
@@ -1214,12 +1318,24 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function alternaLinha(k, botao){
     var c = catIdx[k];
     if (!c) return;
+    // na caixa toda cor já é sua: clicar ali é escolher a cor da peça, não
+    // tirar da caixa — tirar se faz na marca de onde ela veio
+    if (marcaAtiva === "minhas"){ usaCor(c.hex, rotulo(c)); return; }
     var i = minhas.indexOf(k);
-    if (i >= 0) minhas.splice(i, 1);
-    else {
+    if (i >= 0){
+      minhas.splice(i, 1);
+      // uma avulsa só existe porque você a cadastrou: desmarcar é apagar, senão
+      // ela ficaria parada na grade sem ser de ninguém
+      if (avulsas[k]){
+        delete avulsas[k];
+        montaIndice();
+        salvaLinhas();
+        montaMarcas(); listaCatalogo(); contaLinhas();
+        return;
+      }
+    } else {
       minhas.push(k);
-      curPal = "minhas";
-      usaCor(c.hex, c.marca + " " + c.code);
+      usaCor(c.hex, rotulo(c));
     }
     var tem = i < 0;
     if (botao){
@@ -1227,9 +1343,31 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       botao.setAttribute("aria-pressed", tem ? "true" : "false");
     }
     salvaLinhas();
-    renderPaletteList();
-    renderSwatches();
+    montaMarcas();
     contaLinhas();
+  }
+
+  // Linha que não está em cartela nenhuma: nasce já marcada, porque cadastrar
+  // é dizer que você tem. Entra no índice como as outras e some do mesmo jeito.
+  function guardaAvulsa(){
+    var marca = ($("avMarca").value || "").trim().slice(0, 24);
+    var code = ($("avCode").value || "").trim().slice(0, 12);
+    var hex = ($("avCor").value || "").toUpperCase();
+    if (!marca && !code){
+      $("avAviso").textContent = "Escreva a marca, o código, ou os dois — é como você vai reconhecer a linha depois.";
+      $("avMarca").focus();
+      return;
+    }
+    if (!/^#[0-9A-F]{6}$/.test(hex)) return;
+    var k = "avulsa:" + proxAvulsa++;
+    avulsas[k] = { marca: marca, code: code, hex: hex };
+    montaIndice();
+    minhas.push(k);
+    usaCor(hex, rotulo(catIdx[k]));
+    salvaLinhas();
+    montaMarcas(); listaCatalogo(); contaLinhas();
+    $("avMarca").value = ""; $("avCode").value = ""; $("avAviso").textContent = "";
+    $("avMarca").focus();
   }
 
   function contaLinhas(){
@@ -1749,24 +1887,36 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   /* Réguas em centímetros com o zero na borda do papel — não na borda da mesa.
      Régua cujo zero está em outro lugar não mede nada. */
+  // a espessura da régua é uma coisa só, definida no CSS: lida daqui para o
+  // JS não guardar uma cópia que possa envelhecer sozinha
+  var RULE = parseFloat(getComputedStyle(document.documentElement)
+               .getPropertyValue("--rule")) || 22;
+
   function rulers(k){
     var cvr = cv.getBoundingClientRect();
     var mr = $("mesa").getBoundingClientRect();
-    var RULE = 22;
     var pxcm = k * 10;
     if (!(pxcm > 0)) return;
+    // as réguas começam depois do quadradinho de canto, então o zero do papel
+    // vale o mesmo desconto nos dois eixos
     var ox = cvr.left - mr.left - RULE;
     var oy = cvr.top - mr.top - RULE;
+    var larg = mr.width - RULE, alt = mr.height - RULE;
+    // A régua mede o papel, não a mesa: o zero é a borda da folha, então marca
+    // fora dela não mede coisa nenhuma — "32" numa folha de 29,7 só engana. O
+    // último tique é o último centímetro inteiro que cabe no papel.
+    var pa = paperMM();
+    var fimX = pa.w / 10, fimY = pa.h / 10;
     var a = "", b = "", i, x, y, big;
     var passo = pxcm < 14 ? 5 : (pxcm < 30 ? 2 : 1);   // sem números grudados
     var i0 = Math.max(0, Math.floor(-ox / pxcm));
-    for (i = i0; (x = ox + i * pxcm) < mr.width && i - i0 < 600; i++){
+    for (i = i0; i <= fimX && (x = ox + i * pxcm) < larg && i - i0 < 600; i++){
       big = i % passo === 0;
       a += '<span class="t' + (big ? " big" : "") + '" style="left:' + x + 'px"></span>';
       if (big) a += '<span class="l" style="left:' + x + 'px">' + i + '</span>';
     }
     i0 = Math.max(0, Math.floor(-oy / pxcm));
-    for (i = i0; (y = oy + i * pxcm) < mr.height && i - i0 < 600; i++){
+    for (i = i0; i <= fimY && (y = oy + i * pxcm) < alt && i - i0 < 600; i++){
       big = i % passo === 0;
       b += '<span class="t' + (big ? " big" : "") + '" style="top:' + y + 'px"></span>';
       if (big) b += '<span class="l" style="top:' + y + 'px">' + i + '</span>';
@@ -1901,7 +2051,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         photoBox: { size: $("photoSize").value, or: $("photoOr").value,
                     w: $("photoWmm").value, h: $("photoHmm").value,
                     x: Math.round(photo.x * 10) / 10, y: Math.round(photo.y * 10) / 10 },
-        mm: $("mm").value, pal: curPal, thread: thread, sel: sel,
+        mm: $("mm").value, thread: thread, sel: sel,
         els: els.map(packEl)
       }));
     } catch (e){ marcaMemoria(true, "o molde"); return; }
@@ -1918,15 +2068,16 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     saveTimer = setTimeout(saveState, 400);
   }
 
+  // primeiro na caixa, que é onde o nome importa; depois no catálogo inteiro,
+  // para um molde restaurado não perder o nome de uma cor que ainda não é sua
   function threadLabel(hex){
-    for (var i = 0; i < PALETTES.length; i++){
-      var c = PALETTES[i].colors;
-      for (var j = 0; j < c.length; j++) if (c[j][0] === hex) return c[j][1];
-    }
     for (var k = 0; k < minhas.length; k++){
       var l = catIdx[minhas[k]];
-      if (l && l.hex === hex) return l.marca + " " + l.code;
+      if (l && l.hex === hex) return rotulo(l);
     }
+    var chaves = Object.keys(catIdx);
+    for (var i = 0; i < chaves.length; i++)
+      if (catIdx[chaves[i]].hex === hex) return rotulo(catIdx[chaves[i]]);
     return "";
   }
 
@@ -1968,13 +2119,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     clampPhoto();
     lastPaper = paperMM();
 
-    if (s.pal === "minhas" && minhas.length) curPal = "minhas";
-    else if (typeof s.pal === "number" && PALETTES[s.pal]) curPal = s.pal;
-    if (typeof s.thread === "string" && /^#[0-9A-Fa-f]{6}$/.test(s.thread)){
-      thread = s.thread;
-      var name = threadLabel(thread);
-      if (name) $("threadName").textContent = name;
-    }
+    // s.pal, de quando havia paletas prontas, é ignorado de propósito
+    if (typeof s.thread === "string" && /^#[0-9A-Fa-f]{6}$/.test(s.thread)) thread = s.thread;
 
     els = pieces;
     sel = Math.min(Math.max(0, s.sel | 0), els.length - 1);
@@ -2122,6 +2268,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     els.forEach(function(el, i){
       var b = document.createElement("button");
       b.className = "chip" + (i === sel ? " on" : "");
+      b.setAttribute("aria-pressed", i === sel ? "true" : "false");
       // o ponto de cor é o que deixa ver o arranjo inteiro de uma vez, sem
       // ter de selecionar peça por peça para lembrar de que linha é cada uma
       var cor = corDe(el);
@@ -2142,12 +2289,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var piece = focus === "el" && !!el;
     // com uma linha por peça, o painel precisa dizer qual peça ele está
     // pintando — senão o quadradinho marcado vira adivinhação
-    var cor = corDe(el);
-    $("threadName").textContent = cor.nome;
-    $("threadAlvo").textContent = el
-      ? "Linha de " + (el.kind === "text" ? "“" + (el.text || "texto") + "”" : "símbolo")
-      : "Linha da próxima peça";
-    renderSwatches();
+    mostraThread();
     $("alinha").classList.toggle("hide", !piece);
     $("alAcima").classList.toggle("hide", !piece || sel < 1);
     $("flipEl").classList.toggle("on", !!(el && el.flip));
@@ -2592,39 +2734,106 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return new Blob([arr], { type: "image/png" });
   }
 
+  // Salvar o arquivo é a única parte do app que muda de aparelho para aparelho,
+  // então há três caminhos, do melhor para o pior:
+  //   1. Chrome/Edge no desktop têm showSaveFilePicker: abre o diálogo do Windows
+  //      e o arquivo cai na pasta escolhida. É o único caminho que pergunta.
+  //   2. o iPhone não tem picker, e o jeito de chegar na pasta Arquivos é a folha
+  //      de compartilhar, onde existe "Salvar em Arquivos".
+  //   3. o resto cai no <a download>, que vai para a pasta de downloads, sem perguntar.
+  // O <a download> nunca leva target="_blank": com os dois juntos o Safari ignora
+  // o download e apenas abre o arquivo numa aba, que era o que acontecia aqui.
   function deliver(blob, name, dataUrlForImg){
+    if (window.showSaveFilePicker){
+      savePicker(blob, name).then(function(r){
+        if (r === "salvo"){ saved(name); return; }
+        if (r === "cancelado") return;          // fechou o diálogo de propósito
+        if (!anchorDownload(blob, name)) rescue(blob, name, dataUrlForImg);
+        else saved(name);
+      });
+      return;
+    }
+
     var file = null;
     try { if (window.File) file = new File([blob], name, { type: blob.type }); } catch(e){}
     if (file && navigator.canShare && navigator.canShare({ files: [file] })){
-      navigator.share({ files: [file] }).catch(function(){ fallbackLink(blob, name, dataUrlForImg); });
+      navigator.share({ files: [file] }).then(function(){ clearOut(); }).catch(function(err){
+        if (err && err.name === "AbortError") return;
+        if (!anchorDownload(blob, name)) rescue(blob, name, dataUrlForImg);
+        else saved(name);
+      });
       return;
     }
-    fallbackLink(blob, name, dataUrlForImg);
+
+    if (!anchorDownload(blob, name)) rescue(blob, name, dataUrlForImg);
+    else saved(name);
   }
 
-  function fallbackLink(blob, name, dataUrlForImg){
+  function isPDF(name){ return name.slice(-4).toLowerCase() === ".pdf"; }
+
+  // o diálogo "salvar como" de verdade. Devolve sempre uma promessa que resolve
+  // em texto, para quem chamou decidir sem precisar distinguir tipos de erro.
+  function savePicker(blob, name){
+    var tipo = isPDF(name)
+      ? { description: "Molde em PDF", accept: { "application/pdf": [".pdf"] } }
+      : { description: "Imagem PNG",   accept: { "image/png":       [".png"] } };
+    return window.showSaveFilePicker({ suggestedName: name, types: [tipo] })
+      .then(function(handle){ return handle.createWritable(); })
+      .then(function(w){
+        return w.write(blob).then(function(){ return w.close(); });
+      })
+      .then(function(){ return "salvo"; })
+      .catch(function(err){
+        return (err && err.name === "AbortError") ? "cancelado" : "falhou";
+      });
+  }
+
+  // download comum, direto para a pasta de downloads. Devolve se o clique saiu.
+  function anchorDownload(blob, name){
     var href = null;
-    try { href = URL.createObjectURL(blob); } catch(e){}
-    if (href){
-      try {
-        var a = document.createElement("a");
-        a.href = href; a.download = name; a.target = "_blank";
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      } catch(e){}
+    try { href = URL.createObjectURL(blob); } catch(e){ return false; }
+    try {
+      var a = document.createElement("a");
+      a.href = href; a.download = name;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    } catch(e){
+      URL.revokeObjectURL(href);
+      return false;
     }
+    // o blob precisa sobreviver ao download; um minuto é folga de sobra
+    setTimeout(function(){ URL.revokeObjectURL(href); }, 60000);
+    return true;
+  }
+
+  function clearOut(){ $("out").innerHTML = ""; }
+
+  function saved(name){
+    var box = $("out");
+    box.innerHTML = "";
+    var p = document.createElement("p");
+    p.className = "hint"; p.style.marginTop = "20px";
+    p.textContent = "Pronto: " + name + " salvo.";
+    box.appendChild(p);
+  }
+
+  // último recurso, quando nem o picker nem o download saíram: um link na página
+  // para a pessoa clicar na mão. No celular sem compartilhar, a prévia em imagem
+  // ainda é o caminho para "Salvar em Fotos".
+  function rescue(blob, name, dataUrlForImg){
     if (dataUrlForImg){ showImage(dataUrlForImg); return; }
-    if (href){
-      var box = $("out");
-      box.innerHTML = "";
-      var p = document.createElement("p");
-      p.className = "hint"; p.style.marginTop = "20px";
-      var link = document.createElement("a");
-      link.href = href; link.target = "_blank"; link.textContent = "Abrir o PDF numa nova aba";
-      link.style.color = "var(--mat)";
-      p.appendChild(document.createTextNode("Não baixou sozinho? "));
-      p.appendChild(link);
-      box.appendChild(p);
-    }
+    var href = null;
+    try { href = URL.createObjectURL(blob); } catch(e){ return; }
+    var box = $("out");
+    box.innerHTML = "";
+    var p = document.createElement("p");
+    p.className = "hint"; p.style.marginTop = "20px";
+    var link = document.createElement("a");
+    link.href = href; link.download = name;
+    link.textContent = "Baixar " + (isPDF(name) ? "o PDF" : "a imagem") + " na mão";
+    link.style.color = "var(--mat)";
+    p.appendChild(document.createTextNode("Não baixou sozinho? "));
+    p.appendChild(link);
+    box.appendChild(p);
   }
 
   $("dl").addEventListener("click", function(){
@@ -2845,12 +3054,209 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     pdf.setLineDashPattern([], 0);
   }
 
+  /* ---- os PDF já gerados ----------------------------------------------
+
+     A estante guarda o molde para continuar editando; isto guarda o PDF que
+     saiu dele — o arquivo pronto para imprimir, com a data e o tamanho do
+     papel que ele usou. Quem perdeu o download, ou quer a mesma folha de
+     novo, não precisa refazer nada.
+
+     Não há servidor: os arquivos ficam no IndexedDB deste navegador e não
+     saem do aparelho. IndexedDB e não localStorage porque um PDF de molde
+     grande tem megabytes, e a cota do localStorage é o que a estante e a
+     foto já disputam. */
+  var HIST_DB = "ponto-letra", HIST_STORE = "moldes", HIST_MAX = 20;
+  var histDB = null, histOff = false, histURLs = [];
+
+  function withHist(fn){
+    if (histOff){ fn(null); return; }
+    if (histDB){ fn(histDB); return; }
+    var req;
+    try { req = window.indexedDB && indexedDB.open(HIST_DB, 1); } catch(e){ req = null; }
+    if (!req){ histOff = true; fn(null); return; }
+    req.onupgradeneeded = function(){
+      var db = req.result;
+      if (!db.objectStoreNames.contains(HIST_STORE)) db.createObjectStore(HIST_STORE, { keyPath: "id" });
+    };
+    req.onsuccess = function(){ histDB = req.result; fn(histDB); };
+    req.onerror = req.onblocked = function(){ histOff = true; fn(null); };
+  }
+
+  function histWrite(job, ok, fail){
+    withHist(function(db){
+      if (!db){ if (fail) fail(); return; }
+      var tx;
+      try { tx = db.transaction(HIST_STORE, "readwrite"); } catch(e){ if (fail) fail(e); return; }
+      try { job(tx.objectStore(HIST_STORE)); } catch(e){ if (fail) fail(e); return; }
+      tx.oncomplete = function(){ if (ok) ok(); };
+      tx.onerror = tx.onabort = function(){ if (fail) fail(tx.error); };
+    });
+  }
+
+  // do mais recente para o mais antigo
+  function histAll(cb){
+    withHist(function(db){
+      if (!db){ cb(null); return; }
+      var out = [], tx;
+      try { tx = db.transaction(HIST_STORE, "readonly"); } catch(e){ cb(null); return; }
+      var cur = tx.objectStore(HIST_STORE).openCursor();
+      cur.onsuccess = function(){
+        var c = cur.result;
+        if (c){ out.push(c.value); c.continue(); }
+      };
+      tx.oncomplete = function(){
+        out.sort(function(a, b){ return b.at - a.at; });
+        cb(out);
+      };
+      tx.onerror = tx.onabort = function(){ cb(null); };
+    });
+  }
+
+  // a miniatura é o molde desenhado pequeno, não uma página do PDF: é o que
+  // deixa reconhecer um arranjo numa fileira de 40px sem abrir o arquivo
+  function histThumb(R){
+    try {
+      var k = Math.min(3, 150 / R.w);
+      var c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(R.w * k));
+      c.height = Math.max(1, Math.round(R.h * k));
+      paint(c.getContext("2d"), k, R, { photoAlpha: 1, outline: false });
+      return c.toDataURL("image/jpeg", 0.6);
+    } catch(e){ return ""; }
+  }
+
+  function histSave(blob, name, note, thumb){
+    // sem FileReader não há como virar bytes, e sem IndexedDB não há onde pôr:
+    // nos dois casos guardar é impossível, e o PDF segue para o download igual
+    if (histOff || !window.FileReader || !window.indexedDB) return;
+    var fr = new FileReader();
+    fr.onload = function(){
+      var rec = {
+        id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8),
+        at: Date.now(), name: name, size: blob.size, note: note, thumb: thumb, buf: fr.result
+      };
+      // cheio ou sem espaço: o mais antigo sai para o novo entrar
+      histAll(function(list){
+        var velhos = list && list.length > HIST_MAX - 1 ? list.slice(HIST_MAX - 1) : [];
+        histWrite(function(st){
+          velhos.forEach(function(v){ st.delete(v.id); });
+          st.put(rec);
+        }, histRender, function(){
+          if (list && list.length){
+            histWrite(function(st){ st.delete(list[list.length - 1].id); st.put(rec); }, histRender, histRender);
+          } else { histRender(); }
+        });
+      });
+    };
+    fr.onerror = function(){};
+    fr.readAsArrayBuffer(blob);
+  }
+
+  function histSize(n){
+    if (n >= 1048576) return (Math.round(n / 104857.6) / 10).toFixed(1).replace(".", ",") + " MB";
+    return Math.max(1, Math.round(n / 1024)) + " KB";
+  }
+
+  function histOpen(rec, baixar){
+    var href;
+    try { href = URL.createObjectURL(new Blob([rec.buf], { type: "application/pdf" })); }
+    catch(e){ return; }
+    histURLs.push(href);
+    var a = document.createElement("a");
+    a.href = href; a.target = "_blank"; a.rel = "noopener";
+    if (baixar) a.download = rec.name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+
+  var ICO_BAIXA = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>';
+
+  function histRow(rec){
+    var l = document.createElement("div");
+    l.className = "mold";
+
+    if (rec.thumb){
+      var img = document.createElement("img");
+      img.className = "thumb"; img.src = rec.thumb; img.alt = "";
+      l.appendChild(img);
+    }
+
+    var a = document.createElement("button");
+    a.type = "button"; a.className = "abre";
+    a.title = rec.note || rec.name;
+    var nm = document.createElement("span");
+    nm.className = "nm"; nm.textContent = rec.name;
+    var qd = document.createElement("span");
+    qd.className = "qd"; qd.textContent = quando(rec.at) + " · " + histSize(rec.size);
+    a.appendChild(nm); a.appendChild(qd);
+    a.addEventListener("click", function(){ histOpen(rec, false); });
+
+    var d = document.createElement("button");
+    d.type = "button"; d.className = "baixa";
+    d.innerHTML = ICO_BAIXA;
+    d.title = "baixar de novo";
+    d.setAttribute("aria-label", "baixar de novo " + rec.name);
+    d.addEventListener("click", function(){ histOpen(rec, true); });
+
+    var x = document.createElement("button");
+    x.type = "button"; x.className = "apaga";
+    x.textContent = "\u00D7";
+    x.title = "apagar este pdf";
+    x.setAttribute("aria-label", "apagar o pdf " + rec.name);
+    x.addEventListener("click", function(){
+      if (!confirm("Apagar \u201C" + rec.name + "\u201D dos pdf guardados? Isso n\u00E3o se desfaz.")) return;
+      histWrite(function(st){ st.delete(rec.id); }, histRender, histRender);
+    });
+
+    l.appendChild(a); l.appendChild(d); l.appendChild(x);
+    return l;
+  }
+
+  function histRender(){
+    var box = $("pdfLista"), dica = $("pdfDica"), limpar = $("pdfLimpar");
+    if (!box) return;
+    histURLs.splice(0).forEach(function(u){ try { URL.revokeObjectURL(u); } catch(e){} });
+    histAll(function(list){
+      box.innerHTML = "";
+      if (!list){
+        limpar.classList.add("hide");
+        dica.textContent = "Este navegador n\u00E3o guarda os pdf \u2014 em janela an\u00F4nima, ou com os dados " +
+                           "do site bloqueados, o arquivo s\u00F3 fica onde voc\u00EA o salvou.";
+        return;
+      }
+      if (!list.length){
+        limpar.classList.add("hide");
+        dica.textContent = "Nenhum pdf guardado ainda. O pr\u00F3ximo molde que voc\u00EA baixar aparece aqui.";
+        return;
+      }
+      limpar.classList.remove("hide");
+      dica.textContent = "Cada pdf que voc\u00EA baixa fica guardado aqui, neste navegador e neste aparelho. " +
+                         "Os " + HIST_MAX + " mais recentes; o " + (HIST_MAX + 1) + "\u00BA derruba o mais antigo.";
+      list.slice(0, HIST_MAX).forEach(function(rec){ box.appendChild(histRow(rec)); });
+    });
+  }
+
+  $("pdfLimpar").addEventListener("click", function(){
+    if (!confirm("Apagar todos os pdf guardados neste navegador? Isso n\u00E3o se desfaz.")) return;
+    histWrite(function(st){ st.clear(); }, histRender, histRender);
+  });
+
   $("pdf").addEventListener("click", function(){
     if (!window.jspdf || !window.jspdf.jsPDF){
       alert("O gerador de PDF não carregou. Recarregue a página.");
       return;
     }
     if (!els.length) return;
+    // gerar um molde grande segura a thread por um segundo. O botão avisa antes
+    // de travar, e o setTimeout dá ao navegador a chance de pintar esse aviso —
+    // só o nodeValue do texto muda, para o ícone não ir junto.
+    var btn = this, rot = btn.lastChild, antes = rot.nodeValue;
+    btn.disabled = true; rot.nodeValue = "gerando…";
+    setTimeout(function(){
+      try { montaPDF(); } finally { btn.disabled = false; rot.nodeValue = antes; }
+    }, 30);
+  });
+
+  function montaPDF(){
     var R = cropArea();
     var plano = pdfPlan(R);
     /* `floatPrecision` e `compress` valem o molde inteiro: cada furo é um
@@ -2874,8 +3280,14 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       if (plano.tiled) vizinhas(pdf, plano, i, ox, oy);
     }
 
-    deliver(pdf.output("blob"), saveName("pdf"), null);
-  });
+    var pa = paperMM();
+    var blob = pdf.output("blob"), nome = saveName("pdf");
+    histSave(blob, nome, "papel " + fmt(pa.w) + " × " + fmt(pa.h) + " mm · " +
+             totalCount + (totalCount === 1 ? " ponto" : " pontos") + " · " +
+             plano.cols * plano.rows + (plano.cols * plano.rows === 1 ? " folha" : " folhas"),
+             histThumb(R));
+    deliver(blob, nome, null);
+  }
 
 
   /* ---- escolher a fonte vendo o traço ----------------------------------
@@ -3094,24 +3506,24 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   }, { passive: false });
 
   /* ---- painel da linha ------------------------------------------------ */
-  $("palette").addEventListener("change", function(){
-    curPal = this.value === "minhas" ? "minhas" : parseInt(this.value, 10);
-    renderSwatches();
-  });
+  $("catBusca").addEventListener("input", listaCatalogo);
 
-  [].forEach.call(document.querySelectorAll("#linhaAbas button"), function(b){
+  [].forEach.call(document.querySelectorAll("#catOrdem button"), function(b){
     b.addEventListener("click", function(){
-      var alvo = b.dataset.aba;
-      [].forEach.call(document.querySelectorAll("#linhaAbas button"), function(x){
+      ordemModo = b.dataset.ordem;
+      [].forEach.call(document.querySelectorAll("#catOrdem button"), function(x){
         x.classList.toggle("on", x === b);
       });
-      [].forEach.call(document.querySelectorAll('.pane[data-pane="linha"] > div[data-aba]'),
-        function(d){ d.classList.toggle("hide", d.dataset.aba !== alvo); });
-      contaLinhas();          // desarma o "confirmar" do limpar ao trocar de aba
+      listaCatalogo();
     });
   });
 
-  $("catBusca").addEventListener("input", listaCatalogo);
+  $("avAdd").addEventListener("click", guardaAvulsa);
+  [].forEach.call(document.querySelectorAll("#avMarca, #avCode"), function(campo){
+    campo.addEventListener("keydown", function(e){
+      if (e.key === "Enter"){ e.preventDefault(); guardaAvulsa(); }
+    });
+  });
 
   // um ouvinte só para a grade inteira: são centenas de quadradinhos
   $("catGrade").addEventListener("click", function(e){
@@ -3128,10 +3540,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       return;
     }
     minhas = [];
-    if (curPal === "minhas") curPal = 0;
     salvaLinhas();
-    renderPaletteList();
-    renderSwatches();
+    montaMarcas();
     listaCatalogo();
     contaLinhas();
   });
@@ -3394,14 +3804,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   window.addEventListener("resize", draw);
 
   function boot(){
-    carregaLinhas();          // antes de restaurar: a paleta "minhas linhas"
+    carregaLinhas();          // antes de restaurar: a caixa é a primeira marca
     carregaEstante();         // e antes do molde: é ela que diz qual abrir
     var it = itemAtual();
     restored = !!it && restoreState(it.dados);
     if (!restored) moldeEmBranco();
     renderMoldes();
-    renderPaletteList();
-    renderSwatches();
+    histRender();
     montaMarcas();
     listaCatalogo();
     contaLinhas();

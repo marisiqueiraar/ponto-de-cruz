@@ -6,8 +6,8 @@ window.jspdf = { jsPDF };
 const noop = new Proxy({}, { get: () => () => {}, set: () => true });
 global.document = { createElement: () => ({ width:0, height:0, getContext: () => noop,
   toDataURL: () => "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" }) };
-let handler = null, saida = null;
-global.$ = () => ({ addEventListener: (_, f) => { handler = f; } });
+let saida = null;   // o ouvinte do botão só adia; quem constrói é montaPDF()
+global.$ = () => ({ addEventListener: () => {} });
 function deliver(b){ saida = b; }
 function saveName(){ return "amostra.pdf"; }
 function fmt(v){ return (Math.round(v*10)/10).toFixed(1).replace(".", ","); }
@@ -48,7 +48,7 @@ eval(fs.readFileSync(__dirname + "/pdfcode.js", "utf8"));
 totalCount = els.reduce((n,e) => n + e.cells.flat().filter(Boolean).length, 0);
 totalHoles = els.reduce((n,e) => n + holesOf(e).length, 0);
 els[sel] = els[0]; els[0].kind = "text";   // para o título sair como texto
-handler();
+montaPDF();
 saida.arrayBuffer().then(ab => {
   fs.writeFileSync(__dirname + "/molde-amostra.pdf", Buffer.from(ab));
   const R = cropArea(), p = pdfPlan(R);

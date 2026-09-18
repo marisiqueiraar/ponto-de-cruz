@@ -11,7 +11,9 @@ sem backend. Ao lado dele há um único arquivo de dados, `catalogos.js`, com os
 das marcas de linha — dado puro, sem lógica nenhuma. A tela é um editor: trilho de ícones à esquerda que abre um painel, barra de cima
 que muda conforme o que está selecionado, e o papel no centro sobre uma mesa com réguas em
 centímetros. O `layout.html` na raiz é a maquete dessa arrumação, com os controles inertes —
-serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
+serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `cartela.html`
+é a outra página irmã: a ferramenta que lê as cores de uma cartela de linha e alimenta o
+`catalogos.js`.
 
 ## O que ele faz
 
@@ -34,14 +36,24 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
   não por nome: cada linha mostra a sua palavra escrita naquela fonte e, ao lado, a mesma
   palavra já em quadradinhos, que é o que vira furo. Com busca e filtro por grupo. Os cartões
   pedem a fonte só quando chegam à vista, então abrir a lista não baixa as 40 famílias.
-- **Linhas**: oito paletas de quatro cores cada, mais os catálogos das marcas — 391 cores da
-  Anchor e 455 da DMC. **Cada peça tem a sua linha**: escolher uma cor pinta a peça selecionada,
-  e a lista de peças mostra um ponto da cor de cada uma, para ver o arranjo inteiro de uma vez.
-  Sem isso o catálogo só servia para uma cor de cada vez, e é comparando duas linhas lado a lado
-  no arranjo que a escolha se decide. Na aba **catálogo** você toca nas cores que tem na caixa;
-  elas viram a paleta **minhas linhas**, e marcar uma já pinta a peça com ela, que é o jeito de
-  ver a cor real antes de gastar meada. A busca aceita código ou nome. O que você marcou fica
-  guardado no navegador à parte do molde, e não some quando você recomeça um desenho.
+- **Linhas**: o painel é o catálogo das marcas — 391 cores da Anchor e 455 da DMC — numa
+  fileira de marcas e uma grade. Cada quadradinho traz o **código impresso dentro**, que é o
+  que se pede na loja. **Cada peça tem a sua linha**: tocar num quadradinho diz que você tem
+  aquela linha e já pinta a peça selecionada com ela, e a lista de peças mostra um ponto da cor
+  de cada uma, para ver o arranjo inteiro de uma vez. É comparando duas linhas lado a lado no
+  arranjo que a escolha se decide. Tocar de novo desmarca. A busca aceita código ou nome.
+
+  As cores saem **por tom**, não por número: a família vem do matiz, em faixas de 15°, e
+  dentro dela a escala vai do claro ao escuro, com os neutros no fim — é o que faz a grade
+  ler como cartela e deixa os tons vizinhos lado a lado. O botão **por código** troca para a
+  ordem numérica quando você já sabe o número que procura.
+
+  O que você marcou vira a marca **minhas**, a primeira da fileira; ali tocar numa cor só a
+  põe na peça, sem tirar da caixa — tirar se faz na marca de onde ela veio. Fica guardado no
+  navegador à parte do molde, e não some quando você recomeça um desenho. Para a meada que não
+  está em cartela nenhuma, o cadastro de **linha avulsa** no pé do painel: marca, código e cor.
+  Ela nasce marcada, entra em **minhas** junto com as outras e aparece também na marca
+  **avulsas** — onde desmarcar apaga de vez, porque ela só existe por você ter cadastrado.
 - **Posicionar com precisão**: as setas do teclado movem a peça selecionada de meio milímetro, ou
   de cinco com Shift — com a foto selecionada, movem a foto. Na aba peças, três botões alinham a
   peça: centralizar na foto, centralizar no papel, alinhar pela base da foto — e, quando há uma
@@ -58,6 +70,12 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
 - **Contagem**: pontos e furos, com o tamanho da peça selecionada em centímetros. O rodapé diz o
   tempo todo se o molde sai numa folha ou em quantas, e avisa em vermelho quando alguma peça
   passou da borda do papel — o molde é recortado no papel, então o que está fora não sai no PDF.
+- **PDF já gerados**: cada molde que você baixa fica guardado no navegador, com miniatura,
+  data, tamanho e as medidas que usou. Dá para abrir, baixar de novo ou apagar um a um, na aba
+  **moldes**. São os 20 mais recentes, e o 21º derruba o mais antigo. Eles moram no IndexedDB,
+  não no `localStorage`: um molde grande em PDF tem megabytes, e a cota do `localStorage` já é
+  disputada pela estante e pela foto. Em janela anônima, ou com os dados do site bloqueados, a
+  lista diz isso em vez de sumir sem explicação.
 - **PDF do molde**: em tamanho real, recortado na área do bordado, com a moldura de recorte, o
   retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
   distância exata para colar a foto no papel e uma **régua de aferição de 50 mm** — se ela não
@@ -107,6 +125,35 @@ python3 -m http.server
 
 Os testes rodam em `node`, sem instalar nada: `testes/roda.sh`. O que eles
 cobrem, e o que não cobrem, está em [`testes/LEIAME.md`](testes/LEIAME.md).
+
+## `cartela.html`
+
+A ferramenta que lê a cartela de papel de uma marca. Abra a página, arraste as imagens da
+cartela, e ela devolve a cor de cada amostra — a mediana dos pixels do miolo, que é como as
+cores da Anchor foram tiradas. Cada amostra é um botão: guardar grava a cor direto na caixa de
+linhas do app, sem passar por catálogo nenhum, porque as duas páginas moram no mesmo endereço
+e dividem o mesmo `localStorage`. A saída em texto continua ali para quem quiser colar em
+`catalogos.js`.
+
+Ela acha as amostras pela projeção dos pixels que não são fundo: primeiro as colunas, depois
+as linhas dentro de cada coluna. O rótulo embaixo da amostra é fino e estreito demais para
+passar pelo corte, e barra escura no topo de um recorte de tela não atrapalha. A prévia
+contorna o que foi achado e mostra a contagem, então dá para conferir antes de guardar.
+
+Os códigos você escreve na ordem de leitura — ou, para a cartela da Círculo, escolhe a tela
+num atalho embutido, que é a única lista que vem pronta. Eles aparecem embaixo de cada
+amostra, e só quando a quantidade bate com a contagem: lista torta pareia errado, e pareado
+errado é pior do que sem código nenhum.
+
+**Das amostras direto para a caixa de linhas.** Clicar numa amostra e em *guardar na caixa*
+grava a cor em `ponto-e-letra/linhas/v1`, como linha avulsa, com a cor tirada do pixel em vez
+de escolhida no olho. É o caminho curto para quem tem trinta meadas de uma marca e não quer
+subir a cartela inteira. Como `localStorage` é por origem, isso só funciona com as duas
+páginas no mesmo endereço; a página avisa quando não encontra a memória do app, e aí o
+caminho é o `copiar tudo` e o `catalogos.js`.
+
+Nada sai do navegador: as imagens são lidas em `canvas`, ali mesmo. A página não faz parte
+do app e o app não depende dela.
 
 ## O que está em aberto
 
@@ -160,7 +207,8 @@ andou um milímetro seria desperdício. Cada molde tem as suas duas chaves, `…
 o arranjo e `…/molde/foto/v1/<id>` para a imagem. O molde gravado antes de existir estante
 continua nas chaves sem `<id>`, e entra no índice apontando para elas: numa cota quase cheia,
 copiar a foto para migrar é a diferença entre migrar e perdê-la. `ponto-e-letra/linhas/v1` guarda
-as linhas que você marcou como suas. Não há servidor nem conta — o trabalho não acompanha você
+as linhas que você marcou como suas — inclusive as avulsas, que moram só aí, já que não vêm de
+catálogo nenhum. Não há servidor nem conta — o trabalho não acompanha você
 para outro aparelho ou outro navegador, e some se você limpar os dados do site, a menos que você
 salve o arquivo do molde. A foto é guardada reduzida (1600 px no maior lado, JPEG), porque é só guia de
 posicionamento: na tela e no PDF ela aparece a 22% de opacidade. As chaves são separadas de
@@ -168,6 +216,11 @@ propósito. A foto é o único item capaz de estourar a cota do navegador, e ass
 arranjo junto na queda. As linhas ficam à parte porque são inventário, não desenho: a caixa de
 linhas continua a mesma quando você começa um molde do zero, e o molde não carrega a caixa
 junto.
+
+Os PDF já gerados são a exceção: eles ficam no **IndexedDB**, na base `ponto-letra`, store
+`moldes`. Um molde grande em PDF tem megabytes, e pôr isso no `localStorage` derrubaria o
+arranjo e a foto junto. Vinte registros no máximo, cada um com o arquivo, uma miniatura JPEG,
+o nome, a data, o tamanho e as medidas que ele usou.
 
 ## `sw.js`
 
