@@ -40,13 +40,19 @@ function temCor(cores, rgb){
   return cores.some(c => c.every((v, i) => Math.abs(v * 255 - rgb[i]) <= 2));
 }
 
+/* O traço das peças está na página do molde, e ela nem sempre é a primeira: com
+   a moldura de recorte valendo a folha inteira, o texto sai numa página antes.
+   A página do molde é a que desenha o fundo da foto — a única com imagem. */
+function folhaDoMolde(buf){
+  return streams(buf).filter(st => /\/I\d+ Do/.test(st))[0];
+}
+
 (async () => {
   // três peças, três linhas
   els = [bloco(40, 190, "#BE5103"), bloco(80, 190, "#384959"), bloco(120, 190, "#069494")];
   montaPDF();
   let buf = Buffer.from(await saida.arrayBuffer());
-  let st = streams(buf).filter(s => s.includes(" re"))[0];
-  const cores = corDoTraco(st);
+  const cores = corDoTraco(folhaDoMolde(buf));
   [[190,81,3], [56,73,89], [6,148,148]].forEach(c =>
     ok(temCor(cores, c), "traço na cor " + c.join(",") + " presente no molde"));
   const texto = streams(buf).join("\n");
@@ -64,8 +70,7 @@ function temCor(cores, rgb){
            cells: Array.from({length:8}, () => Array(8).fill(1)) }];
   montaPDF();
   buf = Buffer.from(await saida.arrayBuffer());
-  st = streams(buf).filter(s => s.includes(" re"))[0];
-  ok(temCor(corDoTraco(st), [190,81,3]), "peça sem cor usa a linha corrente");
+  ok(temCor(corDoTraco(folhaDoMolde(buf)), [190,81,3]), "peça sem cor usa a linha corrente");
   ok(streams(buf).join("\n").includes("Terracota"), "e aparece na legenda com o nome dela");
 
   // duas peças da mesma linha entram uma vez só na legenda
@@ -92,9 +97,13 @@ function temCor(cores, rgb){
   els = Object.keys(NOMES).map((c, i) => bloco(20 + i * 12, 190, c));
   montaPDF();
   buf = Buffer.from(await saida.arrayBuffer());
-  const n = pdfPlan(cropArea()).cols * pdfPlan(cropArea()).rows;
+  const plano = pdfPlan(cropArea(), contentArea());
+  const n = plano.cols * plano.rows;
   const pgs = (buf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) || []).length;
-  ok(pgs === n, "com " + Object.keys(NOMES).length + " linhas o PDF sai com " + n + " folha(s), e saiu com " + pgs);
+  ok(pgs === n + (plano.capa ? 1 : 0),
+     "com " + Object.keys(NOMES).length + " linhas o PDF sai com " + n + " folha(s)" +
+     (plano.capa ? " + instrução" : "") + ", e saiu com " + pgs + " página(s)");
+  ok(n === 1, "o rodapé maior não repartiu o molde (deu " + n + " folha(s))");
 
   console.log(falhas ? "\n" + falhas + " FALHAS" : "\ntudo certo");
   process.exit(falhas ? 1 : 0);

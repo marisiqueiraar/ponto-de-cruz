@@ -23,9 +23,18 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
 - **Peças bordadas**: quantas quiser, cada uma sendo uma palavra ou um símbolo — dez desenhos:
   coração cheio, coração vazado, estrela, seta, flor, folha, coroa, lua, sol, infinito e casa. Arraste
   para posicionar, incline de -45° a 45°, redimensione com dois dedos, espelhe, e ajuste ponto a
-  ponto no modo de edição. Duplicar copia a peça com as
+  ponto no modo de edição. Palavra nova nasce com o que está na barra de cima — fonte, altura,
+  traço, sensibilidade, espaço, arco e inclinação —, para a segunda linha de um nome sair do
+  tamanho da primeira. Duplicar copia a peça com as
   células como estão, então a cópia nasce com os ajustes manuais da original e segue a vida
   dela própria a partir dali.
+- **Altura**: é a altura da **letra maiúscula**, contada em quadradinhos e medida na fonte, não
+  na palavra escrita. Era a caixa de tinta da palavra — e essa caixa sobe com o "l" e desce com
+  o "g", então "amor" e "alegria" na mesma altura saíam com letras de tamanhos bem diferentes,
+  o que não tem como não parecer erro. Pela maiúscula, a mesma altura dá sempre a mesma letra, e
+  o que ascende e desce passa disso. A aba **molde** mostra a altura em quadradinhos e em
+  milímetros, ao lado do tamanho da peça inteira. Molde gravado antes da mudança tem o número
+  convertido uma vez, na volta: o número muda, o tamanho da peça não.
 - **Palavra em arco**: de -120° a 120°, que é o nome curvado por cima da foto. O arco dobra a
   **imagem** da palavra, fatia por fatia, em vez de escrever letra por letra sobre a curva —
   letra por letra é o jeito comum e rompe as ligaduras da cursiva, e ligadura é o que faz a
@@ -76,12 +85,20 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   não no `localStorage`: um molde grande em PDF tem megabytes, e a cota do `localStorage` já é
   disputada pela estante e pela foto. Em janela anônima, ou com os dados do site bloqueados, a
   lista diz isso em vez de sumir sem explicação.
-- **PDF do molde**: em tamanho real, recortado na área do bordado, com a moldura de recorte, o
+- **PDF do molde**: em tamanho real, com a moldura de recorte, o
   retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
   distância exata para colar a foto no papel e uma **régua de aferição de 50 mm** — se ela não
   medir 50 mm na régua de verdade, a impressora reduziu a página e nenhum furo vai bater. No
   rodapé de cada folha vai a legenda das linhas usadas, com o código da marca — cor de tela não
   é código de meada, e sem a legenda o molde impresso não diz o que comprar de novo.
+- **A moldura de recorte é a folha inteira**: e não a caixa do desenho. Molde recortado rente
+  ao bordado só se prende mirando o retângulo da foto; molde do tamanho do papel se prende
+  borda com borda, que é a mira que a mão acerta. Numa A4 isso nunca cabe embaixo do
+  cabeçalho, então o texto sai na página 1 e o papel inteiro na 2 — a folha impressa **é** o
+  molde, sem tesoura. O que não se paga é folha de molde a mais: se houver furo perto demais
+  da borda do papel, a folha inteira sairia repartida onde o desenho sozinho sai inteiro, e aí
+  a moldura volta a cercar o bordado com 8 mm de folga. O aviso ao lado do botão de baixar diz
+  quando isso acontece.
 - **Folha de instrução**: o cabeçalho ocupa 46 mm de altura e o rodapé mais 8. Um molde que
   usa quase toda a folha cabe no papel e não cabe embaixo desse texto — e era repartido em duas
   folhas por causa das instruções, não do desenho. Quando isso acontece o texto é que muda de
@@ -114,9 +131,15 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   traço não desfaz o que acabou de sair, e o traço inteiro é um passo só no desfazer.
   Enquanto se acende e apaga quadradinho, a barra fica amarela e os
   campos da peça saem dela — no celular eles roubam a altura de que a grade precisa, e em
-  qualquer tela mexer na altura ou na sensibilidade refaz a peça e joga fora justamente o que
-  se está ajustando à mão. No celular o painel e as abas recolhem: a grade passa de 164 × 232
-  para 328 × 464 px.
+  qualquer tela mudar a grade embaixo do dedo que a está acertando é o caminho mais curto para
+  se perder. No celular o painel e as abas recolhem: a grade passa de 164 × 232 para 328 × 464 px.
+- **O ajuste à mão sobrevive aos controles**: o que você acende ou apaga não mora nas células,
+  mora numa lista de quadradinhos por cima do que a fonte desenhou. Mexer na altura, no traço, na
+  sensibilidade ou na fonte refaz o desenho **com a lista junto**: quando a grade muda de tamanho,
+  cada ajuste vai na mesma proporção e preenche o bloco que passou a ocupar, para um traço aceso à
+  mão continuar traço em vez de virar pontilhado. Antes, cada correção durava até o toque seguinte
+  num controle — trabalho perdido justamente no momento de acertar a palavra. Quem descarta é só o
+  botão **Recalcular**, e ele pergunta antes.
 - **Desfazer e refazer**: cada passo guarda o arranjo inteiro, células incluídas, então voltar
   atrás devolve também o que foi aceso ou apagado à mão. Botões na barra de cima, Ctrl+Z e
   Ctrl+Shift+Z. Um arraste de controle deslizante vira um passo só, não dezenas.
@@ -129,8 +152,10 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
 - **Memória local**: papel, foto, peças, posições, inclinações, linha de cada peça e os ajustes
   feitos ponto a ponto ficam guardados no navegador e voltam ao reabrir. As células são gravadas como estão,
   e não recalculadas na volta — é isso que preserva o que você acendeu ou apagou à mão. Para
-  refazer tudo a partir dos controles, o botão **Recalcular** — que pergunta antes quando há
-  ajustes manuais a perder, dizendo quantos são, e oferece refazer só a peça selecionada. O
+  refazer tudo a partir dos controles **e limpar** os ajustes, o botão **Recalcular** — que
+  pergunta antes quando há ajustes manuais a perder, dizendo quantos são, e oferece refazer só a
+  peça selecionada. A lista de ajustes vai gravada junto com as células, então ela também volta
+  ao reabrir e viaja no arquivo do molde. O
   rodapé mostra a conta o tempo todo.
 
 ## Rodando

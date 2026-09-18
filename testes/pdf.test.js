@@ -62,6 +62,8 @@ function gera(nome, esperado){
   });
 }
 
+function diz2(c, m){ console.log((c ? "ok   " : "FALHA") + " " + m); if (!c) process.exitCode = 1; }
+
 (async () => {
   // 1. molde pequeno: uma folha só, como sempre foi
   els = [peca(30, 40, 20, 10)];
@@ -98,6 +100,34 @@ function gera(nome, esperado){
   // sem molde na estante o título vem da peça, como sempre foi
   console.log((t.includes("amor") ? "ok   " : "FALHA") + " sem estante, o título do PDF é a palavra da peça");
   if (!t.includes("amor")) process.exitCode = 1;
+
+  /* ---- a moldura de recorte é a folha inteira -------------------------
+
+     Quem recorta prende o molde pela borda do papel, e não mirando o
+     retângulo da foto: então a região impressa é o papel todo. Numa A4 isso
+     nunca cabe embaixo do cabeçalho — sai o texto numa página e o molde
+     inteiro na outra, que é uma folha de molde só, como era. */
+  paper = { w: 210, h: 297 };
+  photo = { x: 20, y: 30, w: 100, h: 150 };
+  els = [peca(30, 200, 20, 8)];
+  conta();
+  let cr = cropArea(), pl2 = pdfPlan(cr, contentArea());
+  diz2(cr.x === 0 && cr.y === 0 && cr.w === 210 && cr.h === 297,
+       "a moldura pega a folha inteira (" + cr.w + "x" + cr.h + " mm)");
+  diz2(folhaCheia(cr), "e o cabeçalho sabe disso");
+  diz2(pl2.cols * pl2.rows === 1 && pl2.capa,
+       "numa folha de molde só, com o texto na anterior");
+
+  /* ...mas nunca ao preço de uma folha de molde a mais. Furo a 2 mm da borda
+     do papel não cabe na folha nua, e a folha inteira sairia repartida onde o
+     desenho sozinho sai inteiro: aí a moldura volta a cercar o desenho. */
+  els = [peca(2, 200, 20, 8)];
+  conta();
+  cr = cropArea(); pl2 = pdfPlan(cr, contentArea());
+  diz2(!folhaCheia(cr), "furo colado na borda: a moldura volta ao desenho (" +
+       cr.w.toFixed(0) + "x" + cr.h.toFixed(0) + " mm)");
+  diz2(pl2.cols * pl2.rows === 1 && !pl2.tiled,
+       "e o molde continua numa folha só, sem emenda");
 
   /* ---- o caso da folha de instrução -----------------------------------
 

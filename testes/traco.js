@@ -36,7 +36,7 @@ const acesos = cells => cells.reduce((n, l) => n + (l.match(/1/g) || []).length,
       const d = JSON.parse(localStorage.getItem(it.dados));
       const e = d.els[+d.sel || 0];
       return { mm: parseFloat(d.mm), x: +e.x, y: +e.y, rot: +e.rot,
-               manual: +e.manual || 0, cells: e.cells };
+               manual: +e.manual || 0, edits: e.edits || [], cells: e.cells };
     });
   };
 
@@ -106,6 +106,10 @@ const acesos = cells => cells.reduce((n, l) => n + (l.match(/1/g) || []).length,
   ok(risco === "1".repeat(N), "o arraste acendeu os " + N + " quadradinhos, sem furo (saiu " + risco + ")");
   ok(acesos(d.cells) - antes === N, "e não acendeu mais nenhum fora do traço");
   ok(d.manual === N, "o rodapé conta os " + N + " à mão (contou " + d.manual + ")");
+  // o traço anota quadradinho por quadradinho, e não um total: é essa lista
+  // que faz o ajuste à mão sobreviver a uma mudança de altura (ajuste.js)
+  ok(d.edits.length === N, "e os " + N + " entram na lista de ajustes da peça, um a um (entraram " +
+     d.edits.length + ")");
 
   // ---- 2. o traço inteiro é um passo só no desfazer -----------------------
   await pg.locator("body").press("Control+z");

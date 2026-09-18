@@ -41,6 +41,12 @@ como se prova que o teto não deforma o molde.
 Continua valendo a ressalva: não há celular de verdade nesta bancada. O teto
 protege contra o limite conhecido, mas quem confirma é um aparelho.
 
+Os números da tabela são da época em que a altura era a caixa de tinta da
+palavra. Desde que ela passou a ser a altura da maiúscula da fonte, a mesma
+altura 60 desenha letra maior: o pior caso dá 867 × 276 quadradinhos com o teto
+e 867 × 276 sem ele — medido de novo no Chromium, com o teto desligado, e é esse
+o número que `testes/teto.js` cobra.
+
 ---
 
 ## 2. ~~Avisar quando a memória do navegador encher~~ — feito
@@ -149,7 +155,7 @@ Nada falta deste item.
 - **O laço só move.** Girar, espelhar, apagar, duplicar e os botões de alinhar
   continuam valendo para a peça selecionada, uma de cada vez — com um bloco
   laçado a barra esconde esses campos em vez de mexer em uma só das laçadas. É
-  decisão de escopo, não limitação: está em [REVISAR.md](REVISAR.md), item 5.
+  decisão de escopo, não limitação: está em [REVISAR.md](REVISAR.md), item 6.
 - **`sw.js` continua na raiz.** Ele existe só para desregistrar o service
   worker que o app React deixou para trás. Em algum momento todo mundo que
   abriu aquela versão já passou por aqui e ele pode sair — mas não há como
@@ -177,18 +183,18 @@ mudança de aplicativo:
 
 `testes/` cobre o repartir em folhas, a posição em cada folha, a emenda, a cor
 por peça, a estante, a montagem da tela no Chromium, as setas e botões de
-alinhar, o arco e o espaçamento das letras, a conta de fio, e o arraste que
-acende quadradinho. São treze conjuntos; `testes/roda.sh` roda todos. O que
-**não** existe:
+alinhar, o arco e o espaçamento das letras, a conta de fio, o ajuste à mão que
+sobrevive à altura, o arraste que acende quadradinho e o laço que move o bloco.
+São quinze conjuntos; `testes/roda.sh` roda todos. O que **não** existe:
 
 - Nada que exercite o desenho no canvas — `textMatrix()`, que transforma o
   traço da fonte em quadradinhos, é o coração do app e não tem teste nenhum.
   Um teste dele não é óbvio: o resultado depende de como o navegador rasteriza
   a fonte, então comparar com uma matriz fixa quebraria sozinho.
-- Nada que exercite o arraste que posiciona a peça nem a pinça de dois dedos.
-  O arraste do modo ponto a ponto saiu desta lista: `traco.js` desenha uma
-  fileira com o botão apertado e confere quadradinho por quadradinho no que o
-  app gravou.
+- Nada que exercite a pinça de dois dedos, nem o arraste de uma peça sozinha.
+  Os outros dois arrastes saíram desta lista: `traco.js` desenha uma fileira com
+  o botão apertado e `laco.js` laça foto e peças e move o bloco, os dois
+  conferindo milímetro por milímetro no que o app gravou.
 - Nada compara o PDF com uma imagem de referência. Os testes leem coordenadas
   de dentro do arquivo, o que pega o molde no lugar errado, mas não pega feio.
 - Nada roda num navegador de celular de verdade. `tela.js` usa um Chromium de
