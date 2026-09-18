@@ -33,10 +33,18 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
   paleta **minhas linhas**, e marcar uma já pinta o molde com ela, que é o jeito de ver a cor
   real no arranjo antes de gastar meada. A busca aceita código ou nome. O que você marcou fica
   guardado no navegador à parte do molde, e não some quando você recomeça um desenho.
-- **Contagem**: pontos e furos, com o tamanho da peça selecionada em centímetros.
+- **Contagem**: pontos e furos, com o tamanho da peça selecionada em centímetros. O rodapé diz o
+  tempo todo se o molde sai numa folha ou em quantas.
 - **PDF do molde**: em tamanho real, recortado na área do bordado, com a moldura de recorte, o
   retângulo da foto para alinhar, as bordas do papel quando encostam na área, e no cabeçalho a
-  distância exata para colar a foto no papel.
+  distância exata para colar a foto no papel e uma **régua de aferição de 50 mm** — se ela não
+  medir 50 mm na régua de verdade, a impressora reduziu a página e nenhum furo vai bater.
+- **Molde em várias folhas**: o que não cabe numa A4 é repartido, nunca reduzido. Molde reduzido
+  é molde errado, e o erro só aparece com a agulha na mão. Cada folha traz o seu número, um
+  mapinha de onde ela fica no conjunto e, nas margens, qual folha continua de cada lado. As
+  vizinhas repetem pelo menos 10 mm do desenho: é sobrepondo essa faixa até os furos coincidirem
+  que se emenda, porque encostar folha com folha exige uma precisão de tesoura que ninguém tem.
+  O app escolhe entre folha em pé e deitada pela que gastar menos papel.
 - **PNG** da prévia, para conferir o arranjo.
 - **Zoom e deslocamento**: o papel cresce dentro da mesa, que rola. Botões no canto, Ctrl (ou ⌘)
   com a roda do mouse aproximando no ponto sob o cursor, e uma mãozinha que troca o arraste de

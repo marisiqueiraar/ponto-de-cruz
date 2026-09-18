@@ -194,6 +194,7 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .fit .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:0 0 auto}
 .fit.tight{border-color:var(--lemon-deep);border-left-width:4px}
 .fit.tight .dot{background:var(--lemon-deep)}
+.fit.multi{border-color:var(--accent);border-left-width:4px}   /* mais de uma folha não é erro */
 .fit.over{background:var(--danger);border-color:var(--danger);color:#fff;max-width:none;
   flex:0 0 auto}   /* o aviso que decide a impressão nunca é truncado */
 .fit.over .dot{background:#fff}
@@ -665,7 +666,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <h2>do arquivo ao material</h2>
     <ul>
       <li>Cole a foto no papel usando a medida que aparece no cabeçalho do PDF: distância da borda esquerda e da borda de cima. É essa posição que faz o molde bater.</li>
+      <li>Antes de furar, meça a régua impressa no cabeçalho: se os 50 mm dela não derem 50 mm na sua régua, a impressora reduziu a página e nenhum furo vai bater. Imprima de novo em 100%, sem "ajustar à página".</li>
       <li>Recorte o molde impresso pela moldura tracejada e prenda sobre o conjunto alinhando o retângulo da foto com a foto de verdade, fita crepe nos quatro cantos.</li>
+      <li>Molde maior que uma A4 sai em várias folhas, todas em tamanho real. Cada uma diz qual é no cabeçalho, e as vizinhas repetem uma faixa do desenho: sobreponha uma na outra até os furos da faixa coincidirem, e só então prenda. As margens dizem qual folha continua de cada lado.</li>
       <li>Fure ponto a ponto com agulha grossa, apoiado em EVA ou cortiça. Cada quadradinho usa quatro furos, compartilhados com os vizinhos — por isso o número de furos é menor que o dobro de pontos.</li>
       <li>Borde com 2 ou 3 fios de meada. Em furo que atravessa foto e papel, puxe devagar: papel fotográfico não fecha depois de rasgar.</li>
       <li>Espaçamento entre 2,5 e 3 mm é o mais seguro nesse material. Abaixo de 2 mm a tira de papel entre dois furos vira pó.</li>
@@ -1155,17 +1158,28 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return n;
   }
 
+  // a caixa da peça já girada, em mm de papel
+  function elPaperBox(el){
+    var b = bboxMM(el);
+    var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
+    [[0,0],[b.w,0],[0,b.h],[b.w,b.h]].forEach(function(c){
+      var p = localToPaper(el, c[0], c[1]);
+      if (p.x < minX) minX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y > maxY) maxY = p.y;
+    });
+    return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+  }
+
   function stitchArea(){
     var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
     els.forEach(function(el){
-      var b = bboxMM(el);
-      [[0,0],[b.w,0],[0,b.h],[b.w,b.h]].forEach(function(c){
-        var p = localToPaper(el, c[0], c[1]);
-        if (p.x < minX) minX = p.x;
-        if (p.y < minY) minY = p.y;
-        if (p.x > maxX) maxX = p.x;
-        if (p.y > maxY) maxY = p.y;
-      });
+      var b = elPaperBox(el);
+      if (b.x < minX) minX = b.x;
+      if (b.y < minY) minY = b.y;
+      if (b.x + b.w > maxX) maxX = b.x + b.w;
+      if (b.y + b.h > maxY) maxY = b.y + b.h;
     });
     if (maxX < 0) return null;
     return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
@@ -1185,14 +1199,62 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
   }
 
-  // a folha do PDF: 10 mm de margem lateral, 44 mm de cabeçalho e 8 mm embaixo.
-  // a tela e o PDF decidem a escala por aqui, para nunca discordarem sobre caber.
-  var PDF_SIDE = 10, PDF_TOP = 44, PDF_FOOT = 8;
+  // a folha do PDF: 10 mm de margem lateral, 46 mm de cabeçalho e 8 mm embaixo.
+  // a tela e o PDF decidem por aqui se cabe, para nunca discordarem.
+  var PDF_SIDE = 10, PDF_TOP = 46, PDF_FOOT = 8;
   function pdfFit(R){
     var land = R.w > R.h;
     var pageW = land ? 297 : 210, pageH = land ? 210 : 297;
     var maxW = pageW - PDF_SIDE * 2, maxH = pageH - PDF_TOP - PDF_FOOT;
     return { land: land, pageW: pageW, scale: Math.min(1, maxW / R.w, maxH / R.h) };
+  }
+
+  /* ---- o molde repartido em folhas ------------------------------------
+
+     Molde reduzido para caber numa folha é molde errado: o furo sai fora do
+     lugar e isso só se descobre com a agulha na mão, depois de colar a foto.
+     Então o que não cabe numa A4 sai em várias, sempre em tamanho real.
+
+     Folhas vizinhas repetem pelo menos SOBRA mm do desenho. É essa faixa
+     repetida que deixa sobrepor uma na outra até os furos coincidirem —
+     emendar topo a topo pede uma precisão de tesoura que ninguém tem. */
+  var TILE_TOP = 49, SOBRA = 10;
+
+  function nFolhas(medida, util){
+    if (medida <= util) return 1;
+    return Math.ceil((medida - SOBRA) / (util - SOBRA));
+  }
+
+  // as folhas ficam distribuídas por igual, e não empilhadas num canto com a
+  // última sobrando: assim a faixa repetida é a mesma em todas as emendas.
+  function inicios(medida, util, n){
+    if (n <= 1) return [0];
+    var passo = (medida - util) / (n - 1), a = [];
+    for (var i = 0; i < n; i++) a.push(i * passo);
+    return a;
+  }
+
+  function pdfPlan(R){
+    var um = pdfFit(R);
+    if (um.scale >= 1)
+      return { tiled: false, land: um.land, pageW: um.pageW, top: PDF_TOP,
+               cols: 1, rows: 1, tw: R.w, th: R.h, xs: [0], ys: [0] };
+
+    function grade(land){
+      var uw = (land ? 297 : 210) - PDF_SIDE * 2;
+      var uh = (land ? 210 : 297) - TILE_TOP - PDF_FOOT;
+      var cols = nFolhas(R.w, uw), rows = nFolhas(R.h, uh);
+      return { land: land, uw: uw, uh: uh, cols: cols, rows: rows, n: cols * rows };
+    }
+    // menos folhas ganha; empatou, a folha fica na direção do molde
+    var ret = grade(false), dei = grade(true);
+    var g = (dei.n < ret.n || (dei.n === ret.n && R.w > R.h)) ? dei : ret;
+    return {
+      tiled: true, land: g.land, pageW: g.land ? 297 : 210, top: TILE_TOP,
+      cols: g.cols, rows: g.rows,
+      tw: Math.min(g.uw, R.w), th: Math.min(g.uh, R.h),
+      xs: inicios(R.w, g.uw, g.cols), ys: inicios(R.h, g.uh, g.rows)
+    };
   }
 
   function drawPhoto(ctx, k, region, alpha){
@@ -1274,7 +1336,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   /* O aviso de escala mora colado no botão de baixar, porque é sobre o que vai
      sair quando ele for apertado. Três estados: cabe, cabe por pouco, não cabe. */
   function showFit(cr){
-    var fit = pdfFit(cr);
+    var plano = pdfPlan(cr);
     var land = cr.w > cr.h;
     var maxW = (land ? 297 : 210) - PDF_SIDE * 2;
     var maxH = (land ? 210 : 297) - PDF_TOP - PDF_FOOT;
@@ -1282,12 +1344,14 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var area = fmt(cr.w / 10) + " × " + fmt(cr.h / 10) + " cm";
     var box = $("fitHint"), txt = $("fitTxt"), state = "";
 
-    if (fit.scale < 1){
-      state = "over";
-      txt.textContent = "não cabe em A4 — o PDF sairia a " + Math.round(fit.scale * 100) + "%";
-      box.title = "Área do molde: " + area + " — não cabe numa A4 em tamanho real: o PDF " +
-        "sairia reduzido a " + Math.round(fit.scale * 100) + "% e os furos não vão bater. " +
-        "Aproxime as peças da foto ou reduza a altura do texto.";
+    if (plano.tiled){
+      var n = plano.cols * plano.rows;
+      state = "multi";
+      txt.textContent = "tamanho real em " + n + " folhas";
+      box.title = "Área do molde: " + area + " — não cabe numa A4 inteira, então o PDF sai " +
+        "em " + n + " folhas (" + plano.rows + " × " + plano.cols + "), todas em tamanho real. " +
+        "As vizinhas repetem uma faixa do desenho: é por ela que você sobrepõe uma na outra " +
+        "até os furos coincidirem.";
     } else if (folga < 5){
       state = "tight";
       txt.textContent = "cabe em A4 · " + fmt(folga) + " mm de folga";
@@ -2067,96 +2131,207 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     if (blob) deliver(blob, saveName("png"), url); else showImage(url);
   });
 
-  $("pdf").addEventListener("click", function(){
-    if (!window.jspdf || !window.jspdf.jsPDF){
-      alert("O gerador de PDF não carregou. Recarregue a página.");
-      return;
-    }
-    if (!els.length) return;
-    var pa = paperMM();
-    var R = cropArea();
-    var fit = pdfFit(R);
-    var land = fit.land, pageW = fit.pageW, scale = fit.scale;
-    var pdf = new window.jspdf.jsPDF({ unit:"mm", format:"a4", orientation: land ? "landscape" : "portrait" });
-    var ox = (pageW - R.w * scale) / 2, oy = PDF_TOP;
+  /* Régua impressa. É o único jeito de descobrir, antes de furar, que a
+     impressora reduziu a página: se estes 50 mm não medirem 50 mm na régua de
+     verdade, o molde inteiro está fora de escala e nenhum furo vai bater. */
+  function reguaAfericao(pdf, x, y){
+    pdf.setDrawColor(20);
+    pdf.setLineWidth(0.3);
+    pdf.line(x, y, x + 50, y);
+    for (var i = 0; i <= 50; i += 10)
+      pdf.line(x + i, y, x + i, y - (i % 50 === 0 ? 2.8 : 1.6));
+    pdf.setFontSize(7);
+    pdf.setTextColor(80);
+    pdf.text("50 mm exatos", x + 53, y);
+  }
 
-    pdf.setFontSize(15);
+  // mapinha das folhas: numa mesa com seis folhas parecidas, o desenho de qual
+  // é qual resolve mais rápido que o número escrito.
+  function mapaFolhas(pdf, plano, idx, dir, y){
+    var c = Math.min(4, 24 / plano.cols, 20 / plano.rows);
+    var x = dir - plano.cols * c;
+    pdf.setLineWidth(0.15);
+    pdf.setDrawColor(150);
+    pdf.setFillColor(56, 73, 89);
+    for (var r = 0; r < plano.rows; r++)
+      for (var q = 0; q < plano.cols; q++)
+        pdf.rect(x + q * c, y + r * c, c, c, (r * plano.cols + q) === idx ? "FD" : "D");
+  }
+
+  function cabecalho(pdf, plano, idx){
+    var pa = paperMM();
     var t = els[sel];
+    pdf.setFontSize(15);
+    pdf.setTextColor(20);
     pdf.text(t && t.kind === "text" ? (t.text || "molde de furos") : "molde de furos", 12, 15);
+
+    var y = 21;
+    if (plano.tiled){
+      pdf.setFontSize(10);
+      pdf.setTextColor(56, 73, 89);
+      pdf.text("folha " + (idx + 1) + " de " + (plano.cols * plano.rows) + "   |   linha " +
+               (Math.floor(idx / plano.cols) + 1) + ", coluna " + (idx % plano.cols + 1), 12, 21);
+      mapaFolhas(pdf, plano, idx, plano.pageW - 12, 9);
+      y = 27;
+    }
+
     pdf.setFontSize(9);
     pdf.setTextColor(80);
     pdf.text("Papel " + fmt(pa.w) + " x " + fmt(pa.h) + " mm   |   foto " + fmt(photo.w) + " x " + fmt(photo.h) +
              " mm   |   furos de " + fmt(P()) + " mm   |   " + totalCount.toLocaleString("pt-BR") +
-             " pontos, " + totalHoles.toLocaleString("pt-BR") + " furos", 12, 21);
-    pdf.text("Cole a foto a " + fmt(photo.x) + " mm da borda esquerda e " + fmt(photo.y) + " mm da borda de cima do papel.", 12, 26);
-    pdf.text("Sobra: " + fmt(pa.w - photo.x - photo.w) + " mm a direita, " + fmt(pa.h - photo.y - photo.h) + " mm embaixo.", 12, 31);
-    pdf.setTextColor(scale < 1 ? 190 : 80, scale < 1 ? 81 : 80, scale < 1 ? 3 : 80);
-    pdf.text(scale < 1
-      ? "ATENCAO: reduzido a " + Math.round(scale * 100) + "% para caber na folha. Nesse tamanho os furos nao batem com o material."
-      : "Imprima em 100%, sem ajustar a pagina. Confira com uma regua: o retangulo abaixo deve medir " + fmt(photo.w) + " mm de largura.", 12, 36);
-    pdf.setTextColor(80);
+             " pontos, " + totalHoles.toLocaleString("pt-BR") + " furos", 12, y);
+    pdf.text("Cole a foto a " + fmt(photo.x) + " mm da borda esquerda e " + fmt(photo.y) +
+             " mm da borda de cima do papel.", 12, y + 5);
+    pdf.text(plano.tiled
+      ? "Recorte pela moldura tracejada. As folhas vizinhas repetem uma faixa do desenho: sobreponha ate os furos coincidirem."
+      : "Sobra: " + fmt(pa.w - photo.x - photo.w) + " mm a direita, " + fmt(pa.h - photo.y - photo.h) + " mm embaixo.",
+      12, y + 10);
+    pdf.text("Imprima em 100%, sem ajustar a pagina. Confira na regua abaixo antes de furar.", 12, y + 15);
+    reguaAfericao(pdf, 12, y + 20);
+  }
+
+  // qual folha continua de cada lado, escrito na margem. Com o texto girado o
+  // glifo cresce para a esquerda e a linha sobe, então a âncora vai meia
+  // palavra abaixo do meio para a legenda sair centrada no corte.
+  function vizinhas(pdf, plano, idx, ox, oy){
+    var col = idx % plano.cols, lin = Math.floor(idx / plano.cols);
+    pdf.setFontSize(7);
+    pdf.setTextColor(120);
+    var lado = function(txt, x, meio){
+      pdf.text(txt, x, meio + pdf.getTextWidth(txt) / 2, { angle: 90 });
+    };
+    if (lin > 0)
+      pdf.text("^ folha " + (idx - plano.cols + 1), ox + plano.tw / 2, oy - 2, { align: "center" });
+    if (lin < plano.rows - 1)
+      pdf.text("v folha " + (idx + plano.cols + 1), ox + plano.tw / 2, oy + plano.th + 5, { align: "center" });
+    if (col > 0) lado("< folha " + idx, ox - 2, oy + plano.th / 2);
+    if (col < plano.cols - 1) lado("folha " + (idx + 2) + " >", ox + plano.tw + 5, oy + plano.th / 2);
+  }
+
+  /* O molde de uma folha, em tamanho real. `vw` é o pedaço do papel que esta
+     folha mostra, e tudo é recortado nele: sem o recorte, o traço de uma peça
+     vizinha invade a margem e reaparece cortado pela metade depois da tesoura. */
+  function moldeNaFolha(pdf, vw, ox, oy){
+    var pa = paperMM();
 
     // 4 px/mm basta para um fundo desenhado a 22% de opacidade, e a compressão
     // impede o jsPDF de embutir o raster cru — sem ela o molde sai com 6,5 MB
     var bg = document.createElement("canvas");
     var bgk = 4;
-    bg.width = Math.round(R.w * bgk); bg.height = Math.round(R.h * bgk);
+    bg.width = Math.round(vw.w * bgk); bg.height = Math.round(vw.h * bgk);
     var bctx = bg.getContext("2d");
     bctx.fillStyle = "#fff"; bctx.fillRect(0, 0, bg.width, bg.height);
-    drawPhoto(bctx, bgk, R, 0.22);
-    pdf.addImage(bg.toDataURL("image/png"), "PNG", ox, oy, R.w * scale, R.h * scale, undefined, "FAST");
+    drawPhoto(bctx, bgk, vw, 0.22);
+    pdf.addImage(bg.toDataURL("image/png"), "PNG", ox, oy, vw.w, vw.h, undefined, "FAST");
 
-    pdf.setDrawColor(150);
-    pdf.setLineWidth(0.2);
-    pdf.setLineDashPattern([2, 2], 0);
-    pdf.rect(ox, oy, R.w * scale, R.h * scale);
-    pdf.setLineDashPattern([], 0);
+    // o `null` é o que impede o jsPDF de pintar este retângulo antes de usá-lo
+    // como recorte — sem ele, cada folha sai com uma moldura sólida a mais.
+    pdf.saveGraphicsState();
+    pdf.rect(ox, oy, vw.w, vw.h, null);
+    pdf.clip();
+    pdf.discardPath();
 
     pdf.setDrawColor(20);
     pdf.setLineWidth(0.4);
-    pdf.rect(ox + (photo.x - R.x) * scale, oy + (photo.y - R.y) * scale, photo.w * scale, photo.h * scale);
+    pdf.rect(ox + (photo.x - vw.x), oy + (photo.y - vw.y), photo.w, photo.h);
 
     var edges = [];
-    if (R.x <= 0.01) edges.push(["v", 0]);
-    if (R.y <= 0.01) edges.push(["h", 0]);
-    if (R.x + R.w >= pa.w - 0.01) edges.push(["v", pa.w]);
-    if (R.y + R.h >= pa.h - 0.01) edges.push(["h", pa.h]);
+    if (vw.x <= 0.01) edges.push(["v", 0]);
+    if (vw.y <= 0.01) edges.push(["h", 0]);
+    if (vw.x + vw.w >= pa.w - 0.01) edges.push(["v", pa.w]);
+    if (vw.y + vw.h >= pa.h - 0.01) edges.push(["h", pa.h]);
     pdf.setDrawColor(56, 73, 89);
     pdf.setLineWidth(0.6);
     edges.forEach(function(e){
       if (e[0] === "v"){
-        var X = ox + (e[1] - R.x) * scale;
-        pdf.line(X, oy, X, oy + R.h * scale);
+        var X = ox + (e[1] - vw.x);
+        pdf.line(X, oy, X, oy + vw.h);
       } else {
-        var Y = oy + (e[1] - R.y) * scale;
-        pdf.line(ox, Y, ox + R.w * scale, Y);
+        var Y = oy + (e[1] - vw.y);
+        pdf.line(ox, Y, ox + vw.w, Y);
       }
     });
+
+    // o recorte esconde o que sai da folha, mas o jsPDF grava o traço assim
+    // mesmo: repartido em seis folhas, o arquivo sairia com seis cópias do
+    // molde inteiro. Fora da folha, nem desenha.
+    var fora = function(pt, m){
+      return pt.x < vw.x - m || pt.x > vw.x + vw.w + m ||
+             pt.y < vw.y - m || pt.y > vw.y + vw.h + m;
+    };
+    var cabe = function(el){
+      var b = elPaperBox(el);
+      return b.x <= vw.x + vw.w && b.x + b.w >= vw.x &&
+             b.y <= vw.y + vw.h && b.y + b.h >= vw.y;
+    };
 
     var p = P();
     var trgb = threadRGB();
     pdf.setDrawColor(trgb[0], trgb[1], trgb[2]);
     pdf.setLineWidth(0.22);
     els.forEach(function(el){
+      if (!cabe(el)) return;
       for (var r = 0; r < el.cells.length; r++){
         for (var q = 0; q < el.cells[r].length; q++){
           if (!el.cells[r][q]) continue;
+          if (fora(localToPaper(el, (q + 0.5) * p, (r + 0.5) * p), p)) continue;
           var a1 = localToPaper(el, q * p + p * 0.22, r * p + p * 0.22);
           var a2 = localToPaper(el, (q + 1) * p - p * 0.22, (r + 1) * p - p * 0.22);
           var b1 = localToPaper(el, (q + 1) * p - p * 0.22, r * p + p * 0.22);
           var b2 = localToPaper(el, q * p + p * 0.22, (r + 1) * p - p * 0.22);
-          pdf.line(ox + (a1.x - R.x) * scale, oy + (a1.y - R.y) * scale, ox + (a2.x - R.x) * scale, oy + (a2.y - R.y) * scale);
-          pdf.line(ox + (b1.x - R.x) * scale, oy + (b1.y - R.y) * scale, ox + (b2.x - R.x) * scale, oy + (b2.y - R.y) * scale);
+          pdf.line(ox + (a1.x - vw.x), oy + (a1.y - vw.y), ox + (a2.x - vw.x), oy + (a2.y - vw.y));
+          pdf.line(ox + (b1.x - vw.x), oy + (b1.y - vw.y), ox + (b2.x - vw.x), oy + (b2.y - vw.y));
         }
       }
     });
 
     pdf.setFillColor(15, 15, 15);
     els.forEach(function(el){
+      if (!cabe(el)) return;
       holesOf(el).forEach(function(h){
-        pdf.circle(ox + (h.x - R.x) * scale, oy + (h.y - R.y) * scale, Math.max(0.22, 0.3 * scale), "F");
+        if (fora(h, 1)) return;
+        pdf.circle(ox + (h.x - vw.x), oy + (h.y - vw.y), 0.3, "F");
       });
     });
+
+    pdf.restoreGraphicsState();
+
+    // a moldura de recorte fica fora do clip: linha desenhada em cima da borda
+    // perde metade da espessura para o recorte e sai mais fina de um lado.
+    pdf.setDrawColor(150);
+    pdf.setLineWidth(0.2);
+    pdf.setLineDashPattern([2, 2], 0);
+    pdf.rect(ox, oy, vw.w, vw.h);
+    pdf.setLineDashPattern([], 0);
+  }
+
+  $("pdf").addEventListener("click", function(){
+    if (!window.jspdf || !window.jspdf.jsPDF){
+      alert("O gerador de PDF não carregou. Recarregue a página.");
+      return;
+    }
+    if (!els.length) return;
+    var R = cropArea();
+    var plano = pdfPlan(R);
+    /* `floatPrecision` e `compress` valem o molde inteiro: cada furo é um
+       círculo de quatro curvas, e sem eles o jsPDF grava cada coordenada com
+       dezessete casas decimais — 700 bytes por furo, megabytes por folha, que
+       o celular ainda precisa baixar. Duas casas em pt são 3,5 milésimos de
+       milímetro: mais fino do que qualquer agulha alcança. */
+    var pdf = new window.jspdf.jsPDF({
+      unit: "mm", format: "a4", orientation: plano.land ? "landscape" : "portrait",
+      compress: true, floatPrecision: 2
+    });
+
+    for (var i = 0; i < plano.cols * plano.rows; i++){
+      if (i) pdf.addPage("a4", plano.land ? "landscape" : "portrait");
+      var vw = { x: R.x + plano.xs[i % plano.cols], y: R.y + plano.ys[Math.floor(i / plano.cols)],
+                 w: plano.tw, h: plano.th };
+      var ox = (plano.pageW - plano.tw) / 2, oy = plano.top;
+      cabecalho(pdf, plano, i);
+      moldeNaFolha(pdf, vw, ox, oy);
+      if (plano.tiled) vizinhas(pdf, plano, i, ox, oy);
+    }
 
     deliver(pdf.output("blob"), saveName("pdf"), null);
   });
