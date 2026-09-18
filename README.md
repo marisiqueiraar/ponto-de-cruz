@@ -64,6 +64,12 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
 - **Desfazer e refazer**: cada passo guarda o arranjo inteiro, células incluídas, então voltar
   atrás devolve também o que foi aceso ou apagado à mão. Botões na barra de cima, Ctrl+Z e
   Ctrl+Shift+Z. Um arraste de controle deslizante vira um passo só, não dezenas.
+- **Vários moldes**: a aba **moldes** guarda quantos você quiser, cada um com nome e data, e
+  troca entre eles. Antes havia um molde só: começar um desenho novo apagava o anterior sem
+  volta. O molde que já estava gravado entra na lista como está, sem nada ser copiado.
+- **Arquivo do molde**: salvar e abrir um `.json` com tudo dentro — papel, foto, peças, linhas e
+  os ajustes feitos ponto a ponto. É o único jeito de o trabalho ir para outro aparelho ou voltar
+  depois de você limpar os dados do site; o navegador, sozinho, não leva nada para lugar nenhum.
 - **Memória local**: papel, foto, peças, posições, inclinações, linha de cada peça e os ajustes
   feitos ponto a ponto ficam guardados no navegador e voltam ao reabrir. As células são gravadas como estão,
   e não recalculadas na volta — é isso que preserva o que você acendeu ou apagou à mão. Para
@@ -114,11 +120,16 @@ raiz declara que não há build — sem ele, um projeto criado com o preset Vite
 
 ## Onde ficam os dados
 
-Tudo no `localStorage` do próprio navegador, em três chaves: `ponto-e-letra/molde/v1` para o
-arranjo, `ponto-e-letra/molde/foto/v1` para a imagem e `ponto-e-letra/linhas/v1` para as linhas
-que você marcou como suas. Não há servidor nem conta — o trabalho
-não acompanha você para outro aparelho ou outro navegador, e some se você limpar os dados do
-site. A foto é guardada reduzida (1600 px no maior lado, JPEG), porque é só guia de
+Tudo no `localStorage` do próprio navegador. `ponto-e-letra/moldes/v1` é o índice da estante:
+diz quais moldes existem, qual está aberto, e o **nome das chaves** de cada um — nunca o
+conteúdo, porque gravar acontece a cada gesto e reescrever a estante inteira porque uma peça
+andou um milímetro seria desperdício. Cada molde tem as suas duas chaves, `…/molde/v1/<id>` para
+o arranjo e `…/molde/foto/v1/<id>` para a imagem. O molde gravado antes de existir estante
+continua nas chaves sem `<id>`, e entra no índice apontando para elas: numa cota quase cheia,
+copiar a foto para migrar é a diferença entre migrar e perdê-la. `ponto-e-letra/linhas/v1` guarda
+as linhas que você marcou como suas. Não há servidor nem conta — o trabalho não acompanha você
+para outro aparelho ou outro navegador, e some se você limpar os dados do site, a menos que você
+salve o arquivo do molde. A foto é guardada reduzida (1600 px no maior lado, JPEG), porque é só guia de
 posicionamento: na tela e no PDF ela aparece a 22% de opacidade. As chaves são separadas de
 propósito. A foto é o único item capaz de estourar a cota do navegador, e assim ela nunca leva o
 arranjo junto na queda. As linhas ficam à parte porque são inventário, não desenho: a caixa de

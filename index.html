@@ -242,6 +242,19 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
 .num span{font-size:13px;color:var(--ink-soft)}
 .num strong{font-family:var(--display);font-weight:400;font-size:14px}
 
+/* estante de moldes */
+.moldes{display:flex;flex-direction:column;gap:6px;margin-bottom:4px}
+.mold{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:6px;
+  overflow:hidden;background:#fff}
+.mold.on{border-color:var(--mat);box-shadow:inset 4px 0 0 var(--lemon)}
+.mold .abre{flex:1 1 auto;min-width:0;text-align:left;border:0;background:transparent;
+  padding:8px 11px;min-height:44px;color:var(--ink)}
+.mold .nm{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mold .qd{display:block;font-size:12px;color:var(--ink-soft);margin-top:2px}
+.mold .apaga{flex:0 0 auto;width:38px;border:0;border-left:1px solid var(--line);
+  background:transparent;color:var(--ink-soft);font-size:17px;line-height:1}
+.mold .apaga:hover{background:var(--danger);color:#fff}
+
 /* lista de peças */
 .chips{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
 .chip{display:block;width:100%;text-align:left;border:1px solid var(--line);background:#fff;
@@ -375,7 +388,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   .rail{flex-direction:row;gap:0;padding:4px;border-right:0;
     border-top:1px solid var(--line);overflow-x:auto;overflow-y:hidden}
-  .rail button{width:auto;flex:1 0 auto;min-width:54px;padding:5px 6px 4px}
+  .rail button{width:auto;flex:1 0 auto;min-width:50px;padding:5px 5px 4px}
   .rail button svg{width:18px;height:18px}
 
   .panel{border-right:0;border-top:1px solid var(--line);padding:14px 14px 20px}
@@ -527,6 +540,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   <button data-pane="pecas" class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></svg>peças</button>
   <button data-pane="linha"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3.4"/><circle cx="16" cy="16" r="3.4"/></svg>linha</button>
   <button data-pane="molde"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1"/><circle cx="9" cy="9" r=".9" fill="currentColor"/><circle cx="15" cy="9" r=".9" fill="currentColor"/><circle cx="9" cy="15" r=".9" fill="currentColor"/><circle cx="15" cy="15" r=".9" fill="currentColor"/></svg>molde</button>
+  <button data-pane="moldes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h6l2 2h10v10H3z"/><path d="M3 7V5h6l2 2"/></svg>moldes</button>
   <button data-pane="ajuda"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 113 2.5v1.5M12 17h.01"/></svg>ajuda</button>
 </nav>
 
@@ -664,6 +678,26 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <div id="out"></div>
   </section>
 
+  <section class="pane" data-pane="moldes">
+    <h2>meus moldes</h2>
+    <div class="field">
+      <label for="moldeNome">Nome deste molde</label>
+      <input id="moldeNome" type="text" autocomplete="off" spellcheck="false" placeholder="sem nome">
+    </div>
+    <button id="moldeNovo" class="wide">começar um molde novo</button>
+    <div class="moldes" id="moldeLista"></div>
+
+    <div class="rule"></div>
+    <h2>levar para outro lugar</h2>
+    <button id="moldeSalvar" class="wide">salvar arquivo do molde</button>
+    <button id="moldeAbrir" class="wide">abrir arquivo do molde</button>
+    <input id="moldeArq" type="file" accept="application/json,.json" class="hide">
+    <p class="note" id="moldeAviso"></p>
+    <p class="note">O arquivo leva tudo: papel, foto, peças, linhas e os ajustes feitos ponto a
+      ponto. É por ele que o trabalho vai para outro aparelho, ou volta depois de você limpar os
+      dados do site — o navegador, sozinho, não leva nada para lugar nenhum.</p>
+  </section>
+
   <section class="pane notes" data-pane="ajuda">
     <h2>do arquivo ao material</h2>
     <ul>
@@ -672,6 +706,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <li>Recorte o molde impresso pela moldura tracejada e prenda sobre o conjunto alinhando o retângulo da foto com a foto de verdade, fita crepe nos quatro cantos.</li>
       <li>Molde maior que uma A4 sai em várias folhas, todas em tamanho real. Cada uma diz qual é no cabeçalho, e as vizinhas repetem uma faixa do desenho: sobreponha uma na outra até os furos da faixa coincidirem, e só então prenda. As margens dizem qual folha continua de cada lado.</li>
       <li>Fure ponto a ponto com agulha grossa, apoiado em EVA ou cortiça. Cada quadradinho usa quatro furos, compartilhados com os vizinhos — por isso o número de furos é menor que o dobro de pontos.</li>
+      <li>Guarde o arquivo do molde na aba <b>moldes</b> antes de mudar de aparelho ou limpar o navegador. O que fica só no navegador não vai a lugar nenhum e some com os dados do site.</li>
       <li>Cada peça pode ter a sua linha: selecione a peça e toque na cor. O rodapé do PDF lista as linhas usadas com o código da marca — a cor impressa é referência de tela, o código é o que se compra.</li>
       <li>Borde com 2 ou 3 fios de meada. Em furo que atravessa foto e papel, puxe devagar: papel fotográfico não fecha depois de rasgar.</li>
       <li>Espaçamento entre 2,5 e 3 mm é o mais seguro nesse material. Abaixo de 2 mm a tira de papel entre dois furos vira pó.</li>
@@ -828,6 +863,77 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   var STORE = "ponto-e-letra/molde/v1";
   var PHOTO_STORE = "ponto-e-letra/molde/foto/v1";
   var PHOTO_MAX_PX = 1600;
+
+  /* ---- a estante de moldes --------------------------------------------
+
+     Uma chave só para um molde só significava que começar um desenho novo
+     apagava o anterior, sem volta. Agora cada molde tem as suas chaves e este
+     índice diz quais existem e qual está aberto.
+
+     O índice guarda o NOME das chaves de cada molde, nunca o conteúdo. Gravar
+     acontece a cada gesto, e reescrever a estante inteira porque uma peça
+     andou um milímetro seria desperdício. É isso também que deixa o molde que
+     já estava gravado ficar exatamente onde está: ele entra na estante
+     apontando para as chaves antigas, sem nada ser copiado — numa cota quase
+     cheia, copiar a foto para migrar é a diferença entre migrar e perdê-la. */
+  var MOLDES = "ponto-e-letra/moldes/v1";
+  var estante = { v: 1, atual: "", itens: [] };
+
+  function novoId(){
+    return "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
+
+  function itemAtual(){
+    for (var i = 0; i < estante.itens.length; i++)
+      if (estante.itens[i].id === estante.atual) return estante.itens[i];
+    return null;
+  }
+
+  function salvaEstante(){
+    try { localStorage.setItem(MOLDES, JSON.stringify(estante)); } catch (e){}
+  }
+
+  function criaMolde(nome){
+    var id = novoId();
+    var it = { id: id, nome: nome || "", em: Date.now(), pecas: 0,
+               dados: STORE + "/" + id, foto: PHOTO_STORE + "/" + id };
+    estante.itens.unshift(it);
+    estante.atual = id;
+    salvaEstante();
+    return it;
+  }
+
+  function carregaEstante(){
+    var raw = null;
+    try { raw = localStorage.getItem(MOLDES); } catch (e){ return; }
+    if (raw){
+      var e;
+      try { e = JSON.parse(raw); } catch (err){ e = null; }
+      if (e && e.v === 1 && e.itens && e.itens.length){
+        estante = { v: 1, atual: e.atual || "",
+                    itens: e.itens.filter(function(i){ return i && i.id && i.dados && i.foto; }) };
+        if (!itemAtual() && estante.itens.length) estante.atual = estante.itens[0].id;
+        if (estante.itens.length) return;
+      }
+    }
+    // primeira abertura desta versão: o molde que já estava gravado entra na
+    // estante como está, apontando para as chaves de sempre
+    var tinha = false;
+    try { tinha = !!localStorage.getItem(STORE); } catch (e2){}
+    if (tinha){
+      estante = { v: 1, atual: "legado",
+                  itens: [{ id: "legado", nome: "", em: Date.now(), pecas: 0,
+                            dados: STORE, foto: PHOTO_STORE }] };
+      salvaEstante();
+    }
+  }
+
+  // o nome que um molde ganha sozinho: a primeira palavra bordada nele
+  function nomeSugerido(){
+    for (var i = 0; i < els.length; i++)
+      if (els[i].kind === "text" && (els[i].text || "").trim()) return els[i].text.trim();
+    return "";
+  }
   var saveTimer = 0;
   var restored = false;
 
@@ -1530,8 +1636,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   }
 
   function saveState(){
+    var it = itemAtual() || criaMolde(nomeSugerido());
     try {
-      localStorage.setItem(STORE, JSON.stringify({
+      localStorage.setItem(it.dados, JSON.stringify({
         v: 1,
         paper: { size: $("paperSize").value, or: $("paperOr").value,
                  w: $("paperW").value, h: $("paperH").value },
@@ -1541,7 +1648,12 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         mm: $("mm").value, pal: curPal, thread: thread, sel: sel,
         els: els.map(packEl)
       }));
-    } catch (e){ /* janela anônima ou cota cheia: seguir sem memória */ }
+    } catch (e){ /* janela anônima ou cota cheia: seguir sem memória */ return; }
+    it.em = Date.now();
+    it.pecas = els.length;
+    if (!it.nome) it.nome = nomeSugerido();
+    salvaEstante();
+    renderMoldes();
   }
 
   function scheduleSave(){
@@ -1561,9 +1673,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return "";
   }
 
-  function restoreState(){
+  function restoreState(chave){
     var raw;
-    try { raw = localStorage.getItem(STORE); } catch (e){ return false; }
+    try { raw = localStorage.getItem(chave); } catch (e){ return false; }
     if (!raw) return false;
     var s;
     try { s = JSON.parse(raw); } catch (e){ return false; }
@@ -1615,21 +1727,24 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   // a foto costuma ser o maior item do navegador: vai reduzida, e num formato
   // com perda, porque serve só de guia na tela e a 22% no PDF
   function savePhoto(img){
+    var it = itemAtual() || criaMolde(nomeSugerido());
     try {
       var k = Math.min(1, PHOTO_MAX_PX / Math.max(img.width, img.height));
       var c = document.createElement("canvas");
       c.width = Math.round(img.width * k);
       c.height = Math.round(img.height * k);
       c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      localStorage.setItem(PHOTO_STORE, c.toDataURL("image/jpeg", 0.85));
+      localStorage.setItem(it.foto, c.toDataURL("image/jpeg", 0.85));
     } catch (e){
-      try { localStorage.removeItem(PHOTO_STORE); } catch (e2){}
+      try { localStorage.removeItem(it.foto); } catch (e2){}
     }
   }
 
   function restorePhoto(){
+    var it = itemAtual();
+    if (!it) return;
     var url;
-    try { url = localStorage.getItem(PHOTO_STORE); } catch (e){ return; }
+    try { url = localStorage.getItem(it.foto); } catch (e){ return; }
     if (!url) return;
     var img = new Image();
     img.onload = function(){ photoImg = img; draw(); };
@@ -2135,8 +2250,10 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   cv.addEventListener("pointercancel", endDrag);
 
   function saveName(ext){
+    var it = itemAtual();
     var el = els[sel];
-    var t = (el && el.kind === "text" ? el.text : "bordado").trim().replace(/\s+/g, "-").replace(/[^A-Za-z0-9\-]/g, "");
+    var t = ((it && it.nome) || (el && el.kind === "text" ? el.text : "") || "bordado")
+      .trim().replace(/\s+/g, "-").replace(/[^A-Za-z0-9\-]/g, "");
     return "molde-" + (t || "ponto-cruz") + "." + ext;
   }
 
@@ -2270,10 +2387,10 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   function cabecalho(pdf, plano, idx){
     var pa = paperMM();
-    var t = els[sel];
+    var it = itemAtual(), t = els[sel];
     pdf.setFontSize(15);
     pdf.setTextColor(20);
-    pdf.text(t && t.kind === "text" ? (t.text || "molde de furos") : "molde de furos", 12, 15);
+    pdf.text((it && it.nome) || (t && t.kind === "text" && t.text) || "molde de furos", 12, 15);
 
     var y = 21;
     if (plano.tiled){
@@ -2706,6 +2823,191 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     contaLinhas();
   });
 
+  /* ---- a estante na tela ---------------------------------------------- */
+
+  function quando(ms){
+    if (!ms) return "agora";
+    var d = new Date(ms);
+    return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) + " às " +
+           d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function renderMoldes(){
+    var box = $("moldeLista");
+    if (!box) return;
+    box.innerHTML = "";
+    estante.itens.forEach(function(it){
+      var l = document.createElement("div");
+      l.className = "mold" + (it.id === estante.atual ? " on" : "");
+
+      var a = document.createElement("button");
+      a.type = "button"; a.className = "abre";
+      var nm = document.createElement("span");
+      nm.className = "nm"; nm.textContent = it.nome || "sem nome";
+      var qd = document.createElement("span");
+      qd.className = "qd";
+      qd.textContent = (it.pecas || 0) + ((it.pecas === 1) ? " peça" : " peças") + " · " + quando(it.em);
+      a.appendChild(nm); a.appendChild(qd);
+      a.addEventListener("click", function(){ abreMolde(it.id); });
+
+      var x = document.createElement("button");
+      x.type = "button"; x.className = "apaga";
+      x.textContent = "×";
+      x.title = "apagar este molde";
+      x.setAttribute("aria-label", "apagar o molde " + (it.nome || "sem nome"));
+      x.addEventListener("click", function(){ apagaMolde(it.id); });
+
+      l.appendChild(a); l.appendChild(x);
+      box.appendChild(l);
+    });
+    // o campo do nome não é reescrito enquanto estão digitando nele
+    var at = itemAtual(), campo = $("moldeNome");
+    if (at && campo && campo !== document.activeElement) campo.value = at.nome || "";
+  }
+
+  /* Abrir outro molde é trocar tudo o que está na tela: peças, papel, foto,
+     linha e o desfazer. O que estava aberto é gravado antes — nunca se perde
+     trabalho por ter clicado no molde errado. */
+  function abreItem(it){
+    if (!it) return;
+    photoImg = null; photoURL = null;
+    // `restored` é o que segura o redesenho cego das fontes, 1,4 s depois de
+    // abrir a página: molde vindo da memória não pode ser recalculado, senão
+    // perde os ajustes feitos ponto a ponto
+    restored = restoreState(it.dados);
+    if (!restored) moldeEmBranco();
+    renderChips(); syncControls(); renderMoldes();
+    restorePhoto(); mostraFonte(); draw(); mostraZoom(); resetHist();
+  }
+
+  function abreMolde(id){
+    if (id === estante.atual) return;
+    saveState();
+    estante.atual = id;
+    salvaEstante();
+    abreItem(itemAtual());
+  }
+
+  function moldeEmBranco(){
+    els = [];
+    syncPhotoSize();
+    lastPaper = paperMM();
+    var pa = paperMM();
+    photo.x = (pa.w - photo.w) / 2;
+    photo.y = pa.h * 0.14;
+    photoImg = null; photoURL = null;
+    addText();
+    els[0].x = photo.x - 6;
+    els[0].y = photo.y + photo.h - 10;
+  }
+
+  function apagaMolde(id){
+    var it = null;
+    estante.itens.forEach(function(x){ if (x.id === id) it = x; });
+    if (!it) return;
+    if (!confirm("Apagar o molde “" + (it.nome || "sem nome") + "”? Isso não se desfaz.")) return;
+    try { localStorage.removeItem(it.dados); } catch (e){}
+    try { localStorage.removeItem(it.foto); } catch (e){}
+    var era = estante.atual === id;
+    estante.itens = estante.itens.filter(function(x){ return x.id !== id; });
+    if (era){
+      // apagou o que estava aberto: abre o mais recente, ou uma folha limpa
+      if (estante.itens.length){
+        estante.atual = estante.itens[0].id;
+        salvaEstante();
+        abreItem(itemAtual());
+        return;
+      }
+      estante.atual = "";
+      criaMolde("");
+      moldeEmBranco();
+      renderChips(); syncControls(); draw(); resetHist();
+    }
+    salvaEstante();
+    renderMoldes();
+  }
+
+  function avisaArquivo(msg){
+    var p = $("moldeAviso");
+    if (p) p.textContent = msg || "";
+  }
+
+  /* ---- o molde como arquivo -------------------------------------------
+
+     O navegador guarda, mas não carrega: o trabalho não vai para outro
+     aparelho e some com os dados do site. O arquivo leva o molde inteiro, foto
+     junto, porque molde sem a foto perde o guia de onde cada peça fica. */
+  function exportaMolde(){
+    saveState();
+    var it = itemAtual();
+    if (!it) return;
+    var dados = null, foto = null;
+    try { dados = localStorage.getItem(it.dados); } catch (e){}
+    try { foto = localStorage.getItem(it.foto); } catch (e){}
+    if (!dados) return avisaArquivo("Não há nada gravado para salvar.");
+    var corpo;
+    try {
+      corpo = JSON.stringify({ app: "ponto-e-letra", v: 1, nome: it.nome || "sem nome",
+                               em: new Date().toISOString(), molde: JSON.parse(dados),
+                               foto: foto || null });
+    } catch (e){ return avisaArquivo("Não consegui montar o arquivo."); }
+    deliver(new Blob([corpo], { type: "application/json" }), saveName("json"), null);
+    avisaArquivo("Arquivo salvo com a foto junto.");
+  }
+
+  function importaMolde(arquivo){
+    var fr = new FileReader();
+    fr.onerror = function(){ avisaArquivo("Não consegui ler esse arquivo."); };
+    fr.onload = function(){
+      var a = null;
+      try { a = JSON.parse(String(fr.result)); } catch (e){}
+      if (!a || a.app !== "ponto-e-letra" || !a.molde || !a.molde.els || !a.molde.els.length)
+        return avisaArquivo("Esse arquivo não é um molde do ponto & letra.");
+      saveState();                     // o que está aberto continua guardado
+      var it = criaMolde(a.nome || "molde aberto de arquivo");
+      try { localStorage.setItem(it.dados, JSON.stringify(a.molde)); }
+      catch (e){
+        estante.itens = estante.itens.filter(function(x){ return x.id !== it.id; });
+        estante.atual = estante.itens.length ? estante.itens[0].id : "";
+        salvaEstante();
+        return avisaArquivo("Não coube na memória do navegador. Apague um molde antigo e tente de novo.");
+      }
+      // a foto é o item que estoura a cota; sem ela o molde ainda vale
+      if (typeof a.foto === "string" && a.foto.indexOf("data:image") === 0){
+        try { localStorage.setItem(it.foto, a.foto); } catch (e2){}
+      }
+      salvaEstante();
+      abreItem(it);
+      avisaArquivo("Molde aberto: “" + (it.nome || "sem nome") + "”.");
+    };
+    fr.readAsText(arquivo);
+  }
+
+  $("moldeNovo").addEventListener("click", function(){
+    saveState();
+    criaMolde("");
+    moldeEmBranco();
+    renderChips(); syncControls(); renderMoldes(); draw(); mostraZoom(); resetHist();
+    avisaArquivo("");
+  });
+
+  $("moldeNome").addEventListener("input", function(){
+    var it = itemAtual();
+    if (!it) return;
+    it.nome = this.value.trim();
+    salvaEstante();
+    var alvo = $("moldeLista").querySelector(".mold.on .nm");
+    if (alvo) alvo.textContent = it.nome || "sem nome";
+  });
+
+  $("moldeSalvar").addEventListener("click", exportaMolde);
+  $("moldeAbrir").addEventListener("click", function(){ $("moldeArq").click(); });
+  $("moldeArq").addEventListener("change", function(e){
+    var f = e.target.files && e.target.files[0];
+    if (f) importaMolde(f);
+    e.target.value = "";     // o mesmo arquivo pode ser aberto de novo
+  });
+
   /* ---- trilho e painéis ---------------------------------------------- */
   [].forEach.call(document.querySelectorAll(".rail button"), function(b){
     b.addEventListener("click", function(){
@@ -2725,17 +3027,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   function boot(){
     carregaLinhas();          // antes de restaurar: a paleta "minhas linhas"
-    restored = restoreState();   // só existe se houver o que ela mostre
-    if (!restored){
-      syncPhotoSize();
-      lastPaper = paperMM();
-      var pa = paperMM();
-      photo.x = (pa.w - photo.w) / 2;
-      photo.y = pa.h * 0.14;
-      addText();
-      els[0].x = photo.x - 6;
-      els[0].y = photo.y + photo.h - 10;
-    }
+    carregaEstante();         // e antes do molde: é ela que diz qual abrir
+    var it = itemAtual();
+    restored = !!it && restoreState(it.dados);
+    if (!restored) moldeEmBranco();
+    renderMoldes();
     renderPaletteList();
     renderSwatches();
     montaMarcas();
