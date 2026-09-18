@@ -68,6 +68,17 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   peça: centralizar na foto, centralizar no papel, alinhar pela base da foto — e, quando há uma
   peça acima na lista, alinhar com ela, que é o que resolve nome em duas linhas. Eles movem a
   caixa já girada, porque alinhar uma palavra inclinada pelo canto de cima dela a deixaria torta.
+- **Guias pontilhadas**: o botão da cruz, no canto da mesa, liga as guias — linhas pontilhadas
+  que atravessam a mesa de cima a baixo e de lado a lado. Da primeira vez ele abre uma cruz no
+  meio do papel; de resto, cada guia é puxada de dentro da régua para a mesa, arrastada para
+  onde você quiser e levada de volta para a régua para sumir. Cada uma diz em centímetros onde
+  está, pára em milímetro inteiro quando solta longe de tudo, e encaixa sozinha nas bordas e no
+  meio do papel e da foto, que é onde quase toda referência cai.
+  Arrastando uma peça ou a foto, os dois lados e o centro dela **encostam na guia** quando
+  passam perto — e um bloco laçado encosta pela caixa de tudo o que está nele, e não peça por
+  peça, senão o arranjo que se acabou de laçar chegaria do outro lado desmanchado — a folga do ímã é medida em pixels de tela, então ela é sempre a mesma
+  distância para o dedo, em qualquer zoom. As guias são de cada molde, ficam gravadas com ele
+  e não entram no PDF: são risco de tela, como a régua da mesa.
 - **Fio por linha**: quantos metros cada cor pede, somados por cor e repetidos na legenda do
   PDF. A conta fica escrita ao lado, com os números do espaçamento escolhido, porque quem vai à
   loja com um número merece saber de onde ele veio: a **frente** é geometria (duas diagonais de
@@ -127,7 +138,7 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   não sai do papel, e o bloco inteiro para com ela em vez de se desmanchar na borda. Com um
   bloco laçado, a barra de cima troca os campos da peça por quem está no laço e um botão que
   **apaga as peças laçadas de uma vez** — a moldura da foto não é peça e fica onde está, e um
-  desfazer devolve o bloco inteiro.
+  desfazer devolve o bloco inteiro. Com as guias ligadas, o bloco encosta nelas inteiro.
 - **Modo ponto a ponto**: um toque acende ou apaga um quadradinho, e arrastar sem soltar
   acende ou apaga a fileira inteira por onde o dedo (ou o botão) passa — quem decide se o
   traço acende ou apaga é o primeiro quadradinho dele, então voltar por cima do próprio

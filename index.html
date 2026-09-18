@@ -368,6 +368,41 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
 .ruler.v .l{right:11px;transform:translateY(-50%)}
 .corner{position:absolute;top:0;left:0;width:var(--rule);height:var(--rule);background:#fff;
   border-right:1px solid var(--line);border-bottom:1px solid var(--line);z-index:3}
+/* ---- guias ---------------------------------------------------------
+   A linha pontilhada atravessa a mesa inteira, e não só o papel: é assim que
+   ela serve de régua para o olho até na peça que ainda está fora da folha.
+   A faixa que se pega é mais larga que o risco, senão pegar uma guia de 1px
+   com o dedo seria sorte; o risco fica no meio dela. */
+.guias{position:absolute;top:var(--rule);left:var(--rule);right:0;bottom:0;
+  z-index:3;pointer-events:none;overflow:hidden}
+.guias .g{position:absolute;pointer-events:auto;touch-action:none}
+.guias .g.v{top:0;bottom:0;width:9px;margin-left:-4px;cursor:ew-resize}
+.guias .g.h{left:0;right:0;height:9px;margin-top:-4px;cursor:ns-resize}
+/* O pontilhado é desenhado, e não feito de borda tracejada: borda tracejada
+   muda de fase conforme o tamanho do elemento, e as guias ficariam com
+   tracinhos diferentes entre si. O risco é da cor da régua, e não da cor de
+   destaque do app, porque linha de bordar também é amarela — dois riscos
+   amarelos na tela seriam a peça e a guia disputando o mesmo significado. */
+.guias .g::before{content:"";position:absolute;background-repeat:repeat}
+.guias .g.v::before{left:4px;top:0;bottom:0;width:1px;
+  background-image:repeating-linear-gradient(180deg,var(--ink-soft) 0 3px,transparent 3px 7px)}
+.guias .g.h::before{top:4px;left:0;right:0;height:1px;
+  background-image:repeating-linear-gradient(90deg,var(--ink-soft) 0 3px,transparent 3px 7px)}
+/* o número é metade da guia: guia sem medida volta a ser chute */
+.guias .g i{position:absolute;font-family:var(--display);font-style:normal;font-size:9px;
+  line-height:1;padding:2px 3px;border-radius:3px;white-space:nowrap;
+  background:var(--lemon);color:var(--ink);box-shadow:0 1px 3px rgba(56,73,89,.25)}
+.guias .g.v i{top:3px;left:7px}
+.guias .g.h i{left:3px;top:7px}
+/* na mão o pontilhado vira risco cheio: é como a guia diz qual delas se mexeu */
+.guias .g.pega::before{background-image:none;background-color:var(--ink)}
+
+/* com as guias ligadas a régua deixa de ser enfeite: arrastar de dentro dela
+   solta uma guia na mesa */
+.mesa.guiando .ruler.h{cursor:ns-resize}
+.mesa.guiando .ruler.v{cursor:ew-resize}
+.mesa.guiando .ruler{touch-action:none}
+
 /* a mesa rola quando o papel cresce; margin:auto no filho centraliza sem
    cortar as bordas, que é o defeito conhecido de centralizar com flex e
    overflow ao mesmo tempo */
@@ -841,6 +876,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <li>Ajuste ponto a ponto <b>sobrevive</b> a mexer na altura, no traço, na sensibilidade e na fonte: o desenho é refeito e os quadradinhos que você acendeu ou apagou vão junto, acompanhando a grade nova. Quem descarta é só o botão <b>recalcular</b>, e ele pergunta antes.</li>
       <li>Para o nome curvado por cima da foto, use o campo <b>arco</b> na barra de cima. Se a cursiva fechar demais em letra pequena, abra o <b>espaço</b> entre as letras — ele é contado em quadradinhos, os mesmos que viram furo.</li>
       <li>Para posicionar fino, use as setas do teclado: meio milímetro por toque, cinco com Shift. Os três botões na aba <b>peças</b> centralizam a peça na foto ou no papel, e encostam ela na base da foto.</li>
+      <li>O botão da cruz pontilhada, no canto da mesa, liga as <b>guias</b>: linhas pontilhadas que atravessam a mesa inteira. Puxe uma de dentro da régua para soltar outra, e leve-a de volta para a régua para tirá-la. Arrastando, a peça encosta sozinha na guia — é o jeito de alinhar no olho sem sair torto. Um bloco laçado encosta inteiro, pela caixa de tudo o que está nele. Elas ficam na tela e não saem no PDF.</li>
       <li>Guarde o arquivo do molde na aba <b>moldes</b> antes de mudar de aparelho ou limpar o navegador. O que fica só no navegador não vai a lugar nenhum e some com os dados do site.</li>
       <li>A aba <b>molde</b> diz quantos metros cada linha pede, e mostra a conta que usou. A frente é exata; o avesso e os 15% de perda são estimativa, então compre com folga.</li>
       <li>Cada peça pode ter a sua linha: selecione a peça e toque na cor. O rodapé do PDF lista as linhas usadas com o código da marca — a cor impressa é referência de tela, o código é o que se compra.</li>
@@ -857,7 +893,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   <div class="ruler h" id="rulerH"></div>
   <div class="ruler v" id="rulerV"></div>
   <div class="stage" id="stage"><canvas id="grid" width="10" height="10"></canvas></div>
+  <div class="guias" id="guias" aria-hidden="true"></div>
   <div class="zoom">
+    <button id="zGuias" title="guias pontilhadas" aria-label="guias pontilhadas" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3"/></svg></button>
     <button id="zOut" title="afastar" aria-label="afastar">−</button>
     <button id="zVal" title="encaixar o papel na tela">100%</button>
     <button id="zIn" title="aproximar" aria-label="aproximar">+</button>
@@ -954,6 +992,17 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   var editing = false;
   var MODO_MOVER = "Arraste a palavra ou a foto para posicionar, ou arraste no vazio para laçar várias e mover juntas. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.";
   var zoom = 1, fitK = 1, mao = false;   /* vista: escala relativa ao encaixe */
+  /* As guias: linhas pontilhadas que atravessam a mesa de ponta a ponta, para
+     posicionar no olho sem sair torto. Os valores são milímetros de papel — e
+     não pixels de tela — porque é isso que as mantém no mesmo centímetro
+     depois de um zoom, de um rolar ou de uma janela redimensionada.
+     "v" são as que descem, medidas na régua de cima; "h" as que atravessam,
+     medidas na régua da esquerda. */
+  var guias = { on: false, v: [], h: [] };
+  /* A folga do ímã, em pixels de tela. Em pixels ela é sempre a mesma distância
+     para o dedo; em milímetros ficaria larga no zoom pequeno e sumiria no
+     grande. Vira milímetros dividindo pela escala da vista, onde é usada. */
+  var FOLGA_PX = 6;
   var focus = "el";   /* "el" | "photo" | "none" — decide a barra de cima */
 
   /* ---- o laço ---------------------------------------------------------
@@ -2200,6 +2249,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     }
     $("rulerH").innerHTML = a;
     $("rulerV").innerHTML = b;
+    guiasRender(ox, oy, k);      // as guias medem pela mesma origem que a régua
   }
 
   function draw(){
@@ -2351,6 +2401,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
                     w: $("photoWmm").value, h: $("photoHmm").value,
                     x: Math.round(photo.x * 10) / 10, y: Math.round(photo.y * 10) / 10 },
         mm: $("mm").value, thread: thread, sel: sel,
+        guias: { on: guias.on ? 1 : 0, v: guias.v, h: guias.h },
         els: els.map(packEl)
       }));
     } catch (e){ marcaMemoria(true, "o molde"); return; }
@@ -2420,6 +2471,14 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
     // s.pal, de quando havia paletas prontas, é ignorado de propósito
     if (typeof s.thread === "string" && /^#[0-9A-Fa-f]{6}$/.test(s.thread)) thread = s.thread;
+
+    // as guias são do molde, e não do navegador: quem guardou o arranjo com uma
+    // guia na base da foto quer achá-la ali na volta
+    var gs = s.guias;
+    guias.on = !!(gs && gs.on);
+    guias.v = (gs && gs.v || []).map(Number).filter(function(v){ return isFinite(v); });
+    guias.h = (gs && gs.h || []).map(Number).filter(function(v){ return isFinite(v); });
+    guiasApara();
 
     els = pieces;
     sel = Math.min(Math.max(0, s.sel | 0), els.length - 1);
@@ -2805,6 +2864,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     clampPhoto();
     els.forEach(function(el, i){ el.x = photo.x + dx[i]; el.y = photo.y + dy[i]; });
     lastPaper = after;
+    guiasApara();        // a guia que sobrou fora da folha nova mediria mentira
     draw();
   }
   ["paperSize","paperOr"].forEach(function(id){ $(id).addEventListener("change", onPaperChange); });
@@ -2972,6 +3032,27 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return { x: (e.clientX - b.left) / k, y: (e.clientY - b.top) / k };
   }
 
+  /* Ímã das guias. A caixa que se compara é a JÁ GIRADA, pelo mesmo motivo
+     dos botões de alinhar: encostar uma palavra inclinada pelo canto de cima
+     dela a deixaria torta. Três referências por eixo — os dois lados e o meio
+     —, porque tanto faz alinhar duas palavras pela esquerda ou pelo centro,
+     e a guia não tem como adivinhar qual das duas você quis. */
+  function imanta(b){
+    var g = { x: 0, y: 0 };
+    if (!guias.on) return g;
+    var folga = FOLGA_PX / (cv._k || 1);
+    [["x", "w", guias.v], ["y", "h", guias.h]].forEach(function(eixo){
+      var bordas = [b[eixo[0]], b[eixo[0]] + b[eixo[1]] / 2, b[eixo[0]] + b[eixo[1]]];
+      var dist = folga;
+      for (var i = 0; i < bordas.length; i++)
+        for (var j = 0; j < eixo[2].length; j++){
+          var d = eixo[2][j] - bordas[i];
+          if (Math.abs(d) < dist){ dist = Math.abs(d); g[eixo[0]] = d; }
+        }
+    });
+    return g;
+  }
+
   function hitEl(pt){
     for (var i = els.length - 1; i >= 0; i--){
       var l = paperToLocal(els[i], pt.x, pt.y);
@@ -3033,8 +3114,25 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
              y: Math.max(-by, Math.min(pa.h - photo.h - by, dy)) };
   }
 
+  // a caixa de tudo o que está laçado, com as peças já giradas. O bloco anda
+  // rígido, então ela é medida uma vez e depois só acompanha o deslocamento
+  function caixaDoLaco(){
+    var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    marca.forEach(function(i){
+      if (!els[i]) return;
+      var b = elPaperBox(els[i]);
+      x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y);
+      x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h);
+    });
+    if (marcaFoto){
+      x0 = Math.min(x0, photo.x); y0 = Math.min(y0, photo.y);
+      x1 = Math.max(x1, photo.x + photo.w); y1 = Math.max(y1, photo.y + photo.h);
+    }
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+  }
+
   function pegaLaco(pt){
-    var d = { kind:"laco", x: pt.x, y: pt.y, itens: [], foto: null };
+    var d = { kind:"laco", x: pt.x, y: pt.y, itens: [], foto: null, caixa: caixaDoLaco() };
     marca.forEach(function(i){
       if (els[i]) d.itens.push({ i: i, x: els[i].x, y: els[i].y });
     });
@@ -3047,6 +3145,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function arrastaLaco(pt){
     var f = drag.foto || { x: 0, y: 0 };
     var p = seguraPasso(pt.x - drag.x, pt.y - drag.y, f.x, f.y);
+    /* O ímã das guias pega o bloco pela caixa de tudo junto, e não peça por
+       peça: cada uma encostando na sua guia desmancharia o arranjo que o laço
+       existe para preservar. Depois de encostar, o passo passa pela foto de
+       novo — encostar numa guia não é motivo para a foto sair do papel. */
+    var c = drag.caixa;
+    var g = imanta({ x: c.x + p.x, y: c.y + p.y, w: c.w, h: c.h });
+    if (g.x || g.y) p = seguraPasso(p.x + g.x, p.y + g.y, f.x, f.y);
     drag.itens.forEach(function(it){
       els[it.i].x = Math.round((it.x + p.x) * 10) / 10;
       els[it.i].y = Math.round((it.y + p.y) * 10) / 10;
@@ -3251,13 +3356,20 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var pt = evPos(e);
     if (drag.kind === "laco"){
       arrastaLaco(pt);
-    } else if (drag.kind === "el"){
+      draw();
+      return;
+    }
+    var nx = pt.x - drag.dx, ny = pt.y - drag.dy, g;
+    if (drag.kind === "el"){
       var el = els[drag.i];
-      el.x = Math.round((pt.x - drag.dx) * 10) / 10;
-      el.y = Math.round((pt.y - drag.dy) * 10) / 10;
+      var b = elPaperBox(el);      // onde a caixa girada está agora...
+      g = imanta({ x: b.x + nx - el.x, y: b.y + ny - el.y, w: b.w, h: b.h });  // ...e onde ia parar
+      el.x = Math.round((nx + g.x) * 10) / 10;
+      el.y = Math.round((ny + g.y) * 10) / 10;
     } else {
-      photo.x = Math.round((pt.x - drag.dx) * 10) / 10;
-      photo.y = Math.round((pt.y - drag.dy) * 10) / 10;
+      g = imanta({ x: nx, y: ny, w: photo.w, h: photo.h });
+      photo.x = Math.round((nx + g.x) * 10) / 10;
+      photo.y = Math.round((ny + g.y) * 10) / 10;
       clampPhoto();
     }
     draw();
@@ -4100,13 +4212,21 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   $("zIn").addEventListener("click", function(){ setZoom(zoom * 1.25); });
   $("zOut").addEventListener("click", function(){ setZoom(zoom / 1.25); });
   $("zVal").addEventListener("click", function(){ setZoom(1); });
+  /* A dica do rodapé tem três donos — a mãozinha, as guias e o arraste comum —
+     e sai de um lugar só para nenhum deles apagar o aviso do outro. */
+  function mostraDica(){
+    $("modeHint").textContent = mao
+      ? "Arraste para mover a vista. Toque de novo na mãozinha para voltar a posicionar as peças."
+      : guias.on
+        ? "Puxe da régua para soltar outra guia e leve a guia de volta para a régua para tirá-la. Arrastando, a peça encosta na guia."
+        : "Arraste a palavra ou a foto para posicionar. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.";
+  }
+
   $("zPan").addEventListener("click", function(){
     mao = !mao;
     this.classList.toggle("on", mao);
     stage.classList.toggle("mao", mao);
-    $("modeHint").textContent = mao
-      ? "Arraste para mover a vista. Toque de novo na mãozinha para voltar a posicionar as peças."
-      : MODO_MOVER;
+    mostraDica();
   });
 
   stage.addEventListener("scroll", function(){ rulers(cv._k || 1); });
@@ -4116,6 +4236,141 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     e.preventDefault();
     setZoom(zoom * (e.deltaY < 0 ? 1.12 : 1 / 1.12), e.clientX, e.clientY);
   }, { passive: false });
+
+  /* ---- guias pontilhadas ----------------------------------------------
+
+     Os botões de alinhar resolvem o centro e a seta resolve o meio milímetro.
+     O que faltava era o meio do caminho: uma linha de referência escolhida por
+     você — "as duas palavras começam aqui", "o coração fica nesta altura" —
+     para arrastar no olho e ainda assim parar no lugar certo.
+
+     A guia nasce puxada da régua para dentro da mesa e volta para a régua para
+     ser tirada, que é como se tira uma régua de verdade de cima do papel. Ela
+     é risco de tela: não entra no molde nem no PDF, porque nunca esteve no
+     papel — o desenho do PDF sai do canvas, e a guia é um elemento por cima
+     dele. */
+
+  var puxa = null;        /* a guia na mão: {eixo, i} */
+
+  function guiasRender(ox, oy, k){
+    var box = $("guias");
+    if (!box) return;
+    if (!guias.on){ if (box.firstChild) box.innerHTML = ""; return; }
+    var h = "";
+    guias.v.forEach(function(mm, i){
+      h += '<span class="g v" data-eixo="v" data-i="' + i + '" style="left:' +
+           (ox + mm * k).toFixed(1) + 'px"><i>' + fmt(mm / 10) + '</i></span>';
+    });
+    guias.h.forEach(function(mm, i){
+      h += '<span class="g h" data-eixo="h" data-i="' + i + '" style="top:' +
+           (oy + mm * k).toFixed(1) + 'px"><i>' + fmt(mm / 10) + '</i></span>';
+    });
+    box.innerHTML = h;
+    if (puxa){
+      var g = box.querySelector('.g.' + puxa.eixo + '[data-i="' + puxa.i + '"]');
+      if (g) g.classList.add("pega");
+    }
+  }
+
+  /* Onde uma guia solta gosta de parar: as bordas e o meio do papel, as bordas
+     e o meio da foto. Longe delas, o milímetro inteiro mais próximo — guia em
+     73,4 mm é número que ninguém repete com a régua na mão. */
+  function encaixaGuia(eixo, v){
+    var pa = paperMM();
+    var notas = eixo === "v"
+      ? [0, pa.w / 2, pa.w, photo.x, photo.x + photo.w / 2, photo.x + photo.w]
+      : [0, pa.h / 2, pa.h, photo.y, photo.y + photo.h / 2, photo.y + photo.h];
+    var dist = FOLGA_PX / (cv._k || 1), achou = null;
+    for (var i = 0; i < notas.length; i++){
+      var d = Math.abs(notas[i] - v);
+      if (d < dist){ dist = d; achou = notas[i]; }
+    }
+    return achou === null ? Math.round(v) : Math.round(achou * 10) / 10;
+  }
+
+  // guia fora do papel não mede nada, pela mesma razão que a régua da mesa pára
+  // na borda da folha: o zero dela é o papel, não a mesa
+  function guiasApara(){
+    var pa = paperMM();
+    guias.v = guias.v.filter(function(v){ return v >= 0 && v <= pa.w; });
+    guias.h = guias.h.filter(function(v){ return v >= 0 && v <= pa.h; });
+  }
+
+  function moveGuia(e){
+    if (!puxa) return;
+    e.preventDefault();
+    var pt = evPos(e);
+    guias[puxa.eixo][puxa.i] = encaixaGuia(puxa.eixo, puxa.eixo === "v" ? pt.x : pt.y);
+    rulers(cv._k || 1);
+  }
+
+  function soltaGuia(){
+    if (!puxa) return;
+    var pa = paperMM(), lim = puxa.eixo === "v" ? pa.w : pa.h;
+    var v = guias[puxa.eixo][puxa.i];
+    if (!(v >= 0 && v <= lim)) guias[puxa.eixo].splice(puxa.i, 1);
+    puxa = null;
+    rulers(cv._k || 1);
+    scheduleSave();
+  }
+
+  // A régua de cima solta a guia que atravessa e a da esquerda solta a que
+  // desce — é o gesto de empurrar uma régua de verdade para fora da borda.
+  // O toque seco na régua não deixa guia nenhuma: ela nasce fora do papel e
+  // soltaGuia() a descarta.
+  [["rulerH", "h"], ["rulerV", "v"]].forEach(function(par){
+    var r = $(par[0]), eixo = par[1];
+    r.addEventListener("pointerdown", function(e){
+      if (!guias.on) return;
+      e.preventDefault();
+      r.setPointerCapture(e.pointerId);
+      var pt = evPos(e);
+      guias[eixo].push(encaixaGuia(eixo, eixo === "v" ? pt.x : pt.y));
+      puxa = { eixo: eixo, i: guias[eixo].length - 1 };
+      rulers(cv._k || 1);
+    });
+    r.addEventListener("pointermove", moveGuia);
+    r.addEventListener("pointerup", soltaGuia);
+    r.addEventListener("pointercancel", soltaGuia);
+  });
+
+  // A captura fica na camada, e não na guia: cada mexida refaz os riscos, e o
+  // elemento que recebeu o toque deixa de existir no meio do arraste.
+  $("guias").addEventListener("pointerdown", function(e){
+    var g = e.target;
+    while (g && g !== this && !(g.classList && g.classList.contains("g"))) g = g.parentNode;
+    if (!g || g === this) return;
+    e.preventDefault();
+    this.setPointerCapture(e.pointerId);
+    puxa = { eixo: g.dataset.eixo, i: +g.dataset.i };
+    g.classList.add("pega");
+  });
+  $("guias").addEventListener("pointermove", moveGuia);
+  $("guias").addEventListener("pointerup", soltaGuia);
+  $("guias").addEventListener("pointercancel", soltaGuia);
+
+  // a opção é do molde, e não do navegador: abrir outro molde acende ou apaga o
+  // botão junto com as guias dele
+  function guiasSync(){
+    $("zGuias").classList.toggle("on", guias.on);
+    $("zGuias").setAttribute("aria-pressed", guias.on ? "true" : "false");
+    $("mesa").classList.toggle("guiando", guias.on);
+    mostraDica();
+    rulers(cv._k || 1);
+  }
+
+  $("zGuias").addEventListener("click", function(){
+    guias.on = !guias.on;
+    // ligar e nada aparecer pareceria botão quebrado: da primeira vez a opção
+    // abre a cruz no meio do papel, que é de onde quase todo arranjo parte
+    if (guias.on && !guias.v.length && !guias.h.length){
+      var pa = paperMM();
+      guias.v = [Math.round(pa.w / 2 * 10) / 10];
+      guias.h = [Math.round(pa.h / 2 * 10) / 10];
+    }
+    guiasSync();
+    scheduleSave();
+  });
 
   /* ---- painel da linha ------------------------------------------------ */
   $("catBusca").addEventListener("input", listaCatalogo);
@@ -4269,7 +4524,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     restored = restoreState(it.dados);
     if (!restored) moldeEmBranco();
     renderChips(); syncControls(); renderMoldes();
-    restorePhoto(); mostraFonte(); draw(); mostraZoom(); resetHist();
+    restorePhoto(); mostraFonte(); draw(); mostraZoom(); guiasSync(); resetHist();
   }
 
   function abreMolde(id){
@@ -4282,6 +4537,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   function moldeEmBranco(){
     els = [];
+    guias.on = false; guias.v = []; guias.h = [];
     syncPhotoSize();
     lastPaper = paperMM();
     var pa = paperMM();
@@ -4466,6 +4722,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     mostraFonte();
     draw();
     mostraZoom();
+    guiasSync();
     resetHist();
   }
   if (document.fonts && document.fonts.ready){ document.fonts.ready.then(boot); } else boot();

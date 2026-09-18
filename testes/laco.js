@@ -29,7 +29,7 @@ const perto = (a, b, t) => Math.abs(a - b) <= (t === undefined ? 0.051 : t);
       return { foto: { x: +d.photoBox.x, y: +d.photoBox.y,
                        w: +d.photoBox.w, h: +d.photoBox.h },
                mm: parseFloat(d.mm),
-               els: d.els.map(e => ({ x: +e.x, y: +e.y,
+               els: d.els.map(e => ({ x: +e.x, y: +e.y, rot: +e.rot,
                                       cols: e.cells[0].length, rows: e.cells.length })) };
     });
   };
@@ -63,6 +63,22 @@ const perto = (a, b, t) => Math.abs(a - b) <= (t === undefined ? 0.051 : t);
   // o centro da peça acerta o alvo mesmo girada: o giro é em torno dele
   const centro = (st, i) => ({ x: st.els[i].x + st.els[i].cols * st.mm / 2,
                                y: st.els[i].y + st.els[i].rows * st.mm / 2 });
+
+  // a caixa da peça JÁ GIRADA, a mesma que o ímã das guias compara
+  const caixa = (e, mm) => {
+    const w = e.cols * mm, h = e.rows * mm, a = e.rot * Math.PI / 180;
+    const W = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a));
+    const H = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a));
+    return { x: e.x + w / 2 - W / 2, y: e.y + h / 2 - H / 2, w: W, h: H };
+  };
+  // e a caixa de tudo o que está laçado, que é por onde o bloco encosta
+  const caixaDoBloco = (st, comFoto) => {
+    const bs = st.els.map(e => caixa(e, st.mm));
+    if (comFoto) bs.push(st.foto);
+    const x = Math.min(...bs.map(b => b.x)), y = Math.min(...bs.map(b => b.y));
+    return { x, y, w: Math.max(...bs.map(b => b.x + b.w)) - x,
+             h: Math.max(...bs.map(b => b.y + b.h)) - y };
+  };
   const seta = async (tecla, n) => { for (let i = 0; i < n; i++) await pg.locator("body").press(tecla); };
   // o que prova que o bloco não se desmanchou: a distância de cada peça até a
   // foto é a mesma de antes
@@ -150,7 +166,39 @@ const perto = (a, b, t) => Math.abs(a - b) <= (t === undefined ? 0.051 : t);
   await pg.waitForTimeout(200);
   ok(/hide/.test(await noLaco()), "e Shift de novo na mesma peça tira ela do laço");
 
-  // ---- 9. apagar o bloco laçado ----------------------------------------
+  // ---- 9. o ímã das guias pega o bloco pela caixa de todos juntos --------
+  // é a regra que o laço existe para proteger: se cada peça encostasse na sua
+  // guia, o arranjo que se acabou de laçar chegaria do outro lado desmanchado
+  await pg.click("#zGuias");                // a cruz nasce no meio do papel
+  await pg.waitForTimeout(300);
+  await arrasta([1, 1], [209, 296]);
+  await pg.waitForTimeout(200);
+  st = await estado();
+  const arranjoAntes = arranjo(st);
+  const bloco = caixaDoBloco(st, true);
+  const GUIA = 105;                         // metade de 210 mm de papel
+  // a mira é o meio do bloco, e não a borda: com a foto dentro do laço, uma
+  // borda longe da guia pediria um passo que a foto não tem para dar — ela
+  // pararia na borda do papel antes de o ímã ter chance
+  const pedido = GUIA + 1.2 - (bloco.x + bloco.w / 2);
+  const folgaFoto = pedido < 0 ? -st.foto.x : 210 - st.foto.w - st.foto.x;
+  ok(Math.abs(pedido) < Math.abs(folgaFoto),
+     "o passo pedido cabe no que a foto pode andar (" + pedido.toFixed(1) +
+     " mm de " + folgaFoto.toFixed(1) + ")");
+  // o bloco se pega longe das guias: a faixa da guia é a que responde ao
+  // toque ali, e o arraste sairia mexendo nela em vez de no bloco
+  await arrasta([130, 100], [130 + pedido, 100]);
+  st = await estado();
+  const blocoDepois = caixaDoBloco(st, true);
+  const depois = blocoDepois.x + blocoDepois.w / 2;
+  ok(perto(depois, GUIA), "o bloco encostou na guia pelo meio de todos juntos (parou em " +
+     depois.toFixed(2) + " mm, guia em " + GUIA + ")");
+  ok(mesmoArranjo(arranjo(st), arranjoAntes),
+     "e encostou inteiro: o ímã não desmanchou o arranjo de dentro do bloco");
+  await pg.click("#zGuias");                // desliga: o resto não é sobre guias
+  await pg.waitForTimeout(300);
+
+  // ---- 10. apagar o bloco laçado ----------------------------------------
   await arrasta([1, 1], [209, 296]);        // laça tudo de novo
   await pg.waitForTimeout(200);
   ok(/2 peças e a foto no laço/.test(await diz()), "tudo laçado outra vez");
@@ -164,7 +212,7 @@ const perto = (a, b, t) => Math.abs(a - b) <= (t === undefined ? 0.051 : t);
      "e deixou a moldura da foto onde estava");
   ok(/hide/.test(await noLaco()), "sem peça nenhuma, a barra do bloco sai da frente");
 
-  // ---- 10. e volta num passo só ------------------------------------------
+  // ---- 11. e volta num passo só ------------------------------------------
   await pg.locator("body").press("Control+z");
   st = await estado();
   ok(st.els.length === 2 &&

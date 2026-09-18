@@ -149,6 +149,14 @@ Nada falta deste item.
   código confere `"letterSpacing" in ctx` e, se não houver, simplesmente não
   espaça — o controle fica na barra sem fazer nada. Em 2026 isso é raro, mas
   controle que não faz nada e não diz por quê é pior que controle ausente.
+- **A faixa de pegar a guia rouba o toque da peça que está debaixo dela.** São
+  9 px em volta do risco, com o risco no meio: pegar 1 px com o dedo seria
+  sorte, mas a peça que cai exatamente sobre a guia precisa ser pega um pouco
+  ao lado. Vale o mesmo para a mãozinha: arrastar a vista começando em cima de
+  uma guia arrasta a guia.
+- **As guias ficam de fora do desfazer.** Elas são móvel de tela, como o zoom,
+  e não entram na pilha — tirar uma guia sem querer se resolve puxando outra.
+  Ficam gravadas com o molde, isso sim.
 - **`testes/amostra.js` tem uma cópia dos desenhos dos símbolos.** Ele desenha
   sem abrir o app, então repete a tabela do `index.html`. Se os símbolos mudarem,
   a amostra fica mentindo sem ninguém notar.
@@ -184,19 +192,19 @@ mudança de aplicativo:
 
 `testes/` cobre o repartir em folhas, a posição em cada folha, a emenda, a cor
 por peça, a estante, a montagem da tela no Chromium, as setas e botões de
-alinhar, o arco e o espaçamento das letras, a conta de fio, o ajuste à mão que
-sobrevive à altura, o arraste que acende quadradinho, e o laço que move e apaga
-o bloco.
-São quinze conjuntos; `testes/roda.sh` roda todos. O que **não** existe:
+alinhar, as guias e o ímã delas, o arco e o espaçamento das letras, a conta de
+fio, o ajuste à mão que sobrevive à altura, o arraste que acende quadradinho, e
+o laço que move e apaga o bloco. São dezesseis conjuntos; `testes/roda.sh` roda
+todos. O que **não** existe:
 
 - Nada que exercite o desenho no canvas — `textMatrix()`, que transforma o
   traço da fonte em quadradinhos, é o coração do app e não tem teste nenhum.
   Um teste dele não é óbvio: o resultado depende de como o navegador rasteriza
   a fonte, então comparar com uma matriz fixa quebraria sozinho.
-- Nada que exercite a pinça de dois dedos, nem o arraste de uma peça sozinha.
-  Os outros dois arrastes saíram desta lista: `traco.js` desenha uma fileira com
-  o botão apertado e `laco.js` laça foto e peças e move o bloco, os dois
-  conferindo milímetro por milímetro no que o app gravou.
+- Quase nada que exercite arrastar. `guias.js` arrasta com o mouse — puxa a
+  guia da régua e leva a peça até encostar nela —, e é o único. A pinça de dois
+  dedos e o modo ponto a ponto seguem sem teste, e `posicao.js` mexe na página
+  só pelo teclado e pelos botões.
 - Nada compara o PDF com uma imagem de referência. Os testes leem coordenadas
   de dentro do arquivo, o que pega o molde no lugar errado, mas não pega feio.
 - Nada roda num navegador de celular de verdade. `tela.js` usa um Chromium de
