@@ -231,11 +231,20 @@ clique soma a peça. **Se você preferir pelo encostar, é uma linha só** (a
 função `dentro()` em `index.html`).
 
 **Com um bloco laçado, a barra de cima esconde os campos da peça.** Texto,
-fonte, altura, giro, espelhar, apagar, duplicar e os botões de alinhar mexeriam
-em uma só das peças laçadas, e ninguém saberia em qual. No lugar deles a barra
-diz o que está no laço. Isso quer dizer que **o laço serve para mover, e só**:
-para o resto, clique numa peça sozinha. Se você quiser apagar ou girar o bloco
-inteiro, dá para fazer — só não fiz sem você decidir.
+fonte, altura, giro, espelhar, duplicar e os botões de alinhar mexeriam em uma
+só das peças laçadas, e ninguém saberia em qual. No lugar deles a barra diz o
+que está no laço e traz o botão de **apagar as peças laçadas**, que você pediu
+depois. As outras ações continuam sendo de uma peça de cada vez: para elas,
+clique numa peça sozinha. Girar ou duplicar o bloco inteiro dá para fazer — só
+não fiz sem você decidir.
+
+Três coisas dentro do apagar, que também foram minhas. Ele **não pergunta
+antes**, como o apagar de uma peça nunca perguntou: quem devolve é o desfazer,
+num passo só. Ele **não tira a foto**, mesmo quando ela está laçada — a moldura
+é o lugar da foto no papel, e não uma coisa posta em cima dele; hoje nem existe
+jeito de tirar a foto sem abrir outro molde. E o rótulo do botão diz o número
+("apagar as 2 peças"), porque no celular ele é a única coisa da barra do laço
+que cabe na tela sem rolar.
 
 **A foto segura o bloco na borda.** A foto não pode sair do papel (isso já era
 assim), e uma peça pode. Se cada um obedecesse à sua própria regra, o bloco se

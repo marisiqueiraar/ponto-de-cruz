@@ -160,10 +160,11 @@ Nada falta deste item.
 - **`testes/amostra.js` tem uma cópia dos desenhos dos símbolos.** Ele desenha
   sem abrir o app, então repete a tabela do `index.html`. Se os símbolos mudarem,
   a amostra fica mentindo sem ninguém notar.
-- **O laço só move.** Girar, espelhar, apagar, duplicar e os botões de alinhar
-  continuam valendo para a peça selecionada, uma de cada vez — com um bloco
-  laçado a barra esconde esses campos em vez de mexer em uma só das laçadas. É
-  decisão de escopo, não limitação: está em [REVISAR.md](REVISAR.md), item 6.
+- **O laço move e apaga, e só.** Girar, espelhar, duplicar e os botões de
+  alinhar continuam valendo para a peça selecionada, uma de cada vez — com um
+  bloco laçado a barra esconde esses campos em vez de mexer em uma só das
+  laçadas. É decisão de escopo, não limitação: está em
+  [REVISAR.md](REVISAR.md), item 6.
 - **`sw.js` continua na raiz.** Ele existe só para desregistrar o service
   worker que o app React deixou para trás. Em algum momento todo mundo que
   abriu aquela versão já passou por aqui e ele pode sair — mas não há como
@@ -191,8 +192,10 @@ mudança de aplicativo:
 
 `testes/` cobre o repartir em folhas, a posição em cada folha, a emenda, a cor
 por peça, a estante, a montagem da tela no Chromium, as setas e botões de
-alinhar, as guias e o ímã delas, o arco e o espaçamento das letras, e a conta de
-fio. São treze conjuntos; `testes/roda.sh` roda todos. O que **não** existe:
+alinhar, o arco e o espaçamento das letras, a conta de fio, o ajuste à mão que
+sobrevive à altura, o arraste que acende quadradinho, e o laço que move e apaga
+o bloco.
+São quinze conjuntos; `testes/roda.sh` roda todos. O que **não** existe:
 
 - Nada que exercite o desenho no canvas — `textMatrix()`, que transforma o
   traço da fonte em quadradinhos, é o coração do app e não tem teste nenhum.

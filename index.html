@@ -482,6 +482,10 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   #pdf{order:2;padding:0 12px}
   #hist{order:4;flex:0 0 auto}
   #ctlActs{order:5;flex:0 0 auto}
+  /* No celular a barra rola, e o que rola para fora da máscara é o que estiver
+     por último. Entre dizer o que está laçado e poder apagar, fica o botão:
+     ele já traz a conta no rótulo, e os contornos na grade mostram o resto. */
+  #ctlGrupoTxt{display:none}
   .tools{order:6;flex:1 1 90px;min-width:0;padding:0}
 
   .rail{flex-direction:row;gap:0;padding:4px;border-right:0;
@@ -534,7 +538,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   <div class="tools">
     <span class="none" id="ctlNone">&nbsp;</span>
     <span class="grp hide" id="ctlEdit"><span class="none" id="ctlEditTxt">ajustando ponto a ponto</span></span>
-    <span class="grp hide" id="ctlGrupo"><span class="none" id="ctlGrupoTxt"></span></span>
+    <span class="grp hide" id="ctlGrupo"><span class="none" id="ctlGrupoTxt"></span>
+      <button id="delLaco" class="tbtn danger"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg><span id="delLacoTxt">apagar</span></button>
+    </span>
 
     <fieldset id="ctlText" class="hide">
       <span class="t txt"><span>texto</span><input id="txt" type="text" value="champ" autocomplete="off" spellcheck="false"></span>
@@ -637,7 +643,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <button id="edit" class="tbtn" title="ajustar ponto a ponto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18V3H3zm8 16H5v-6h6v6zm0-8H5V5h6v6zm8 8h-6v-6h6v6zm0-8h-6V5h6v6z"/></svg><span id="editLabel">ajustar</span></button>
       <button id="flipEl" class="tbtn icon" title="espelhar a peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18"/><path d="M9 7L4 12l5 5z" fill="currentColor"/><path d="M15 7l5 5-5 5z"/></svg></button>
       <button id="dupEl" class="tbtn icon" title="duplicar peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 1H4a2 2 0 00-2 2v12h2V3h11V1zm4 4H8a2 2 0 00-2 2v14a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2zm0 16H8V7h11v14z"/></svg></button>
-      <button id="delEl" class="tbtn danger"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg title="excluir peça"><span class="hide">excluir</span></button>
+      <button id="delEl" class="tbtn danger" title="excluir a peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg><span class="hide">excluir</span></button>
     </span>
     <span class="fit" id="fitHint"><span class="dot"></span><span id="fitTxt" aria-live="polite">&nbsp;</span></span>
     <button id="pdf"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg>baixar molde pdf</button>
@@ -2659,7 +2665,14 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       var n = marca.length;
       var q = n ? n + (n === 1 ? " peça" : " peças") : "";
       if (marcaFoto) q += (q ? " e " : "") + "a foto";
-      $("ctlGrupoTxt").textContent = q + " no laço · arraste ou use as setas para mover tudo junto";
+      // o texto é curto de propósito: a barra rola, e o que empurra o botão de
+      // apagar para debaixo da máscara é justamente o que ninguém vai ler duas
+      // vezes. Como se move o bloco está no rodapé, que é onde moram os gestos
+      $("ctlGrupoTxt").textContent = q + " no laço";
+      $("delLacoTxt").textContent = n === 1 ? "apagar a peça" : "apagar as " + n + " peças";
+      $("delLaco").title = (n === 1 ? "apagar a peça laçada" : "apagar as " + n + " peças laçadas") +
+        (marcaFoto ? " — a moldura da foto não é peça e fica onde está" : "") +
+        ". O desfazer devolve tudo num passo.";
       ["alinha", "ctlPhoto", "ctlPiece", "ctlActs", "ctlNone", "ctlText", "ctlSym"]
         .forEach(function(id){ $(id).classList.add("hide"); });
       return;
@@ -3135,6 +3148,24 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       clampPhoto();
     }
   }
+
+  /* Apagar o laço tira as peças laçadas de uma vez, e de trás para a frente:
+     apagar da primeira para a última mudaria o índice das que ainda faltam. A
+     moldura da foto não é peça e fica — ela é o lugar da foto no papel, e não
+     uma coisa posta em cima dele. Sem pergunta antes: o desfazer devolve o
+     bloco inteiro num passo, como em qualquer outro gesto do app. */
+  function apagaLaco(){
+    if (!marca.length) return;
+    var ordem = marca.slice().sort(function(a, b){ return b - a; });
+    var menor = ordem[ordem.length - 1];
+    ordem.forEach(function(i){ if (els[i]) els.splice(i, 1); });
+    sel = Math.max(0, Math.min(menor, els.length - 1));
+    soUm(els.length ? sel : -1);
+    focus = els.length ? "el" : "none";
+    renderChips(); syncControls(); draw(); pushHist();
+  }
+
+  $("delLaco").addEventListener("click", apagaLaco);
 
   /* ---- acender e apagar em traço -------------------------------------
      Um toque acende ou apaga um quadradinho; o dedo (ou o botão do mouse)

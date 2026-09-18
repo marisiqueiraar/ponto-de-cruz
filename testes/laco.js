@@ -150,6 +150,27 @@ const perto = (a, b, t) => Math.abs(a - b) <= (t === undefined ? 0.051 : t);
   await pg.waitForTimeout(200);
   ok(/hide/.test(await noLaco()), "e Shift de novo na mesma peça tira ela do laço");
 
+  // ---- 9. apagar o bloco laçado ----------------------------------------
+  await arrasta([1, 1], [209, 296]);        // laça tudo de novo
+  await pg.waitForTimeout(200);
+  ok(/2 peças e a foto no laço/.test(await diz()), "tudo laçado outra vez");
+  const antesDeApagar = await estado();
+
+  await pg.click("#delLaco");
+  st = await estado();
+  ok(st.els.length === 0, "apagar o laço levou as duas peças (sobraram " + st.els.length + ")");
+  // a moldura da foto é o lugar da foto no papel, não uma peça: ela fica
+  ok(perto(st.foto.x, antesDeApagar.foto.x) && perto(st.foto.y, antesDeApagar.foto.y),
+     "e deixou a moldura da foto onde estava");
+  ok(/hide/.test(await noLaco()), "sem peça nenhuma, a barra do bloco sai da frente");
+
+  // ---- 10. e volta num passo só ------------------------------------------
+  await pg.locator("body").press("Control+z");
+  st = await estado();
+  ok(st.els.length === 2 &&
+     st.els.every((e, i) => perto(e.x, antesDeApagar.els[i].x) && perto(e.y, antesDeApagar.els[i].y)),
+     "um desfazer devolve as duas peças no lugar em que estavam");
+
   await nav.close();
   console.log(falhas ? "\n" + falhas + " falha(s)" : "\ntudo certo");
   process.exit(falhas ? 1 : 0);

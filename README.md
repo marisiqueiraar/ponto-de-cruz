@@ -134,7 +134,10 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   "encostar" por causa da foto: ela costuma estar embaixo de tudo, e pelo encostar um laço em
   volta de duas palavras a levaria junto sem ninguém pedir. Shift (ou Ctrl) no clique soma ou
   tira uma peça do laço, na mesa ou nas fichas da aba peças. Quem segura o bloco é a foto: ela
-  não sai do papel, e o bloco inteiro para com ela em vez de se desmanchar na borda.
+  não sai do papel, e o bloco inteiro para com ela em vez de se desmanchar na borda. Com um
+  bloco laçado, a barra de cima troca os campos da peça por quem está no laço e um botão que
+  **apaga as peças laçadas de uma vez** — a moldura da foto não é peça e fica onde está, e um
+  desfazer devolve o bloco inteiro.
 - **Modo ponto a ponto**: um toque acende ou apaga um quadradinho, e arrastar sem soltar
   acende ou apaga a fileira inteira por onde o dedo (ou o botão) passa — quem decide se o
   traço acende ou apaga é o primeiro quadradinho dele, então voltar por cima do próprio
