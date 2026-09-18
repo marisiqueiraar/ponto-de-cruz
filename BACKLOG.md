@@ -152,6 +152,10 @@ Nada falta deste item.
 - **`testes/amostra.js` tem uma cópia dos desenhos dos símbolos.** Ele desenha
   sem abrir o app, então repete a tabela do `index.html`. Se os símbolos mudarem,
   a amostra fica mentindo sem ninguém notar.
+- **O laço só move.** Girar, espelhar, apagar, duplicar e os botões de alinhar
+  continuam valendo para a peça selecionada, uma de cada vez — com um bloco
+  laçado a barra esconde esses campos em vez de mexer em uma só das laçadas. É
+  decisão de escopo, não limitação: está em [REVISAR.md](REVISAR.md), item 6.
 - **`sw.js` continua na raiz.** Ele existe só para desregistrar o service
   worker que o app React deixou para trás. Em algum momento todo mundo que
   abriu aquela versão já passou por aqui e ele pode sair — mas não há como
@@ -179,16 +183,18 @@ mudança de aplicativo:
 
 `testes/` cobre o repartir em folhas, a posição em cada folha, a emenda, a cor
 por peça, a estante, a montagem da tela no Chromium, as setas e botões de
-alinhar, o arco e o espaçamento das letras, e a conta de fio. São dez
-conjuntos; `testes/roda.sh` roda todos. O que **não** existe:
+alinhar, o arco e o espaçamento das letras, a conta de fio, o ajuste à mão que
+sobrevive à altura, o arraste que acende quadradinho e o laço que move o bloco.
+São quinze conjuntos; `testes/roda.sh` roda todos. O que **não** existe:
 
 - Nada que exercite o desenho no canvas — `textMatrix()`, que transforma o
   traço da fonte em quadradinhos, é o coração do app e não tem teste nenhum.
   Um teste dele não é óbvio: o resultado depende de como o navegador rasteriza
   a fonte, então comparar com uma matriz fixa quebraria sozinho.
-- Nada que exercite arrastar com o dedo ou o mouse, a pinça de dois dedos, nem
-  o modo ponto a ponto. `posicao.js` mexe na página, mas pelo teclado e pelos
-  botões.
+- Nada que exercite a pinça de dois dedos, nem o arraste de uma peça sozinha.
+  Os outros dois arrastes saíram desta lista: `traco.js` desenha uma fileira com
+  o botão apertado e `laco.js` laça foto e peças e move o bloco, os dois
+  conferindo milímetro por milímetro no que o app gravou.
 - Nada compara o PDF com uma imagem de referência. Os testes leem coordenadas
   de dentro do arquivo, o que pega o molde no lugar errado, mas não pega feio.
 - Nada roda num navegador de celular de verdade. `tela.js` usa um Chromium de
