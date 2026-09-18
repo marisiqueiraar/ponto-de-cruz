@@ -315,6 +315,16 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
   border-radius:6px;background:#fff;font-family:var(--display);font-size:9px;color:var(--ink-soft)}
 .catfoot button.perigo{border-color:var(--danger);color:var(--danger)}
 
+/* cadastro de uma linha fora de cartela */
+.subtit{font-family:var(--display);font-weight:400;font-size:10px;letter-spacing:.03em;
+  color:var(--ink-soft);margin:0 0 9px}
+.avulsa{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.avulsa input[type=color]{width:100%;height:40px;padding:2px;border:1px solid var(--line);
+  border-radius:6px;background:#fff}
+.avulsa button{height:40px;border:1px solid var(--mat);border-radius:6px;background:#fff;
+  color:var(--mat);font-family:var(--display);font-size:10px;letter-spacing:.02em}
+.avulsa button:hover{background:var(--lemon);border-color:var(--lemon-deep)}
+
 .notes{font-size:14px;color:var(--ink-soft)}
 .notes ul{padding-left:18px;margin:0}
 .notes li{margin-bottom:9px}
@@ -689,6 +699,23 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       jeito de experimentar a cor no arranjo antes de gastar meada. Tocar de novo desmarca —
       dentro de <b>minhas</b>, tocar só usa a cor; para tirar da caixa, volte à marca de onde
       ela veio.</p>
+
+      <div class="rule"></div>
+      <h3 class="subtit">uma linha fora de cartela</h3>
+      <div class="avulsa">
+        <input id="avMarca" type="text" placeholder="marca" autocomplete="off" maxlength="24"
+               aria-label="Marca da linha">
+        <input id="avCode" type="text" placeholder="código" autocomplete="off" maxlength="12"
+               aria-label="Código da linha">
+        <input id="avCor" type="color" value="#B3B347" aria-label="Cor da linha">
+        <button type="button" id="avAdd">guardar</button>
+      </div>
+      <p class="note" id="avAviso"></p>
+      <p class="note">Para a meada que você tem e não está em cartela nenhuma. Ela nasce
+      marcada, entra na marca <b>minhas</b> junto com as outras e aparece também na marca
+      <b>avulsas</b> — onde desmarcar apaga de vez, porque ela só existe porque você a
+      cadastrou.</p>
+
       <p class="note">As cores são referência de tela. A da Anchor sai da cartela da própria
       marca; a da DMC vem de tabela pública e é mais aproximada. Monitor, luz e lote mudam o
       que você vê na mão. Na tela e na prévia em PNG o molde sai na cor escolhida; em PDF sai
@@ -859,29 +886,58 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
      Daqui para baixo fica só o que é seu — a lista do que já está na caixa,
      por chave "marca:codigo". Ela vira a marca "minhas", a primeira da fileira,
      e é assim que a cor de uma linha de verdade entra no molde para ser testada. */
-  var CAT = window.CATALOGOS || [];
+  var CAT = [];
   var catIdx = {};
-  CAT.forEach(function(m){
-    m.cores.forEach(function(c){
-      catIdx[m.id + ":" + c[0]] = { marca: m.marca, code: c[0], hex: c[1], nome: c[2] || "" };
-    });
-  });
   var minhas = [];                                   /* chaves, na ordem em que foram marcadas */
-  var marcaAtiva = CAT.length ? CAT[0].id : "";
+  var avulsas = {};        /* "avulsa:3" -> {marca, code, hex} — linha que você cadastrou */
+  var proxAvulsa = 1;
+  var marcaAtiva = "";
+
+  /* O índice é refeito toda vez que as avulsas mudam, e elas entram nele como
+     qualquer cor de marca. É por isso que o resto do painel não precisa saber
+     que existem: a paleta, a busca e as amostras leem daqui. A marca "avulsas"
+     é montada na hora só para elas aparecerem na grade e poderem sair de lá. */
+  function montaIndice(){
+    CAT = (window.CATALOGOS || []).slice();
+    catIdx = {};
+    var chaves = Object.keys(avulsas);
+    if (chaves.length){
+      CAT.push({ id: "avulsa", marca: "avulsas", cores: chaves.map(function(k){
+        return [k.split(":")[1], avulsas[k].hex];
+      })});
+    }
+    CAT.forEach(function(m){
+      m.cores.forEach(function(c){
+        catIdx[m.id + ":" + c[0]] = { marca: m.marca, code: c[0], hex: c[1], nome: c[2] || "" };
+      });
+    });
+    chaves.forEach(function(k){          // a avulsa mostra a marca e o código que você escreveu
+      catIdx[k] = { marca: avulsas[k].marca, code: avulsas[k].code, hex: avulsas[k].hex, nome: "" };
+    });
+    // "minhas" é a caixa, não uma marca do catálogo: ela não está no CAT e
+    // mesmo assim é uma vista válida da grade
+    if (marcaAtiva !== "minhas" &&
+        !CAT.filter(function(m){ return m.id === marcaAtiva; }).length)
+      marcaAtiva = CAT.length ? CAT[0].id : "";
+  }
+  montaIndice();
 
   /* Chave à parte da do molde de propósito, como a da foto: o que você tem na
      caixa é inventário, não desenho. Começar um molde do zero não pode apagar
      a caixa de linhas, e a caixa não deve viajar junto com o arranjo. */
   var LINHAS_STORE = "ponto-e-letra/linhas/v1";
 
-  function nomeLinha(k){
-    var c = catIdx[k];
-    return c ? c.marca + " " + c.code : "";
+  // marca e código, sem sobrar espaço quando um dos dois vier vazio numa avulsa
+  function rotulo(reg){
+    return reg ? (reg.marca + " " + reg.code).trim() : "";
   }
+
+  function nomeLinha(k){ return rotulo(catIdx[k]); }
 
   function salvaLinhas(){
     try {
-      localStorage.setItem(LINHAS_STORE, JSON.stringify({ v: 1, tenho: minhas }));
+      localStorage.setItem(LINHAS_STORE,
+        JSON.stringify({ v: 1, tenho: minhas, avulsas: avulsas }));
     } catch (e){ /* janela anônima ou cota cheia: seguir sem memória */ }
   }
 
@@ -891,10 +947,20 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     if (!raw) return;
     var s;
     try { s = JSON.parse(raw); } catch (e){ return; }
-    if (!s || s.v !== 1 || !s.tenho || !s.tenho.length) return;
+    if (!s || s.v !== 1) return;
+    if (s.avulsas) Object.keys(s.avulsas).forEach(function(k){
+      var a = s.avulsas[k];
+      if (!a || !/^#[0-9A-Fa-f]{6}$/.test(a.hex || "")) return;
+      avulsas[k] = { marca: String(a.marca || "").slice(0, 24),
+                     code: String(a.code || "").slice(0, 12),
+                     hex: a.hex.toUpperCase() };
+      var n = parseInt(String(k).split(":")[1], 10);
+      if (n >= proxAvulsa) proxAvulsa = n + 1;
+    });
+    montaIndice();
     // um código que saiu do catálogo entre uma versão e outra é descartado na
     // volta: sem cor no índice não há o que mostrar nem o que pintar
-    minhas = s.tenho.filter(function(k){ return !!catIdx[k]; });
+    if (s.tenho) minhas = s.tenho.filter(function(k){ return !!catIdx[k]; });
   }
 
   /* ---- memória local -------------------------------------------------
@@ -1168,7 +1234,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var vistas = chaves.filter(function(k){
       var r = catIdx[k];
       if (!r) return false;
-      return !q || (r.marca + " " + r.code + " " + r.nome).toLowerCase().indexOf(q) >= 0;
+      return !q || (rotulo(r) + " " + r.nome).toLowerCase().indexOf(q) >= 0;
     });
     if (!vistas.length){
       grade.innerHTML = '<p class="vazio">Nenhuma cor com esse código ou nome.</p>';
@@ -1179,7 +1245,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     vistas.forEach(function(k){
       var reg = catIdx[k];
       var tem = minhas.indexOf(k) >= 0;
-      var rot = reg.marca + " " + reg.code + (reg.nome ? " — " + reg.nome : "");
+      var rot = rotulo(reg) + (reg.nome ? " — " + reg.nome : "");
       var b = document.createElement("button");
       b.type = "button";
       b.className = "cat" + (tem && !naCaixa ? " on" : "");
@@ -1202,12 +1268,22 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     if (!c) return;
     // na caixa toda cor já é sua: clicar ali é escolher a cor da peça, não
     // tirar da caixa — tirar se faz na marca de onde ela veio
-    if (marcaAtiva === "minhas"){ usaCor(c.hex, c.marca + " " + c.code); return; }
+    if (marcaAtiva === "minhas"){ usaCor(c.hex, rotulo(c)); return; }
     var i = minhas.indexOf(k);
-    if (i >= 0) minhas.splice(i, 1);
-    else {
+    if (i >= 0){
+      minhas.splice(i, 1);
+      // uma avulsa só existe porque você a cadastrou: desmarcar é apagar, senão
+      // ela ficaria parada na grade sem ser de ninguém
+      if (avulsas[k]){
+        delete avulsas[k];
+        montaIndice();
+        salvaLinhas();
+        montaMarcas(); listaCatalogo(); contaLinhas();
+        return;
+      }
+    } else {
       minhas.push(k);
-      usaCor(c.hex, c.marca + " " + c.code);
+      usaCor(c.hex, rotulo(c));
     }
     var tem = i < 0;
     if (botao){
@@ -1217,6 +1293,29 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     salvaLinhas();
     montaMarcas();
     contaLinhas();
+  }
+
+  // Linha que não está em cartela nenhuma: nasce já marcada, porque cadastrar
+  // é dizer que você tem. Entra no índice como as outras e some do mesmo jeito.
+  function guardaAvulsa(){
+    var marca = ($("avMarca").value || "").trim().slice(0, 24);
+    var code = ($("avCode").value || "").trim().slice(0, 12);
+    var hex = ($("avCor").value || "").toUpperCase();
+    if (!marca && !code){
+      $("avAviso").textContent = "Escreva a marca, o código, ou os dois — é como você vai reconhecer a linha depois.";
+      $("avMarca").focus();
+      return;
+    }
+    if (!/^#[0-9A-F]{6}$/.test(hex)) return;
+    var k = "avulsa:" + proxAvulsa++;
+    avulsas[k] = { marca: marca, code: code, hex: hex };
+    montaIndice();
+    minhas.push(k);
+    usaCor(hex, rotulo(catIdx[k]));
+    salvaLinhas();
+    montaMarcas(); listaCatalogo(); contaLinhas();
+    $("avMarca").value = ""; $("avCode").value = ""; $("avAviso").textContent = "";
+    $("avMarca").focus();
   }
 
   function contaLinhas(){
@@ -1876,11 +1975,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function threadLabel(hex){
     for (var k = 0; k < minhas.length; k++){
       var l = catIdx[minhas[k]];
-      if (l && l.hex === hex) return l.marca + " " + l.code;
+      if (l && l.hex === hex) return rotulo(l);
     }
     var chaves = Object.keys(catIdx);
     for (var i = 0; i < chaves.length; i++)
-      if (catIdx[chaves[i]].hex === hex) return catIdx[chaves[i]].marca + " " + catIdx[chaves[i]].code;
+      if (catIdx[chaves[i]].hex === hex) return rotulo(catIdx[chaves[i]]);
     return "";
   }
 
@@ -3111,6 +3210,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         x.classList.toggle("on", x === b);
       });
       listaCatalogo();
+    });
+  });
+
+  $("avAdd").addEventListener("click", guardaAvulsa);
+  [].forEach.call(document.querySelectorAll("#avMarca, #avCode"), function(campo){
+    campo.addEventListener("keydown", function(e){
+      if (e.key === "Enter"){ e.preventDefault(); guardaAvulsa(); }
     });
   });
 
