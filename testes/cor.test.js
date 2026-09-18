@@ -7,8 +7,8 @@ window.jspdf = { jsPDF };
 const noop = new Proxy({}, { get: () => () => {}, set: () => true });
 global.document = { createElement: () => ({ width:0, height:0, getContext: () => noop,
   toDataURL: () => "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" }) };
-let handler = null, saida = null;
-global.$ = () => ({ addEventListener: (_, f) => { handler = f; } });
+let saida = null;   // o ouvinte do botão só adia; quem constrói é montaPDF()
+global.$ = () => ({ addEventListener: () => {} });
 function deliver(b){ saida = b; }
 function saveName(){ return "m.pdf"; }
 function fmt(v){ return (Math.round(v*10)/10).toFixed(1).replace(".", ","); }
@@ -43,7 +43,7 @@ function temCor(cores, rgb){
 (async () => {
   // três peças, três linhas
   els = [bloco(40, 190, "#BE5103"), bloco(80, 190, "#384959"), bloco(120, 190, "#069494")];
-  handler();
+  montaPDF();
   let buf = Buffer.from(await saida.arrayBuffer());
   let st = streams(buf).filter(s => s.includes(" re"))[0];
   const cores = corDoTraco(st);
@@ -62,7 +62,7 @@ function temCor(cores, rgb){
   // peça sem cor gravada (molde antigo) cai na cor corrente
   els = [{ kind:"sym", sym:"heart", scale:1, rot:0, x:40, y:190,
            cells: Array.from({length:8}, () => Array(8).fill(1)) }];
-  handler();
+  montaPDF();
   buf = Buffer.from(await saida.arrayBuffer());
   st = streams(buf).filter(s => s.includes(" re"))[0];
   ok(temCor(corDoTraco(st), [190,81,3]), "peça sem cor usa a linha corrente");
@@ -90,7 +90,7 @@ function temCor(cores, rgb){
 
   // o molde ainda cabe: o rodapé maior não pode engolir o desenho
   els = Object.keys(NOMES).map((c, i) => bloco(20 + i * 12, 190, c));
-  handler();
+  montaPDF();
   buf = Buffer.from(await saida.arrayBuffer());
   const n = pdfPlan(cropArea()).cols * pdfPlan(cropArea()).rows;
   const pgs = (buf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) || []).length;

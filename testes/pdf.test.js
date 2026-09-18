@@ -10,8 +10,8 @@ global.document = { createElement: () => ({
   width: 0, height: 0, getContext: () => noop,
   toDataURL: () => "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
 }) };
-let handler = null, saida = null;
-global.$ = () => ({ addEventListener: (_, f) => { handler = f; } });
+let saida = null;   // o ouvinte do botão só adia; quem constrói é montaPDF()
+global.$ = () => ({ addEventListener: () => {} });
 function deliver(blob){ saida = blob; }
 function saveName(){ return "molde.pdf"; }
 function fmt(v){ return (Math.round(v * 10) / 10).toFixed(1).replace(".", ","); }
@@ -42,7 +42,7 @@ function conta(){
 function gera(nome, esperado){
   conta();
   saida = null;
-  handler();
+  montaPDF();
   return saida.arrayBuffer().then(ab => {
     const b = Buffer.from(ab);
     const txt = b.toString("latin1");

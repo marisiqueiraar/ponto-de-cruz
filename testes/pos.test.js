@@ -9,8 +9,8 @@ window.jspdf = { jsPDF };
 const noop = new Proxy({}, { get: () => () => {}, set: () => true });
 global.document = { createElement: () => ({ width:0, height:0, getContext: () => noop,
   toDataURL: () => "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" }) };
-let handler = null, saida = null;
-global.$ = () => ({ addEventListener: (_, f) => { handler = f; } });
+let saida = null;   // o ouvinte do botão só adia; quem constrói é montaPDF()
+global.$ = () => ({ addEventListener: () => {} });
 function deliver(b){ saida = b; }
 function saveName(){ return "m.pdf"; }
 function fmt(v){ return (Math.round(v*10)/10).toFixed(1).replace(".", ","); }
@@ -42,7 +42,7 @@ function ok(c, m){ if (!c){ console.log("  FALHOU: " + m); falhas++; } }
 
 els = [{ kind:"text", text:"amor", rot:0, x: 60, y: 330,
          cells: Array.from({length: 24}, () => Array(60).fill(1)) }];
-handler();
+montaPDF();
 saida.arrayBuffer().then(ab => {
   const buf = Buffer.from(ab);
   const R = cropArea(), plano = pdfPlan(R);
