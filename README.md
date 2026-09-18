@@ -19,7 +19,7 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
 - **Foto**: tamanhos de revelação comuns (10×15, 9×13, 13×18, 15×21, quadrado, polaroid) ou
   medida própria, arrastável sobre o papel, com imagem opcional só para visualizar.
 - **Peças bordadas**: quantas quiser, cada uma sendo uma palavra ou um símbolo — dez desenhos:
-  coração cheio, coração vazado, estrela, seta, folha, coroa, lua, sol, infinito e casa. Arraste
+  coração cheio, coração vazado, estrela, seta, flor, folha, coroa, lua, sol, infinito e casa. Arraste
   para posicionar, incline de -45° a 45°, redimensione com dois dedos, espelhe, e ajuste ponto a
   ponto no modo de edição. Duplicar copia a peça com as
   células como estão, então a cópia nasce com os ajustes manuais da original e segue a vida
@@ -44,8 +44,9 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF.
   guardado no navegador à parte do molde, e não some quando você recomeça um desenho.
 - **Posicionar com precisão**: as setas do teclado movem a peça selecionada de meio milímetro, ou
   de cinco com Shift — com a foto selecionada, movem a foto. Na aba peças, três botões alinham a
-  peça: centralizar na foto, centralizar no papel, alinhar pela base da foto. Eles movem a caixa
-  já girada, porque alinhar uma palavra inclinada pelo canto de cima dela a deixaria torta.
+  peça: centralizar na foto, centralizar no papel, alinhar pela base da foto — e, quando há uma
+  peça acima na lista, alinhar com ela, que é o que resolve nome em duas linhas. Eles movem a
+  caixa já girada, porque alinhar uma palavra inclinada pelo canto de cima dela a deixaria torta.
 - **Fio por linha**: quantos metros cada cor pede, somados por cor e repetidos na legenda do
   PDF. A conta fica escrita ao lado, com os números do espaçamento escolhido, porque quem vai à
   loja com um número merece saber de onde ele veio: a **frente** é geometria (duas diagonais de
@@ -144,6 +145,11 @@ Nenhuma. Tudo que o app precisa está no repositório, e ele funciona sem rede:
 Site estático: publique a raiz do repositório em qualquer host. Na Vercel, o `vercel.json` da
 raiz declara que não há build — sem ele, um projeto criado com o preset Vite tenta rodar
 `vite build` e falha com `vite: command not found`.
+
+- **Quando a memória do navegador enche**, o rodapé diz **não coube na memória** em vermelho e a
+  aba moldes escreve o caminho: salve o arquivo e apague um molde. Antes disso, gravar falhava em
+  silêncio e o trabalho simplesmente parava de ser guardado. O aviso aparece também no celular,
+  onde o resto do rodapé fica escondido — é lá que a cota estoura primeiro.
 
 ## Onde ficam os dados
 
