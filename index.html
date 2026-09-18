@@ -55,19 +55,11 @@
 @font-face{font-family:"UnifrakturMaguntia";src:url("fonts/unifrakturmaguntia.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"VT323";src:url("fonts/vt323.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Yellowtail";src:url("fonts/yellowtail.woff2") format("woff2");font-display:swap}
-@font-face{
-  font-family:"CS Norman Mono";
-  src:url("./CSNormanMono.woff2") format("woff2"),
-      url("./CSNormanMono.woff") format("woff"),
-      url("./CSNormanMono.otf") format("opentype");
-  font-weight:400;
-  font-display:swap;
-}
 /* Casca no modelo de editor: trilho de ícones, um painel, barra de cima que
    muda com a seleção, e a mesa com o papel no centro. Os controles são os
    mesmos de antes — só mudaram de lugar. */
 :root{
-  --display:"CS Norman Mono","Silkscreen","Courier New",monospace;
+  --display:"Silkscreen","Courier New",monospace;
   --paper:#EDF4FB;
   --ink:#384959;
   --ink-soft:#6A89A7;
@@ -194,6 +186,7 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .fit .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:0 0 auto}
 .fit.tight{border-color:var(--lemon-deep);border-left-width:4px}
 .fit.tight .dot{background:var(--lemon-deep)}
+.fit.multi{border-color:var(--accent);border-left-width:4px}   /* mais de uma folha não é erro */
 .fit.over{background:var(--danger);border-color:var(--danger);color:#fff;max-width:none;
   flex:0 0 auto}   /* o aviso que decide a impressão nunca é truncado */
 .fit.over .dot{background:#fff}
@@ -241,11 +234,41 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
 .num span{font-size:13px;color:var(--ink-soft)}
 .num strong{font-family:var(--display);font-weight:400;font-size:14px}
 
+/* fio por linha */
+.fios{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.fio{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink)}
+.fio .pt{width:11px;height:11px;border-radius:50%;flex:0 0 auto;border:1px solid rgba(0,0,0,.2)}
+.fio .nm{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fio b{font-family:var(--display);font-weight:400;font-size:13px;flex:0 0 auto}
+.fio .vazio{color:var(--ink-soft)}
+
+/* alinhar a peça */
+.alinha{margin:0 0 12px}
+.alinha button{width:100%;min-height:38px;margin-bottom:6px;padding:0 10px;
+  border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);
+  font-size:13.5px;text-align:left}
+.alinha button:hover{border-color:var(--mat);background:var(--paper)}
+
+/* estante de moldes */
+.moldes{display:flex;flex-direction:column;gap:6px;margin-bottom:4px}
+.mold{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:6px;
+  overflow:hidden;background:#fff}
+.mold.on{border-color:var(--mat);box-shadow:inset 4px 0 0 var(--lemon)}
+.mold .abre{flex:1 1 auto;min-width:0;text-align:left;border:0;background:transparent;
+  padding:8px 11px;min-height:44px;color:var(--ink)}
+.mold .nm{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mold .qd{display:block;font-size:12px;color:var(--ink-soft);margin-top:2px}
+.mold .apaga{flex:0 0 auto;width:38px;border:0;border-left:1px solid var(--line);
+  background:transparent;color:var(--ink-soft);font-size:17px;line-height:1}
+.mold .apaga:hover{background:var(--danger);color:#fff}
+
 /* lista de peças */
 .chips{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
 .chip{display:block;width:100%;text-align:left;border:1px solid var(--line);background:#fff;
   border-radius:6px;padding:9px 11px;font-size:14px;color:var(--ink);min-height:40px}
 .chip.on{border-color:var(--mat);box-shadow:inset 4px 0 0 var(--lemon)}
+.chip .pt{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;
+  vertical-align:-1px;border:1px solid rgba(0,0,0,.2)}
 
 /* cores da linha */
 .swrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;min-height:44px}
@@ -372,7 +395,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   .rail{flex-direction:row;gap:0;padding:4px;border-right:0;
     border-top:1px solid var(--line);overflow-x:auto;overflow-y:hidden}
-  .rail button{width:auto;flex:1 0 auto;min-width:54px;padding:5px 6px 4px}
+  .rail button{width:auto;flex:1 0 auto;min-width:50px;padding:5px 5px 4px}
   .rail button svg{width:18px;height:18px}
 
   .panel{border-right:0;border-top:1px solid var(--line);padding:14px 14px 20px}
@@ -468,7 +491,6 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
           <option value="Pirata One">Pirata One</option>
         </optgroup>
         <optgroup label="Pixel e bloco">
-          <option value="CS Norman Mono">CS Norman Mono (arquivo seu)</option>
           <option value="Silkscreen">Silkscreen</option>
           <option value="Press Start 2P">Press Start 2P</option>
           <option value="Pixelify Sans">Pixelify Sans</option>
@@ -479,6 +501,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <span class="t"><span>altura</span><input id="rows" type="number" min="8" max="60" step="1" value="18"><b id="rowsOut" class="hide">18</b></span>
       <span class="t"><span>traço</span><input id="thick" type="number" min="0" max="12" step="1" value="2"><b id="thickOut" class="hide">2</b></span>
       <span class="t"><span>sens.</span><input id="thr" type="number" min="10" max="80" step="5" value="35"><b id="thrOut" class="hide">35</b></span>
+      <span class="t"><span>espaço</span><input id="esp" type="number" min="0" max="8" step="1" value="0"><b id="espOut" class="hide">0</b></span>
+      <span class="t"><span>arco</span><input id="arc" type="number" min="-120" max="120" step="5" value="0"><b id="arcOut" class="hide">0</b></span>
     </fieldset>
 
     <fieldset id="ctlSym" class="hide">
@@ -487,6 +511,12 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         <option value="heartOutline">Coração vazado</option>
         <option value="star">Estrela</option>
         <option value="arrow">Seta</option>
+        <option value="folha">Folha</option>
+        <option value="coroa">Coroa</option>
+        <option value="lua">Lua</option>
+        <option value="sol">Sol</option>
+        <option value="infinito">Infinito</option>
+        <option value="casa">Casa</option>
       </select></span>
       <span class="t"><span>tamanho</span><input id="symScale" type="number" min="1" max="6" step="1" value="1"><b id="symScaleOut" class="hide">1</b></span>
     </fieldset>
@@ -509,6 +539,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     </span>
     <span class="grp hide" id="ctlActs">
       <button id="edit" class="tbtn" title="ajustar ponto a ponto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18V3H3zm8 16H5v-6h6v6zm0-8H5V5h6v6zm8 8h-6v-6h6v6zm0-8h-6V5h6v6z"/></svg><span id="editLabel">ajustar</span></button>
+      <button id="flipEl" class="tbtn icon" title="espelhar a peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18"/><path d="M9 7L4 12l5 5z" fill="currentColor"/><path d="M15 7l5 5-5 5z"/></svg></button>
       <button id="dupEl" class="tbtn icon" title="duplicar peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 1H4a2 2 0 00-2 2v12h2V3h11V1zm4 4H8a2 2 0 00-2 2v14a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2zm0 16H8V7h11v14z"/></svg></button>
       <button id="delEl" class="tbtn danger"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg title="excluir peça"><span class="hide">excluir</span></button>
     </span>
@@ -524,6 +555,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   <button data-pane="pecas" class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></svg>peças</button>
   <button data-pane="linha"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3.4"/><circle cx="16" cy="16" r="3.4"/></svg>linha</button>
   <button data-pane="molde"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1"/><circle cx="9" cy="9" r=".9" fill="currentColor"/><circle cx="15" cy="9" r=".9" fill="currentColor"/><circle cx="9" cy="15" r=".9" fill="currentColor"/><circle cx="15" cy="15" r=".9" fill="currentColor"/></svg>molde</button>
+  <button data-pane="moldes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h6l2 2h10v10H3z"/><path d="M3 7V5h6l2 2"/></svg>moldes</button>
   <button data-pane="ajuda"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 113 2.5v1.5M12 17h.01"/></svg>ajuda</button>
 </nav>
 
@@ -592,6 +624,17 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <h2>peças</h2>
     <button id="addText" class="wide">nova palavra</button>
     <button id="addSym" class="wide">novo símbolo</button>
+
+    <div class="alinha hide" id="alinha">
+      <label>Alinhar a peça selecionada</label>
+      <button type="button" id="alFoto">centralizar na foto</button>
+      <button type="button" id="alPapel">centralizar no papel</button>
+      <button type="button" id="alBase">pela base da foto</button>
+    </div>
+
+    <p class="note" id="setasDica">As setas do teclado movem a peça selecionada de meio milímetro.
+      Com Shift, de cinco.</p>
+
     <div class="rule"></div>
     <div class="chips" id="chips"></div>
     <p class="note">Toque numa peça para selecioná-la: os ajustes dela aparecem na barra de cima.
@@ -613,7 +656,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         <select id="palette"></select>
       </div>
       <div class="field">
-        <label>Cor da linha <b id="threadName">Limao escuro</b></label>
+        <label><span id="threadAlvo">Cor da linha</span> <b id="threadName">Limao escuro</b></label>
         <div class="swrow" id="swatches"></div>
       </div>
       <p class="note">A cor vale para a tela e para a prévia em PNG. O molde em PDF sai sempre
@@ -653,6 +696,17 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <div class="num"><span>Pontos</span><strong id="count">—</strong></div>
     <div class="num"><span>Furos</span><strong id="holes">—</strong></div>
     <div class="num"><span>Peça selecionada</span><strong id="size">—</strong></div>
+
+    <div class="rule"></div>
+    <h2>fio por linha</h2>
+    <div class="fios" id="fios"></div>
+    <p class="note" id="fiosConta"></p>
+    <p class="note">A frente é geometria e não tem dúvida. O avesso supõe que você borda um
+    ponto cheio de cada vez — em fileiras gasta menos, pulando de um canto a outro gasta mais.
+    A perda é margem. O comprimento é do fio como ele passa no furo: bordando com 2 fios, são
+    metros de fio de 2 fios. Uma meada de 6 fios desfiada em pares rende três vezes o
+    comprimento dela.</p>
+
     <div class="rule"></div>
     <button id="dl" class="wide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>baixar prévia png</button>
     <button id="reset" class="wide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>recalcular</button>
@@ -661,12 +715,39 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <div id="out"></div>
   </section>
 
+  <section class="pane" data-pane="moldes">
+    <h2>meus moldes</h2>
+    <div class="field">
+      <label for="moldeNome">Nome deste molde</label>
+      <input id="moldeNome" type="text" autocomplete="off" spellcheck="false" placeholder="sem nome">
+    </div>
+    <button id="moldeNovo" class="wide">começar um molde novo</button>
+    <div class="moldes" id="moldeLista"></div>
+
+    <div class="rule"></div>
+    <h2>levar para outro lugar</h2>
+    <button id="moldeSalvar" class="wide">salvar arquivo do molde</button>
+    <button id="moldeAbrir" class="wide">abrir arquivo do molde</button>
+    <input id="moldeArq" type="file" accept="application/json,.json" class="hide">
+    <p class="note" id="moldeAviso"></p>
+    <p class="note">O arquivo leva tudo: papel, foto, peças, linhas e os ajustes feitos ponto a
+      ponto. É por ele que o trabalho vai para outro aparelho, ou volta depois de você limpar os
+      dados do site — o navegador, sozinho, não leva nada para lugar nenhum.</p>
+  </section>
+
   <section class="pane notes" data-pane="ajuda">
     <h2>do arquivo ao material</h2>
     <ul>
       <li>Cole a foto no papel usando a medida que aparece no cabeçalho do PDF: distância da borda esquerda e da borda de cima. É essa posição que faz o molde bater.</li>
+      <li>Antes de furar, meça a régua impressa no cabeçalho: se os 50 mm dela não derem 50 mm na sua régua, a impressora reduziu a página e nenhum furo vai bater. Imprima de novo em 100%, sem "ajustar à página".</li>
       <li>Recorte o molde impresso pela moldura tracejada e prenda sobre o conjunto alinhando o retângulo da foto com a foto de verdade, fita crepe nos quatro cantos.</li>
+      <li>Molde maior que uma A4 sai em várias folhas, todas em tamanho real. Cada uma diz qual é no cabeçalho, e as vizinhas repetem uma faixa do desenho: sobreponha uma na outra até os furos da faixa coincidirem, e só então prenda. As margens dizem qual folha continua de cada lado.</li>
       <li>Fure ponto a ponto com agulha grossa, apoiado em EVA ou cortiça. Cada quadradinho usa quatro furos, compartilhados com os vizinhos — por isso o número de furos é menor que o dobro de pontos.</li>
+      <li>Para o nome curvado por cima da foto, use o campo <b>arco</b> na barra de cima. Se a cursiva fechar demais em letra pequena, abra o <b>espaço</b> entre as letras — ele é contado em quadradinhos, os mesmos que viram furo.</li>
+      <li>Para posicionar fino, use as setas do teclado: meio milímetro por toque, cinco com Shift. Os três botões na aba <b>peças</b> centralizam a peça na foto ou no papel, e encostam ela na base da foto.</li>
+      <li>Guarde o arquivo do molde na aba <b>moldes</b> antes de mudar de aparelho ou limpar o navegador. O que fica só no navegador não vai a lugar nenhum e some com os dados do site.</li>
+      <li>A aba <b>molde</b> diz quantos metros cada linha pede, e mostra a conta que usou. A frente é exata; o avesso e os 15% de perda são estimativa, então compre com folga.</li>
+      <li>Cada peça pode ter a sua linha: selecione a peça e toque na cor. O rodapé do PDF lista as linhas usadas com o código da marca — a cor impressa é referência de tela, o código é o que se compra.</li>
       <li>Borde com 2 ou 3 fios de meada. Em furo que atravessa foto e papel, puxe devagar: papel fotográfico não fecha depois de rasgar.</li>
       <li>Espaçamento entre 2,5 e 3 mm é o mais seguro nesse material. Abaixo de 2 mm a tira de papel entre dois furos vira pó.</li>
     </ul>
@@ -731,7 +812,22 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     heart: [".XX...XX.","XXXX.XXXX","XXXXXXXXX","XXXXXXXXX",".XXXXXXX.","..XXXXX..","...XXX...","....X...."],
     heartOutline: [".XX...XX.","X..X.X..X","X...X...X","X.......X",".X.....X.","..X...X..","...X.X...","....X...."],
     star: ["....X....","...XXX...","...XXX...","XXXXXXXXX",".XXXXXXX.","..XXXXX..","..XX.XX..",".XX...XX.","XX.....XX"],
-    arrow: ["....X....","...XX....","..X.X....",".X..X....","XXXXXXXXX",".X..X....","..X.X....","...XX....","....X...."]
+    arrow: ["....X....","...XX....","..X.X....",".X..X....","XXXXXXXXX",".X..X....","..X.X....","...XX....","....X...."],
+    folha: [".....XXXX","...XXXXXX","..XXXXXXX",".XXXXXXX.",".XXXXXX..","XXXXXX...","XXXXX....",".XXX.....","X........"],
+    coroa: ["X...X...X","X...X...X","XX.XXX.XX","XXXXXXXXX",".XXXXXXX.",".XXXXXXX."],
+    lua: ["...XXX...","..XXXXX..",".XXXX....",".XXX.....",".XXX.....",".XXX.....",".XXXX....","..XXXXX..","...XXX..."],
+    sol: ["X...X...X",".X..X..X.","..XXXXX..","..XXXXX..","XXXXXXXXX","..XXXXX..","..XXXXX..",".X..X..X.","X...X...X"],
+    infinito: [".XX...XX.","X..X.X..X","X...X...X","X..X.X..X",".XX...XX."],
+    casa: ["....X....","...XXX...","..XXXXX..",".XXXXXXX.","XXXXXXXXX",".XX...XX.",".XX.X.XX.",".XX.X.XX.",".XXXXXXX."]
+  };
+
+  // o nome de cada desenho mora aqui, e não espalhado entre o seletor e a
+  // lista de peças: são os dois lugares que precisam dele, e desencontrado
+  // deixa a peça na lista chamada "undefined"
+  var NOMES_SYM = {
+    heart: "coração", heartOutline: "coração vazado", star: "estrela", arrow: "seta",
+    folha: "folha", coroa: "coroa", lua: "lua", sol: "sol",
+    infinito: "infinito", casa: "casa"
   };
 
   var els = [];
@@ -822,12 +918,141 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   var STORE = "ponto-e-letra/molde/v1";
   var PHOTO_STORE = "ponto-e-letra/molde/foto/v1";
   var PHOTO_MAX_PX = 1600;
+
+  /* ---- a estante de moldes --------------------------------------------
+
+     Uma chave só para um molde só significava que começar um desenho novo
+     apagava o anterior, sem volta. Agora cada molde tem as suas chaves e este
+     índice diz quais existem e qual está aberto.
+
+     O índice guarda o NOME das chaves de cada molde, nunca o conteúdo. Gravar
+     acontece a cada gesto, e reescrever a estante inteira porque uma peça
+     andou um milímetro seria desperdício. É isso também que deixa o molde que
+     já estava gravado ficar exatamente onde está: ele entra na estante
+     apontando para as chaves antigas, sem nada ser copiado — numa cota quase
+     cheia, copiar a foto para migrar é a diferença entre migrar e perdê-la. */
+  var MOLDES = "ponto-e-letra/moldes/v1";
+  var estante = { v: 1, atual: "", itens: [] };
+
+  function novoId(){
+    return "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
+
+  function itemAtual(){
+    for (var i = 0; i < estante.itens.length; i++)
+      if (estante.itens[i].id === estante.atual) return estante.itens[i];
+    return null;
+  }
+
+  function salvaEstante(){
+    try { localStorage.setItem(MOLDES, JSON.stringify(estante)); } catch (e){}
+  }
+
+  function criaMolde(nome){
+    var id = novoId();
+    var it = { id: id, nome: nome || "", em: Date.now(), pecas: 0,
+               dados: STORE + "/" + id, foto: PHOTO_STORE + "/" + id };
+    estante.itens.unshift(it);
+    estante.atual = id;
+    salvaEstante();
+    return it;
+  }
+
+  function carregaEstante(){
+    var raw = null;
+    try { raw = localStorage.getItem(MOLDES); } catch (e){ return; }
+    if (raw){
+      var e;
+      try { e = JSON.parse(raw); } catch (err){ e = null; }
+      if (e && e.v === 1 && e.itens && e.itens.length){
+        estante = { v: 1, atual: e.atual || "",
+                    itens: e.itens.filter(function(i){ return i && i.id && i.dados && i.foto; }) };
+        if (!itemAtual() && estante.itens.length) estante.atual = estante.itens[0].id;
+        if (estante.itens.length) return;
+      }
+    }
+    // primeira abertura desta versão: o molde que já estava gravado entra na
+    // estante como está, apontando para as chaves de sempre
+    var tinha = false;
+    try { tinha = !!localStorage.getItem(STORE); } catch (e2){}
+    if (tinha){
+      estante = { v: 1, atual: "legado",
+                  itens: [{ id: "legado", nome: "", em: Date.now(), pecas: 0,
+                            dados: STORE, foto: PHOTO_STORE }] };
+      salvaEstante();
+    }
+  }
+
+  // o nome que um molde ganha sozinho: a primeira palavra bordada nele
+  function nomeSugerido(){
+    for (var i = 0; i < els.length; i++)
+      if (els[i].kind === "text" && (els[i].text || "").trim()) return els[i].text.trim();
+    return "";
+  }
   var saveTimer = 0;
   var restored = false;
 
-  function threadRGB(){
-    var h = thread.replace("#", "");
+  function hexRGB(hex){
+    var h = hex.replace("#", "");
     return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)];
+  }
+
+  /* A cor mora na peça, não no molde inteiro. É vendo duas peças com as duas
+     linhas de verdade, lado a lado no arranjo, que a escolha se decide — e o
+     catálogo das marcas só serve para isso se der para usar mais de uma.
+
+     `thread` continua existindo como a cor corrente: a que a próxima peça
+     nasce usando, e a que vale para as peças gravadas antes desta mudança,
+     que não têm cor nenhuma dentro delas. */
+  function corDe(el){
+    if (el && el.color)
+      return { hex: el.color, nome: el.colorName || threadLabel(el.color) || el.color };
+    return { hex: thread, nome: threadLabel(thread) || thread };
+  }
+
+  /* ---- quanto fio cada linha gasta ------------------------------------
+
+     A conta tem uma parte certa e duas suposições, e as três ficam à vista na
+     aba molde, porque quem vai à loja com um número merece saber de onde ele
+     veio.
+
+     CERTO: a frente. Cada ponto cheio são duas diagonais de um quadradinho,
+     p√2 cada uma. Isso é geometria, não palpite.
+
+     SUPOSTO: o avesso. Bordando um ponto cheio de cada vez — sobe em A, desce
+     em D, sobe em C, desce em B — o fio anda dois LADOS do quadradinho por
+     trás, 2p. Quem borda em fileiras gasta menos; quem pula de um canto a
+     outro do desenho gasta mais.
+
+     SUPOSTO: os 15% de começos, remates e a ponta que não dá para usar.
+
+     O que sai é o comprimento do fio como ele atravessa o furo: se você borda
+     com 2 fios, são metros de fio de 2 fios. Não converto para meadas porque
+     isso depende do comprimento da meada de cada marca — mas uma meada de 6
+     fios desfiada em pares rende três vezes o comprimento dela. */
+  var PERDA = 1.15;
+  function fioFrente(){ return 2 * P() * Math.SQRT2; }   // mm por ponto, exato
+  function fioAvesso(){ return 2 * P(); }                // mm por ponto, suposto
+  function fioPorPonto(){ return (fioFrente() + fioAvesso()) * PERDA; }
+
+  // as linhas do molde, na ordem das peças e sem repetir cor, com quantos
+  // pontos e quantos metros cada uma pede
+  function linhasUsadas(){
+    var vistas = {}, lista = [];
+    els.forEach(function(el){
+      var c = corDe(el);
+      if (!vistas[c.hex]){
+        vistas[c.hex] = { hex: c.hex, nome: c.nome, pontos: 0 };
+        lista.push(vistas[c.hex]);
+      }
+      vistas[c.hex].pontos += countOf(el);
+    });
+    var porPonto = fioPorPonto();
+    lista.forEach(function(l){
+      l.metros = l.pontos * porPonto / 1000;
+      l.rotulo = l.nome + "  ·  " + fmt(l.metros) + " m";
+    });
+    return lista;
   }
 
   // a lista é montada de novo toda vez que a caixa de linhas muda de tamanho,
@@ -871,9 +1096,10 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
                       'e toque nas cores que você tem.</p>';
       return;
     }
+    var atual = corDe(els[sel]).hex;
     cores.forEach(function(c){
       var b = document.createElement("button");
-      b.className = "sw" + (c[0] === thread ? " on" : "");
+      b.className = "sw" + (c[0] === atual ? " on" : "");
       b.style.background = c[0];
       b.title = c[1] + " " + c[0];
       b.setAttribute("aria-label", "Linha " + c[1]);
@@ -886,9 +1112,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   }
 
   function usaCor(hex, nome){
-    thread = hex;
+    thread = hex;                       // a cor corrente, com que a próxima peça nasce
+    var el = els[sel];
+    if (el){ el.color = hex; el.colorName = nome; }
     $("threadName").textContent = nome;
+    renderChips();
     draw();          // draw() é quem agenda a gravação, inclusive da cor
+    if (el) pushHist();   // trocar a linha se desfaz como qualquer outro passo
   }
 
   /* ---- catálogo das marcas -------------------------------------------- */
@@ -1054,32 +1284,86 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return out;
   }
 
-  function textMatrix(text, fam, targetRows, thick, thr){
+  function textMatrix(text, fam, targetRows, thick, thr, esp, arco){
     text = text || " ";
+    esp = +esp || 0;
+    arco = +arco || 0;
     var c = document.createElement("canvas");
     var x = c.getContext("2d");
     x.font = fontStr(100, fam);
+    var m0 = x.measureText(text);
+    var asc = m0.actualBoundingBoxAscent || 72;
+    var dsc = m0.actualBoundingBoxDescent || 28;
+    var h = asc + dsc;
+    if (h <= 0) return [[0]];
+    var k = (targetRows * S) / h;
+
+    /* O espaçamento vai em quadradinhos, e não em pixels ou em por cento: dois
+       quadradinhos entre as letras são dois quadradinhos em qualquer altura de
+       peça, que é como quem borda conta. Ele entra antes de medir, senão a
+       largura sai errada e a palavra nasce cortada. */
+    var espPx = esp * S;
+    if (espPx && "letterSpacing" in x) x.letterSpacing = (espPx / k) + "px";
+
     var m = x.measureText(text);
-    var asc = m.actualBoundingBoxAscent || 72;
-    var dsc = m.actualBoundingBoxDescent || 28;
     var left = m.actualBoundingBoxLeft || 0;
     var right = m.actualBoundingBoxRight || m.width;
-    var h = asc + dsc, w = left + right;
-    if (h <= 0 || w <= 0) return [[0]];
-    var k = (targetRows * S) / h;
+    var w = left + right;
+    if (w <= 0) return [[0]];
+
     var pad = S * 3;
-    c.width = Math.ceil(w * k) + pad * 2;
-    c.height = Math.ceil(targetRows * S) + pad * 2;
-    x = c.getContext("2d");
-    x.font = fontStr(100 * k, fam);
-    x.textBaseline = "alphabetic";
-    x.fillStyle = "#000"; x.strokeStyle = "#000";
-    x.lineJoin = "round"; x.lineCap = "round";
+    var W = Math.ceil(w * k);
+    var reto = document.createElement("canvas");
+    reto.width = W + pad * 2;
+    reto.height = Math.ceil(targetRows * S) + pad * 2;
+    var rx = reto.getContext("2d");
+    rx.font = fontStr(100 * k, fam);
+    if (espPx && "letterSpacing" in rx) rx.letterSpacing = espPx + "px";
+    rx.textBaseline = "alphabetic";
+    rx.fillStyle = "#000"; rx.strokeStyle = "#000";
+    rx.lineJoin = "round"; rx.lineCap = "round";
     var bx = pad + left * k, by = pad + asc * k;
-    if (thick > 0){ x.lineWidth = thick * k * 0.55; x.strokeText(text, bx, by); }
-    x.fillText(text, bx, by);
-    var cols = Math.floor(c.width / S), rowsN = Math.floor(c.height / S);
-    var data = x.getImageData(0, 0, c.width, c.height).data;
+    if (thick > 0){ rx.lineWidth = thick * k * 0.55; rx.strokeText(text, bx, by); }
+    rx.fillText(text, bx, by);
+
+    var alvo = reto, ax = rx;
+    if (arco){
+      /* O arco dobra a IMAGEM da palavra, fatia por fatia, em vez de escrever
+         letra por letra sobre a curva. Letra por letra é o jeito comum, e numa
+         cursiva ele rompe as ligaduras — e ligadura é o que faz a palavra
+         parecer escrita à mão, que é a razão de existir da lista de fontes
+         deste app. Dobrando a imagem, a ligação entre as letras acompanha a
+         curva junto com o resto do traço. */
+      var ang = Math.abs(arco) * Math.PI / 180;
+      var R = W / ang;                              // raio que faz a palavra ocupar o arco
+      var flecha = R * (1 - Math.cos(ang / 2));     // o quanto o meio sobe ou desce
+      alvo = document.createElement("canvas");
+      alvo.width = Math.ceil(W + reto.height + pad * 2);
+      alvo.height = Math.ceil(reto.height + flecha);
+      ax = alvo.getContext("2d");
+      var dcx = alvo.width / 2;
+      var dby = arco > 0 ? by : by + flecha;        // a linha de base no meio da palavra
+      var dcy = arco > 0 ? dby + R : dby - R;       // centro do círculo, abaixo ou acima
+      var cxSrc = bx + W / 2;
+      for (var sx = 0; sx < W + 2; sx++){
+        var phi = ((bx + sx) - cxSrc) / R;
+        ax.save();
+        if (arco > 0){
+          ax.translate(dcx + R * Math.sin(phi), dcy - R * Math.cos(phi));
+          ax.rotate(phi);
+        } else {
+          ax.translate(dcx + R * Math.sin(phi), dcy + R * Math.cos(phi));
+          ax.rotate(-phi);
+        }
+        // duas colunas de largura, uma de sobra: fatia de um pixel só deixa
+        // falha entre as vizinhas assim que o arco abre
+        ax.drawImage(reto, bx + sx, 0, 2, reto.height, -1, -by, 2, reto.height);
+        ax.restore();
+      }
+    }
+
+    var cols = Math.floor(alvo.width / S), rowsN = Math.floor(alvo.height / S);
+    var data = ax.getImageData(0, 0, alvo.width, alvo.height).data;
     var cells = [];
     for (var r = 0; r < rowsN; r++){
       var line = [];
@@ -1087,7 +1371,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         var on = 0;
         for (var yy = 0; yy < S; yy++){
           for (var xx = 0; xx < S; xx++){
-            var i = (((r * S + yy) * c.width) + (q * S + xx)) * 4 + 3;
+            var i = (((r * S + yy) * alvo.width) + (q * S + xx)) * 4 + 3;
             if (data[i] > 90) on++;
           }
         }
@@ -1098,11 +1382,26 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return trim(cells);
   }
 
+  // espelhar troca a ordem das colunas, e mais nada: as células acesas à mão
+  // viram junto, então espelhar uma peça ajustada não descarta o ajuste
+  function espelha(cells){
+    return cells.map(function(row){ return row.slice().reverse(); });
+  }
+
+  /* Fonte que o seletor não oferece é fonte que não chega, e fonte que não
+     chega faz o canvas desenhar numa cursiva genérica — o molde sai errado sem
+     avisar. Então o que vem da memória é conferido contra a lista. */
+  function fonteConhecida(nome){
+    if (!nome) return false;
+    return !!document.querySelector('#font option[value="' + String(nome).replace(/"/g, "") + '"]');
+  }
+
   function rebuild(el){
     el.manual = 0;   // refazer a peça descarta o que foi aceso ou apagado à mão
     el.cells = el.kind === "sym"
       ? matrixFromStrings(SYMS[el.sym], el.scale)
-      : textMatrix(el.text, el.font, el.rowsTarget, el.thick, el.thr);
+      : textMatrix(el.text, el.font, el.rowsTarget, el.thick, el.thr, el.esp, el.arc);
+    if (el.flip) el.cells = espelha(el.cells);
   }
 
   function bboxMM(el){
@@ -1155,20 +1454,43 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return n;
   }
 
+  // a caixa da peça já girada, em mm de papel
+  function elPaperBox(el){
+    var b = bboxMM(el);
+    var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
+    [[0,0],[b.w,0],[0,b.h],[b.w,b.h]].forEach(function(c){
+      var p = localToPaper(el, c[0], c[1]);
+      if (p.x < minX) minX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y > maxY) maxY = p.y;
+    });
+    return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+  }
+
   function stitchArea(){
     var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
     els.forEach(function(el){
-      var b = bboxMM(el);
-      [[0,0],[b.w,0],[0,b.h],[b.w,b.h]].forEach(function(c){
-        var p = localToPaper(el, c[0], c[1]);
-        if (p.x < minX) minX = p.x;
-        if (p.y < minY) minY = p.y;
-        if (p.x > maxX) maxX = p.x;
-        if (p.y > maxY) maxY = p.y;
-      });
+      var b = elPaperBox(el);
+      if (b.x < minX) minX = b.x;
+      if (b.y < minY) minY = b.y;
+      if (b.x + b.w > maxX) maxX = b.x + b.w;
+      if (b.y + b.h > maxY) maxY = b.y + b.h;
     });
     if (maxX < 0) return null;
     return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+  }
+
+  /* Peça arrastada para fora do papel some do PDF sem dizer nada: o
+     `cropArea()` recorta nas bordas do papel e o que ficou de fora não
+     aparece. Contar quantas são é o que permite avisar antes de imprimir. */
+  function pecasForaDoPapel(){
+    var pa = paperMM(), n = 0;
+    els.forEach(function(el){
+      var b = elPaperBox(el);
+      if (b.x < -0.01 || b.y < -0.01 || b.x + b.w > pa.w + 0.01 || b.y + b.h > pa.h + 0.01) n++;
+    });
+    return n;
   }
 
   function cropArea(){
@@ -1185,14 +1507,82 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
   }
 
-  // a folha do PDF: 10 mm de margem lateral, 44 mm de cabeçalho e 8 mm embaixo.
-  // a tela e o PDF decidem a escala por aqui, para nunca discordarem sobre caber.
-  var PDF_SIDE = 10, PDF_TOP = 44, PDF_FOOT = 8;
+  // a folha do PDF: 10 mm de margem lateral, 46 mm de cabeçalho e 8 mm embaixo.
+  // a tela e o PDF decidem por aqui se cabe, para nunca discordarem.
+  var PDF_SIDE = 10, PDF_TOP = 46, PDF_FOOT = 8, FOOT_LINHA = 4.2;
+
+  /* Quanto rodapé a legenda das linhas pede. A conta é feita sem o jsPDF,
+     porque quem pergunta se o molde cabe é a tela, a cada desenho, e ela não
+     tem documento nenhum na mão. Helvetica de 7 pt não passa de 1,45 mm por
+     caractere; superestimar sobra rodapé, subestimar comeria o molde. A folha
+     estreita decide, para a conta valer nas duas orientações. */
+  function legendaLinhas(){
+    var usadas = linhasUsadas();
+    if (!usadas.length) return 1;
+    var util = 210 - PDF_SIDE * 2;
+    var n = 1, x = 0;
+    usadas.forEach(function(c){
+      var w = 9 + c.rotulo.length * 1.45;
+      if (x > 0 && x + w > util){ n++; x = 0; }
+      x += w;
+    });
+    return Math.min(n, 3);   // passou de três linhas, o rodapé come o molde
+  }
+  function footMM(){ return PDF_FOOT + (legendaLinhas() - 1) * FOOT_LINHA; }
+
   function pdfFit(R){
     var land = R.w > R.h;
     var pageW = land ? 297 : 210, pageH = land ? 210 : 297;
-    var maxW = pageW - PDF_SIDE * 2, maxH = pageH - PDF_TOP - PDF_FOOT;
+    var maxW = pageW - PDF_SIDE * 2, maxH = pageH - PDF_TOP - footMM();
     return { land: land, pageW: pageW, scale: Math.min(1, maxW / R.w, maxH / R.h) };
+  }
+
+  /* ---- o molde repartido em folhas ------------------------------------
+
+     Molde reduzido para caber numa folha é molde errado: o furo sai fora do
+     lugar e isso só se descobre com a agulha na mão, depois de colar a foto.
+     Então o que não cabe numa A4 sai em várias, sempre em tamanho real.
+
+     Folhas vizinhas repetem pelo menos SOBRA mm do desenho. É essa faixa
+     repetida que deixa sobrepor uma na outra até os furos coincidirem —
+     emendar topo a topo pede uma precisão de tesoura que ninguém tem. */
+  var TILE_TOP = 49, SOBRA = 10;
+
+  function nFolhas(medida, util){
+    if (medida <= util) return 1;
+    return Math.ceil((medida - SOBRA) / (util - SOBRA));
+  }
+
+  // as folhas ficam distribuídas por igual, e não empilhadas num canto com a
+  // última sobrando: assim a faixa repetida é a mesma em todas as emendas.
+  function inicios(medida, util, n){
+    if (n <= 1) return [0];
+    var passo = (medida - util) / (n - 1), a = [];
+    for (var i = 0; i < n; i++) a.push(i * passo);
+    return a;
+  }
+
+  function pdfPlan(R){
+    var um = pdfFit(R);
+    if (um.scale >= 1)
+      return { tiled: false, land: um.land, pageW: um.pageW, top: PDF_TOP,
+               cols: 1, rows: 1, tw: R.w, th: R.h, xs: [0], ys: [0] };
+
+    function grade(land){
+      var uw = (land ? 297 : 210) - PDF_SIDE * 2;
+      var uh = (land ? 210 : 297) - TILE_TOP - footMM();
+      var cols = nFolhas(R.w, uw), rows = nFolhas(R.h, uh);
+      return { land: land, uw: uw, uh: uh, cols: cols, rows: rows, n: cols * rows };
+    }
+    // menos folhas ganha; empatou, a folha fica na direção do molde
+    var ret = grade(false), dei = grade(true);
+    var g = (dei.n < ret.n || (dei.n === ret.n && R.w > R.h)) ? dei : ret;
+    return {
+      tiled: true, land: g.land, pageW: g.land ? 297 : 210, top: TILE_TOP,
+      cols: g.cols, rows: g.rows,
+      tw: Math.min(g.uw, R.w), th: Math.min(g.uh, R.h),
+      xs: inicios(R.w, g.uw, g.cols), ys: inicios(R.h, g.uh, g.rows)
+    };
   }
 
   function drawPhoto(ctx, k, region, alpha){
@@ -1266,7 +1656,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     els.forEach(function(el, i){
       totalCount += countOf(el);
       totalHoles += holesOf(el).length;
-      drawStitches(ctx, el, k, region, thread, Math.max(1.3, P() * k * 0.15));
+      drawStitches(ctx, el, k, region, corDe(el).hex, Math.max(1.3, P() * k * 0.15));
       if (opts.outline && i === sel) drawOutline(ctx, el, k, region);
     });
   }
@@ -1274,20 +1664,31 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   /* O aviso de escala mora colado no botão de baixar, porque é sobre o que vai
      sair quando ele for apertado. Três estados: cabe, cabe por pouco, não cabe. */
   function showFit(cr){
-    var fit = pdfFit(cr);
+    var plano = pdfPlan(cr);
     var land = cr.w > cr.h;
     var maxW = (land ? 297 : 210) - PDF_SIDE * 2;
-    var maxH = (land ? 210 : 297) - PDF_TOP - PDF_FOOT;
+    var maxH = (land ? 210 : 297) - PDF_TOP - footMM();
     var folga = Math.min(maxW - cr.w, maxH - cr.h);
     var area = fmt(cr.w / 10) + " × " + fmt(cr.h / 10) + " cm";
     var box = $("fitHint"), txt = $("fitTxt"), state = "";
+    var fora = pecasForaDoPapel();
 
-    if (fit.scale < 1){
+    if (fora){
+      // vem antes de tudo: não adianta saber em quantas folhas sai um molde
+      // a que está faltando meia palavra
       state = "over";
-      txt.textContent = "não cabe em A4 — o PDF sairia a " + Math.round(fit.scale * 100) + "%";
-      box.title = "Área do molde: " + area + " — não cabe numa A4 em tamanho real: o PDF " +
-        "sairia reduzido a " + Math.round(fit.scale * 100) + "% e os furos não vão bater. " +
-        "Aproxime as peças da foto ou reduza a altura do texto.";
+      txt.textContent = fora === 1 ? "1 peça fora do papel" : fora + " peças fora do papel";
+      box.title = (fora === 1 ? "Uma peça passou" : fora + " peças passaram") + " da borda do papel. " +
+        "O molde é recortado no papel, então o que está fora não vai sair no PDF. " +
+        "Arraste de volta, ou use os botões de alinhar na aba peças.";
+    } else if (plano.tiled){
+      var n = plano.cols * plano.rows;
+      state = "multi";
+      txt.textContent = "tamanho real em " + n + " folhas";
+      box.title = "Área do molde: " + area + " — não cabe numa A4 inteira, então o PDF sai " +
+        "em " + n + " folhas (" + plano.rows + " × " + plano.cols + "), todas em tamanho real. " +
+        "As vizinhas repetem uma faixa do desenho: é por ela que você sobrepõe uma na outra " +
+        "até os furos coincidirem.";
     } else if (folga < 5){
       state = "tight";
       txt.textContent = "cabe em A4 · " + fmt(folga) + " mm de folga";
@@ -1358,6 +1759,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     } else $("size").textContent = "—";
 
     showFit(cropArea());
+    renderFios();
     rulers(k);
 
     // toda alteração de estado passa por aqui, então é o único lugar que precisa
@@ -1373,10 +1775,12 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   // string de "0" e "1" — mais compacto que JSON de array e igualmente legível.
   function packEl(el){
     var r = { kind: el.kind, x: el.x, y: el.y, rot: el.rot, manual: el.manual || 0,
+              color: el.color || "", colorName: el.colorName || "",
               cells: el.cells.map(function(row){ return row.join(""); }) };
     if (el.kind === "text"){
       r.text = el.text; r.font = el.font;
       r.rowsTarget = el.rowsTarget; r.thick = el.thick; r.thr = el.thr;
+      r.esp = el.esp || 0; r.arc = el.arc || 0; r.flip = el.flip || 0;
     } else {
       r.sym = el.sym; r.scale = el.scale;
     }
@@ -1392,12 +1796,21 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     });
     var el = { kind: r.kind === "sym" ? "sym" : "text", cells: cells,
                x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0, manual: +r.manual || 0 };
+    // molde gravado antes de a cor morar na peça volta sem cor, e aí vale a
+    // corrente — que é exatamente a cor com que ele foi desenhado na época
+    if (typeof r.color === "string" && /^#[0-9A-Fa-f]{6}$/.test(r.color)){
+      el.color = r.color;
+      el.colorName = typeof r.colorName === "string" ? r.colorName : "";
+    }
     if (el.kind === "text"){
       el.text = typeof r.text === "string" ? r.text : "";
-      el.font = r.font || "Great Vibes";
+      el.font = fonteConhecida(r.font) ? r.font : "Great Vibes";
       el.rowsTarget = +r.rowsTarget || 18;
       el.thick = r.thick == null ? 2 : +r.thick;
       el.thr = +r.thr || 0.35;
+      el.esp = +r.esp || 0;
+      el.arc = +r.arc || 0;
+      el.flip = r.flip ? 1 : 0;
     } else {
       el.sym = SYMS[r.sym] ? r.sym : "heart";
       el.scale = +r.scale || 1;
@@ -1406,8 +1819,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   }
 
   function saveState(){
+    var it = itemAtual() || criaMolde(nomeSugerido());
     try {
-      localStorage.setItem(STORE, JSON.stringify({
+      localStorage.setItem(it.dados, JSON.stringify({
         v: 1,
         paper: { size: $("paperSize").value, or: $("paperOr").value,
                  w: $("paperW").value, h: $("paperH").value },
@@ -1417,7 +1831,12 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         mm: $("mm").value, pal: curPal, thread: thread, sel: sel,
         els: els.map(packEl)
       }));
-    } catch (e){ /* janela anônima ou cota cheia: seguir sem memória */ }
+    } catch (e){ /* janela anônima ou cota cheia: seguir sem memória */ return; }
+    it.em = Date.now();
+    it.pecas = els.length;
+    if (!it.nome) it.nome = nomeSugerido();
+    salvaEstante();
+    renderMoldes();
   }
 
   function scheduleSave(){
@@ -1437,9 +1856,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return "";
   }
 
-  function restoreState(){
+  function restoreState(chave){
     var raw;
-    try { raw = localStorage.getItem(STORE); } catch (e){ return false; }
+    try { raw = localStorage.getItem(chave); } catch (e){ return false; }
     if (!raw) return false;
     var s;
     try { s = JSON.parse(raw); } catch (e){ return false; }
@@ -1491,21 +1910,24 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   // a foto costuma ser o maior item do navegador: vai reduzida, e num formato
   // com perda, porque serve só de guia na tela e a 22% no PDF
   function savePhoto(img){
+    var it = itemAtual() || criaMolde(nomeSugerido());
     try {
       var k = Math.min(1, PHOTO_MAX_PX / Math.max(img.width, img.height));
       var c = document.createElement("canvas");
       c.width = Math.round(img.width * k);
       c.height = Math.round(img.height * k);
       c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      localStorage.setItem(PHOTO_STORE, c.toDataURL("image/jpeg", 0.85));
+      localStorage.setItem(it.foto, c.toDataURL("image/jpeg", 0.85));
     } catch (e){
-      try { localStorage.removeItem(PHOTO_STORE); } catch (e2){}
+      try { localStorage.removeItem(it.foto); } catch (e2){}
     }
   }
 
   function restorePhoto(){
+    var it = itemAtual();
+    if (!it) return;
     var url;
-    try { url = localStorage.getItem(PHOTO_STORE); } catch (e){ return; }
+    try { url = localStorage.getItem(it.foto); } catch (e){ return; }
     if (!url) return;
     var img = new Image();
     img.onload = function(){ photoImg = img; draw(); };
@@ -1586,14 +2008,54 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     if (e.shiftKey) redo(); else undo();
   });
 
+  /* A conta aparece com os números do espaçamento de agora, e não como
+     fórmula genérica: "7,1 mm de frente" diz mais do que "2p√2", e muda
+     junto quando se mexe no espaçamento entre furos. */
+  function renderFios(){
+    var box = $("fios");
+    if (!box) return;
+    box.innerHTML = "";
+    var lista = linhasUsadas();
+    if (!lista.length){
+      box.innerHTML = '<p class="note vazio">Nenhuma peça no molde ainda.</p>';
+      $("fiosConta").textContent = "";
+      return;
+    }
+    lista.forEach(function(l){
+      var d = document.createElement("div");
+      d.className = "fio";
+      d.title = l.pontos.toLocaleString("pt-BR") + " pontos";
+      var pt = document.createElement("span");
+      pt.className = "pt"; pt.style.background = l.hex;
+      var nm = document.createElement("span");
+      nm.className = "nm"; nm.textContent = l.nome;
+      var qt = document.createElement("b");
+      qt.textContent = fmt(l.metros) + " m";
+      d.appendChild(pt); d.appendChild(nm); d.appendChild(qt);
+      box.appendChild(d);
+    });
+    $("fiosConta").textContent =
+      "Com furos de " + fmt(P()) + " mm, cada ponto cheio gasta " + fmt(fioFrente()) +
+      " mm de frente (duas diagonais), " + fmt(fioAvesso()) + " mm de avesso (dois lados) e " +
+      Math.round((PERDA - 1) * 100) + "% de perda: " + fmt(fioPorPonto()) + " mm por ponto.";
+  }
+
   function renderChips(){
     var box = $("chips");
     box.innerHTML = "";
     els.forEach(function(el, i){
       var b = document.createElement("button");
       b.className = "chip" + (i === sel ? " on" : "");
-      b.textContent = el.kind === "text" ? (el.text || "texto")
-        : ({heart:"coração", heartOutline:"coração vazado", star:"estrela", arrow:"seta"})[el.sym];
+      // o ponto de cor é o que deixa ver o arranjo inteiro de uma vez, sem
+      // ter de selecionar peça por peça para lembrar de que linha é cada uma
+      var cor = corDe(el);
+      var pt = document.createElement("span");
+      pt.className = "pt";
+      pt.style.background = cor.hex;
+      pt.title = cor.nome;
+      b.appendChild(pt);
+      b.appendChild(document.createTextNode(el.kind === "text" ? (el.text || "texto")
+        : (NOMES_SYM[el.sym] || "símbolo")));
       b.addEventListener("click", function(){ sel = i; focus = "el"; syncControls(); draw(); renderChips(); });
       box.appendChild(b);
     });
@@ -1602,6 +2064,16 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function syncControls(){
     var el = els[sel];
     var piece = focus === "el" && !!el;
+    // com uma linha por peça, o painel precisa dizer qual peça ele está
+    // pintando — senão o quadradinho marcado vira adivinhação
+    var cor = corDe(el);
+    $("threadName").textContent = cor.nome;
+    $("threadAlvo").textContent = el
+      ? "Linha de " + (el.kind === "text" ? "“" + (el.text || "texto") + "”" : "símbolo")
+      : "Linha da próxima peça";
+    renderSwatches();
+    $("alinha").classList.toggle("hide", !piece);
+    $("flipEl").classList.toggle("on", !!(el && el.flip));
     $("ctlPhoto").classList.toggle("hide", focus !== "photo");
     $("ctlPiece").classList.toggle("hide", !piece);
     $("ctlActs").classList.toggle("hide", !piece);
@@ -1619,6 +2091,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       $("rows").value = el.rowsTarget; $("rowsOut").textContent = el.rowsTarget;
       $("thick").value = el.thick; $("thickOut").textContent = el.thick;
       $("thr").value = Math.round(el.thr * 100); $("thrOut").textContent = Math.round(el.thr * 100);
+      $("esp").value = el.esp || 0; $("espOut").textContent = el.esp || 0;
+      $("arc").value = el.arc || 0; $("arcOut").textContent = el.arc || 0;
     } else {
       $("ctlText").classList.add("hide"); $("ctlSym").classList.remove("hide");
       $("sym").value = el.sym;
@@ -1636,14 +2110,17 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   function addText(){
     var el = { kind:"text", text:"champ", font:"Great Vibes", rowsTarget:18, thick:2, thr:0.35, rot:-4,
-               x: photo.x, y: photo.y + photo.h - 14, cells:[[0]] };
+               esp:0, arc:0, flip:0,
+               x: photo.x, y: photo.y + photo.h - 14, cells:[[0]],
+               color: thread, colorName: threadLabel(thread) || thread };
     rebuild(el);
     els.push(el); sel = els.length - 1; focus = "el";
     renderChips(); syncControls(); draw(); pushHist();
   }
 
   function addSym(){
-    var el = { kind:"sym", sym:"heart", scale:2, rot:0, x: photo.x + photo.w - 20, y: photo.y + photo.h - 20, cells:[[0]] };
+    var el = { kind:"sym", sym:"heart", scale:2, rot:0, x: photo.x + photo.w - 20, y: photo.y + photo.h - 20,
+               flip:0, cells:[[0]], color: thread, colorName: threadLabel(thread) || thread };
     rebuild(el);
     els.push(el); sel = els.length - 1; focus = "el";
     renderChips(); syncControls(); draw(); pushHist();
@@ -1657,6 +2134,18 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     sel = Math.max(0, sel - 1);
     if (!els.length) focus = "none";
     renderChips(); syncControls(); draw(); pushHist();
+  });
+
+  /* Espelhar mexe nas células como elas estão, e não refaz a peça: quem
+     acendeu quadradinho à mão vê o ajuste virar junto em vez de sumir. A marca
+     fica gravada para o próximo Recalcular espelhar também. */
+  $("flipEl").addEventListener("click", function(){
+    var el = els[sel];
+    if (!el) return;
+    el.flip = el.flip ? 0 : 1;
+    el.cells = espelha(el.cells);
+    this.classList.toggle("on", !!el.flip);
+    renderChips(); draw(); pushHist();
   });
 
   $("dupEl").addEventListener("click", function(){
@@ -1685,9 +2174,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       el.rowsTarget = parseInt($("rows").value, 10);
       el.thick = parseInt($("thick").value, 10);
       el.thr = parseInt($("thr").value, 10) / 100;
+      el.esp = parseInt($("esp").value, 10) || 0;
+      el.arc = parseInt($("arc").value, 10) || 0;
       $("rowsOut").textContent = el.rowsTarget;
       $("thickOut").textContent = el.thick;
       $("thrOut").textContent = $("thr").value;
+      $("espOut").textContent = el.esp;
+      $("arcOut").textContent = el.arc;
       loadFontThen(function(){ rebuild(el); renderChips(); draw(); pushLater(); });
       return;
     }
@@ -1698,7 +2191,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     renderChips(); draw(); pushLater();
   }
 
-  ["txt","font","rows","thick","thr","sym","symScale"].forEach(function(id){
+  ["txt","font","rows","thick","thr","esp","arc","sym","symScale"].forEach(function(id){
     $(id).addEventListener("input", updateSelected);
   });
   $("rot").addEventListener("input", function(){
@@ -1993,8 +2486,10 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   cv.addEventListener("pointercancel", endDrag);
 
   function saveName(ext){
+    var it = itemAtual();
     var el = els[sel];
-    var t = (el && el.kind === "text" ? el.text : "bordado").trim().replace(/\s+/g, "-").replace(/[^A-Za-z0-9\-]/g, "");
+    var t = ((it && it.nome) || (el && el.kind === "text" ? el.text : "") || "bordado")
+      .trim().replace(/\s+/g, "-").replace(/[^A-Za-z0-9\-]/g, "");
     return "molde-" + (t || "ponto-cruz") + "." + ext;
   }
 
@@ -2134,96 +2629,240 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     if (blob) deliver(blob, saveName("png"), url); else showImage(url);
   });
 
-  $("pdf").addEventListener("click", function(){
-    if (!window.jspdf || !window.jspdf.jsPDF){
-      alert("O gerador de PDF não carregou. Recarregue a página.");
-      return;
-    }
-    if (!els.length) return;
-    var pa = paperMM();
-    var R = cropArea();
-    var fit = pdfFit(R);
-    var land = fit.land, pageW = fit.pageW, scale = fit.scale;
-    var pdf = new window.jspdf.jsPDF({ unit:"mm", format:"a4", orientation: land ? "landscape" : "portrait" });
-    var ox = (pageW - R.w * scale) / 2, oy = PDF_TOP;
+  /* Régua impressa. É o único jeito de descobrir, antes de furar, que a
+     impressora reduziu a página: se estes 50 mm não medirem 50 mm na régua de
+     verdade, o molde inteiro está fora de escala e nenhum furo vai bater. */
+  function reguaAfericao(pdf, x, y){
+    pdf.setDrawColor(20);
+    pdf.setLineWidth(0.3);
+    pdf.line(x, y, x + 50, y);
+    for (var i = 0; i <= 50; i += 10)
+      pdf.line(x + i, y, x + i, y - (i % 50 === 0 ? 2.8 : 1.6));
+    pdf.setFontSize(7);
+    pdf.setTextColor(80);
+    pdf.text("50 mm exatos", x + 53, y);
+  }
 
+  // mapinha das folhas: numa mesa com seis folhas parecidas, o desenho de qual
+  // é qual resolve mais rápido que o número escrito.
+  function mapaFolhas(pdf, plano, idx, dir, y){
+    var c = Math.min(4, 24 / plano.cols, 20 / plano.rows);
+    var x = dir - plano.cols * c;
+    pdf.setLineWidth(0.15);
+    pdf.setDrawColor(150);
+    pdf.setFillColor(56, 73, 89);
+    for (var r = 0; r < plano.rows; r++)
+      for (var q = 0; q < plano.cols; q++)
+        pdf.rect(x + q * c, y + r * c, c, c, (r * plano.cols + q) === idx ? "FD" : "D");
+  }
+
+  /* A legenda no rodapé. Sem ela o molde impresso não diz qual linha é qual:
+     o traço sai na cor, mas cor de tela não é código de meada, e quem volta ao
+     trabalho uma semana depois não tem como saber o que comprar de novo.
+     Vai em toda folha, porque cada folha é recortada e usada sozinha. */
+  function legenda(pdf, plano){
+    var usadas = linhasUsadas();
+    if (!usadas.length) return;
+    var util = plano.pageW - PDF_SIDE * 2;
+    var y = (plano.land ? 210 : 297) - footMM() + 4;
+    var x = 12, linha = 1, max = legendaLinhas();
+    pdf.setFontSize(7);
+    for (var i = 0; i < usadas.length; i++){
+      var w = 9.5 + pdf.getTextWidth(usadas[i].rotulo);
+      if (x > 12 && x - 12 + w > util){
+        if (linha >= max){
+          pdf.setTextColor(120);
+          pdf.text("+ " + (usadas.length - i) + " linhas", x, y);
+          return;
+        }
+        linha++; x = 12; y += FOOT_LINHA;
+      }
+      var rgb = hexRGB(usadas[i].hex);
+      pdf.setFillColor(rgb[0], rgb[1], rgb[2]);
+      pdf.setDrawColor(120);
+      pdf.setLineWidth(0.15);
+      pdf.rect(x, y - 2.4, 3.2, 3.2, "FD");
+      pdf.setTextColor(60);
+      pdf.text(usadas[i].rotulo, x + 4.6, y);
+      x += w;
+    }
+  }
+
+  function cabecalho(pdf, plano, idx){
+    var pa = paperMM();
+    var it = itemAtual(), t = els[sel];
     pdf.setFontSize(15);
-    var t = els[sel];
-    pdf.text(t && t.kind === "text" ? (t.text || "molde de furos") : "molde de furos", 12, 15);
+    pdf.setTextColor(20);
+    pdf.text((it && it.nome) || (t && t.kind === "text" && t.text) || "molde de furos", 12, 15);
+
+    var y = 21;
+    if (plano.tiled){
+      pdf.setFontSize(10);
+      pdf.setTextColor(56, 73, 89);
+      pdf.text("folha " + (idx + 1) + " de " + (plano.cols * plano.rows) + "   |   linha " +
+               (Math.floor(idx / plano.cols) + 1) + ", coluna " + (idx % plano.cols + 1), 12, 21);
+      mapaFolhas(pdf, plano, idx, plano.pageW - 12, 9);
+      y = 27;
+    }
+
     pdf.setFontSize(9);
     pdf.setTextColor(80);
     pdf.text("Papel " + fmt(pa.w) + " x " + fmt(pa.h) + " mm   |   foto " + fmt(photo.w) + " x " + fmt(photo.h) +
              " mm   |   furos de " + fmt(P()) + " mm   |   " + totalCount.toLocaleString("pt-BR") +
-             " pontos, " + totalHoles.toLocaleString("pt-BR") + " furos", 12, 21);
-    pdf.text("Cole a foto a " + fmt(photo.x) + " mm da borda esquerda e " + fmt(photo.y) + " mm da borda de cima do papel.", 12, 26);
-    pdf.text("Sobra: " + fmt(pa.w - photo.x - photo.w) + " mm a direita, " + fmt(pa.h - photo.y - photo.h) + " mm embaixo.", 12, 31);
-    pdf.setTextColor(scale < 1 ? 190 : 80, scale < 1 ? 81 : 80, scale < 1 ? 3 : 80);
-    pdf.text(scale < 1
-      ? "ATENCAO: reduzido a " + Math.round(scale * 100) + "% para caber na folha. Nesse tamanho os furos nao batem com o material."
-      : "Imprima em 100%, sem ajustar a pagina. Confira com uma regua: o retangulo abaixo deve medir " + fmt(photo.w) + " mm de largura.", 12, 36);
-    pdf.setTextColor(80);
+             " pontos, " + totalHoles.toLocaleString("pt-BR") + " furos", 12, y);
+    pdf.text("Cole a foto a " + fmt(photo.x) + " mm da borda esquerda e " + fmt(photo.y) +
+             " mm da borda de cima do papel.", 12, y + 5);
+    pdf.text(plano.tiled
+      ? "Recorte pela moldura tracejada. As folhas vizinhas repetem uma faixa do desenho: sobreponha ate os furos coincidirem."
+      : "Sobra: " + fmt(pa.w - photo.x - photo.w) + " mm a direita, " + fmt(pa.h - photo.y - photo.h) + " mm embaixo.",
+      12, y + 10);
+    pdf.text("Imprima em 100%, sem ajustar a pagina. Confira na regua abaixo antes de furar.", 12, y + 15);
+    reguaAfericao(pdf, 12, y + 20);
+  }
+
+  // qual folha continua de cada lado, escrito na margem. Com o texto girado o
+  // glifo cresce para a esquerda e a linha sobe, então a âncora vai meia
+  // palavra abaixo do meio para a legenda sair centrada no corte.
+  function vizinhas(pdf, plano, idx, ox, oy){
+    var col = idx % plano.cols, lin = Math.floor(idx / plano.cols);
+    pdf.setFontSize(7);
+    pdf.setTextColor(120);
+    var lado = function(txt, x, meio){
+      pdf.text(txt, x, meio + pdf.getTextWidth(txt) / 2, { angle: 90 });
+    };
+    if (lin > 0)
+      pdf.text("^ folha " + (idx - plano.cols + 1), ox + plano.tw / 2, oy - 2, { align: "center" });
+    if (lin < plano.rows - 1)
+      pdf.text("v folha " + (idx + plano.cols + 1), ox + plano.tw / 2, oy + plano.th + 5, { align: "center" });
+    if (col > 0) lado("< folha " + idx, ox - 2, oy + plano.th / 2);
+    if (col < plano.cols - 1) lado("folha " + (idx + 2) + " >", ox + plano.tw + 5, oy + plano.th / 2);
+  }
+
+  /* O molde de uma folha, em tamanho real. `vw` é o pedaço do papel que esta
+     folha mostra, e tudo é recortado nele: sem o recorte, o traço de uma peça
+     vizinha invade a margem e reaparece cortado pela metade depois da tesoura. */
+  function moldeNaFolha(pdf, vw, ox, oy){
+    var pa = paperMM();
 
     // 4 px/mm basta para um fundo desenhado a 22% de opacidade, e a compressão
     // impede o jsPDF de embutir o raster cru — sem ela o molde sai com 6,5 MB
     var bg = document.createElement("canvas");
     var bgk = 4;
-    bg.width = Math.round(R.w * bgk); bg.height = Math.round(R.h * bgk);
+    bg.width = Math.round(vw.w * bgk); bg.height = Math.round(vw.h * bgk);
     var bctx = bg.getContext("2d");
     bctx.fillStyle = "#fff"; bctx.fillRect(0, 0, bg.width, bg.height);
-    drawPhoto(bctx, bgk, R, 0.22);
-    pdf.addImage(bg.toDataURL("image/png"), "PNG", ox, oy, R.w * scale, R.h * scale, undefined, "FAST");
+    drawPhoto(bctx, bgk, vw, 0.22);
+    pdf.addImage(bg.toDataURL("image/png"), "PNG", ox, oy, vw.w, vw.h, undefined, "FAST");
 
-    pdf.setDrawColor(150);
-    pdf.setLineWidth(0.2);
-    pdf.setLineDashPattern([2, 2], 0);
-    pdf.rect(ox, oy, R.w * scale, R.h * scale);
-    pdf.setLineDashPattern([], 0);
+    // o `null` é o que impede o jsPDF de pintar este retângulo antes de usá-lo
+    // como recorte — sem ele, cada folha sai com uma moldura sólida a mais.
+    pdf.saveGraphicsState();
+    pdf.rect(ox, oy, vw.w, vw.h, null);
+    pdf.clip();
+    pdf.discardPath();
 
     pdf.setDrawColor(20);
     pdf.setLineWidth(0.4);
-    pdf.rect(ox + (photo.x - R.x) * scale, oy + (photo.y - R.y) * scale, photo.w * scale, photo.h * scale);
+    pdf.rect(ox + (photo.x - vw.x), oy + (photo.y - vw.y), photo.w, photo.h);
 
     var edges = [];
-    if (R.x <= 0.01) edges.push(["v", 0]);
-    if (R.y <= 0.01) edges.push(["h", 0]);
-    if (R.x + R.w >= pa.w - 0.01) edges.push(["v", pa.w]);
-    if (R.y + R.h >= pa.h - 0.01) edges.push(["h", pa.h]);
+    if (vw.x <= 0.01) edges.push(["v", 0]);
+    if (vw.y <= 0.01) edges.push(["h", 0]);
+    if (vw.x + vw.w >= pa.w - 0.01) edges.push(["v", pa.w]);
+    if (vw.y + vw.h >= pa.h - 0.01) edges.push(["h", pa.h]);
     pdf.setDrawColor(56, 73, 89);
     pdf.setLineWidth(0.6);
     edges.forEach(function(e){
       if (e[0] === "v"){
-        var X = ox + (e[1] - R.x) * scale;
-        pdf.line(X, oy, X, oy + R.h * scale);
+        var X = ox + (e[1] - vw.x);
+        pdf.line(X, oy, X, oy + vw.h);
       } else {
-        var Y = oy + (e[1] - R.y) * scale;
-        pdf.line(ox, Y, ox + R.w * scale, Y);
+        var Y = oy + (e[1] - vw.y);
+        pdf.line(ox, Y, ox + vw.w, Y);
       }
     });
 
+    // o recorte esconde o que sai da folha, mas o jsPDF grava o traço assim
+    // mesmo: repartido em seis folhas, o arquivo sairia com seis cópias do
+    // molde inteiro. Fora da folha, nem desenha.
+    var fora = function(pt, m){
+      return pt.x < vw.x - m || pt.x > vw.x + vw.w + m ||
+             pt.y < vw.y - m || pt.y > vw.y + vw.h + m;
+    };
+    var cabe = function(el){
+      var b = elPaperBox(el);
+      return b.x <= vw.x + vw.w && b.x + b.w >= vw.x &&
+             b.y <= vw.y + vw.h && b.y + b.h >= vw.y;
+    };
+
     var p = P();
-    var trgb = threadRGB();
-    pdf.setDrawColor(trgb[0], trgb[1], trgb[2]);
     pdf.setLineWidth(0.22);
     els.forEach(function(el){
+      if (!cabe(el)) return;
+      var rgb = hexRGB(corDe(el).hex);
+      pdf.setDrawColor(rgb[0], rgb[1], rgb[2]);
       for (var r = 0; r < el.cells.length; r++){
         for (var q = 0; q < el.cells[r].length; q++){
           if (!el.cells[r][q]) continue;
+          if (fora(localToPaper(el, (q + 0.5) * p, (r + 0.5) * p), p)) continue;
           var a1 = localToPaper(el, q * p + p * 0.22, r * p + p * 0.22);
           var a2 = localToPaper(el, (q + 1) * p - p * 0.22, (r + 1) * p - p * 0.22);
           var b1 = localToPaper(el, (q + 1) * p - p * 0.22, r * p + p * 0.22);
           var b2 = localToPaper(el, q * p + p * 0.22, (r + 1) * p - p * 0.22);
-          pdf.line(ox + (a1.x - R.x) * scale, oy + (a1.y - R.y) * scale, ox + (a2.x - R.x) * scale, oy + (a2.y - R.y) * scale);
-          pdf.line(ox + (b1.x - R.x) * scale, oy + (b1.y - R.y) * scale, ox + (b2.x - R.x) * scale, oy + (b2.y - R.y) * scale);
+          pdf.line(ox + (a1.x - vw.x), oy + (a1.y - vw.y), ox + (a2.x - vw.x), oy + (a2.y - vw.y));
+          pdf.line(ox + (b1.x - vw.x), oy + (b1.y - vw.y), ox + (b2.x - vw.x), oy + (b2.y - vw.y));
         }
       }
     });
 
     pdf.setFillColor(15, 15, 15);
     els.forEach(function(el){
+      if (!cabe(el)) return;
       holesOf(el).forEach(function(h){
-        pdf.circle(ox + (h.x - R.x) * scale, oy + (h.y - R.y) * scale, Math.max(0.22, 0.3 * scale), "F");
+        if (fora(h, 1)) return;
+        pdf.circle(ox + (h.x - vw.x), oy + (h.y - vw.y), 0.3, "F");
       });
     });
+
+    pdf.restoreGraphicsState();
+
+    // a moldura de recorte fica fora do clip: linha desenhada em cima da borda
+    // perde metade da espessura para o recorte e sai mais fina de um lado.
+    pdf.setDrawColor(150);
+    pdf.setLineWidth(0.2);
+    pdf.setLineDashPattern([2, 2], 0);
+    pdf.rect(ox, oy, vw.w, vw.h);
+    pdf.setLineDashPattern([], 0);
+  }
+
+  $("pdf").addEventListener("click", function(){
+    if (!window.jspdf || !window.jspdf.jsPDF){
+      alert("O gerador de PDF não carregou. Recarregue a página.");
+      return;
+    }
+    if (!els.length) return;
+    var R = cropArea();
+    var plano = pdfPlan(R);
+    /* `floatPrecision` e `compress` valem o molde inteiro: cada furo é um
+       círculo de quatro curvas, e sem eles o jsPDF grava cada coordenada com
+       dezessete casas decimais — 700 bytes por furo, megabytes por folha, que
+       o celular ainda precisa baixar. Duas casas em pt são 3,5 milésimos de
+       milímetro: mais fino do que qualquer agulha alcança. */
+    var pdf = new window.jspdf.jsPDF({
+      unit: "mm", format: "a4", orientation: plano.land ? "landscape" : "portrait",
+      compress: true, floatPrecision: 2
+    });
+
+    for (var i = 0; i < plano.cols * plano.rows; i++){
+      if (i) pdf.addPage("a4", plano.land ? "landscape" : "portrait");
+      var vw = { x: R.x + plano.xs[i % plano.cols], y: R.y + plano.ys[Math.floor(i / plano.cols)],
+                 w: plano.tw, h: plano.th };
+      var ox = (plano.pageW - plano.tw) / 2, oy = plano.top;
+      cabecalho(pdf, plano, i);
+      moldeNaFolha(pdf, vw, ox, oy);
+      legenda(pdf, plano);
+      if (plano.tiled) vizinhas(pdf, plano, i, ox, oy);
+    }
 
     deliver(pdf.output("blob"), saveName("pdf"), null);
   });
@@ -2487,6 +3126,240 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     contaLinhas();
   });
 
+  /* ---- alinhar e empurrar a peça --------------------------------------
+
+     Arrastando com o mouse, acertar milímetro é sorte, e a foto já tinha três
+     botões de posicionar na barra enquanto a peça não tinha nenhum.
+
+     O que se move é a caixa JÁ GIRADA: centralizar uma palavra inclinada pelo
+     canto de cima dela deixaria o texto visivelmente torto no papel. */
+  function moveEl(el, dx, dy){
+    el.x = Math.round((el.x + dx) * 10) / 10;
+    el.y = Math.round((el.y + dy) * 10) / 10;
+  }
+
+  function alinha(modo){
+    var el = els[sel];
+    if (!el) return;
+    var b = elPaperBox(el), pa = paperMM();
+    if (modo === "foto")  moveEl(el, (photo.x + photo.w / 2) - (b.x + b.w / 2), 0);
+    if (modo === "papel") moveEl(el, (pa.w / 2) - (b.x + b.w / 2), 0);
+    if (modo === "base")  moveEl(el, 0, (photo.y + photo.h) - (b.y + b.h));
+    draw(); pushHist();
+  }
+
+  $("alFoto").addEventListener("click", function(){ alinha("foto"); });
+  $("alPapel").addEventListener("click", function(){ alinha("papel"); });
+  $("alBase").addEventListener("click", function(){ alinha("base"); });
+
+  var SETAS = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+
+  document.addEventListener("keydown", function(e){
+    var d = SETAS[e.key];
+    if (!d || e.ctrlKey || e.metaKey || e.altKey) return;
+    var tag = ((e.target || {}).tagName || "").toUpperCase();
+    // dentro de um campo, a seta anda no texto e no número
+    if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+    var passo = e.shiftKey ? 5 : 0.5;
+    if (focus === "photo"){
+      photo.x = Math.round((photo.x + d[0] * passo) * 10) / 10;
+      photo.y = Math.round((photo.y + d[1] * passo) * 10) / 10;
+      clampPhoto();
+    } else {
+      var el = els[sel];
+      if (!el || focus !== "el") return;
+      moveEl(el, d[0] * passo, d[1] * passo);
+    }
+    e.preventDefault();      // senão a seta rola a mesa junto
+    draw();
+    pushLater();             // uma rajada de setas vira um passo só no desfazer
+  });
+
+  /* ---- a estante na tela ---------------------------------------------- */
+
+  function quando(ms){
+    if (!ms) return "agora";
+    var d = new Date(ms);
+    return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) + " às " +
+           d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function renderMoldes(){
+    var box = $("moldeLista");
+    if (!box) return;
+    box.innerHTML = "";
+    estante.itens.forEach(function(it){
+      var l = document.createElement("div");
+      l.className = "mold" + (it.id === estante.atual ? " on" : "");
+
+      var a = document.createElement("button");
+      a.type = "button"; a.className = "abre";
+      var nm = document.createElement("span");
+      nm.className = "nm"; nm.textContent = it.nome || "sem nome";
+      var qd = document.createElement("span");
+      qd.className = "qd";
+      qd.textContent = (it.pecas || 0) + ((it.pecas === 1) ? " peça" : " peças") + " · " + quando(it.em);
+      a.appendChild(nm); a.appendChild(qd);
+      a.addEventListener("click", function(){ abreMolde(it.id); });
+
+      var x = document.createElement("button");
+      x.type = "button"; x.className = "apaga";
+      x.textContent = "×";
+      x.title = "apagar este molde";
+      x.setAttribute("aria-label", "apagar o molde " + (it.nome || "sem nome"));
+      x.addEventListener("click", function(){ apagaMolde(it.id); });
+
+      l.appendChild(a); l.appendChild(x);
+      box.appendChild(l);
+    });
+    // o campo do nome não é reescrito enquanto estão digitando nele
+    var at = itemAtual(), campo = $("moldeNome");
+    if (at && campo && campo !== document.activeElement) campo.value = at.nome || "";
+  }
+
+  /* Abrir outro molde é trocar tudo o que está na tela: peças, papel, foto,
+     linha e o desfazer. O que estava aberto é gravado antes — nunca se perde
+     trabalho por ter clicado no molde errado. */
+  function abreItem(it){
+    if (!it) return;
+    photoImg = null; photoURL = null;
+    // `restored` é o que segura o redesenho cego das fontes, 1,4 s depois de
+    // abrir a página: molde vindo da memória não pode ser recalculado, senão
+    // perde os ajustes feitos ponto a ponto
+    restored = restoreState(it.dados);
+    if (!restored) moldeEmBranco();
+    renderChips(); syncControls(); renderMoldes();
+    restorePhoto(); mostraFonte(); draw(); mostraZoom(); resetHist();
+  }
+
+  function abreMolde(id){
+    if (id === estante.atual) return;
+    saveState();
+    estante.atual = id;
+    salvaEstante();
+    abreItem(itemAtual());
+  }
+
+  function moldeEmBranco(){
+    els = [];
+    syncPhotoSize();
+    lastPaper = paperMM();
+    var pa = paperMM();
+    photo.x = (pa.w - photo.w) / 2;
+    photo.y = pa.h * 0.14;
+    photoImg = null; photoURL = null;
+    addText();
+    els[0].x = photo.x - 6;
+    els[0].y = photo.y + photo.h - 10;
+  }
+
+  function apagaMolde(id){
+    var it = null;
+    estante.itens.forEach(function(x){ if (x.id === id) it = x; });
+    if (!it) return;
+    if (!confirm("Apagar o molde “" + (it.nome || "sem nome") + "”? Isso não se desfaz.")) return;
+    try { localStorage.removeItem(it.dados); } catch (e){}
+    try { localStorage.removeItem(it.foto); } catch (e){}
+    var era = estante.atual === id;
+    estante.itens = estante.itens.filter(function(x){ return x.id !== id; });
+    if (era){
+      // apagou o que estava aberto: abre o mais recente, ou uma folha limpa
+      if (estante.itens.length){
+        estante.atual = estante.itens[0].id;
+        salvaEstante();
+        abreItem(itemAtual());
+        return;
+      }
+      estante.atual = "";
+      criaMolde("");
+      moldeEmBranco();
+      renderChips(); syncControls(); draw(); resetHist();
+    }
+    salvaEstante();
+    renderMoldes();
+  }
+
+  function avisaArquivo(msg){
+    var p = $("moldeAviso");
+    if (p) p.textContent = msg || "";
+  }
+
+  /* ---- o molde como arquivo -------------------------------------------
+
+     O navegador guarda, mas não carrega: o trabalho não vai para outro
+     aparelho e some com os dados do site. O arquivo leva o molde inteiro, foto
+     junto, porque molde sem a foto perde o guia de onde cada peça fica. */
+  function exportaMolde(){
+    saveState();
+    var it = itemAtual();
+    if (!it) return;
+    var dados = null, foto = null;
+    try { dados = localStorage.getItem(it.dados); } catch (e){}
+    try { foto = localStorage.getItem(it.foto); } catch (e){}
+    if (!dados) return avisaArquivo("Não há nada gravado para salvar.");
+    var corpo;
+    try {
+      corpo = JSON.stringify({ app: "ponto-e-letra", v: 1, nome: it.nome || "sem nome",
+                               em: new Date().toISOString(), molde: JSON.parse(dados),
+                               foto: foto || null });
+    } catch (e){ return avisaArquivo("Não consegui montar o arquivo."); }
+    deliver(new Blob([corpo], { type: "application/json" }), saveName("json"), null);
+    avisaArquivo("Arquivo salvo com a foto junto.");
+  }
+
+  function importaMolde(arquivo){
+    var fr = new FileReader();
+    fr.onerror = function(){ avisaArquivo("Não consegui ler esse arquivo."); };
+    fr.onload = function(){
+      var a = null;
+      try { a = JSON.parse(String(fr.result)); } catch (e){}
+      if (!a || a.app !== "ponto-e-letra" || !a.molde || !a.molde.els || !a.molde.els.length)
+        return avisaArquivo("Esse arquivo não é um molde do ponto & letra.");
+      saveState();                     // o que está aberto continua guardado
+      var it = criaMolde(a.nome || "molde aberto de arquivo");
+      try { localStorage.setItem(it.dados, JSON.stringify(a.molde)); }
+      catch (e){
+        estante.itens = estante.itens.filter(function(x){ return x.id !== it.id; });
+        estante.atual = estante.itens.length ? estante.itens[0].id : "";
+        salvaEstante();
+        return avisaArquivo("Não coube na memória do navegador. Apague um molde antigo e tente de novo.");
+      }
+      // a foto é o item que estoura a cota; sem ela o molde ainda vale
+      if (typeof a.foto === "string" && a.foto.indexOf("data:image") === 0){
+        try { localStorage.setItem(it.foto, a.foto); } catch (e2){}
+      }
+      salvaEstante();
+      abreItem(it);
+      avisaArquivo("Molde aberto: “" + (it.nome || "sem nome") + "”.");
+    };
+    fr.readAsText(arquivo);
+  }
+
+  $("moldeNovo").addEventListener("click", function(){
+    saveState();
+    criaMolde("");
+    moldeEmBranco();
+    renderChips(); syncControls(); renderMoldes(); draw(); mostraZoom(); resetHist();
+    avisaArquivo("");
+  });
+
+  $("moldeNome").addEventListener("input", function(){
+    var it = itemAtual();
+    if (!it) return;
+    it.nome = this.value.trim();
+    salvaEstante();
+    var alvo = $("moldeLista").querySelector(".mold.on .nm");
+    if (alvo) alvo.textContent = it.nome || "sem nome";
+  });
+
+  $("moldeSalvar").addEventListener("click", exportaMolde);
+  $("moldeAbrir").addEventListener("click", function(){ $("moldeArq").click(); });
+  $("moldeArq").addEventListener("change", function(e){
+    var f = e.target.files && e.target.files[0];
+    if (f) importaMolde(f);
+    e.target.value = "";     // o mesmo arquivo pode ser aberto de novo
+  });
+
   /* ---- trilho e painéis ---------------------------------------------- */
   [].forEach.call(document.querySelectorAll(".rail button"), function(b){
     b.addEventListener("click", function(){
@@ -2506,17 +3379,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   function boot(){
     carregaLinhas();          // antes de restaurar: a paleta "minhas linhas"
-    restored = restoreState();   // só existe se houver o que ela mostre
-    if (!restored){
-      syncPhotoSize();
-      lastPaper = paperMM();
-      var pa = paperMM();
-      photo.x = (pa.w - photo.w) / 2;
-      photo.y = pa.h * 0.14;
-      addText();
-      els[0].x = photo.x - 6;
-      els[0].y = photo.y + photo.h - 10;
-    }
+    carregaEstante();         // e antes do molde: é ela que diz qual abrir
+    var it = itemAtual();
+    restored = !!it && restoreState(it.dados);
+    if (!restored) moldeEmBranco();
+    renderMoldes();
     renderPaletteList();
     renderSwatches();
     montaMarcas();
