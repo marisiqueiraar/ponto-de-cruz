@@ -40,8 +40,6 @@ incluindo `textMatrix()`, que transforma o traço da fonte em quadradinhos e é 
 coração do app —, os gestos, e qualquer comparação do PDF com uma imagem de
 referência.
 
-`tela.js` conhece pelo nome um buraco que está esperando decisão: a fonte
-`CS Norman Mono`, que o seletor oferece e o repositório não tem
-([REVISAR.md](../REVISAR.md), item 1). Ele deixa essa passar e reclama de
-qualquer **outro** arquivo que falte — arquivo faltando aqui quer dizer molde
-desenhado com a fonte errada.
+`tela.js` não tem exceção: qualquer arquivo que falte derruba o teste. Arquivo
+faltando ali quer dizer fonte que não chega, e fonte que não chega faz o canvas
+desenhar numa cursiva genérica, com o molde saindo errado sem avisar.

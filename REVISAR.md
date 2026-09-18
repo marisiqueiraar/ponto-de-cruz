@@ -10,41 +10,29 @@ teste meu consegue responder.
 
 ---
 
-## 1. A fonte CS Norman Mono não está no repositório
+## 1. ~~A fonte CS Norman Mono~~ — resolvido
 
-**É o item mais urgente da lista.**
+O seletor oferecia `CS Norman Mono (arquivo seu)` no grupo **Pixel e bloco**, e
+os três arquivos que o `@font-face` pedia nunca existiram no repositório. Medido
+no Chromium, a família não carregava e o canvas caía na cursiva genérica — "AMOR"
+media 300 px nas duas, contra 313 da Silkscreen. A opção devolvia uma cursiva
+com rótulo de fonte pixelada, e o molde saía desenhado do traço errado.
 
-O seletor de fontes oferece `CS Norman Mono (arquivo seu)`, no grupo **Pixel e
-bloco**. O `@font-face` aponta para `./CSNormanMono.woff2`, `.woff` e `.otf`, na
-raiz — e nenhum dos três existe aqui. Medido no Chromium:
+Você mandou tirar. Saíram a opção, o `@font-face` e a menção no `--display`,
+que agora pede a Silkscreen direto — que era o que já acontecia na prática, só
+que sem três requisições falhando a cada abertura.
 
-```
-CS Norman Mono  carregou: false   largura de "AMOR": 300 px
-cursiva pura                      largura de "AMOR": 300 px   ← o mesmo
-Silkscreen      carregou: true    largura de "AMOR": 313 px
-```
+Peça gravada apontando para fonte que não está mais na lista volta como
+Great Vibes. As células voltam como foram gravadas, então o desenho na tela não
+muda; muda o que o seletor mostra e o que um **Recalcular** usaria.
 
-Ou seja: quem escolhe essa fonte recebe **uma cursiva genérica rotulada como
-pixel**. O cartão da lista mostra a cursiva honestamente (a amostra em
-quadradinhos é gerada do traço que chegou), então não é invisível — mas o rótulo
-promete outra coisa, e o molde sai com o desenho de outra fonte.
+O `testes/tela.js` não tem mais exceção nenhuma: **qualquer** arquivo que falte
+derruba o teste. Arquivo faltando ali quer dizer fonte que não chega, e fonte
+que não chega é o modo de falhar que o README inteiro foi escrito para evitar.
 
-O `--display` da interface inteira também pede essa fonte primeiro, e cai na
-Silkscreen. É por isso que os títulos e botões aparecem em Silkscreen hoje.
-
-**A decisão é sua, e são só duas:**
-
-- **Você tem o arquivo.** Mande, eu coloco em `fonts/` como as outras 40, com a
-  licença registrada em `fonts/LICENCAS.txt`. Era claramente a intenção do
-  rótulo "(arquivo seu)".
-- **Você não vai usar.** Eu tiro a opção do seletor e o `@font-face`, e o
-  `--display` passa a pedir a Silkscreen direto — que é o que já acontece na
-  prática, só que sem três requisições que falham a cada abertura.
-
-Enquanto não se decide, o `testes/tela.js` conhece esse buraco pelo nome e
-avisa se **outro** arquivo passar a faltar. Arquivo faltando aqui quer dizer
-molde desenhado com a fonte errada, que é o modo de falhar que o README inteiro
-foi escrito para evitar.
+Se um dia a CS Norman Mono aparecer, o caminho é o das outras 40: o arquivo em
+`fonts/`, um `@font-face` como os vizinhos, a opção no grupo, e a licença em
+`fonts/LICENCAS.txt`.
 
 ---
 

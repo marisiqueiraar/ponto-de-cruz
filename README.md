@@ -90,9 +90,8 @@ cobrem, e o que não cobrem, está em [`testes/LEIAME.md`](testes/LEIAME.md).
 
 ## O que está em aberto
 
-[`REVISAR.md`](REVISAR.md) — o que precisa de decisão, incluindo uma fonte que
-o seletor oferece e o repositório não tem. [`BACKLOG.md`](BACKLOG.md) — o que
-falta construir.
+[`REVISAR.md`](REVISAR.md) — o que precisa de decisão sua.
+[`BACKLOG.md`](BACKLOG.md) — o que falta construir.
 
 ## Dependências externas
 

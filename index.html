@@ -55,19 +55,11 @@
 @font-face{font-family:"UnifrakturMaguntia";src:url("fonts/unifrakturmaguntia.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"VT323";src:url("fonts/vt323.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Yellowtail";src:url("fonts/yellowtail.woff2") format("woff2");font-display:swap}
-@font-face{
-  font-family:"CS Norman Mono";
-  src:url("./CSNormanMono.woff2") format("woff2"),
-      url("./CSNormanMono.woff") format("woff"),
-      url("./CSNormanMono.otf") format("opentype");
-  font-weight:400;
-  font-display:swap;
-}
 /* Casca no modelo de editor: trilho de ícones, um painel, barra de cima que
    muda com a seleção, e a mesa com o papel no centro. Os controles são os
    mesmos de antes — só mudaram de lugar. */
 :root{
-  --display:"CS Norman Mono","Silkscreen","Courier New",monospace;
+  --display:"Silkscreen","Courier New",monospace;
   --paper:#EDF4FB;
   --ink:#384959;
   --ink-soft:#6A89A7;
@@ -484,7 +476,6 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
           <option value="Pirata One">Pirata One</option>
         </optgroup>
         <optgroup label="Pixel e bloco">
-          <option value="CS Norman Mono">CS Norman Mono (arquivo seu)</option>
           <option value="Silkscreen">Silkscreen</option>
           <option value="Press Start 2P">Press Start 2P</option>
           <option value="Pixelify Sans">Pixelify Sans</option>
@@ -1240,6 +1231,14 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return trim(cells);
   }
 
+  /* Fonte que o seletor não oferece é fonte que não chega, e fonte que não
+     chega faz o canvas desenhar numa cursiva genérica — o molde sai errado sem
+     avisar. Então o que vem da memória é conferido contra a lista. */
+  function fonteConhecida(nome){
+    if (!nome) return false;
+    return !!document.querySelector('#font option[value="' + String(nome).replace(/"/g, "") + '"]');
+  }
+
   function rebuild(el){
     el.manual = 0;   // refazer a peça descarta o que foi aceso ou apagado à mão
     el.cells = el.kind === "sym"
@@ -1624,7 +1623,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     }
     if (el.kind === "text"){
       el.text = typeof r.text === "string" ? r.text : "";
-      el.font = r.font || "Great Vibes";
+      el.font = fonteConhecida(r.font) ? r.font : "Great Vibes";
       el.rowsTarget = +r.rowsTarget || 18;
       el.thick = r.thick == null ? 2 : +r.thick;
       el.thr = +r.thr || 0.35;

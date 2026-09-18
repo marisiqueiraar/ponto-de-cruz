@@ -25,19 +25,14 @@ const path = "file://" + require("path").resolve(__dirname, "..", "index.html");
     await pg.goto(path);
     await pg.waitForTimeout(2200);   // depois do redesenho cego das fontes
 
-    // A CS Norman Mono e' oferecida no seletor de fontes e nao esta no
-    // repositorio: cai numa cursiva generica, rotulada como "pixel e bloco".
-    // Esta' em REVISAR.md, esperando decisao. Qualquer OUTRO arquivo faltando
-    // e' novidade, e novidade aqui quer dizer molde desenhado com a fonte errada.
-    const conhecido = f => /^CSNormanMono\./.test(f);
-    const novos = faltou.filter(f => !conhecido(f));
-    ok(novos.length === 0, nome + ": nenhum arquivo faltando alem da CS Norman Mono" +
-       (novos.length ? " — faltou: " + novos.join(", ") : ""));
-    const outros = erros.filter(e => !/ERR_FILE_NOT_FOUND/.test(e));
-    ok(outros.length === 0, nome + ": console sem erro de JavaScript" +
-       (outros.length ? " — " + outros.join(" | ") : ""));
-    if (faltou.some(conhecido) && nome === "desktop")
-      console.log("      (a CS Norman Mono continua faltando, como REVISAR.md registra)");
+    // Arquivo faltando aqui quer dizer fonte que não chega, e fonte que não
+    // chega faz o canvas desenhar numa cursiva genérica: o molde sai errado
+    // sem avisar. É o modo de falhar que o README inteiro foi escrito para
+    // evitar, então não há exceção nenhuma nesta linha.
+    ok(faltou.length === 0, nome + ": nenhum arquivo faltando" +
+       (faltou.length ? " — faltou: " + faltou.join(", ") : ""));
+    ok(erros.length === 0, nome + ": console limpo" +
+       (erros.length ? " — " + erros.join(" | ") : ""));
     ok(await pg.locator('.rail button[data-pane="moldes"]').isVisible(), nome + ": o botão moldes existe no trilho");
 
     // o trilho inteiro cabe sem cortar nenhum botão?
