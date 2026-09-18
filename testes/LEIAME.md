@@ -8,8 +8,8 @@ um Chromium e se pula sozinho quando não acha um.
 testes/roda.sh        # todos, com a extração refeita antes
 ```
 
-Os dois últimos (`tela.js` e `posicao.js`) dirigem um Chromium e se pulam
-sozinhos quando não acham um. O `posicao.js` mede as posições lendo o que o app
+Os de navegador (`tela.js`, `posicao.js`, `letra.js`, `ajuste.js`, `teto.js` e
+`cota.js`) dirigem um Chromium e se pulam sozinhos quando não acham um. O `posicao.js` mede as posições lendo o que o app
 grava no `localStorage`, em vez de olhar a tela: assim dá para afirmar "andou
 0,5 mm" em vez de "alguma coisa mudou".
 
@@ -34,6 +34,7 @@ em todas as folhas.
 | `estante.test.js` | o molde antigo migra sem nada ser copiado, apagar tira só as chaves daquele molde, trocar grava antes, e o arquivo sobrevive à volta num navegador zerado |
 | `tela.js` | o app monta num Chromium de verdade, sem erro de JavaScript, e o trilho de sete botões cabe numa tela de 360 px |
 | `letra.js` | o espaçamento alarga a palavra sem mudar a altura, o arco levanta o meio acima das pontas (e o arco negativo inverte), e espelhar inverte as colunas sem mudar a grade e sobrevive ao Recalcular |
+| `ajuste.js` | o quadradinho aceso à mão sobrevive a mexer na altura, no traço e na fonte (e só o Recalcular o descarta), a mesma altura dá a mesma letra com e sem descendente, palavra nova nasce com o que está na barra de cima, e molde gravado antes tem o número da altura convertido sem mudar de tamanho |
 | `fio.js` | os metros na tela batem com a conta que a própria tela diz fazer, a conta responde ao espaçamento entre furos, e a soma por cor fecha com o total de pontos |
 | `teto.js` | o teto do rascunho não deforma o molde: o degrau na fronteira é menor que a variação natural, e o pior caso mantém a grade que tinha sem o teto |
 | `cota.js` | com o `localStorage` recusando a escrita, o rodapé avisa em vermelho, a aba moldes diz o que fazer, os dois somem quando volta a caber, e o aviso aparece mesmo numa janela de 360 px, onde o resto do rodapé fica escondido |

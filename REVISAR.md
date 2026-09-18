@@ -166,3 +166,48 @@ memória" e a aba moldes escreve o caminho. Os detalhes estão no
 que encheu, mas ninguém aumenta 5 MB. A saída de verdade é o arquivo do molde,
 e vale pensar se o app deveria insistir mais nisso — oferecer o download
 sozinho quando a memória encher, por exemplo, em vez de só recomendar.
+
+---
+
+## 5. A altura passou a ser a da maiúscula — e isso é uma escolha
+
+Você disse duas coisas: que a altura não dizia o que significava, e que palavras
+pedidas iguais saíam de tamanhos diferentes. As duas tinham a mesma causa. A
+altura era a **caixa de tinta da palavra escrita** — a distância do ponto mais
+alto ao mais baixo daquela palavra, naquela fonte. Como "amor" não sobe nem
+desce e "alegria" faz as duas coisas, pedir 18 nas duas dava letras de tamanhos
+bem diferentes: na segunda, os 18 quadradinhos eram repartidos com o "l" e o
+"g", e só sobrava o miolo para as letras.
+
+Passei a medir na **fonte**, e não na palavra: a altura é a da letra maiúscula.
+A mesma altura passa a dar sempre a mesma letra, e o que ascende e desce passa
+do número pedido, em vez de espremer o resto.
+
+**O que você pode querer diferente:**
+
+- **A referência.** Escolhi a maiúscula. As outras candidatas eram a caixa da
+  fonte inteira (`fontBoundingBox`), que varia demais entre famílias — medi de
+  103 a 175 unidades nas nove que testei, contra 63 a 89 da maiúscula —, e a
+  altura do "x", que deixaria as maiúsculas grandes demais em quem escreve nome
+  com inicial. Pela maiúscula, trocar de fonte mantém o tamanho parecido, que é
+  a outra metade da despadronização que você viu.
+- **O número ficou menor para palavra minúscula.** Em cursiva, a minúscula é
+  muito mais baixa que a maiúscula: "amo" numa altura 24 de Great Vibes sai com
+  11 linhas de tinta. É coerente, mas é uma régua diferente da que você tinha na
+  mão. Se preferir que o número continue sendo "o tamanho que a palavra vai
+  ter", é uma linha de código — e volta a inconsistência junto.
+- **Os moldes antigos.** O número velho é convertido uma vez, na volta, pela
+  razão entre a caixa de tinta daquela palavra e a maiúscula da fonte: as peças
+  continuam do tamanho em que foram desenhadas e o número na barra é que muda.
+  Conferi com um molde no formato antigo (`testes/ajuste.js`): 24 virou 29, e a
+  peça refeita saiu com 25 linhas de tinta, contra as 24 de antes — a diferença
+  é arredondamento de quadradinho, não de desenho.
+- **O padrão de fábrica** virou 16, que é o 18 antigo convertido. O molde em
+  branco abre com a mesma grade de sempre: 36 × 18 quadradinhos, medido nas duas
+  versões.
+
+E a terceira parte: **palavra nova nasce com o que está na barra de cima**, em
+vez de nascer sempre com os valores de fábrica. Era isso que fazia a segunda
+linha de um nome sair de outro tamanho mesmo com os controles à vista dizendo o
+contrário. Só a primeira palavra de um molde em branco usa os valores de
+fábrica, porque aí não há de onde herdar.

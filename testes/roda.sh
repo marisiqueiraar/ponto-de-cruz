@@ -4,7 +4,7 @@ cd "$(dirname "$0")" || exit 1
 python3 extrai.py || exit 1
 node --check app.js || exit 1
 falhou=0
-for t in geo.test pos.test emenda.test pdf.test cor.test estante.test tela posicao letra fio teto cota; do
+for t in geo.test pos.test emenda.test pdf.test cor.test estante.test tela posicao letra ajuste fio teto cota; do
   if node "$t.js" >/dev/null 2>&1; then echo "ok    $t"
   else echo "FALHA $t"; node "$t.js" 2>&1 | tail -12; falhou=1; fi
 done
