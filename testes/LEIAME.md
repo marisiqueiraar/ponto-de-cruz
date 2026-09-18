@@ -8,10 +8,12 @@ um Chromium e se pula sozinho quando não acha um.
 testes/roda.sh        # todos, com a extração refeita antes
 ```
 
-Os dois últimos (`tela.js` e `posicao.js`) dirigem um Chromium e se pulam
+Três deles (`tela.js`, `posicao.js` e `guias.js`) dirigem um Chromium e se pulam
 sozinhos quando não acham um. O `posicao.js` mede as posições lendo o que o app
 grava no `localStorage`, em vez de olhar a tela: assim dá para afirmar "andou
-0,5 mm" em vez de "alguma coisa mudou".
+0,5 mm" em vez de "alguma coisa mudou". O `guias.js` confere as duas medidas ao
+mesmo tempo — os milímetros gravados e os pixels do risco na tela —, porque
+guia no lugar certo com o número errado engana mais do que guia nenhuma.
 
 `extrai.py` puxa do `index.html` os trechos que cada teste exercita e grava
 `geo.js`, `pdfcode.js`, `estante.js` e `app.js` aqui ao lado (todos ignorados
@@ -38,6 +40,7 @@ em todas as folhas.
 | `teto.js` | o teto do rascunho não deforma o molde: o degrau na fronteira é menor que a variação natural, e o pior caso mantém a grade que tinha sem o teto |
 | `cota.js` | com o `localStorage` recusando a escrita, o rodapé avisa em vermelho, a aba moldes diz o que fazer, os dois somem quando volta a caber, e o aviso aparece mesmo numa janela de 360 px, onde o resto do rodapé fica escondido |
 | `posicao.js` | as setas andam 0,5 mm (5 com Shift), a rajada vira um passo só no desfazer, a seta dentro de um campo não empurra a peça, e os três botões de alinhar acertam o centro da caixa já girada |
+| `guias.js` | a opção abre a cruz no meio do papel, a guia puxada da régua para em milímetro inteiro e some quando volta para a régua, o ímã encosta a peça na guia (e não encosta com a opção desligada), e papel menor não deixa guia medindo mentira |
 
 `amostra.js` não testa nada: gera um PDF de várias folhas, com quatro linhas
 diferentes, para olhar.

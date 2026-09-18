@@ -59,6 +59,16 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   peça: centralizar na foto, centralizar no papel, alinhar pela base da foto — e, quando há uma
   peça acima na lista, alinhar com ela, que é o que resolve nome em duas linhas. Eles movem a
   caixa já girada, porque alinhar uma palavra inclinada pelo canto de cima dela a deixaria torta.
+- **Guias pontilhadas**: o botão da cruz, no canto da mesa, liga as guias — linhas pontilhadas
+  que atravessam a mesa de cima a baixo e de lado a lado. Da primeira vez ele abre uma cruz no
+  meio do papel; de resto, cada guia é puxada de dentro da régua para a mesa, arrastada para
+  onde você quiser e levada de volta para a régua para sumir. Cada uma diz em centímetros onde
+  está, pára em milímetro inteiro quando solta longe de tudo, e encaixa sozinha nas bordas e no
+  meio do papel e da foto, que é onde quase toda referência cai.
+  Arrastando uma peça ou a foto, os dois lados e o centro dela **encostam na guia** quando
+  passam perto — a folga do ímã é medida em pixels de tela, então ela é sempre a mesma
+  distância para o dedo, em qualquer zoom. As guias são de cada molde, ficam gravadas com ele
+  e não entram no PDF: são risco de tela, como a régua da mesa.
 - **Fio por linha**: quantos metros cada cor pede, somados por cor e repetidos na legenda do
   PDF. A conta fica escrita ao lado, com os números do espaçamento escolhido, porque quem vai à
   loja com um número merece saber de onde ele veio: a **frente** é geometria (duas diagonais de
