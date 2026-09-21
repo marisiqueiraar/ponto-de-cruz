@@ -242,6 +242,7 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .rule{height:1px;background:var(--line);margin:16px 0}
 .note{font-size:12.5px;color:var(--ink-soft);margin:6px 0 0;line-height:1.45}
+.note.mal{color:var(--danger)}
 .dim{opacity:.45;pointer-events:none}
 .wide{width:100%;height:40px;border:1px solid var(--mat);border-radius:6px;background:#fff;
   color:var(--mat);font-family:var(--display);font-size:11px;letter-spacing:.02em;margin-bottom:10px;
@@ -687,6 +688,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <div class="field"><label for="paperW">Largura em mm</label><input id="paperW" type="number" min="50" max="600" value="210"></div>
       <div class="field"><label for="paperH">Altura em mm</label><input id="paperH" type="number" min="50" max="600" value="297"></div>
     </div>
+    <p class="note" id="paperAviso"></p>
     <p class="note">As medidas próprias aparecem quando o tamanho é <b>Personalizado</b>.</p>
   </section>
 
@@ -712,6 +714,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <div class="field"><label for="photoWmm">Largura em mm</label><input id="photoWmm" type="number" min="20" max="500" value="100"></div>
       <div class="field"><label for="photoHmm">Altura em mm</label><input id="photoHmm" type="number" min="20" max="500" value="150"></div>
     </div>
+    <p class="note" id="photoAviso"></p>
     <div class="rule"></div>
     <div class="field">
       <label for="photo">Imagem</label>
@@ -1470,11 +1473,67 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   function P(){ return parseFloat($("mm").value); }
 
+  /* ---- medidas próprias -----------------------------------------------
+
+     O campo de número avisa a cada tecla, e quem digita "100" passa por "1" e
+     por "10" no caminho. Papel de 1 mm não é um papel a caminho: ele reposiciona
+     a foto, encosta as peças na borda e apara as guias — e nada disso volta
+     quando o número fica pronto. Então enquanto se digita só vale a medida que
+     cabe no limite do campo; a que não cabe espera, e é acertada quando o campo
+     se despede. */
+  var propria = {};
+
+  function limites(id){
+    var el = $(id);
+    return { min: parseFloat(el.min), max: parseFloat(el.max) };
+  }
+
+  function propriaIni(id){ propria[id] = parseFloat($(id).value); }
+
+  function propriaFora(id){
+    var t = $(id).value.trim(), v = parseFloat(t), lim = limites(id);
+    if (t === "") return false;                    // campo vazio é meio de frase
+    return !isFinite(v) || v < lim.min || v > lim.max;
+  }
+
+  function propriaLe(id){                          // a cada tecla: só o que vale
+    if (propriaFora(id)) return false;
+    var v = parseFloat($(id).value);
+    if (isFinite(v)) propria[id] = v;
+    return true;
+  }
+
+  function propriaFirma(id){                       // ao sair: o número é acertado
+    var v = parseFloat($(id).value), lim = limites(id);
+    if (isFinite(v)) propria[id] = Math.max(lim.min, Math.min(lim.max, v));
+    $(id).value = propria[id];
+    return propria[id];
+  }
+
+  function propriaAviso(idAviso, oQue, pares){
+    var p = $(idAviso);
+    if (!p) return;
+    var fora = pares.filter(function(par){ return propriaFora(par[0]); });
+    p.classList.toggle("mal", fora.length > 0);
+    if (!fora.length){ p.textContent = ""; return; }
+    var lim = limites(pares[0][0]);
+    p.textContent = "A " + fora.map(function(par){ return par[1]; }).join(" e a ") +
+      (fora.length > 1 ? " ficam" : " fica") + " entre " + lim.min + " e " + lim.max +
+      " mm. Até o número caber, " + oQue + " segue com " + propria[pares[0][0]] +
+      " \u00d7 " + propria[pares[1][0]] + " mm.";
+  }
+
+  var PAPEL_PARES = [["paperW", "largura"], ["paperH", "altura"]];
+  var FOTO_PARES  = [["photoWmm", "largura"], ["photoHmm", "altura"]];
+
+  function papelAviso(){ propriaAviso("paperAviso", "o papel", PAPEL_PARES); }
+  function fotoAviso(){ propriaAviso("photoAviso", "a foto", FOTO_PARES); }
+
   function paperMM(){
     var v = $("paperSize").value, w, h;
     if (v === "custom"){
-      w = parseFloat($("paperW").value) || 210;
-      h = parseFloat($("paperH").value) || 297;
+      w = propria.paperW || 210;
+      h = propria.paperH || 297;
     } else {
       var q = v.split("x"); w = parseFloat(q[0]); h = parseFloat(q[1]);
     }
@@ -1485,8 +1544,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function photoSizeMM(){
     var v = $("photoSize").value, w, h;
     if (v === "custom"){
-      w = parseFloat($("photoWmm").value) || 100;
-      h = parseFloat($("photoHmm").value) || 150;
+      w = propria.photoWmm || 100;
+      h = propria.photoHmm || 150;
     } else {
       var q = v.split("x"); w = parseFloat(q[0]); h = parseFloat(q[1]);
     }
@@ -2447,6 +2506,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       if (s.paper.or) $("paperOr").value = s.paper.or;
       if (s.paper.w) $("paperW").value = s.paper.w;
       if (s.paper.h) $("paperH").value = s.paper.h;
+      propriaFirma("paperW"); propriaFirma("paperH"); papelAviso();
       $("paperCustom").classList.toggle("hide", $("paperSize").value !== "custom");
     }
     if (s.photoBox){
@@ -2454,6 +2514,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       if (s.photoBox.or) $("photoOr").value = s.photoBox.or;
       if (s.photoBox.w) $("photoWmm").value = s.photoBox.w;
       if (s.photoBox.h) $("photoHmm").value = s.photoBox.h;
+      propriaFirma("photoWmm"); propriaFirma("photoHmm"); fotoAviso();
       $("photoCustom").classList.toggle("hide", $("photoSize").value !== "custom");
     }
     if (s.mm != null){
@@ -2868,14 +2929,20 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     draw();
   }
   ["paperSize","paperOr"].forEach(function(id){ $(id).addEventListener("change", onPaperChange); });
-  ["paperW","paperH"].forEach(function(id){ $(id).addEventListener("input", onPaperChange); });
+  ["paperW","paperH"].forEach(function(id){
+    $(id).addEventListener("input", function(){ propriaLe(id); papelAviso(); onPaperChange(); });
+    $(id).addEventListener("change", function(){ propriaFirma(id); papelAviso(); onPaperChange(); });
+  });
 
   function onPhotoChange(){
     $("photoCustom").classList.toggle("hide", $("photoSize").value !== "custom");
     syncPhotoSize(); draw(); pushLater();
   }
   ["photoSize","photoOr"].forEach(function(id){ $(id).addEventListener("change", onPhotoChange); });
-  ["photoWmm","photoHmm"].forEach(function(id){ $(id).addEventListener("input", onPhotoChange); });
+  ["photoWmm","photoHmm"].forEach(function(id){
+    $(id).addEventListener("input", function(){ propriaLe(id); fotoAviso(); onPhotoChange(); });
+    $(id).addEventListener("change", function(){ propriaFirma(id); fotoAviso(); onPhotoChange(); });
+  });
 
   function flip(id){
     var e = $(id);
@@ -4676,6 +4743,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   }
 
   function boot(){
+    ["paperW","paperH","photoWmm","photoHmm"].forEach(propriaIni);
     carregaLinhas();          // antes de restaurar: a caixa é a primeira marca
     carregaEstante();         // e antes do molde: é ela que diz qual abrir
     var it = itemAtual();
