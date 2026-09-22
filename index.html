@@ -876,7 +876,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <li>Ajuste ponto a ponto <b>sobrevive</b> a mexer na altura, no traço, na sensibilidade e na fonte: o desenho é refeito e os quadradinhos que você acendeu ou apagou vão junto, acompanhando a grade nova. Quem descarta é só o botão <b>recalcular</b>, e ele pergunta antes.</li>
       <li>Para o nome curvado por cima da foto, use o campo <b>arco</b> na barra de cima. Se a cursiva fechar demais em letra pequena, abra o <b>espaço</b> entre as letras — ele é contado em quadradinhos, os mesmos que viram furo.</li>
       <li>Para posicionar fino, use as setas do teclado: meio milímetro por toque, cinco com Shift. Os três botões na aba <b>peças</b> centralizam a peça na foto ou no papel, e encostam ela na base da foto.</li>
-      <li>O botão da cruz pontilhada, no canto da mesa, liga as <b>guias</b>: linhas pontilhadas que atravessam a mesa inteira. Puxe uma de dentro da régua para soltar outra, e leve-a de volta para a régua para tirá-la. Arrastando, a peça encosta sozinha na guia — é o jeito de alinhar no olho sem sair torto. Elas ficam na tela e não saem no PDF.</li>
+      <li>O botão da cruz pontilhada, no canto da mesa, liga as <b>guias</b>: linhas pontilhadas que atravessam a mesa inteira. Puxe uma de dentro da régua para soltar outra, e leve-a de volta para a régua para tirá-la. Arrastando, a peça encosta sozinha na guia — é o jeito de alinhar no olho sem sair torto. Um bloco laçado encosta inteiro, pela caixa de tudo o que está nele. Elas ficam na tela e não saem no PDF.</li>
       <li>Guarde o arquivo do molde na aba <b>moldes</b> antes de mudar de aparelho ou limpar o navegador. O que fica só no navegador não vai a lugar nenhum e some com os dados do site.</li>
       <li>A aba <b>molde</b> diz quantos metros cada linha pede, e mostra a conta que usou. A frente é exata; o avesso e os 15% de perda são estimativa, então compre com folga.</li>
       <li>Cada peça pode ter a sua linha: selecione a peça e toque na cor. O rodapé do PDF lista as linhas usadas com o código da marca — a cor impressa é referência de tela, o código é o que se compra.</li>
@@ -3114,8 +3114,25 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
              y: Math.max(-by, Math.min(pa.h - photo.h - by, dy)) };
   }
 
+  // a caixa de tudo o que está laçado, com as peças já giradas. O bloco anda
+  // rígido, então ela é medida uma vez e depois só acompanha o deslocamento
+  function caixaDoLaco(){
+    var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    marca.forEach(function(i){
+      if (!els[i]) return;
+      var b = elPaperBox(els[i]);
+      x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y);
+      x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h);
+    });
+    if (marcaFoto){
+      x0 = Math.min(x0, photo.x); y0 = Math.min(y0, photo.y);
+      x1 = Math.max(x1, photo.x + photo.w); y1 = Math.max(y1, photo.y + photo.h);
+    }
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+  }
+
   function pegaLaco(pt){
-    var d = { kind:"laco", x: pt.x, y: pt.y, itens: [], foto: null };
+    var d = { kind:"laco", x: pt.x, y: pt.y, itens: [], foto: null, caixa: caixaDoLaco() };
     marca.forEach(function(i){
       if (els[i]) d.itens.push({ i: i, x: els[i].x, y: els[i].y });
     });
@@ -3128,6 +3145,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function arrastaLaco(pt){
     var f = drag.foto || { x: 0, y: 0 };
     var p = seguraPasso(pt.x - drag.x, pt.y - drag.y, f.x, f.y);
+    /* O ímã das guias pega o bloco pela caixa de tudo junto, e não peça por
+       peça: cada uma encostando na sua guia desmancharia o arranjo que o laço
+       existe para preservar. Depois de encostar, o passo passa pela foto de
+       novo — encostar numa guia não é motivo para a foto sair do papel. */
+    var c = drag.caixa;
+    var g = imanta({ x: c.x + p.x, y: c.y + p.y, w: c.w, h: c.h });
+    if (g.x || g.y) p = seguraPasso(p.x + g.x, p.y + g.y, f.x, f.y);
     drag.itens.forEach(function(it){
       els[it.i].x = Math.round((it.x + p.x) * 10) / 10;
       els[it.i].y = Math.round((it.y + p.y) * 10) / 10;
@@ -3330,6 +3354,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     if (!drag) return;
     e.preventDefault();
     var pt = evPos(e);
+    if (drag.kind === "laco"){
+      arrastaLaco(pt);
+      draw();
+      return;
+    }
     var nx = pt.x - drag.dx, ny = pt.y - drag.dy, g;
     if (drag.kind === "el"){
       var el = els[drag.i];
