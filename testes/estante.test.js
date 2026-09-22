@@ -16,6 +16,11 @@ function memoriaFalsa(inicial){
 let falhas = 0;
 const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falhas++; };
 
+// a chave das imagens é derivada do id, e não guardada na estante: molde que
+// já estava gravado antes delas existirem não precisou de migração nenhuma
+const IMGS = it => "ponto-e-letra/molde/imagens/v1/" + it.id;
+const IMAGENS = k => JSON.stringify({ ["i" + k]: "data:image/jpeg;base64," + k });
+
 const MOLDE = k => JSON.stringify({ v:1, paper:{size:"a4"}, photoBox:{x:10,y:20},
   mm:"2.5", pal:0, thread:"#BE5103", sel:0,
   els:[{kind:"text",text:k,x:1,y:2,rot:0,manual:3,color:"#BE5103",colorName:"Terracota",cells:["11","10"]}] });
@@ -43,12 +48,13 @@ function monta(inicial){
     restoreState: chave => { reg.abriu.push(chave); return !!localStorage.getItem(chave); },
     moldeEmBranco: () => { reg.abriu.push("branco"); },
     saveState: () => { reg.gravou = (reg.gravou || 0) + 1; },
-    renderChips(){}, syncControls(){}, restorePhoto(){}, mostraFonte(){},
+    renderChips(){}, syncControls(){}, restorePhoto(){}, restoreOrigens(){}, mostraFonte(){},
     draw(){}, mostraZoom(){}, guiasSync(){}, resetHist(){},
     saveName: ext => "molde-teste." + ext,
     deliver: (blob, nome) => { reg.baixou = { nome, blob }; },
     els: [], restored: false, photoImg: null, photoURL: null,
     STORE: "ponto-e-letra/molde/v1", PHOTO_STORE: "ponto-e-letra/molde/foto/v1",
+    IMG_STORE: "ponto-e-letra/molde/imagens/v1",
     reg
   };
   const src = fs.readFileSync(__dirname + "/estante.js", "utf8");
@@ -83,8 +89,8 @@ function monta(inicial){
   {
     const { api } = monta({});
     const a = api.criaMolde("um"), b = api.criaMolde("dois"), c = api.criaMolde("tres");
-    const chaves = [a, b, c].flatMap(x => [x.dados, x.foto]);
-    ok(new Set(chaves).size === 6, "três moldes, seis chaves distintas");
+    const chaves = [a, b, c].flatMap(x => [x.dados, x.foto, IMGS(x)]);
+    ok(new Set(chaves).size === 9, "três moldes, nove chaves distintas");
     ok(api.estante().atual === c.id, "o último criado fica aberto");
     ok(api.estante().itens[0].id === c.id, "e aparece no topo da lista");
   }
@@ -95,14 +101,18 @@ function monta(inicial){
     const a = api.criaMolde("guardar");
     localStorage.setItem(a.dados, MOLDE("guardar"));
     localStorage.setItem(a.foto, "data:image/jpeg;base64,GUARDA");
+    localStorage.setItem(IMGS(a), IMAGENS("GUARDA"));
     const b = api.criaMolde("descartar");
     localStorage.setItem(b.dados, MOLDE("descartar"));
     localStorage.setItem(b.foto, "data:image/jpeg;base64,DESCARTA");
+    localStorage.setItem(IMGS(b), IMAGENS("DESCARTA"));
     api.apagaMolde(b.id);
     ok(localStorage.getItem(b.dados) === null, "o molde apagado sumiu");
     ok(localStorage.getItem(b.foto) === null, "a foto dele também");
+    ok(localStorage.getItem(IMGS(b)) === null, "e as imagens das peças dele também");
     ok(localStorage.getItem(a.dados) === MOLDE("guardar"), "o outro molde continua inteiro");
     ok(localStorage.getItem(a.foto) === "data:image/jpeg;base64,GUARDA", "e a foto dele também");
+    ok(localStorage.getItem(IMGS(a)) === IMAGENS("GUARDA"), "e as imagens dele também");
     ok(api.estante().atual === a.id, "o que sobrou passou a ser o aberto");
     ok(reg.abriu.includes(a.dados), "e foi realmente carregado na tela");
   }
@@ -140,11 +150,13 @@ function monta(inicial){
     const a = api.criaMolde("presente");
     localStorage.setItem(a.dados, MOLDE("presente"));
     localStorage.setItem(a.foto, "data:image/jpeg;base64,FOTO");
+    localStorage.setItem(IMGS(a), IMAGENS("PECA"));
     api.exportaMolde();
     ok(!!reg.baixou, "o arquivo foi entregue para baixar");
     const arq = JSON.parse(reg.baixou.blob.p);
     ok(arq.app === "ponto-e-letra" && arq.v === 1, "com a marca do app dentro");
     ok(arq.foto === "data:image/jpeg;base64,FOTO", "e a foto junto");
+    ok(JSON.stringify(arq.imagens) === IMAGENS("PECA"), "e as imagens das peças também");
     ok(JSON.stringify(arq.molde) === MOLDE("presente"), "e o molde inteiro");
 
     // abrir num navegador zerado
@@ -155,6 +167,8 @@ function monta(inicial){
     ok(!!it, "o arquivo virou um molde na estante");
     ok(it && localStorage.getItem(it.dados) === MOLDE("presente"), "com o mesmo conteúdo");
     ok(it && localStorage.getItem(it.foto) === "data:image/jpeg;base64,FOTO", "e a mesma foto");
+    ok(it && localStorage.getItem(IMGS(it)) === IMAGENS("PECA"),
+       "e as imagens das peças, sem as quais a largura e a sensibilidade travam");
     ok(it && it.nome === "presente", "e o mesmo nome");
     ok(outro.reg.gravou === 1, "gravando antes o molde que estava aberto");
   }

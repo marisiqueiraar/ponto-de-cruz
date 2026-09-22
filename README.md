@@ -20,7 +20,7 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
 - **Papel**: A4, A5, A3, quadrado, 20×30, 15×20 ou medidas próprias, em retrato ou paisagem.
 - **Foto**: tamanhos de revelação comuns (10×15, 9×13, 13×18, 15×21, quadrado, polaroid) ou
   medida própria, arrastável sobre o papel, com imagem opcional só para visualizar.
-- **Peças bordadas**: quantas quiser, cada uma sendo uma palavra ou um símbolo — dez desenhos:
+- **Peças bordadas**: quantas quiser, cada uma sendo uma palavra, um símbolo ou uma imagem sua — dez desenhos prontos:
   coração cheio, coração vazado, estrela, seta, flor, folha, coroa, lua, sol, infinito e casa. Arraste
   para posicionar, incline de -45° a 45°, redimensione com dois dedos, espelhe, e ajuste ponto a
   ponto no modo de edição. Palavra nova nasce com o que está na barra de cima — fonte, altura,
@@ -28,6 +28,26 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   tamanho da primeira. Duplicar copia a peça com as
   células como estão, então a cópia nasce com os ajustes manuais da original e segue a vida
   dela própria a partir dali.
+- **Imagem**: um arquivo do aparelho vira quadradinho na hora — o escuro acende, o claro apaga
+  —, e o que sai é uma peça como as outras: arrastável, girável, espelhável, com a sua linha e
+  ajustável ponto a ponto. A conversão é um limiar sobre a tinta de cada quadradinho, a mesma
+  conta que a palavra faz sobre o traço da fonte: a **largura** em quadradinhos decide quanto
+  detalhe cabe, a **sensibilidade** decide o que conta como escuro, e o **inverter** resolve
+  desenho claro sobre fundo escuro.
+
+  **Uma linha só, então o que sai é silhueta** — logo, monograma, desenho de traço, brasão,
+  perfil. Foto de rosto vira mancha, e não há sensibilidade que conserte: meio-tom só existe
+  com mais de uma cor de linha, e aqui cada peça tem uma. O painel diz isso antes de a pessoa
+  tentar, porque descobrir sozinha custa um arquivo escolhido, uma conversão e a conclusão
+  errada de que o app está quebrado.
+
+  A imagem escolhida fica guardada com o molde, reduzida a 512 px, e é por isso que mexer na
+  largura e na sensibilidade continua funcionando depois de fechar o navegador. Ela não é o
+  desenho: o desenho são as células, que vão gravadas do mesmo jeito que as das outras peças. Se
+  a imagem se perder — cota estourada, molde vindo de um arquivo antigo —, a peça abre inteira e
+  são só os dois controles que ficam desligados. O **trocar** põe outro arquivo na mesma peça
+  sem ela sair do lugar nem mudar de linha; como a imagem nova é outro desenho, o ajuste ponto a
+  ponto dela não sobrevive, e o botão pergunta antes.
 - **Altura**: é a altura da **letra maiúscula**, contada em quadradinhos e medida na fonte, não
   na palavra escrita. Era a caixa de tinta da palavra — e essa caixa sobe com o "l" e desce com
   o "g", então "amor" e "alegria" na mesma altura saíam com letras de tamanhos bem diferentes,
@@ -260,17 +280,22 @@ raiz declara que não há build — sem ele, um projeto criado com o preset Vite
 Tudo no `localStorage` do próprio navegador. `ponto-e-letra/moldes/v1` é o índice da estante:
 diz quais moldes existem, qual está aberto, e o **nome das chaves** de cada um — nunca o
 conteúdo, porque gravar acontece a cada gesto e reescrever a estante inteira porque uma peça
-andou um milímetro seria desperdício. Cada molde tem as suas duas chaves, `…/molde/v1/<id>` para
-o arranjo e `…/molde/foto/v1/<id>` para a imagem. O molde gravado antes de existir estante
+andou um milímetro seria desperdício. Cada molde tem as suas três chaves: `…/molde/v1/<id>` para
+o arranjo, `…/molde/foto/v1/<id>` para a foto de fundo e `…/molde/imagens/v1/<id>` para as
+imagens das peças, uma por id de peça e só as que alguma peça ainda usa. O molde gravado antes de existir estante
 continua nas chaves sem `<id>`, e entra no índice apontando para elas: numa cota quase cheia,
 copiar a foto para migrar é a diferença entre migrar e perdê-la. `ponto-e-letra/linhas/v1` guarda
 as linhas que você marcou como suas — inclusive as avulsas, que moram só aí, já que não vêm de
 catálogo nenhum. Não há servidor nem conta — o trabalho não acompanha você
 para outro aparelho ou outro navegador, e some se você limpar os dados do site, a menos que você
 salve o arquivo do molde. A foto é guardada reduzida (1600 px no maior lado, JPEG), porque é só guia de
-posicionamento: na tela e no PDF ela aparece a 22% de opacidade. As chaves são separadas de
-propósito. A foto é o único item capaz de estourar a cota do navegador, e assim ela nunca leva o
-arranjo junto na queda. As linhas ficam à parte porque são inventário, não desenho: a caixa de
+posicionamento: na tela e no PDF ela aparece a 22% de opacidade. As imagens das peças são
+guardadas do mesmo jeito e por 512 px, que é mais pixel por quadradinho do que a maior largura
+consegue usar. As chaves são separadas de propósito. A foto e as imagens são os itens capazes de
+estourar a cota do navegador, e assim nenhum dos dois leva o arranjo junto na queda — e a queda
+sai barata, porque as células já estão gravadas dentro do molde e o desenho abre igual sem eles.
+É a mesma razão de o id da imagem, e não a imagem, morar dentro da peça: o desfazer guarda o
+arranjo inteiro em texto a cada passo, e uma imagem ali dentro custaria megabytes por passo. As linhas ficam à parte porque são inventário, não desenho: a caixa de
 linhas continua a mesma quando você começa um molde do zero, e o molde não carrega a caixa
 junto.
 

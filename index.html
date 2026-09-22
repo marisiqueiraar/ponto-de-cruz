@@ -446,6 +446,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 .app.editando .tools .t,
 .app.editando #ctlText,
 .app.editando #ctlSym,
+.app.editando #ctlImg,
 .app.editando #ctlPiece,
 .app.editando #ctlNone{display:none!important}
 .app.editando #ctlEdit{display:flex!important}
@@ -623,6 +624,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <span class="t"><span>tamanho</span><input id="symScale" type="number" min="1" max="6" step="1" value="1"><b id="symScaleOut" class="hide">1</b></span>
     </fieldset>
 
+    <fieldset id="ctlImg" class="hide">
+      <span class="t" title="Largura da peça em quadradinhos. A altura vem sozinha, na proporção da imagem. É este número que decide quanto detalhe cabe: imagem estreita perde o traço fino, imagem larga custa ponto."><span>largura</span><input id="imgLarg" type="number" min="10" max="120" step="1" value="40"><b id="imgLargOut" class="hide">40</b></span>
+      <span class="t" title="Quanto de escuro um quadradinho precisa ter para acender, em por cento. Menos acende mais e engorda o desenho; mais deixa só o que é bem escuro."><span>sens.</span><input id="imgThr" type="number" min="10" max="90" step="5" value="50"><b id="imgThrOut" class="hide">50</b></span>
+      <button type="button" id="imgInv" class="tbtn" title="Troca o claro pelo escuro — é o que resolve desenho branco sobre fundo escuro.">inverter</button>
+      <button type="button" id="imgTroca" class="tbtn" title="Põe outra imagem nesta mesma peça, sem perder o lugar nem a linha dela.">trocar</button>
+    </fieldset>
+
     <span class="grp hide" id="ctlPiece">
       <span class="t"><span>inclinação</span><input id="rot" type="number" min="-45" max="45" step="1" value="0"><b id="rotOut" class="hide">0</b></span>
     </span>
@@ -726,6 +734,15 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <h2>peças</h2>
     <button id="addText" class="wide">nova palavra</button>
     <button id="addSym" class="wide">novo símbolo</button>
+    <button id="addImg" class="wide">nova imagem</button>
+    <input id="imgArq" type="file" accept="image/*" class="hide">
+
+    <p class="note">A imagem vira quadradinho na hora: o escuro dela acende, o claro apaga, e o
+    que sai é uma peça como as outras — uma linha só, arrastável, espelhável e ajustável ponto a
+    ponto. Serve para silhueta, logo, monograma e desenho de traço; foto de rosto vira mancha,
+    porque não há meio-tom numa linha só. Na barra de cima ficam a <b>largura</b> em
+    quadradinhos, a <b>sensibilidade</b> e o <b>inverter</b>.</p>
+    <p class="note" id="imgAviso"></p>
 
     <div class="alinha hide" id="alinha">
       <label>Alinhar a peça selecionada</label>
@@ -874,6 +891,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <li>Se o rodapé ficar vermelho dizendo <b>não coube na memória</b>, salve o arquivo do molde na aba <b>moldes</b> e apague um molde antigo. A partir desse momento o trabalho parou de ser guardado.</li>
       <li>A <b>altura</b> na barra de cima é a altura da letra maiúscula, em quadradinhos, medida na fonte e não na palavra. Por isso duas palavras na mesma altura saem com letras do mesmo tamanho, mesmo que uma tenha “g” e “l” e a outra não — o que ascende e desce passa da altura pedida. A aba <b>molde</b> diz quanto isso dá em milímetros, e palavra nova nasce com o que estiver na barra.</li>
       <li>Ajuste ponto a ponto <b>sobrevive</b> a mexer na altura, no traço, na sensibilidade e na fonte: o desenho é refeito e os quadradinhos que você acendeu ou apagou vão junto, acompanhando a grade nova. Quem descarta é só o botão <b>recalcular</b>, e ele pergunta antes.</li>
+      <li>A peça de <b>imagem</b> lê um arquivo do aparelho e o transforma em quadradinhos na hora: o escuro acende, o claro apaga. Ela tem uma linha só, como as outras, então o que sai é silhueta — logo, monograma, desenho de traço, brasão. Foto de rosto vira mancha, e nenhuma sensibilidade conserta isso: meio-tom pede mais de uma cor de linha. Na barra de cima, a <b>largura</b> em quadradinhos decide quanto detalhe cabe, a <b>sensibilidade</b> decide o que conta como escuro, e o <b>inverter</b> serve para desenho claro sobre fundo escuro. O que a conversão errar, o <b>ajustar</b> acerta ponto a ponto.</li>
       <li>Para o nome curvado por cima da foto, use o campo <b>arco</b> na barra de cima. Se a cursiva fechar demais em letra pequena, abra o <b>espaço</b> entre as letras — ele é contado em quadradinhos, os mesmos que viram furo.</li>
       <li>Para posicionar fino, use as setas do teclado: meio milímetro por toque, cinco com Shift. Os três botões na aba <b>peças</b> centralizam a peça na foto ou no papel, e encostam ela na base da foto.</li>
       <li>O botão da cruz pontilhada, no canto da mesa, liga as <b>guias</b>: linhas pontilhadas que atravessam a mesa inteira. Puxe uma de dentro da régua para soltar outra, e leve-a de volta para a régua para tirá-la. Arrastando, a peça encosta sozinha na guia — é o jeito de alinhar no olho sem sair torto. Um bloco laçado encosta inteiro, pela caixa de tudo o que está nele. Elas ficam na tela e não saem no PDF.</li>
@@ -1110,6 +1128,29 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   var PHOTO_STORE = "ponto-e-letra/molde/foto/v1";
   var PHOTO_MAX_PX = 1600;
 
+  /* A imagem que vira peça mora numa terceira chave, pelo mesmo motivo da
+     foto: é grande, e à parte ela cai sozinha sem levar o molde junto. Cai
+     barato, também — as células já estão gravadas dentro do molde, então o
+     desenho abre igual sem ela; o que se perde é poder mexer na largura e na
+     sensibilidade sem trazer o arquivo de novo.
+
+     Vai reduzida porque é origem de quadradinho, e não desenho final: 512 px
+     dão quatro pixels por quadradinho na largura máxima, e mais do que isso
+     não muda um furo. */
+  var IMG_STORE = "ponto-e-letra/molde/imagens/v1";
+  var IMG_MAX_PX = 512;
+  var IMG_LARG_MIN = 10, IMG_LARG_MAX = 120;
+
+  // id da peça → { url: o data-url gravado, img: o canvas já decodificado.
+  // O molde guarda só o id; o desenho de quem ainda não voltou da memória são
+  // as células gravadas, que bastam para a tela e para o PDF.
+  var origens = {};
+
+  function origemPronta(el){
+    var o = el && el.kind === "img" ? origens[el.img] : null;
+    return o && o.img && o.img.width ? o.img : null;
+  }
+
   /* ---- a estante de moldes --------------------------------------------
 
      Uma chave só para um molde só significava que começar um desenho novo
@@ -1174,10 +1215,14 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     }
   }
 
-  // o nome que um molde ganha sozinho: a primeira palavra bordada nele
+  // o nome que um molde ganha sozinho: a primeira palavra bordada nele — e,
+  // num molde que não tem palavra nenhuma, o nome da primeira imagem, que é o
+  // que a pessoa escolheu e reconhece na lista
   function nomeSugerido(){
     for (var i = 0; i < els.length; i++)
       if (els[i].kind === "text" && (els[i].text || "").trim()) return els[i].text.trim();
+    for (var j = 0; j < els.length; j++)
+      if (els[j].kind === "img" && (els[j].nome || "").trim()) return els[j].nome.trim();
     return "";
   }
   var saveTimer = 0;
@@ -1521,6 +1566,56 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return out;
   }
 
+  /* A imagem vira quadradinho pela mesma conta da palavra: cada quadradinho
+     pega o pedaço de imagem que cai dentro dele e pergunta quanta tinta tem
+     ali. Tinta aqui é o escuro — a luminância invertida —, e acima da
+     sensibilidade o quadradinho acende.
+
+     Não há meio-tom, porque a peça tem uma linha só: o que sai daqui é
+     silhueta. É a razão de a nota do painel mandar este caminho para logo,
+     monograma e desenho de traço, e avisar que foto de rosto vira mancha.
+
+     Devolve nada — e não uma peça em branco — quando a imagem ainda não
+     chegou: quem chamou fica com as células que já tinha, que é o desenho
+     certo, em vez de ver a peça sumir enquanto o navegador decodifica. */
+  function imgMatrix(el){
+    var img = origemPronta(el);
+    if (!img) return null;
+    var cols = Math.max(IMG_LARG_MIN, Math.min(IMG_LARG_MAX, el.larg | 0));
+    var rows = Math.max(1, Math.round(cols * img.height / img.width));
+    var S = Math.max(1, Math.min(SUPER, Math.floor(TETO_CANVAS / Math.max(cols, rows, 1))));
+    var c = document.createElement("canvas");
+    c.width = cols * S; c.height = rows * S;
+    var x = c.getContext("2d");
+    // o branco por baixo é o que dá à transparência o valor de "sem tinta":
+    // sem ele o canvas vazio é preto de alfa zero, e o inverter mentiria
+    x.fillStyle = "#fff";
+    x.fillRect(0, 0, c.width, c.height);
+    x.drawImage(img, 0, 0, c.width, c.height);
+    var data;
+    try { data = x.getImageData(0, 0, c.width, c.height).data; } catch (e){ return null; }
+    var cells = [];
+    for (var r = 0; r < rows; r++){
+      var line = [];
+      for (var q = 0; q < cols; q++){
+        var soma = 0;
+        for (var yy = 0; yy < S; yy++){
+          for (var xx = 0; xx < S; xx++){
+            var i = (((r * S + yy) * c.width) + (q * S + xx)) * 4;
+            // 0,299 / 0,587 / 0,114 é o cinza que o olho vê. A média simples
+            // dos três deixaria o azul escuro claro demais, e um desenho azul
+            // sobre branco perderia metade do traço
+            var lum = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114) / 255;
+            soma += el.inv ? lum : 1 - lum;
+          }
+        }
+        line.push(soma / (S * S) > el.thr ? 1 : 0);
+      }
+      cells.push(line);
+    }
+    return trim(cells);
+  }
+
   function trim(cells){
     var loX = 1e9, hiX = -1, loY = 1e9, hiY = -1;
     for (var r = 0; r < cells.length; r++){
@@ -1760,9 +1855,17 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function rebuild(el, descarta){
     var rowsAntes = el.cells && el.cells.length ? el.cells.length : 0;
     var colsAntes = rowsAntes && el.cells[0] ? el.cells[0].length : 0;
-    el.cells = el.kind === "sym"
+    var novas = el.kind === "sym"
       ? matrixFromStrings(SYMS[el.sym], el.scale)
-      : textMatrix(el.text, el.font, el.rowsTarget, el.thick, el.thr, el.esp, el.arc);
+      : el.kind === "img"
+        ? imgMatrix(el)
+        : textMatrix(el.text, el.font, el.rowsTarget, el.thick, el.thr, el.esp, el.arc);
+    // imagem que ainda não voltou da memória não desfaz a peça: as células
+    // gravadas continuam valendo, e mexer na largura volta a funcionar assim
+    // que ela chega. Vale para o Recalcular também — peça que não dá para
+    // refazer é peça que se preserva
+    if (!novas) return;
+    el.cells = novas;
     if (el.flip) el.cells = espelha(el.cells);
     if (descarta) el.edits = [];
     else aplicaEdits(el, rowsAntes, colsAntes);
@@ -2311,6 +2414,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       r.rowsTarget = el.rowsTarget; r.thick = el.thick; r.thr = el.thr;
       r.esp = el.esp || 0; r.arc = el.arc || 0; r.flip = el.flip || 0;
       r.hv = 2;   // a altura desta peça já está contada pela maiúscula
+    } else if (el.kind === "img"){
+      // o id, e não a imagem: ela é grande e mora na sua própria chave. Assim
+      // o desfazer, que guarda o arranjo inteiro em texto a cada passo,
+      // continua custando alguns quilobytes em vez de alguns megabytes
+      r.img = el.img; r.nome = el.nome || "";
+      r.larg = el.larg; r.thr = el.thr;
+      r.inv = el.inv ? 1 : 0; r.flip = el.flip || 0;
     } else {
       r.sym = el.sym; r.scale = el.scale;
     }
@@ -2324,7 +2434,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       for (var i = 0; i < row.length; i++) line.push(row.charAt(i) === "1" ? 1 : 0);
       return line;
     });
-    var el = { kind: r.kind === "sym" ? "sym" : "text", cells: cells,
+    var kind = r.kind === "sym" ? "sym" : (r.kind === "img" ? "img" : "text");
+    var el = { kind: kind, cells: cells,
                x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0, manual: +r.manual || 0,
                edits: [] };
     var rowsEl = cells.length, colsEl = cells[0] ? cells[0].length : 0;
@@ -2352,6 +2463,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       el.thr = +r.thr || 0.35;
       el.esp = +r.esp || 0;
       el.arc = +r.arc || 0;
+      el.flip = r.flip ? 1 : 0;
+    } else if (el.kind === "img"){
+      el.img = typeof r.img === "string" ? r.img : "";
+      el.nome = typeof r.nome === "string" && r.nome ? r.nome : "imagem";
+      el.larg = Math.max(IMG_LARG_MIN, Math.min(IMG_LARG_MAX, +r.larg || 40));
+      el.thr = +r.thr || 0.5;
+      el.inv = r.inv ? 1 : 0;
       el.flip = r.flip ? 1 : 0;
     } else {
       el.sym = SYMS[r.sym] ? r.sym : "heart";
@@ -2406,6 +2524,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       }));
     } catch (e){ marcaMemoria(true, "o molde"); return; }
     marcaMemoria(false);
+    salvaOrigens();
     it.em = Date.now();
     it.pecas = els.length;
     if (!it.nome) it.nome = nomeSugerido();
@@ -2513,6 +2632,64 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var img = new Image();
     img.onload = function(){ photoImg = img; draw(); };
     img.src = url;
+  }
+
+  /* Só as imagens que alguma peça ainda usa são gravadas: apagar a peça leva
+     a imagem dela junto na próxima gravação, sem varredura nenhuma. Duas
+     peças que nasceram de um duplicar apontam para o mesmo id e continuam
+     pesando uma imagem só. */
+  function salvaOrigens(){
+    var it = itemAtual();
+    if (!it) return;
+    var usadas = {}, tem = false;
+    els.forEach(function(el){
+      if (el.kind !== "img" || !el.img) return;
+      var o = origens[el.img];
+      if (!o || !o.url) return;
+      usadas[el.img] = o.url;
+      tem = true;
+    });
+    var chave = IMG_STORE + "/" + it.id;
+    if (!tem){ try { localStorage.removeItem(chave); } catch (e){} return; }
+    try { localStorage.setItem(chave, JSON.stringify(usadas)); }
+    catch (e){
+      // como a foto: sem elas o molde continua inteiro, porque as células já
+      // estão gravadas. O que fica avisado é o que se perdeu — poder refazer
+      // o desenho a partir da imagem
+      try { localStorage.removeItem(chave); } catch (e2){}
+      marcaMemoria(true, "as imagens das peças");
+    }
+  }
+
+  function restoreOrigens(){
+    var it = itemAtual();
+    if (!it) return;
+    var raw;
+    try { raw = localStorage.getItem(IMG_STORE + "/" + it.id); } catch (e){ return; }
+    if (!raw) return;
+    var m = null;
+    try { m = JSON.parse(raw); } catch (e){ return; }
+    if (!m) return;
+    Object.keys(m).forEach(function(id){
+      var url = m[id];
+      if (typeof url !== "string" || url.indexOf("data:image") !== 0) return;
+      // imagem que já está viva nesta sessão fica como está: trocar de molde e
+      // voltar não a manda decodificar de novo, nem a apaga no meio do caminho
+      if (origens[id] && origens[id].img) return;
+      var img = new Image();
+      origens[id] = { url: url, img: null };
+      img.onload = function(){
+        if (!origens[id]) return;
+        origens[id].img = img;
+        /* A peça já estava desenhada pelas células gravadas — a imagem
+           chegando não muda um quadradinho. O que ela muda é a barra de cima:
+           ela foi montada antes, quando ainda não havia com que refazer o
+           desenho, e desligou a largura e a sensibilidade. Agora há. */
+        var el = els[sel];
+        if (el && el.kind === "img" && el.img === id) syncControls();
+      };
+      img.src = url;
+    });
   }
 
   /* ---- desfazer e refazer --------------------------------------------
@@ -2638,6 +2815,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       pt.title = cor.nome;
       b.appendChild(pt);
       b.appendChild(document.createTextNode(el.kind === "text" ? (el.text || "texto")
+        : el.kind === "img" ? (el.nome || "imagem")
         : (NOMES_SYM[el.sym] || "símbolo")));
       // com Shift (ou Ctrl) a ficha soma ao laço em vez de trocar a seleção:
       // é o caminho para laçar duas peças distantes sem passar por cima do resto
@@ -2673,7 +2851,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       $("delLaco").title = (n === 1 ? "apagar a peça laçada" : "apagar as " + n + " peças laçadas") +
         (marcaFoto ? " — a moldura da foto não é peça e fica onde está" : "") +
         ". O desfazer devolve tudo num passo.";
-      ["alinha", "ctlPhoto", "ctlPiece", "ctlActs", "ctlNone", "ctlText", "ctlSym"]
+      ["alinha", "ctlPhoto", "ctlPiece", "ctlActs", "ctlNone", "ctlText", "ctlSym", "ctlImg"]
         .forEach(function(id){ $(id).classList.add("hide"); });
       return;
     }
@@ -2688,9 +2866,16 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       var pa = paperMM();
       $("ctlNone").textContent = fmt(pa.w / 10) + " × " + fmt(pa.h / 10) + " cm";
     }
-    if (!piece){ $("ctlText").classList.add("hide"); $("ctlSym").classList.add("hide"); return; }
+    if (!piece){
+      ["ctlText", "ctlSym", "ctlImg"].forEach(function(id){ $(id).classList.add("hide"); });
+      return;
+    }
+    // uma barra por tipo de peça: mostrar a certa é esconder as outras duas
+    var barras = { text: "ctlText", sym: "ctlSym", img: "ctlImg" };
+    Object.keys(barras).forEach(function(k){
+      $(barras[k]).classList.toggle("hide", el.kind !== k);
+    });
     if (el.kind === "text"){
-      $("ctlText").classList.remove("hide"); $("ctlSym").classList.add("hide");
       $("txt").value = el.text;
       $("font").value = el.font;
       mostraFonte();
@@ -2699,8 +2884,22 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       $("thr").value = Math.round(el.thr * 100); $("thrOut").textContent = Math.round(el.thr * 100);
       $("esp").value = el.esp || 0; $("espOut").textContent = el.esp || 0;
       $("arc").value = el.arc || 0; $("arcOut").textContent = el.arc || 0;
+    } else if (el.kind === "img"){
+      $("imgLarg").value = el.larg; $("imgLargOut").textContent = el.larg;
+      var pc = Math.round(el.thr * 100);
+      $("imgThr").value = pc; $("imgThrOut").textContent = pc;
+      $("imgInv").classList.toggle("on", !!el.inv);
+      // sem a imagem não há o que refazer: os dois campos ficam à vista, para
+      // a peça continuar dizendo com que números ela foi desenhada, mas
+      // desligados, porque mexer neles não mudaria um quadradinho
+      var semImg = !origemPronta(el);
+      $("imgLarg").disabled = semImg;
+      $("imgThr").disabled = semImg;
+      $("imgInv").disabled = semImg;
+      $("imgInv").title = semImg
+        ? "A imagem desta peça não está mais na memória do navegador. Use o trocar para pôr o arquivo de novo."
+        : "Troca o claro pelo escuro — é o que resolve desenho branco sobre fundo escuro.";
     } else {
-      $("ctlText").classList.add("hide"); $("ctlSym").classList.remove("hide");
       $("sym").value = el.sym;
       $("symScale").value = el.scale; $("symScaleOut").textContent = el.scale;
     }
@@ -2762,6 +2961,132 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     els.push(el); sel = els.length - 1; soUm(sel); focus = "el";
     renderChips(); syncControls(); draw(); pushHist();
   }
+
+  /* A imagem entra reduzida, como a foto, e pelo mesmo motivo: o que ela vai
+     virar são quadradinhos, e 512 px já dão mais pixels por quadradinho do que
+     a maior largura consegue usar — guardar o original inteiro só encheria a
+     cota do navegador sem mudar um furo.
+
+     O que fica na memória da sessão é o canvas reduzido, e não uma imagem nova
+     feita a partir do data-url: o canvas já está decodificado, então a peça
+     nasce desenhada no mesmo gesto em vez de piscar vazia esperando o
+     navegador ler o que ele mesmo acabou de escrever. */
+  function guardaOrigem(id, img){
+    var k = Math.min(1, IMG_MAX_PX / Math.max(img.width, img.height));
+    var c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(img.width * k));
+    c.height = Math.max(1, Math.round(img.height * k));
+    var x = c.getContext("2d");
+    // o alfa vira branco aqui, uma vez, e não a cada refazer: transparência de
+    // logo é fundo, e não tinta
+    x.fillStyle = "#fff";
+    x.fillRect(0, 0, c.width, c.height);
+    x.drawImage(img, 0, 0, c.width, c.height);
+    var url = "";
+    // com perda de propósito: o que sai daqui ainda passa por um limiar, e
+    // artefato de jpeg não muda um quadradinho
+    try { url = c.toDataURL("image/jpeg", 0.85); } catch (e){ url = ""; }
+    origens[id] = { url: url, img: c };
+  }
+
+  function addImg(img, nome){
+    var id = novoId();
+    guardaOrigem(id, img);
+    var el = { kind:"img", img:id, nome: nome || "imagem",
+               larg: 40, thr: 0.5, inv: 0, rot: 0,
+               x: photo.x, y: photo.y, flip:0, edits:[], cells:[[0]],
+               color: thread, colorName: threadLabel(thread) || thread };
+    rebuild(el);
+    // nasce centrada na foto, e não num canto: é de onde quase toda peça é
+    // arrastada, e peça nova no canto da folha some atrás da régua
+    var b = bboxMM(el);
+    el.x = Math.round((photo.x + (photo.w - b.w) / 2) * 10) / 10;
+    el.y = Math.round((photo.y + (photo.h - b.h) / 2) * 10) / 10;
+    els.push(el); sel = els.length - 1; soUm(sel); focus = "el";
+    renderChips(); syncControls(); draw(); pushHist();
+    avisaVazio(el);
+  }
+
+  /* Peça de imagem que não acendeu nada é uma peça de um quadradinho apagado:
+     na tela ela é um ponto, e o motivo — sensibilidade alta demais, ou desenho
+     claro sobre fundo escuro — não está em lugar nenhum. O aviso é onde a
+     imagem foi pedida, e some sozinho quando o desenho volta. */
+  function avisaVazio(el){
+    var vazia = el && el.kind === "img" && el.cells.length === 1 &&
+                el.cells[0].length === 1 && !el.cells[0][0];
+    avisaImagem(vazia
+      ? "Essa imagem não acendeu nenhum quadradinho. Baixe a sensibilidade na barra de cima — ou use o inverter, se o desenho for claro sobre fundo escuro."
+      : "");
+  }
+
+  /* Trocar a imagem de uma peça guarda o lugar, a inclinação e a linha dela —
+     que é a razão de existir do botão: reimportar do zero devolveria a peça no
+     meio da foto, na cor corrente, e o alinhamento teria de ser refeito.
+
+     O ajuste ponto a ponto é o que não sobrevive, e não por descuido: ele é
+     uma lista de quadradinhos daquele desenho, e sobre um desenho diferente
+     não quer dizer nada. Por isso pergunta antes, como o Recalcular. */
+  function trocaImagem(el, img, nome){
+    var id = novoId();       // id novo: a imagem velha pode ser de uma peça duplicada
+    guardaOrigem(id, img);
+    el.img = id;
+    if (nome) el.nome = nome;
+    rebuild(el, true);
+    renderChips(); syncControls(); draw(); pushHist();
+    avisaVazio(el);
+  }
+
+  function avisaImagem(msg){
+    var p = $("imgAviso");
+    if (p) p.textContent = msg || "";
+  }
+
+  // null: a imagem escolhida vira peça nova. Senão, é a peça que troca de
+  // imagem — guardada como referência, e não como índice, porque apagar outra
+  // peça enquanto a janela de arquivos está aberta move os índices
+  var imgAlvo = null;
+
+  function pedeImagem(alvo){
+    imgAlvo = alvo || null;
+    var inp = $("imgArq");
+    inp.value = "";     // escolher o mesmo arquivo duas vezes ainda avisa
+    inp.click();
+  }
+
+  $("addImg").addEventListener("click", function(){ avisaImagem(""); pedeImagem(null); });
+
+  $("imgTroca").addEventListener("click", function(){
+    var el = els[sel];
+    if (!el || el.kind !== "img") return;
+    var n = el.manual || 0;
+    if (n && !confirm("Esta peça tem " + n + (n === 1 ? " quadradinho aceso" : " quadradinhos acesos") +
+        " ou apagado à mão. A imagem nova é outro desenho, então esse ajuste será perdido. Trocar mesmo assim?"))
+      return;
+    avisaImagem("");
+    pedeImagem(el);
+  });
+
+  $("imgArq").addEventListener("change", function(e){
+    var f = e.target.files && e.target.files[0];
+    var alvo = imgAlvo;
+    imgAlvo = null;
+    if (!f) return;
+    var nome = String(f.name || "").replace(/\.[^.]+$/, "").trim().slice(0, 28) || "imagem";
+    var rd = new FileReader();
+    rd.onerror = function(){ avisaImagem("Não consegui ler esse arquivo."); };
+    rd.onload = function(){
+      var img = new Image();
+      img.onerror = function(){ avisaImagem("Esse arquivo não é uma imagem que o navegador abra."); };
+      img.onload = function(){
+        // a peça pode ter sido apagada ou desfeita enquanto a janela de
+        // arquivos estava aberta: sem ela na lista, a troca não tem alvo
+        if (alvo){ if (els.indexOf(alvo) >= 0) trocaImagem(alvo, img, nome); return; }
+        addImg(img, nome);
+      };
+      img.src = rd.result;
+    };
+    rd.readAsDataURL(f);
+  });
 
   $("addText").addEventListener("click", function(){
     loadFontThen(addText, comoEstaNaBarra().font);
@@ -2830,6 +3155,18 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       loadFontThen(function(){ rebuild(el); renderChips(); draw(); pushLater(); });
       return;
     }
+    if (el.kind === "img"){
+      var lg = parseInt($("imgLarg").value, 10);
+      var tr = parseInt($("imgThr").value, 10);
+      if (!isNaN(lg)) el.larg = Math.max(IMG_LARG_MIN, Math.min(IMG_LARG_MAX, lg));
+      if (!isNaN(tr)) el.thr = Math.max(10, Math.min(90, tr)) / 100;
+      $("imgLargOut").textContent = el.larg;
+      $("imgThrOut").textContent = Math.round(el.thr * 100);
+      rebuild(el);
+      avisaVazio(el);
+      renderChips(); draw(); pushLater();
+      return;
+    }
     el.sym = $("sym").value;
     el.scale = parseInt($("symScale").value, 10);
     $("symScaleOut").textContent = el.scale;
@@ -2837,8 +3174,17 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     renderChips(); draw(); pushLater();
   }
 
-  ["txt","font","rows","thick","thr","esp","arc","sym","symScale"].forEach(function(id){
-    $(id).addEventListener("input", updateSelected);
+  ["txt","font","rows","thick","thr","esp","arc","sym","symScale","imgLarg","imgThr"]
+    .forEach(function(id){ $(id).addEventListener("input", updateSelected); });
+
+  $("imgInv").addEventListener("click", function(){
+    var el = els[sel];
+    if (!el || el.kind !== "img") return;
+    el.inv = el.inv ? 0 : 1;
+    this.classList.toggle("on", !!el.inv);
+    rebuild(el);
+    avisaVazio(el);
+    draw(); pushHist();
   });
   $("rot").addEventListener("input", function(){
     var el = els[sel]; if (!el) return;
@@ -3000,6 +3346,14 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
   }
 
+  // o número que os dois dedos esticam, um por tipo de peça: a altura da
+  // maiúscula, a largura da imagem, o tamanho do símbolo
+  function tamanhoDe(el){
+    if (el.kind === "text") return el.rowsTarget;
+    if (el.kind === "img") return el.larg;
+    return el.scale;
+  }
+
   function resizeSelected(steps){
     var el = els[sel];
     if (!el) return;
@@ -3012,6 +3366,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       el.hv = 2;
       $("rows").value = v;
       $("rowsOut").textContent = v;
+    } else if (el.kind === "img"){
+      if (!origemPronta(el)) return;
+      var lg = Math.max(IMG_LARG_MIN, Math.min(IMG_LARG_MAX, steps));
+      if (lg === el.larg) return;
+      el.larg = lg;
+      $("imgLarg").value = lg;
+      $("imgLargOut").textContent = lg;
     } else {
       var z = Math.max(1, Math.min(6, steps));
       if (z === el.scale) return;
@@ -3302,7 +3663,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     cv.setPointerCapture(e.pointerId);
     if (nPointers() === 2 && els[sel]){
       drag = null; laco = null;
-      pinch = { d0: spread(), base: els[sel].kind === "text" ? els[sel].rowsTarget : els[sel].scale };
+      pinch = { d0: spread(), base: tamanhoDe(els[sel]) };
       return;
     }
     if (pega){
@@ -4524,7 +4885,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     restored = restoreState(it.dados);
     if (!restored) moldeEmBranco();
     renderChips(); syncControls(); renderMoldes();
-    restorePhoto(); mostraFonte(); draw(); mostraZoom(); guiasSync(); resetHist();
+    restorePhoto(); restoreOrigens(); mostraFonte(); draw(); mostraZoom(); guiasSync(); resetHist();
   }
 
   function abreMolde(id){
@@ -4556,6 +4917,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     if (!confirm("Apagar o molde “" + (it.nome || "sem nome") + "”? Isso não se desfaz.")) return;
     try { localStorage.removeItem(it.dados); } catch (e){}
     try { localStorage.removeItem(it.foto); } catch (e){}
+    try { localStorage.removeItem(IMG_STORE + "/" + it.id); } catch (e){}
     var era = estante.atual === id;
     estante.itens = estante.itens.filter(function(x){ return x.id !== id; });
     if (era){
@@ -4589,18 +4951,22 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     saveState();
     var it = itemAtual();
     if (!it) return;
-    var dados = null, foto = null;
+    var dados = null, foto = null, imgs = null;
     try { dados = localStorage.getItem(it.dados); } catch (e){}
     try { foto = localStorage.getItem(it.foto); } catch (e){}
+    // as imagens das peças vão junto pelo mesmo motivo da foto: molde sem elas
+    // abre desenhado, mas a largura e a sensibilidade ficam travadas no outro
+    // aparelho, e ninguém entenderia por quê
+    try { imgs = JSON.parse(localStorage.getItem(IMG_STORE + "/" + it.id)); } catch (e){}
     if (!dados) return avisaArquivo("Não há nada gravado para salvar.");
     var corpo;
     try {
       corpo = JSON.stringify({ app: "ponto-e-letra", v: 1, nome: it.nome || "sem nome",
                                em: new Date().toISOString(), molde: JSON.parse(dados),
-                               foto: foto || null });
+                               foto: foto || null, imagens: imgs || null });
     } catch (e){ return avisaArquivo("Não consegui montar o arquivo."); }
     deliver(new Blob([corpo], { type: "application/json" }), saveName("json"), null);
-    avisaArquivo("Arquivo salvo com a foto junto.");
+    avisaArquivo("Arquivo salvo com a foto e as imagens das peças junto.");
   }
 
   function importaMolde(arquivo){
@@ -4623,6 +4989,10 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       // a foto é o item que estoura a cota; sem ela o molde ainda vale
       if (typeof a.foto === "string" && a.foto.indexOf("data:image") === 0){
         try { localStorage.setItem(it.foto, a.foto); } catch (e2){}
+      }
+      if (a.imagens && typeof a.imagens === "object"){
+        try { localStorage.setItem(IMG_STORE + "/" + it.id, JSON.stringify(a.imagens)); }
+        catch (e3){}
       }
       salvaEstante();
       abreItem(it);
@@ -4719,6 +5089,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     syncControls();
     migraAltura();
     restorePhoto();
+    restoreOrigens();
     mostraFonte();
     draw();
     mostraZoom();
