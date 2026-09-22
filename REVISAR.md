@@ -246,6 +246,13 @@ jeito de tirar a foto sem abrir outro molde. E o rótulo do botão diz o número
 ("apagar as 2 peças"), porque no celular ele é a única coisa da barra do laço
 que cabe na tela sem rolar.
 
+**O ímã das guias pega o bloco pela caixa de todos juntos.** As guias chegaram
+depois do laço, e os dois se encontram no arraste. Escolhi encostar o bloco
+pela caixa de tudo o que está nele: se cada peça encostasse na sua guia, o
+arranjo que o laço existe para preservar chegaria do outro lado desmanchado.
+Depois de encostar, o passo ainda passa pela foto — encostar numa guia não é
+motivo para a foto sair do papel.
+
 **A foto segura o bloco na borda.** A foto não pode sair do papel (isso já era
 assim), e uma peça pode. Se cada um obedecesse à sua própria regra, o bloco se
 desmancharia ao chegar na borda: a foto pararia e as palavras seguiriam. Então
