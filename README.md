@@ -20,7 +20,8 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
 - **Papel**: A4, A5, A3, quadrado, 20×30, 15×20 ou medidas próprias, em retrato ou paisagem.
 - **Foto**: tamanhos de revelação comuns (10×15, 9×13, 13×18, 15×21, quadrado, polaroid) ou
   medida própria, arrastável sobre o papel, com imagem opcional só para visualizar.
-- **Peças bordadas**: quantas quiser, cada uma sendo uma palavra ou um símbolo — dez desenhos:
+- **Peças bordadas**: quantas quiser, cada uma sendo uma palavra, um símbolo, uma imagem em
+  uma linha só ou um gráfico colorido — dez desenhos prontos:
   coração cheio, coração vazado, estrela, seta, flor, folha, coroa, lua, sol, infinito e casa. Arraste
   para posicionar, incline de -45° a 45°, redimensione com dois dedos, espelhe, e ajuste ponto a
   ponto no modo de edição. Palavra nova nasce com o que está na barra de cima — fonte, altura,
@@ -28,6 +29,58 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   tamanho da primeira. Duplicar copia a peça com as
   células como estão, então a cópia nasce com os ajustes manuais da original e segue a vida
   dela própria a partir dali.
+- **Imagem**: um arquivo do aparelho vira quadradinho na hora, e o que sai é uma peça como as
+  outras: arrastável, girável, espelhável e ajustável ponto a ponto. Quem decide o caminho é o
+  **cores**, na barra de cima. A **largura** em quadradinhos decide quanto detalhe cabe, e vale
+  nos dois.
+
+  **Em 1 cor é silhueta**: um limiar sobre a tinta de cada quadradinho, a mesma conta que a
+  palavra faz sobre o traço da fonte. A **sensibilidade** decide o que conta como escuro e o
+  **inverter** resolve desenho claro sobre fundo escuro. Serve para logo, monograma, brasão,
+  desenho de traço, perfil.
+
+- **Gráfico colorido**: de 2 cores para cima, a mesma peça carrega a sua própria paleta. As
+  cores da imagem são agrupadas nesse número de tons por k-médias, e cada tom vira a meada mais
+  próxima da cartela escolhida em **linhas** — Anchor, DMC ou **minhas**, que usa só o que você
+  marcou como seu e faz o gráfico sair com as meadas que já estão na gaveta.
+
+  O agrupamento e a comparação são em **Lab**, não em RGB. Em RGB dois verdes vizinhos ficam tão
+  longe um do outro quanto um azul de um roxo, e a linha casada sai pela cor errada, sempre para
+  o mesmo lado. As sementes das k-médias são o ponto mais distante do que já foi semeado, e não
+  sorteadas: a mesma imagem com o mesmo número de cores tem de dar a mesma paleta, senão mexer
+  na largura e voltar traria outras meadas sem nada ter mudado.
+
+  O **fundo** é o corte por baixo: quadradinho mais claro que ele não ganha linha nenhuma. É o
+  que apaga o branco em volta de um logo e o quadriculado de um gráfico pronto — sem ele, a
+  primeira linha da paleta seria sempre uma meada branca para bordar o fundo inteiro.
+
+  Duas cores que caem na mesma meada viram uma: legenda com a mesma linha duas vezes manda
+  comprar duas e bordar como se fossem tons diferentes, que é o erro que só aparece com a
+  agulha na mão.
+
+  **Cada peça guarda a sua paleta**, e mexer na largura reaproveita as linhas que já estão lá —
+  inclusive as que você trocou à mão. Quem pede paleta nova é mudar o número de cores, mudar a
+  cartela, trocar a imagem ou o **recalcular**. Sem isso, acertar um tom e depois mexer num
+  milímetro de largura devolveria outras meadas.
+
+  Na aba **linha**, com um gráfico selecionado, aparece a lista das meadas dele com quantos
+  pontos cada uma tem. Tocar numa escolhe-a; tocar depois numa cor do catálogo põe outra meada
+  no lugar — é o caminho do palpite automático para a linha que você tem de verdade. O **olho**
+  esconde uma linha do desenho sem tirá-la da lista, que é como se apaga um fundo que o corte
+  não pegou. A linha escolhida é também a que o **ajustar** pinta, ponto a ponto.
+
+  **No PDF, cada quadradinho leva a letra da linha**, e a legenda diz que letra é qual. Cor no
+  papel é conferência: a impressora de casa imprime em preto e branco quase sempre, e aí a cor
+  some e a letra fica. Legenda que não cabe em três linhas de rodapé vira folha à parte, inteira
+  — truncar era a saída certa com duas ou três cores, e um gráfico tem quinze.
+
+  A imagem escolhida fica guardada com o molde, reduzida a 512 px, e é por isso que mexer na
+  largura e na sensibilidade continua funcionando depois de fechar o navegador. Ela não é o
+  desenho: o desenho são as células, que vão gravadas do mesmo jeito que as das outras peças. Se
+  a imagem se perder — cota estourada, molde vindo de um arquivo antigo —, a peça abre inteira e
+  são só os dois controles que ficam desligados. O **trocar** põe outro arquivo na mesma peça
+  sem ela sair do lugar nem mudar de linha; como a imagem nova é outro desenho, o ajuste ponto a
+  ponto dela não sobrevive, e o botão pergunta antes.
 - **Altura**: é a altura da **letra maiúscula**, contada em quadradinhos e medida na fonte, não
   na palavra escrita. Era a caixa de tinta da palavra — e essa caixa sobe com o "l" e desce com
   o "g", então "amor" e "alegria" na mesma altura saíam com letras de tamanhos bem diferentes,
@@ -87,6 +140,9 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   no furo — bordando com 2 fios, são metros de fio de 2 fios. Não há conversão para meadas
   porque isso depende da marca, mas uma meada de 6 fios desfiada em pares rende três vezes o
   comprimento dela.
+- **Fio por linha, também dentro do gráfico**: a conta de metros é por cor do molde inteiro, e
+  uma peça de paleta entra nela cor a cor. Duas peças na mesma meada são uma linha só na lista
+  de compras.
 - **Contagem**: pontos e furos, com o tamanho da peça selecionada em centímetros. O rodapé diz o
   tempo todo se o molde sai numa folha ou em quantas, e avisa em vermelho quando alguma peça
   passou da borda do papel — o molde é recortado no papel, então o que está fora não sai no PDF.
@@ -260,17 +316,25 @@ raiz declara que não há build — sem ele, um projeto criado com o preset Vite
 Tudo no `localStorage` do próprio navegador. `ponto-e-letra/moldes/v1` é o índice da estante:
 diz quais moldes existem, qual está aberto, e o **nome das chaves** de cada um — nunca o
 conteúdo, porque gravar acontece a cada gesto e reescrever a estante inteira porque uma peça
-andou um milímetro seria desperdício. Cada molde tem as suas duas chaves, `…/molde/v1/<id>` para
-o arranjo e `…/molde/foto/v1/<id>` para a imagem. O molde gravado antes de existir estante
+andou um milímetro seria desperdício. As células de cada peça vão gravadas como estão — um
+caractere por quadradinho, em base 36: `0` é o vazio e de `1` em diante é o índice da linha na
+paleta daquela peça, então uma peça de uma cor só grava hoje exatamente o que gravava antes de
+existir gráfico colorido, e molde antigo volta igual. Cada molde tem as suas três chaves: `…/molde/v1/<id>` para
+o arranjo, `…/molde/foto/v1/<id>` para a foto de fundo e `…/molde/imagens/v1/<id>` para as
+imagens das peças, uma por id de peça e só as que alguma peça ainda usa. O molde gravado antes de existir estante
 continua nas chaves sem `<id>`, e entra no índice apontando para elas: numa cota quase cheia,
 copiar a foto para migrar é a diferença entre migrar e perdê-la. `ponto-e-letra/linhas/v1` guarda
 as linhas que você marcou como suas — inclusive as avulsas, que moram só aí, já que não vêm de
 catálogo nenhum. Não há servidor nem conta — o trabalho não acompanha você
 para outro aparelho ou outro navegador, e some se você limpar os dados do site, a menos que você
 salve o arquivo do molde. A foto é guardada reduzida (1600 px no maior lado, JPEG), porque é só guia de
-posicionamento: na tela e no PDF ela aparece a 22% de opacidade. As chaves são separadas de
-propósito. A foto é o único item capaz de estourar a cota do navegador, e assim ela nunca leva o
-arranjo junto na queda. As linhas ficam à parte porque são inventário, não desenho: a caixa de
+posicionamento: na tela e no PDF ela aparece a 22% de opacidade. As imagens das peças são
+guardadas do mesmo jeito e por 512 px, que é mais pixel por quadradinho do que a maior largura
+consegue usar. As chaves são separadas de propósito. A foto e as imagens são os itens capazes de
+estourar a cota do navegador, e assim nenhum dos dois leva o arranjo junto na queda — e a queda
+sai barata, porque as células já estão gravadas dentro do molde e o desenho abre igual sem eles.
+É a mesma razão de o id da imagem, e não a imagem, morar dentro da peça: o desfazer guarda o
+arranjo inteiro em texto a cada passo, e uma imagem ali dentro custaria megabytes por passo. As linhas ficam à parte porque são inventário, não desenho: a caixa de
 linhas continua a mesma quando você começa um molde do zero, e o molde não carrega a caixa
 junto.
 

@@ -123,6 +123,19 @@ button:focus-visible,.chip:focus-visible,.cat:focus-visible,.rail button:focus-v
   mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 18px),transparent 100%)}
 .tools::-webkit-scrollbar{height:0}
 .tools fieldset,.tools .grp{display:flex;align-items:center;gap:8px;border:0;margin:0;padding:0;flex:0 0 auto}
+.paleta .sl{display:flex;align-items:center;gap:8px;width:100%;padding:5px 7px;margin:2px 0;
+  border:1px solid var(--line);border-radius:6px;background:#fff;text-align:left;cursor:pointer}
+.paleta .sl:hover{border-color:var(--ink-soft)}
+.paleta .sl.on{border-color:var(--lemon-deep);background:var(--lemon)}
+.paleta .sl.off{opacity:.45}
+.paleta .sl i{width:16px;height:16px;border-radius:3px;border:1px solid rgba(56,73,89,.25);flex:0 0 auto}
+.paleta .sl .lt{font-family:var(--display);font-size:12px;width:13px;flex:0 0 auto;color:var(--ink)}
+.paleta .sl .nm{flex:1 1 auto;font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.paleta .sl .qt{font-family:var(--display);font-size:11px;color:var(--ink-soft);flex:0 0 auto}
+.paleta .sl .olho{flex:0 0 auto;border:0;background:transparent;padding:2px 4px;cursor:pointer;
+  color:var(--ink-soft);line-height:1}
+.paleta .sl .olho svg{width:16px;height:16px;fill:currentColor;display:block}
+
 .tools .sep{width:1px;height:26px;background:var(--line);flex:0 0 auto}
 .tools .none{font-family:var(--display);font-size:12px;color:var(--ink-soft);white-space:nowrap}
 
@@ -447,6 +460,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 .app.editando .tools .t,
 .app.editando #ctlText,
 .app.editando #ctlSym,
+.app.editando #ctlImg,
 .app.editando #ctlPiece,
 .app.editando #ctlNone{display:none!important}
 .app.editando #ctlEdit{display:flex!important}
@@ -624,6 +638,16 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <span class="t"><span>tamanho</span><input id="symScale" type="number" min="1" max="6" step="1" value="1"><b id="symScaleOut" class="hide">1</b></span>
     </fieldset>
 
+    <fieldset id="ctlImg" class="hide">
+      <span class="t" title="Largura da peça em quadradinhos. A altura vem sozinha, na proporção da imagem. É este número que decide quanto detalhe cabe: imagem estreita perde o traço fino, imagem larga custa ponto."><span>largura</span><input id="imgLarg" type="number" min="10" max="120" step="1" value="40"><b id="imgLargOut" class="hide">40</b></span>
+      <span class="t" title="Quantas linhas diferentes a peça usa. Em 1 ela é silhueta, numa linha só, e valem a sensibilidade e o inverter. De 2 para cima a imagem vira gráfico colorido: as cores dela são agrupadas nesse número de tons e cada tom vira a meada mais próxima da marca escolhida."><span>cores</span><input id="imgCores" type="number" min="1" max="20" step="1" value="1"><b id="imgCoresOut" class="hide">1</b></span>
+      <span class="t" id="tImgThr" title="Quanto de escuro um quadradinho precisa ter para acender, em por cento. Menos acende mais e engorda o desenho; mais deixa só o que é bem escuro."><span>sens.</span><input id="imgThr" type="number" min="0" max="90" step="5" value="50"><b id="imgThrOut" class="hide">50</b></span>
+      <span class="t hide" id="tImgCorte" title="Quadradinho com menos escuro que isto fica vazio, sem linha nenhuma — é o que tira o fundo branco de um logo ou o quadriculado de um gráfico. Em 0 nada é descartado e o fundo também ganha meada."><span>fundo</span><input id="imgCorte" type="number" min="0" max="80" step="5" value="10"><b id="imgCorteOut" class="hide">10</b></span>
+      <span class="t hide" id="tImgFonte" title="De que cartela as linhas do gráfico são escolhidas. “minhas” usa só o que você já marcou como seu — e aí o gráfico sai com as meadas que você tem em casa."><span>linhas</span><select id="imgFonte"></select></span>
+      <button type="button" id="imgInv" class="tbtn" title="Troca o claro pelo escuro — é o que resolve desenho branco sobre fundo escuro.">inverter</button>
+      <button type="button" id="imgTroca" class="tbtn" title="Põe outra imagem nesta mesma peça, sem perder o lugar nem a linha dela.">trocar</button>
+    </fieldset>
+
     <span class="grp hide" id="ctlPiece">
       <span class="t"><span>inclinação</span><input id="rot" type="number" min="-45" max="45" step="1" value="0"><b id="rotOut" class="hide">0</b></span>
     </span>
@@ -732,6 +756,18 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <h2>peças</h2>
     <button id="addText" class="wide">nova palavra</button>
     <button id="addSym" class="wide">novo símbolo</button>
+    <button id="addImg" class="wide">nova imagem</button>
+    <input id="imgArq" type="file" accept="image/*" class="hide">
+
+    <p class="note">A imagem vira quadradinho na hora, e o que sai é uma peça como as outras:
+    arrastável, espelhável e ajustável ponto a ponto. O controle que decide tudo é o
+    <b>cores</b>, na barra de cima.</p>
+    <p class="note">Em <b>1 cor</b> ela é silhueta: o escuro acende, o claro apaga, e a peça usa
+    uma linha só. Serve para logo, monograma, brasão e desenho de traço. De <b>2 cores para
+    cima</b> ela vira gráfico: as cores da imagem são agrupadas nesse número de tons e cada tom
+    vira a meada mais próxima da cartela escolhida. A aba <b>linha</b> lista as meadas do
+    gráfico, e ali se troca uma por outra ou se esconde a que sobrou.</p>
+    <p class="note" id="imgAviso"></p>
 
     <div class="alinha hide" id="alinha">
       <label>Alinhar a peça selecionada</label>
@@ -757,6 +793,16 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
     <p class="atual"><i id="threadDot"></i><span id="threadAlvo">Linha da próxima peça</span>
       <b id="threadName">—</b></p>
+
+    <div class="paleta hide" id="paleta">
+      <h3 class="subtit">as linhas deste gráfico</h3>
+      <div id="paletaLista"></div>
+      <p class="note">Toque numa linha da lista para escolhê-la; depois, uma cor do catálogo
+      abaixo entra no lugar dela. O <b>olho</b> esconde a linha do desenho sem tirá-la da
+      lista — é assim que se apaga um fundo que o corte não pegou. A linha escolhida é também
+      a que o <b>ajustar</b> pinta, ponto a ponto.</p>
+      <div class="rule"></div>
+    </div>
 
     <div>
       <div class="abas" id="marcas"></div>
@@ -798,8 +844,12 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
       <p class="note">As cores são referência de tela. A da Anchor sai da cartela da própria
       marca; a da DMC vem de tabela pública e é mais aproximada. Monitor, luz e lote mudam o
-      que você vê na mão. Na tela e na prévia em PNG o molde sai na cor escolhida; em PDF sai
-      sempre em preto, porque é gabarito de furo.</p>
+      que você vê na mão — por isso o que se compra é o código, e não a cor impressa.</p>
+
+      <p class="note">No PDF o ponto sai na cor da linha e os furos em preto. Quando o molde tem
+      um gráfico colorido, cada quadradinho leva também a <b>letra</b> da linha, e a legenda diz
+      que letra é qual: impresso em preto e branco — que é como sai da impressora de casa quase
+      sempre — a cor some e a letra fica.</p>
     </div>
   </section>
 
@@ -880,6 +930,10 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <li>Se o rodapé ficar vermelho dizendo <b>não coube na memória</b>, salve o arquivo do molde na aba <b>moldes</b> e apague um molde antigo. A partir desse momento o trabalho parou de ser guardado.</li>
       <li>A <b>altura</b> na barra de cima é a altura da letra maiúscula, em quadradinhos, medida na fonte e não na palavra. Por isso duas palavras na mesma altura saem com letras do mesmo tamanho, mesmo que uma tenha “g” e “l” e a outra não — o que ascende e desce passa da altura pedida. A aba <b>molde</b> diz quanto isso dá em milímetros, e palavra nova nasce com o que estiver na barra.</li>
       <li>Ajuste ponto a ponto <b>sobrevive</b> a mexer na altura, no traço, na sensibilidade e na fonte: o desenho é refeito e os quadradinhos que você acendeu ou apagou vão junto, acompanhando a grade nova. Quem descarta é só o botão <b>recalcular</b>, e ele pergunta antes.</li>
+      <li>A peça de <b>imagem</b> lê um arquivo do aparelho e o transforma em quadradinhos na hora. Em <b>1 cor</b> ela é silhueta: o escuro acende, o claro apaga, e vale uma linha só — logo, monograma, brasão, desenho de traço. A <b>sensibilidade</b> decide o que conta como escuro e o <b>inverter</b> serve para desenho claro sobre fundo escuro.</li>
+      <li>De <b>2 cores para cima</b> a mesma peça vira <b>gráfico colorido</b>: as cores da imagem são agrupadas nesse número de tons, e cada tom vira a meada mais próxima da cartela escolhida em <b>linhas</b> — inclusive <b>minhas</b>, que usa só o que você já marcou como seu. O <b>fundo</b> tira o que é claro demais para ganhar linha, que é o que apaga o branco em volta de um logo ou o quadriculado de um gráfico pronto. Mais cores é mais fiel e mais meada para comprar; comece em 6 ou 8 e suba se faltar tom.</li>
+      <li>Na aba <b>linha</b>, com um gráfico selecionado, aparece a lista das meadas dele com quantos pontos cada uma tem. Toque numa para escolhê-la e, em seguida, numa cor do catálogo para pôr outra meada no lugar — é assim que se troca o palpite do casamento automático pela linha que você tem na gaveta. O <b>olho</b> esconde uma linha do desenho sem tirá-la da lista, e a linha escolhida é a que o <b>ajustar</b> pinta ponto a ponto.</li>
+      <li>Mexer na <b>largura</b> não sorteia meadas novas: as linhas do gráfico ficam como estão, inclusive as que você trocou à mão. Quem pede paleta nova é mudar o número de <b>cores</b>, mudar a cartela em <b>linhas</b>, trocar a imagem ou apertar o <b>recalcular</b>.</li>
       <li>Para o nome curvado por cima da foto, use o campo <b>arco</b> na barra de cima. Se a cursiva fechar demais em letra pequena, abra o <b>espaço</b> entre as letras — ele é contado em quadradinhos, os mesmos que viram furo.</li>
       <li>Para posicionar fino, use as setas do teclado: meio milímetro por toque, cinco com Shift. Os três botões na aba <b>peças</b> centralizam a peça na foto ou no papel, e encostam ela na base da foto.</li>
       <li>O botão da cruz pontilhada, no canto da mesa, liga as <b>guias</b>: linhas pontilhadas que atravessam a mesa inteira. Puxe uma de dentro da régua para soltar outra, e leve-a de volta para a régua para tirá-la. Arrastando, a peça encosta sozinha na guia — é o jeito de alinhar no olho sem sair torto. Um bloco laçado encosta inteiro, pela caixa de tudo o que está nele. Elas ficam na tela e não saem no PDF.</li>
@@ -1116,6 +1170,36 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   var PHOTO_STORE = "ponto-e-letra/molde/foto/v1";
   var PHOTO_MAX_PX = 1600;
 
+  /* A imagem que vira peça mora numa terceira chave, pelo mesmo motivo da
+     foto: é grande, e à parte ela cai sozinha sem levar o molde junto. Cai
+     barato, também — as células já estão gravadas dentro do molde, então o
+     desenho abre igual sem ela; o que se perde é poder mexer na largura e na
+     sensibilidade sem trazer o arquivo de novo.
+
+     Vai reduzida porque é origem de quadradinho, e não desenho final: 512 px
+     dão quatro pixels por quadradinho na largura máxima, e mais do que isso
+     não muda um furo. */
+  var IMG_STORE = "ponto-e-letra/molde/imagens/v1";
+  var IMG_MAX_PX = 512;
+  var IMG_LARG_MIN = 10, IMG_LARG_MAX = 120;
+
+  // id da peça → { url: o data-url gravado, img: o canvas já decodificado.
+  // O molde guarda só o id; o desenho de quem ainda não voltou da memória são
+  // as células gravadas, que bastam para a tela e para o PDF.
+  var origens = {};
+
+  // peça de gráfico colorido: a que tem mais de uma linha dentro dela. Todo
+  // o resto do app trata as células como liga-desliga, e continua certo —
+  // índice de paleta é verdadeiro do mesmo jeito que o 1 era
+  function temPaleta(el){
+    return !!(el && el.kind === "img" && (el.cores | 0) > 1);
+  }
+
+  function origemPronta(el){
+    var o = el && el.kind === "img" ? origens[el.img] : null;
+    return o && o.img && o.img.width ? o.img : null;
+  }
+
   /* ---- a estante de moldes --------------------------------------------
 
      Uma chave só para um molde só significava que começar um desenho novo
@@ -1180,10 +1264,14 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     }
   }
 
-  // o nome que um molde ganha sozinho: a primeira palavra bordada nele
+  // o nome que um molde ganha sozinho: a primeira palavra bordada nele — e,
+  // num molde que não tem palavra nenhuma, o nome da primeira imagem, que é o
+  // que a pessoa escolheu e reconhece na lista
   function nomeSugerido(){
     for (var i = 0; i < els.length; i++)
       if (els[i].kind === "text" && (els[i].text || "").trim()) return els[i].text.trim();
+    for (var j = 0; j < els.length; j++)
+      if (els[j].kind === "img" && (els[j].nome || "").trim()) return els[j].nome.trim();
     return "";
   }
   var saveTimer = 0;
@@ -1193,6 +1281,176 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var h = hex.replace("#", "");
     return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)];
   }
+
+  /* Letra na cor da própria linha, escurecida até dar para ler. Amarelo claro
+     sobre papel branco não se lê, e o molde impresso tem de ser legível antes
+     de ser bonito — a cor ali serve de conferência, a letra é o que manda. */
+  function corLegivel(hex){
+    var c = hexRGB(hex);
+    var lum = (c[0] * 0.299 + c[1] * 0.587 + c[2] * 0.114) / 255;
+    if (lum <= 0.45 || lum <= 0) return c;
+    var f = 0.45 / lum;
+    return [Math.round(c[0] * f), Math.round(c[1] * f), Math.round(c[2] * f)];
+  }
+
+  /* ---- a imagem em várias linhas -------------------------------------
+
+     Uma linha por peça é silhueta, e silhueta é o que uma foto não é. Para a
+     imagem sair como ela é, a peça carrega a sua própria paleta: `el.paleta` é
+     a lista das linhas dela, e cada quadradinho guarda o índice da linha em
+     vez de um liga-desliga.
+
+     Zero continua sendo vazio. É essa escolha que deixa o resto do app
+     ignorar que existe cor: a conta de furos, o corte das bordas, o espelhar,
+     o contorno do laço e o modo ponto a ponto só perguntam "tem ponto aqui?",
+     e um índice de paleta responde que sim do mesmo jeito que o 1 respondia.
+
+     A letra de cada linha é o que faz o molde funcionar impresso em preto e
+     branco — e é assim que ele sai da impressora de casa quase sempre. Cor no
+     papel é conferência; a letra é o que se lê. As confundíveis ficam de fora:
+     I parece 1, O parece 0, Q parece O. */
+  var LETRAS = "ABCDEFGHKLMNPRSTUVWXYZ".split("");
+  var CORES_MAX = 20;
+
+  function srgbLin(v){
+    v /= 255;
+    return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  }
+
+  /* Lab de D65. A distância tinha de ser a que o olho enxerga: em RGB, dois
+     verdes vizinhos ficam tão longe um do outro quanto um azul de um roxo, e
+     a linha casada sairia pela cor errada — sempre para o lado do verde, que
+     é onde o RGB mais mente. */
+  function labDe(r, g, b){
+    var R = srgbLin(r), G = srgbLin(g), B = srgbLin(b);
+    var x = (R * 0.4124 + G * 0.3576 + B * 0.1805) / 0.95047;
+    var y = (R * 0.2126 + G * 0.7152 + B * 0.0722);
+    var z = (R * 0.0193 + G * 0.1192 + B * 0.9505) / 1.08883;
+    var f = function(t){ return t > 0.008856 ? Math.pow(t, 1 / 3) : 7.787 * t + 16 / 116; };
+    var fx = f(x), fy = f(y), fz = f(z);
+    return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
+  }
+
+  var labCache = {};
+  function labHex(hex){
+    if (!labCache[hex]){
+      var c = hexRGB(hex);
+      labCache[hex] = labDe(c[0], c[1], c[2]);
+    }
+    return labCache[hex];
+  }
+
+  function dLab(a, b){
+    var d0 = a[0] - b[0], d1 = a[1] - b[1], d2 = a[2] - b[2];
+    return d0 * d0 + d1 * d1 + d2 * d2;
+  }
+
+  /* k-médias em Lab, com as sementes escolhidas pelo ponto mais distante do
+     que já foi semeado. Semente sorteada é o normal, e aqui seria errado duas
+     vezes: ela deixa duas cores caírem no mesmo tom, e faz a mesma imagem com
+     o mesmo número de cores dar paletas diferentes a cada volta — mexer na
+     largura e voltar traria outras linhas, sem nada ter mudado. Determinístico
+     é requisito, não capricho. */
+  function kmedias(pts, n){
+    if (pts.length <= n) return pts.map(function(p){ return p.lab.slice(); });
+    var cent = [], i, j;
+    var maior = pts[0];
+    for (i = 1; i < pts.length; i++) if (pts[i].peso > maior.peso) maior = pts[i];
+    cent.push(maior.lab.slice());
+    var perto = pts.map(function(p){ return dLab(p.lab, cent[0]); });
+    while (cent.length < n){
+      var alvo = 0, melhor = -1;
+      for (i = 0; i < pts.length; i++){
+        // o peso entra na escolha da semente: um pixel perdido de cor exótica
+        // não merece uma linha inteira da paleta só por estar longe de tudo
+        var v = perto[i] * Math.sqrt(pts[i].peso);
+        if (v > melhor){ melhor = v; alvo = i; }
+      }
+      if (melhor <= 0) break;
+      cent.push(pts[alvo].lab.slice());
+      for (i = 0; i < pts.length; i++){
+        var d = dLab(pts[i].lab, cent[cent.length - 1]);
+        if (d < perto[i]) perto[i] = d;
+      }
+    }
+    // vinte voltas: daí em diante os grupos param de trocar de dono, e o que
+    // sobra é decimal que nenhuma linha de bordado distingue
+    for (var volta = 0; volta < 20; volta++){
+      var soma = [], peso = [];
+      for (j = 0; j < cent.length; j++){ soma.push([0, 0, 0]); peso.push(0); }
+      for (i = 0; i < pts.length; i++){
+        var dono = 0, dd = 1e18;
+        for (j = 0; j < cent.length; j++){
+          var e = dLab(pts[i].lab, cent[j]);
+          if (e < dd){ dd = e; dono = j; }
+        }
+        soma[dono][0] += pts[i].lab[0] * pts[i].peso;
+        soma[dono][1] += pts[i].lab[1] * pts[i].peso;
+        soma[dono][2] += pts[i].lab[2] * pts[i].peso;
+        peso[dono] += pts[i].peso;
+      }
+      var mexeu = false;
+      for (j = 0; j < cent.length; j++){
+        if (!peso[j]) continue;
+        var novo = [soma[j][0] / peso[j], soma[j][1] / peso[j], soma[j][2] / peso[j]];
+        if (dLab(novo, cent[j]) > 0.01) mexeu = true;
+        cent[j] = novo;
+      }
+      if (!mexeu) break;
+    }
+    // grupo que ficou sem ninguém não vira linha: paleta com cor que não
+    // aparece no desenho manda comprar meada para nada
+    return cent;
+  }
+
+  // as linhas entre as quais a paleta escolhe: uma marca inteira, ou só o que
+  // você já tem na caixa
+  function linhasFonte(fonte){
+    var lista = [];
+    if (fonte === "minhas"){
+      minhas.forEach(function(k){ if (catIdx[k]) lista.push({ chave: k, reg: catIdx[k] }); });
+      return lista;
+    }
+    CAT.forEach(function(m){
+      if (m.id !== fonte) return;
+      m.cores.forEach(function(c){
+        var k = m.id + ":" + c[0];
+        if (catIdx[k]) lista.push({ chave: k, reg: catIdx[k] });
+      });
+    });
+    return lista;
+  }
+
+  /* Cada cor do desenho vira a linha mais próxima que ainda não foi usada. O
+     "ainda não usada" é o que importa: duas cores vizinhas caindo na mesma
+     meada deixariam a legenda repetida e o gráfico com um tom a menos do que
+     diz ter. Quem escolhe primeiro é o grupo com mais quadradinhos, que é o
+     que mais se vê no bordado pronto. */
+  function casaPaleta(cent, pesos, fonte){
+    var linhas = linhasFonte(fonte);
+    if (!linhas.length) linhas = linhasFonte("anchor");
+    var ordem = cent.map(function(c, i){ return i; })
+                    .sort(function(a, b){ return (pesos[b] || 0) - (pesos[a] || 0); });
+    var usadas = {}, saida = [];
+    ordem.forEach(function(i){
+      var melhor = null, dd = 1e18, repescagem = null, dr = 1e18;
+      for (var j = 0; j < linhas.length; j++){
+        var d = dLab(cent[i], labHex(linhas[j].reg.hex));
+        if (d < dr){ dr = d; repescagem = linhas[j]; }
+        if (usadas[linhas[j].chave]) continue;
+        if (d < dd){ dd = d; melhor = linhas[j]; }
+      }
+      // acabaram as linhas livres — cartela pequena, ou "minhas" com menos
+      // cores do que o gráfico pede. Repete, e a junção logo abaixo funde as
+      // duas num tom só em vez de mentir duas linhas iguais na legenda
+      var esc = melhor || repescagem;
+      usadas[esc.chave] = 1;
+      saida[i] = { lab: cent[i].slice(), chave: esc.chave, hex: esc.reg.hex,
+                   rotulo: rotulo(esc.reg), off: 0 };
+    });
+    return saida;
+  }
+
 
   /* A cor mora na peça, não no molde inteiro. É vendo duas peças com as duas
      linhas de verdade, lado a lado no arranjo, que a escolha se decide — e o
@@ -1234,22 +1492,50 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   // as linhas do molde, na ordem das peças e sem repetir cor, com quantos
   // pontos e quantos metros cada uma pede
+  /* A legenda é do molde inteiro, e não de uma peça: duas peças na mesma
+     meada são uma linha só na lista de compras. A letra vem daqui pelo mesmo
+     motivo — ela identifica a linha no molde todo, então dois gráficos que
+     dividem uma cor dividem a letra dela. */
   function linhasUsadas(){
     var vistas = {}, lista = [];
-    els.forEach(function(el){
-      var c = corDe(el);
-      if (!vistas[c.hex]){
-        vistas[c.hex] = { hex: c.hex, nome: c.nome, pontos: 0 };
-        lista.push(vistas[c.hex]);
+    var poe = function(hex, nome, n){
+      if (!n) return;
+      if (!vistas[hex]){
+        vistas[hex] = { hex: hex, nome: nome, pontos: 0 };
+        lista.push(vistas[hex]);
       }
-      vistas[c.hex].pontos += countOf(el);
+      vistas[hex].pontos += n;
+    };
+    els.forEach(function(el){
+      if (el.paleta && el.paleta.length){
+        var n = contaPorCor(el);
+        el.paleta.forEach(function(sl, i){ poe(sl.hex, sl.rotulo || sl.hex, n[i + 1] || 0); });
+        return;
+      }
+      var c = corDe(el);
+      poe(c.hex, c.nome, countOf(el));
     });
     var porPonto = fioPorPonto();
-    lista.forEach(function(l){
+    lista.forEach(function(l, i){
       l.metros = l.pontos * porPonto / 1000;
+      l.letra = LETRAS[i % LETRAS.length];
       l.rotulo = l.nome + "  ·  " + fmt(l.metros) + " m";
     });
     return lista;
+  }
+
+  // hex → letra da legenda, para o molde impresso escrever em cada
+  // quadradinho a mesma letra que o rodapé explica
+  function mapaLetras(){
+    var m = {};
+    linhasUsadas().forEach(function(l){ m[l.hex] = l.letra; });
+    return m;
+  }
+
+  // a cor de um quadradinho: a da paleta da peça, quando ela tem uma
+  function corCel(el, v){
+    return el && el.paleta && el.paleta.length && v > 0 && el.paleta[v - 1]
+      ? el.paleta[v - 1] : null;
   }
 
   // A caixa de linhas é uma marca como as outras na fileira, e a primeira
@@ -1263,17 +1549,44 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   // o alto do painel diz duas coisas: que peça está sendo pintada e com quê
   function mostraThread(){
     var el = els[sel];
+    // com um gráfico selecionado, a cor tocada no catálogo entra na linha
+    // escolhida da paleta — e o cabeçalho tem de dizer isso, senão o toque
+    // parece não ter feito nada
+    if (el && el.paleta && el.paleta.length){
+      var sl = el.paleta[slotAtivo(el) - 1];
+      $("threadDot").style.background = sl.hex;
+      $("threadName").textContent = sl.rotulo || sl.hex;
+      $("threadAlvo").textContent = "Linha escolhida de “" + (el.nome || "imagem") + "”";
+      return;
+    }
     var cor = corDe(el);
     $("threadDot").style.background = cor.hex;
     $("threadName").textContent = cor.nome;
     $("threadAlvo").textContent = el
-      ? "Linha de " + (el.kind === "text" ? "“" + (el.text || "texto") + "”" : "símbolo")
+      ? "Linha de " + (el.kind === "text" ? "“" + (el.text || "texto") + "”"
+          : el.kind === "img" ? "“" + (el.nome || "imagem") + "”" : "símbolo")
       : "Linha da próxima peça";
   }
 
   function usaCor(hex, nome){
     thread = hex;                       // a cor corrente, com que a próxima peça nasce
     var el = els[sel];
+    /* Num gráfico, a cor tocada não pinta a peça inteira: ela entra na linha
+       escolhida da paleta. Pintar tudo de uma cor só desfaria o gráfico, e a
+       escolha manual de meada é justamente o que o casamento automático não
+       acerta sozinho — a cor da tela é referência, quem tem a cartela na mão
+       é você. */
+    if (el && el.paleta && el.paleta.length){
+      var sl = el.paleta[slotAtivo(el) - 1];
+      sl.hex = hex;
+      sl.rotulo = nome;
+      // `sl.lab` não muda: ele é a cor da IMAGEM que esta casa representa, e é
+      // por ele que os quadradinhos são repartidos. Trocar a meada muda com
+      // que linha se borda, não que parte do desenho é esta
+      sl.chave = "";      // escolhida à mão: não é mais a que o casamento deu
+      renderPaleta(); mostraThread(); renderChips(); renderFios(); draw(); pushHist();
+      return;
+    }
     if (el){ el.color = hex; el.colorName = nome; }
     mostraThread();
     renderChips();
@@ -1424,7 +1737,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         delete avulsas[k];
         montaIndice();
         salvaLinhas();
-        montaMarcas(); listaCatalogo(); contaLinhas();
+        montaMarcas(); montaFonteLinhas(); listaCatalogo(); contaLinhas();
         return;
       }
     } else {
@@ -1459,7 +1772,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     minhas.push(k);
     usaCor(hex, rotulo(catIdx[k]));
     salvaLinhas();
-    montaMarcas(); listaCatalogo(); contaLinhas();
+    montaMarcas(); montaFonteLinhas(); listaCatalogo(); contaLinhas();
     $("avMarca").value = ""; $("avCode").value = ""; $("avAviso").textContent = "";
     $("avMarca").focus();
   }
@@ -1614,6 +1927,200 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       }
     }
     return out;
+  }
+
+  /* A imagem vira quadradinho pela mesma conta da palavra: cada quadradinho
+     pega o pedaço de imagem que cai dentro dele e pergunta quanta tinta tem
+     ali. Tinta aqui é o escuro — a luminância invertida —, e acima da
+     sensibilidade o quadradinho acende.
+
+     Este é o caminho de uma linha só, e nele não há meio-tom: o que sai é
+     silhueta — logo, monograma, brasão, desenho de traço. Foto de rosto vira
+     mancha, e a saída para ela é a outra: `imgMapa`, que reparte a imagem em
+     várias meadas. É por isso que os dois partem da mesma grade, logo acima.
+
+     Devolve nada — e não uma peça em branco — quando a imagem ainda não
+     chegou: quem chamou fica com as células que já tinha, que é o desenho
+     certo, em vez de ver a peça sumir enquanto o navegador decodifica. */
+  function imgMatrix(el){
+    var g = gradeDaImagem(el);
+    if (!g) return null;
+    var cells = [];
+    for (var r = 0; r < g.rows; r++){
+      var linha = [];
+      for (var q = 0; q < g.cols; q++){
+        var t = g.tinta[r * g.cols + q];
+        linha.push((el.inv ? 1 - t : t) > el.thr ? 1 : 0);
+      }
+      cells.push(linha);
+    }
+    return trim(cells);
+  }
+
+  /* A imagem lida em quadradinhos, antes de virar liga-desliga ou paleta: a
+     cor média de cada quadradinho e a grade em que ela cai. Os dois caminhos
+     partem daqui, então a largura e a proporção saem iguais nos dois — trocar
+     o número de cores não pode mexer no tamanho da peça. */
+  function gradeDaImagem(el){
+    var img = origemPronta(el);
+    if (!img) return null;
+    var cols = Math.max(IMG_LARG_MIN, Math.min(IMG_LARG_MAX, el.larg | 0));
+    var rows = Math.max(1, Math.round(cols * img.height / img.width));
+    var S = Math.max(1, Math.min(SUPER, Math.floor(TETO_CANVAS / Math.max(cols, rows, 1))));
+    var c = document.createElement("canvas");
+    c.width = cols * S; c.height = rows * S;
+    var x = c.getContext("2d");
+    // o branco por baixo é o que dá à transparência o valor de "sem tinta":
+    // sem ele o canvas vazio é preto de alfa zero, e o inverter mentiria
+    x.fillStyle = "#fff";
+    x.fillRect(0, 0, c.width, c.height);
+    x.drawImage(img, 0, 0, c.width, c.height);
+    var data;
+    try { data = x.getImageData(0, 0, c.width, c.height).data; } catch (e){ return null; }
+    var rgb = [], tinta = [], n = S * S;
+    for (var r = 0; r < rows; r++){
+      for (var q = 0; q < cols; q++){
+        var sr = 0, sg = 0, sb = 0;
+        for (var yy = 0; yy < S; yy++){
+          for (var xx = 0; xx < S; xx++){
+            var i = (((r * S + yy) * c.width) + (q * S + xx)) * 4;
+            sr += data[i]; sg += data[i + 1]; sb += data[i + 2];
+          }
+        }
+        sr /= n; sg /= n; sb /= n;
+        rgb.push([sr, sg, sb]);
+        // 0,299 / 0,587 / 0,114 é o cinza que o olho vê. A média simples dos
+        // três deixaria o azul escuro claro demais, e um desenho azul sobre
+        // branco perderia metade do traço
+        tinta.push(1 - (sr * 0.299 + sg * 0.587 + sb * 0.114) / 255);
+      }
+    }
+    return { cols: cols, rows: rows, rgb: rgb, tinta: tinta };
+  }
+
+  /* A imagem em várias linhas. O vazio vem primeiro: quadradinho mais claro
+     que o corte não ganha linha nenhuma. É o que tira o fundo branco de um
+     logo ou o quadriculado de um gráfico — e sem isso a primeira linha da
+     paleta seria sempre uma meada branca para bordar o fundo inteiro.
+
+     Depois o que sobrou é agrupado em `cores` tons, e cada tom vira a meada
+     mais próxima da marca escolhida. A paleta fica guardada na peça: mexer na
+     largura reaproveita as linhas que já estão lá, em vez de sortear outras.
+     Quem pede paleta nova é mudar o número de cores, trocar a imagem ou o
+     Recalcular. */
+  function imgMapa(el, refaz){
+    var g = gradeDaImagem(el);
+    if (!g) return null;
+    var nCores = Math.max(2, Math.min(CORES_MAX, el.cores | 0));
+    var corte = el.corte == null ? 0.1 : el.corte;
+
+    var vivos = [];
+    for (var i = 0; i < g.tinta.length; i++) if (g.tinta[i] > corte) vivos.push(i);
+    if (!vivos.length) return { cells: [[0]], paleta: [] };
+
+    var paleta = el.paleta && el.paleta.length && el.paletaDe === nCores && !refaz
+      ? el.paleta
+      : null;
+
+    if (!paleta){
+      // as cores juntadas em baldes antes das k-médias: mil quadradinhos de
+      // tons quase iguais custariam mil pontos na conta e dariam o mesmo
+      // centro. O balde é de 4 níveis por canal, fino o bastante para não
+      // fundir dois tons que a paleta separaria
+      var baldes = {}, ordemB = [];
+      vivos.forEach(function(idx){
+        var c = g.rgb[idx];
+        var k = ((c[0] >> 2) << 12) | ((c[1] >> 2) << 6) | (c[2] >> 2);
+        if (!baldes[k]){ baldes[k] = { s: [0, 0, 0], peso: 0 }; ordemB.push(k); }
+        var b = baldes[k];
+        b.s[0] += c[0]; b.s[1] += c[1]; b.s[2] += c[2]; b.peso++;
+      });
+      var pts = ordemB.map(function(k){
+        var b = baldes[k];
+        return { lab: labDe(b.s[0] / b.peso, b.s[1] / b.peso, b.s[2] / b.peso), peso: b.peso };
+      });
+      var cent = kmedias(pts, nCores);
+      // o peso de cada centro decide quem escolhe a meada primeiro
+      var pesos = cent.map(function(){ return 0; });
+      pts.forEach(function(pt){
+        var dono = 0, dd = 1e18;
+        for (var j = 0; j < cent.length; j++){
+          var d = dLab(pt.lab, cent[j]);
+          if (d < dd){ dd = d; dono = j; }
+        }
+        pesos[dono] += pt.peso;
+      });
+      paleta = casaPaleta(cent, pesos, el.fonte || "anchor");
+    }
+
+    // cada quadradinho para o tom mais próximo da paleta
+    var mapa = new Array(g.tinta.length);
+    for (var v = 0; v < mapa.length; v++) mapa[v] = 0;
+    vivos.forEach(function(idx){
+      var lab = labDe(g.rgb[idx][0], g.rgb[idx][1], g.rgb[idx][2]);
+      var dono = 0, dd = 1e18;
+      for (var j = 0; j < paleta.length; j++){
+        var d = dLab(lab, paleta[j].lab);
+        if (d < dd){ dd = d; dono = j; }
+      }
+      mapa[idx] = dono + 1;          // zero é vazio, então a paleta é 1-based
+    });
+
+    var junta = juntaRepetidas(paleta, mapa);
+    paleta = junta.paleta; mapa = junta.mapa;
+    paleta = tiraVazias(paleta, mapa);
+
+    var cells = [];
+    for (var r = 0; r < g.rows; r++){
+      var linha = [];
+      for (var q = 0; q < g.cols; q++){
+        var val = mapa[r * g.cols + q];
+        // linha escondida some do desenho sem sair da paleta: é assim que se
+        // tira um fundo que o corte não pegou, sem perder as outras
+        if (val && paleta[val - 1] && paleta[val - 1].off) val = 0;
+        linha.push(val);
+      }
+      cells.push(linha);
+    }
+    return { cells: trim(cells), paleta: paleta, de: nCores };
+  }
+
+  // duas cores que caíram na mesma meada viram uma só: legenda com a mesma
+  // linha duas vezes manda comprar duas meadas e bordar como se fossem tons
+  // diferentes, que é o erro que só aparece com a agulha na mão
+  function juntaRepetidas(paleta, mapa){
+    var vistas = {}, para = [], nova = [];
+    paleta.forEach(function(sl, i){
+      // pela chave da cartela, e pela cor quando a meada foi escolhida à mão e
+      // não tem chave — duas casas na mesma linha continuam sendo uma linha só
+      var k = sl.chave || "#" + sl.hex;
+      if (vistas[k] == null){
+        vistas[k] = nova.length;
+        nova.push(sl);
+      }
+      para[i + 1] = vistas[k] + 1;
+    });
+    if (nova.length === paleta.length) return { paleta: paleta, mapa: mapa };
+    for (var i = 0; i < mapa.length; i++) if (mapa[i]) mapa[i] = para[mapa[i]];
+    return { paleta: nova, mapa: mapa };
+  }
+
+  // cor que não sobrou em quadradinho nenhum sai da paleta: linha na legenda
+  // que não aparece no desenho manda comprar meada para nada
+  function tiraVazias(paleta, mapa){
+    var usada = {}, i;
+    for (i = 0; i < mapa.length; i++) if (mapa[i]) usada[mapa[i]] = 1;
+    // a escondida fica: ela some do desenho de propósito, e sumir da paleta
+    // tiraria o caminho de volta
+    var para = [], nova = [];
+    for (i = 0; i < paleta.length; i++){
+      if (!usada[i + 1] && !paleta[i].off){ para[i + 1] = 0; continue; }
+      nova.push(paleta[i]);
+      para[i + 1] = nova.length;
+    }
+    if (nova.length === paleta.length) return paleta;
+    for (i = 0; i < mapa.length; i++) if (mapa[i]) mapa[i] = para[mapa[i]] || 0;
+    return nova;
   }
 
   function trim(cells){
@@ -1855,9 +2362,27 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function rebuild(el, descarta){
     var rowsAntes = el.cells && el.cells.length ? el.cells.length : 0;
     var colsAntes = rowsAntes && el.cells[0] ? el.cells[0].length : 0;
-    el.cells = el.kind === "sym"
-      ? matrixFromStrings(SYMS[el.sym], el.scale)
-      : textMatrix(el.text, el.font, el.rowsTarget, el.thick, el.thr, el.esp, el.arc);
+    var novas;
+    if (el.kind === "sym") novas = matrixFromStrings(SYMS[el.sym], el.scale);
+    else if (el.kind === "img"){
+      if (temPaleta(el)){
+        // o Recalcular é o único que pede paleta nova: mexer na largura
+        // reaproveita as linhas que já estão na peça, senão trocar um número
+        // devolveria outras meadas sem ninguém ter pedido
+        var m = imgMapa(el, !!descarta);
+        if (m){ el.paleta = m.paleta; el.paletaDe = m.de; novas = m.cells; }
+      } else {
+        el.paleta = null; el.paletaDe = 0;
+        novas = imgMatrix(el);
+      }
+    }
+    else novas = textMatrix(el.text, el.font, el.rowsTarget, el.thick, el.thr, el.esp, el.arc);
+    // imagem que ainda não voltou da memória não desfaz a peça: as células
+    // gravadas continuam valendo, e mexer na largura volta a funcionar assim
+    // que ela chega. Vale para o Recalcular também — peça que não dá para
+    // refazer é peça que se preserva
+    if (!novas) return;
+    el.cells = novas;
     if (el.flip) el.cells = espelha(el.cells);
     if (descarta) el.edits = [];
     else aplicaEdits(el, rowsAntes, colsAntes);
@@ -1905,6 +2430,24 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       }
     }
     return list;
+  }
+
+  // quantos quadradinhos de cada linha, dentro de uma peça de paleta. O
+  // índice é o valor da célula, então `n[0]` é o vazio e não se usa
+  function contaPorCor(el){
+    var n = [];
+    for (var r = 0; r < el.cells.length; r++)
+      for (var q = 0; q < el.cells[r].length; q++){
+        var v = el.cells[r][q];
+        if (v) n[v] = (n[v] || 0) + 1;
+      }
+    return n;
+  }
+
+  function temGrafico(){
+    for (var i = 0; i < els.length; i++)
+      if (els[i].paleta && els[i].paleta.length) return true;
+    return false;
   }
 
   function countOf(el){
@@ -2039,6 +2582,26 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return Math.min(n, 3);   // passou de três linhas, o rodapé come o molde
   }
   function footMM(){ return PDF_FOOT + (legendaLinhas() - 1) * FOOT_LINHA; }
+
+  /* Se o rodapé deu conta de escrever a legenda inteira. Mede com a mesma
+     régua que `legenda()` usa para escrever — a do próprio PDF —, porque
+     `legendaLinhas()` estima a largura por número de caracteres e essa
+     estimativa erra para mais e para menos. */
+  function legendaCoube(pdf, plano, usadas){
+    var comLetra = temGrafico();
+    var util = plano.pageW - PDF_SIDE * 2;
+    var x = 12, linha = 1, max = legendaLinhas();
+    pdf.setFontSize(7);
+    for (var i = 0; i < usadas.length; i++){
+      var w = 9.5 + pdf.getTextWidth((comLetra ? usadas[i].letra + "  " : "") + usadas[i].rotulo);
+      if (x > 12 && x - 12 + w > util){
+        if (linha >= max) return false;
+        linha++; x = 12;
+      }
+      x += w;
+    }
+    return true;
+  }
 
   function pdfFit(R){
     var land = R.w > R.h;
@@ -2179,9 +2742,16 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     ctx.lineWidth = lw;
     ctx.lineCap = "round";
     var inset = p * 0.22;
+    // a peça de paleta troca de cor de quadradinho para quadradinho, e trocar
+    // o `strokeStyle` a cada ponto custa caro num gráfico de milhares deles:
+    // só se troca quando a cor muda de verdade
+    var atual = color;
     for (var r = 0; r < el.cells.length; r++){
       for (var q = 0; q < el.cells[r].length; q++){
         if (!el.cells[r][q]) continue;
+        var sl = corCel(el, el.cells[r][q]);
+        if (sl && sl.hex !== atual){ atual = sl.hex; ctx.strokeStyle = atual; }
+        else if (!sl && atual !== color){ atual = color; ctx.strokeStyle = atual; }
         var X = q * p, Y = r * p;
         ctx.beginPath();
         ctx.moveTo(X + inset, Y + inset); ctx.lineTo(X + p - inset, Y + p - inset);
@@ -2402,9 +2972,15 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   /* ---- memória local: gravar e restaurar ------------------------------ */
 
-  // as células vão gravadas como estão, e não recalculadas na volta: é o que
-  // preserva os ajustes feitos à mão no modo ponto a ponto. Uma linha por
-  // string de "0" e "1" — mais compacto que JSON de array e igualmente legível.
+  /* As células vão gravadas como estão, e não recalculadas na volta: é o que
+     preserva os ajustes feitos à mão no modo ponto a ponto. Uma linha por
+     string, um caractere por quadradinho — mais compacto que JSON de array e
+     igualmente legível.
+
+     O caractere é base 36, e não "0" ou "1": zero continua sendo o vazio, e de
+     1 em diante é o índice da linha na paleta da peça. Uma peça de uma cor só
+     grava exatamente o que gravava antes, então molde antigo volta igual. */
+  function celChar(v){ return (v | 0).toString(36); }
   function packEl(el){
     var r = { kind: el.kind, x: el.x, y: el.y, rot: el.rot, manual: el.manual || 0,
               color: el.color || "", colorName: el.colorName || "",
@@ -2412,12 +2988,32 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
               // lugar delas: as células são o desenho final, a lista é o que
               // permite refazer o desenho sem perder a correção
               edits: (el.edits || []).map(function(e){ return e.r + "," + e.q + "," + e.v; }),
-              cells: el.cells.map(function(row){ return row.join(""); }) };
+              cells: el.cells.map(function(row){ return row.map(celChar).join(""); }) };
     if (el.kind === "text"){
       r.text = el.text; r.font = el.font;
       r.rowsTarget = el.rowsTarget; r.thick = el.thick; r.thr = el.thr;
       r.esp = el.esp || 0; r.arc = el.arc || 0; r.flip = el.flip || 0;
       r.hv = 2;   // a altura desta peça já está contada pela maiúscula
+    } else if (el.kind === "img"){
+      // o id, e não a imagem: ela é grande e mora na sua própria chave. Assim
+      // o desfazer, que guarda o arranjo inteiro em texto a cada passo,
+      // continua custando alguns quilobytes em vez de alguns megabytes
+      r.img = el.img; r.nome = el.nome || "";
+      r.larg = el.larg; r.thr = el.thr;
+      r.inv = el.inv ? 1 : 0; r.flip = el.flip || 0;
+      r.cores = el.cores || 1;
+      r.corte = el.corte == null ? 0.1 : el.corte;
+      r.fonte = el.fonte || "anchor";
+      if (el.paleta && el.paleta.length){
+        // a paleta é da peça e vai com ela: sem isso, o molde reabriria com o
+        // gráfico em cinza nenhum e as trocas de meada feitas à mão perdidas
+        r.paleta = el.paleta.map(function(sl){
+          return { lab: sl.lab.map(function(v){ return Math.round(v * 100) / 100; }),
+                   hex: sl.hex, chave: sl.chave || "",
+                   rotulo: sl.rotulo || "", off: sl.off ? 1 : 0 };
+        });
+        r.paletaDe = el.paletaDe || el.cores;
+      }
     } else {
       r.sym = el.sym; r.scale = el.scale;
     }
@@ -2428,17 +3024,23 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     if (!r || !r.cells || !r.cells.length) return null;
     var cells = r.cells.map(function(row){
       var line = [];
-      for (var i = 0; i < row.length; i++) line.push(row.charAt(i) === "1" ? 1 : 0);
+      for (var i = 0; i < row.length; i++){
+        var v = parseInt(row.charAt(i), 36);
+        line.push(isNaN(v) || v < 0 ? 0 : v);
+      }
       return line;
     });
-    var el = { kind: r.kind === "sym" ? "sym" : "text", cells: cells,
+    var kind = r.kind === "sym" ? "sym" : (r.kind === "img" ? "img" : "text");
+    var el = { kind: kind, cells: cells,
                x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0, manual: +r.manual || 0,
                edits: [] };
     var rowsEl = cells.length, colsEl = cells[0] ? cells[0].length : 0;
     if (r.edits && r.edits.length){
       r.edits.forEach(function(t){
         var v = String(t).split(",");
-        var e = { r: +v[0], q: +v[1], v: +v[2] ? 1 : 0 };
+        // o valor é o índice da linha, e não um liga-desliga: num gráfico
+        // colorido o ajuste à mão guarda com que meada o quadradinho foi aceso
+        var e = { r: +v[0], q: +v[1], v: Math.max(0, +v[2] || 0) };
         // ajuste fora da grade é lixo de um molde que mudou de tamanho por fora
         if (e.r >= 0 && e.q >= 0 && e.r < rowsEl && e.q < colsEl) el.edits.push(e);
       });
@@ -2460,6 +3062,24 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       el.esp = +r.esp || 0;
       el.arc = +r.arc || 0;
       el.flip = r.flip ? 1 : 0;
+    } else if (el.kind === "img"){
+      el.img = typeof r.img === "string" ? r.img : "";
+      el.nome = typeof r.nome === "string" && r.nome ? r.nome : "imagem";
+      el.larg = Math.max(IMG_LARG_MIN, Math.min(IMG_LARG_MAX, +r.larg || 40));
+      el.thr = +r.thr || 0.5;
+      el.inv = r.inv ? 1 : 0;
+      el.flip = r.flip ? 1 : 0;
+      el.cores = Math.max(1, Math.min(CORES_MAX, +r.cores || 1));
+      el.corte = r.corte == null ? 0.1 : +r.corte;
+      el.fonte = typeof r.fonte === "string" && r.fonte ? r.fonte : "anchor";
+      if (r.paleta && r.paleta.length){
+        el.paleta = r.paleta.map(function(sl){
+          return { lab: (sl.lab || [0, 0, 0]).map(Number),
+                   hex: /^#[0-9A-Fa-f]{6}$/.test(sl.hex || "") ? sl.hex : "#888888",
+                   chave: sl.chave || "", rotulo: sl.rotulo || "", off: sl.off ? 1 : 0 };
+        });
+        el.paletaDe = +r.paletaDe || el.cores;
+      }
     } else {
       el.sym = SYMS[r.sym] ? r.sym : "heart";
       el.scale = +r.scale || 1;
@@ -2513,6 +3133,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       }));
     } catch (e){ marcaMemoria(true, "o molde"); return; }
     marcaMemoria(false);
+    salvaOrigens();
     it.em = Date.now();
     it.pecas = els.length;
     if (!it.nome) it.nome = nomeSugerido();
@@ -2639,6 +3260,64 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     img.src = url;
   }
 
+  /* Só as imagens que alguma peça ainda usa são gravadas: apagar a peça leva
+     a imagem dela junto na próxima gravação, sem varredura nenhuma. Duas
+     peças que nasceram de um duplicar apontam para o mesmo id e continuam
+     pesando uma imagem só. */
+  function salvaOrigens(){
+    var it = itemAtual();
+    if (!it) return;
+    var usadas = {}, tem = false;
+    els.forEach(function(el){
+      if (el.kind !== "img" || !el.img) return;
+      var o = origens[el.img];
+      if (!o || !o.url) return;
+      usadas[el.img] = o.url;
+      tem = true;
+    });
+    var chave = IMG_STORE + "/" + it.id;
+    if (!tem){ try { localStorage.removeItem(chave); } catch (e){} return; }
+    try { localStorage.setItem(chave, JSON.stringify(usadas)); }
+    catch (e){
+      // como a foto: sem elas o molde continua inteiro, porque as células já
+      // estão gravadas. O que fica avisado é o que se perdeu — poder refazer
+      // o desenho a partir da imagem
+      try { localStorage.removeItem(chave); } catch (e2){}
+      marcaMemoria(true, "as imagens das peças");
+    }
+  }
+
+  function restoreOrigens(){
+    var it = itemAtual();
+    if (!it) return;
+    var raw;
+    try { raw = localStorage.getItem(IMG_STORE + "/" + it.id); } catch (e){ return; }
+    if (!raw) return;
+    var m = null;
+    try { m = JSON.parse(raw); } catch (e){ return; }
+    if (!m) return;
+    Object.keys(m).forEach(function(id){
+      var url = m[id];
+      if (typeof url !== "string" || url.indexOf("data:image") !== 0) return;
+      // imagem que já está viva nesta sessão fica como está: trocar de molde e
+      // voltar não a manda decodificar de novo, nem a apaga no meio do caminho
+      if (origens[id] && origens[id].img) return;
+      var img = new Image();
+      origens[id] = { url: url, img: null };
+      img.onload = function(){
+        if (!origens[id]) return;
+        origens[id].img = img;
+        /* A peça já estava desenhada pelas células gravadas — a imagem
+           chegando não muda um quadradinho. O que ela muda é a barra de cima:
+           ela foi montada antes, quando ainda não havia com que refazer o
+           desenho, e desligou a largura e a sensibilidade. Agora há. */
+        var el = els[sel];
+        if (el && el.kind === "img" && el.img === id) syncControls();
+      };
+      img.src = url;
+    });
+  }
+
   /* ---- desfazer e refazer --------------------------------------------
      Cada passo é o arranjo inteiro em texto, gravado do mesmo jeito que a
      memória local: as células vão como estão, então desfazer devolve também o
@@ -2746,6 +3425,70 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       Math.round((PERDA - 1) * 100) + "% de perda: " + fmt(fioPorPonto()) + " mm por ponto.";
   }
 
+  /* A linha escolhida na paleta: é ela que o catálogo troca e que o ajustar
+     pinta. Mora na peça e não é gravada — escolha de momento, não desenho. */
+  function slotAtivo(el){
+    var n = el && el.paleta ? el.paleta.length : 0;
+    if (!n) return 1;
+    var v = el.slot | 0;
+    return v >= 1 && v <= n ? v : 1;
+  }
+
+  var OLHO = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5 0-9 4.5-9 7s4 7 9 7 9-4.5 9-7-4-7-9-7zm0 11a4 4 0 110-8 4 4 0 010 8z"/></svg>';
+  var OLHO_OFF = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4.3L4.3 3l16.7 16.7-1.3 1.3-3-3A10 10 0 0112 19c-5 0-9-4.5-9-7 0-1.4 1.2-3.3 3.1-4.8L3 4.3zM12 5c5 0 9 4.5 9 7 0 1-.7 2.4-1.9 3.7L15.6 12A3.9 3.9 0 0012 8.1L9.6 5.7A10 10 0 0112 5z"/></svg>';
+
+  function renderPaleta(){
+    var caixa = $("paleta"), lista = $("paletaLista");
+    if (!caixa || !lista) return;
+    var el = els[sel];
+    var pal = focus === "el" && el && el.paleta && el.paleta.length ? el.paleta : null;
+    caixa.classList.toggle("hide", !pal);
+    lista.innerHTML = "";
+    if (!pal) return;
+    var n = contaPorCor(el), ativo = slotAtivo(el);
+    var letras = mapaLetras();
+    pal.forEach(function(sl, i){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "sl" + (i + 1 === ativo ? " on" : "") + (sl.off ? " off" : "");
+      b.setAttribute("aria-pressed", i + 1 === ativo ? "true" : "false");
+      var pt = document.createElement("i");
+      pt.style.background = sl.hex;
+      var lt = document.createElement("span");
+      lt.className = "lt";
+      lt.textContent = sl.off ? "—" : (letras[sl.hex] || "");
+      var nm = document.createElement("span");
+      nm.className = "nm";
+      nm.textContent = sl.rotulo || sl.hex;
+      var qt = document.createElement("b");
+      qt.className = "qt";
+      qt.textContent = (n[i + 1] || 0).toLocaleString("pt-BR");
+      var olho = document.createElement("span");
+      olho.className = "olho";
+      olho.setAttribute("role", "button");
+      olho.setAttribute("tabindex", "0");
+      olho.title = sl.off ? "mostrar esta linha de novo" : "esconder esta linha do desenho";
+      olho.innerHTML = sl.off ? OLHO_OFF : OLHO;
+      var escondeIsto = function(e){
+        e.stopPropagation();
+        sl.off = sl.off ? 0 : 1;
+        rebuild(el);
+        renderPaleta(); renderChips(); renderFios(); draw(); pushHist();
+      };
+      olho.addEventListener("click", escondeIsto);
+      olho.addEventListener("keydown", function(e){
+        if (e.key === "Enter" || e.key === " ") escondeIsto(e);
+      });
+      b.appendChild(pt); b.appendChild(lt); b.appendChild(nm);
+      b.appendChild(qt); b.appendChild(olho);
+      b.addEventListener("click", function(){
+        el.slot = i + 1;
+        renderPaleta(); mostraThread();
+      });
+      lista.appendChild(b);
+    });
+  }
+
   function renderChips(){
     var box = $("chips");
     box.innerHTML = "";
@@ -2755,13 +3498,26 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       b.setAttribute("aria-pressed", marcado(i) ? "true" : "false");
       // o ponto de cor é o que deixa ver o arranjo inteiro de uma vez, sem
       // ter de selecionar peça por peça para lembrar de que linha é cada uma
-      var cor = corDe(el);
-      var pt = document.createElement("span");
-      pt.className = "pt";
-      pt.style.background = cor.hex;
-      pt.title = cor.nome;
-      b.appendChild(pt);
+      if (el.paleta && el.paleta.length){
+        // três pontos dizem "isto tem paleta" de longe, sem precisar abrir a
+        // peça para descobrir que ela não é de uma cor só
+        el.paleta.slice(0, 3).forEach(function(sl){
+          var p3 = document.createElement("span");
+          p3.className = "pt";
+          p3.style.background = sl.hex;
+          p3.title = el.paleta.length + " linhas";
+          b.appendChild(p3);
+        });
+      } else {
+        var cor = corDe(el);
+        var pt = document.createElement("span");
+        pt.className = "pt";
+        pt.style.background = cor.hex;
+        pt.title = cor.nome;
+        b.appendChild(pt);
+      }
       b.appendChild(document.createTextNode(el.kind === "text" ? (el.text || "texto")
+        : el.kind === "img" ? (el.nome || "imagem")
         : (NOMES_SYM[el.sym] || "símbolo")));
       // com Shift (ou Ctrl) a ficha soma ao laço em vez de trocar a seleção:
       // é o caminho para laçar duas peças distantes sem passar por cima do resto
@@ -2797,7 +3553,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       $("delLaco").title = (n === 1 ? "apagar a peça laçada" : "apagar as " + n + " peças laçadas") +
         (marcaFoto ? " — a moldura da foto não é peça e fica onde está" : "") +
         ". O desfazer devolve tudo num passo.";
-      ["alinha", "ctlPhoto", "ctlPiece", "ctlActs", "ctlNone", "ctlText", "ctlSym"]
+      ["alinha", "ctlPhoto", "ctlPiece", "ctlActs", "ctlNone", "ctlText", "ctlSym", "ctlImg"]
         .forEach(function(id){ $(id).classList.add("hide"); });
       return;
     }
@@ -2812,9 +3568,16 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       var pa = paperMM();
       $("ctlNone").textContent = fmt(pa.w / 10) + " × " + fmt(pa.h / 10) + " cm";
     }
-    if (!piece){ $("ctlText").classList.add("hide"); $("ctlSym").classList.add("hide"); return; }
+    if (!piece){
+      ["ctlText", "ctlSym", "ctlImg"].forEach(function(id){ $(id).classList.add("hide"); });
+      return;
+    }
+    // uma barra por tipo de peça: mostrar a certa é esconder as outras duas
+    var barras = { text: "ctlText", sym: "ctlSym", img: "ctlImg" };
+    Object.keys(barras).forEach(function(k){
+      $(barras[k]).classList.toggle("hide", el.kind !== k);
+    });
     if (el.kind === "text"){
-      $("ctlText").classList.remove("hide"); $("ctlSym").classList.add("hide");
       $("txt").value = el.text;
       $("font").value = el.font;
       mostraFonte();
@@ -2823,8 +3586,36 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       $("thr").value = Math.round(el.thr * 100); $("thrOut").textContent = Math.round(el.thr * 100);
       $("esp").value = el.esp || 0; $("espOut").textContent = el.esp || 0;
       $("arc").value = el.arc || 0; $("arcOut").textContent = el.arc || 0;
+    } else if (el.kind === "img"){
+      var grafico = temPaleta(el);
+      $("imgLarg").value = el.larg; $("imgLargOut").textContent = el.larg;
+      $("imgCores").value = el.cores || 1; $("imgCoresOut").textContent = el.cores || 1;
+      var pc = Math.round(el.thr * 100);
+      $("imgThr").value = pc; $("imgThrOut").textContent = pc;
+      var pk = Math.round((el.corte == null ? 0.1 : el.corte) * 100);
+      $("imgCorte").value = pk; $("imgCorteOut").textContent = pk;
+      $("imgFonte").value = el.fonte || "anchor";
+      // sensibilidade e inverter são de silhueta; corte de fundo e cartela são
+      // de gráfico. Mostrar os quatro deixaria dois mexendo em nada
+      $("tImgThr").classList.toggle("hide", grafico);
+      $("imgInv").classList.toggle("hide", grafico);
+      $("tImgCorte").classList.toggle("hide", !grafico);
+      $("tImgFonte").classList.toggle("hide", !grafico);
+      $("imgInv").classList.toggle("on", !!el.inv);
+      // sem a imagem não há o que refazer: os dois campos ficam à vista, para
+      // a peça continuar dizendo com que números ela foi desenhada, mas
+      // desligados, porque mexer neles não mudaria um quadradinho
+      var semImg = !origemPronta(el);
+      $("imgLarg").disabled = semImg;
+      $("imgThr").disabled = semImg;
+      $("imgInv").disabled = semImg;
+      $("imgCores").disabled = semImg;
+      $("imgCorte").disabled = semImg;
+      $("imgFonte").disabled = semImg;
+      $("imgInv").title = semImg
+        ? "A imagem desta peça não está mais na memória do navegador. Use o trocar para pôr o arquivo de novo."
+        : "Troca o claro pelo escuro — é o que resolve desenho branco sobre fundo escuro.";
     } else {
-      $("ctlText").classList.add("hide"); $("ctlSym").classList.remove("hide");
       $("sym").value = el.sym;
       $("symScale").value = el.scale; $("symScaleOut").textContent = el.scale;
     }
@@ -2886,6 +3677,135 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     els.push(el); sel = els.length - 1; soUm(sel); focus = "el";
     renderChips(); syncControls(); draw(); pushHist();
   }
+
+  /* A imagem entra reduzida, como a foto, e pelo mesmo motivo: o que ela vai
+     virar são quadradinhos, e 512 px já dão mais pixels por quadradinho do que
+     a maior largura consegue usar — guardar o original inteiro só encheria a
+     cota do navegador sem mudar um furo.
+
+     O que fica na memória da sessão é o canvas reduzido, e não uma imagem nova
+     feita a partir do data-url: o canvas já está decodificado, então a peça
+     nasce desenhada no mesmo gesto em vez de piscar vazia esperando o
+     navegador ler o que ele mesmo acabou de escrever. */
+  function guardaOrigem(id, img){
+    var k = Math.min(1, IMG_MAX_PX / Math.max(img.width, img.height));
+    var c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(img.width * k));
+    c.height = Math.max(1, Math.round(img.height * k));
+    var x = c.getContext("2d");
+    // o alfa vira branco aqui, uma vez, e não a cada refazer: transparência de
+    // logo é fundo, e não tinta
+    x.fillStyle = "#fff";
+    x.fillRect(0, 0, c.width, c.height);
+    x.drawImage(img, 0, 0, c.width, c.height);
+    var url = "";
+    // com perda de propósito: o que sai daqui ainda passa por um limiar, e
+    // artefato de jpeg não muda um quadradinho
+    try { url = c.toDataURL("image/jpeg", 0.85); } catch (e){ url = ""; }
+    origens[id] = { url: url, img: c };
+  }
+
+  function addImg(img, nome){
+    var id = novoId();
+    guardaOrigem(id, img);
+    var el = { kind:"img", img:id, nome: nome || "imagem",
+               larg: 40, thr: 0.5, inv: 0, rot: 0,
+               x: photo.x, y: photo.y, flip:0, edits:[], cells:[[0]],
+               color: thread, colorName: threadLabel(thread) || thread };
+    rebuild(el);
+    // nasce centrada na foto, e não num canto: é de onde quase toda peça é
+    // arrastada, e peça nova no canto da folha some atrás da régua
+    var b = bboxMM(el);
+    el.x = Math.round((photo.x + (photo.w - b.w) / 2) * 10) / 10;
+    el.y = Math.round((photo.y + (photo.h - b.h) / 2) * 10) / 10;
+    els.push(el); sel = els.length - 1; soUm(sel); focus = "el";
+    renderChips(); syncControls(); draw(); pushHist();
+    avisaVazio(el);
+  }
+
+  /* Peça de imagem que não acendeu nada é uma peça de um quadradinho apagado:
+     na tela ela é um ponto, e o motivo — sensibilidade alta demais, ou desenho
+     claro sobre fundo escuro — não está em lugar nenhum. O aviso é onde a
+     imagem foi pedida, e some sozinho quando o desenho volta. */
+  function avisaVazio(el){
+    var vazia = el && el.kind === "img" && el.cells.length === 1 &&
+                el.cells[0].length === 1 && !el.cells[0][0];
+    if (!vazia) return avisaImagem("");
+    // o controle que resolve não é o mesmo nos dois caminhos, e mandar mexer
+    // no que está escondido na barra é pior do que não avisar nada
+    avisaImagem(temPaleta(el)
+      ? "Essa imagem não acendeu nenhum quadradinho: o corte de fundo levou tudo. Baixe o fundo na barra de cima."
+      : "Essa imagem não acendeu nenhum quadradinho. Baixe a sensibilidade na barra de cima — ou use o inverter, se o desenho for claro sobre fundo escuro.");
+  }
+
+  /* Trocar a imagem de uma peça guarda o lugar, a inclinação e a linha dela —
+     que é a razão de existir do botão: reimportar do zero devolveria a peça no
+     meio da foto, na cor corrente, e o alinhamento teria de ser refeito.
+
+     O ajuste ponto a ponto é o que não sobrevive, e não por descuido: ele é
+     uma lista de quadradinhos daquele desenho, e sobre um desenho diferente
+     não quer dizer nada. Por isso pergunta antes, como o Recalcular. */
+  function trocaImagem(el, img, nome){
+    var id = novoId();       // id novo: a imagem velha pode ser de uma peça duplicada
+    guardaOrigem(id, img);
+    el.img = id;
+    if (nome) el.nome = nome;
+    rebuild(el, true);
+    renderChips(); syncControls(); draw(); pushHist();
+    avisaVazio(el);
+  }
+
+  function avisaImagem(msg){
+    var p = $("imgAviso");
+    if (p) p.textContent = msg || "";
+  }
+
+  // null: a imagem escolhida vira peça nova. Senão, é a peça que troca de
+  // imagem — guardada como referência, e não como índice, porque apagar outra
+  // peça enquanto a janela de arquivos está aberta move os índices
+  var imgAlvo = null;
+
+  function pedeImagem(alvo){
+    imgAlvo = alvo || null;
+    var inp = $("imgArq");
+    inp.value = "";     // escolher o mesmo arquivo duas vezes ainda avisa
+    inp.click();
+  }
+
+  $("addImg").addEventListener("click", function(){ avisaImagem(""); pedeImagem(null); });
+
+  $("imgTroca").addEventListener("click", function(){
+    var el = els[sel];
+    if (!el || el.kind !== "img") return;
+    var n = el.manual || 0;
+    if (n && !confirm("Esta peça tem " + n + (n === 1 ? " quadradinho aceso" : " quadradinhos acesos") +
+        " ou apagado à mão. A imagem nova é outro desenho, então esse ajuste será perdido. Trocar mesmo assim?"))
+      return;
+    avisaImagem("");
+    pedeImagem(el);
+  });
+
+  $("imgArq").addEventListener("change", function(e){
+    var f = e.target.files && e.target.files[0];
+    var alvo = imgAlvo;
+    imgAlvo = null;
+    if (!f) return;
+    var nome = String(f.name || "").replace(/\.[^.]+$/, "").trim().slice(0, 28) || "imagem";
+    var rd = new FileReader();
+    rd.onerror = function(){ avisaImagem("Não consegui ler esse arquivo."); };
+    rd.onload = function(){
+      var img = new Image();
+      img.onerror = function(){ avisaImagem("Esse arquivo não é uma imagem que o navegador abra."); };
+      img.onload = function(){
+        // a peça pode ter sido apagada ou desfeita enquanto a janela de
+        // arquivos estava aberta: sem ela na lista, a troca não tem alvo
+        if (alvo){ if (els.indexOf(alvo) >= 0) trocaImagem(alvo, img, nome); return; }
+        addImg(img, nome);
+      };
+      img.src = rd.result;
+    };
+    rd.readAsDataURL(f);
+  });
 
   $("addText").addEventListener("click", function(){
     loadFontThen(addText, comoEstaNaBarra().font);
@@ -2954,6 +3874,28 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       loadFontThen(function(){ rebuild(el); renderChips(); draw(); pushLater(); });
       return;
     }
+    if (el.kind === "img"){
+      var lg = parseInt($("imgLarg").value, 10);
+      var tr = parseInt($("imgThr").value, 10);
+      var ct = parseInt($("imgCorte").value, 10);
+      var nc = parseInt($("imgCores").value, 10);
+      if (!isNaN(lg)) el.larg = Math.max(IMG_LARG_MIN, Math.min(IMG_LARG_MAX, lg));
+      if (!isNaN(tr)) el.thr = Math.max(0, Math.min(90, tr)) / 100;
+      if (!isNaN(ct)) el.corte = Math.max(0, Math.min(80, ct)) / 100;
+      if (!isNaN(nc)) el.cores = Math.max(1, Math.min(CORES_MAX, nc));
+      el.fonte = $("imgFonte").value || "anchor";
+      $("imgLargOut").textContent = el.larg;
+      $("imgThrOut").textContent = Math.round(el.thr * 100);
+      $("imgCorteOut").textContent = Math.round(el.corte * 100);
+      $("imgCoresOut").textContent = el.cores;
+      rebuild(el);
+      avisaVazio(el);
+      // a barra troca de campos quando a peça deixa de ser silhueta, e a lista
+      // de linhas do gráfico nasce ou some junto
+      syncControls(); renderPaleta(); renderFios();
+      renderChips(); draw(); pushLater();
+      return;
+    }
     el.sym = $("sym").value;
     el.scale = parseInt($("symScale").value, 10);
     $("symScaleOut").textContent = el.scale;
@@ -2961,8 +3903,46 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     renderChips(); draw(); pushLater();
   }
 
-  ["txt","font","rows","thick","thr","esp","arc","sym","symScale"].forEach(function(id){
-    $(id).addEventListener("input", updateSelected);
+  ["txt","font","rows","thick","thr","esp","arc","sym","symScale",
+   "imgLarg","imgThr","imgCorte","imgCores"]
+    .forEach(function(id){ $(id).addEventListener("input", updateSelected); });
+  $("imgFonte").addEventListener("change", function(){
+    var el = els[sel];
+    if (!el || el.kind !== "img") return;
+    el.fonte = this.value || "anchor";
+    // trocar de cartela é pedir paleta nova: as meadas de outra marca não são
+    // as mesmas cores com outro número
+    el.paleta = null; el.paletaDe = 0;
+    rebuild(el);
+    syncControls(); renderPaleta(); renderFios(); renderChips(); draw(); pushHist();
+  });
+
+  // as marcas entre as quais o gráfico escolhe as linhas
+  function montaFonteLinhas(){
+    var sel2 = $("imgFonte");
+    if (!sel2) return;
+    var antes = sel2.value;
+    sel2.innerHTML = "";
+    CAT.forEach(function(m){
+      var o = document.createElement("option");
+      o.value = m.id; o.textContent = m.marca;
+      sel2.appendChild(o);
+    });
+    var o2 = document.createElement("option");
+    o2.value = "minhas"; o2.textContent = "minhas";
+    sel2.appendChild(o2);
+    if (antes) sel2.value = antes;
+    if (!sel2.value) sel2.value = CAT.length ? CAT[0].id : "minhas";
+  }
+
+  $("imgInv").addEventListener("click", function(){
+    var el = els[sel];
+    if (!el || el.kind !== "img") return;
+    el.inv = el.inv ? 0 : 1;
+    this.classList.toggle("on", !!el.inv);
+    rebuild(el);
+    avisaVazio(el);
+    draw(); pushHist();
   });
   $("rot").addEventListener("input", function(){
     var el = els[sel]; if (!el) return;
@@ -3150,6 +4130,14 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
   }
 
+  // o número que os dois dedos esticam, um por tipo de peça: a altura da
+  // maiúscula, a largura da imagem, o tamanho do símbolo
+  function tamanhoDe(el){
+    if (el.kind === "text") return el.rowsTarget;
+    if (el.kind === "img") return el.larg;
+    return el.scale;
+  }
+
   function resizeSelected(steps){
     var el = els[sel];
     if (!el) return;
@@ -3162,6 +4150,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       el.hv = 2;
       $("rows").value = v;
       $("rowsOut").textContent = v;
+    } else if (el.kind === "img"){
+      if (!origemPronta(el)) return;
+      var lg = Math.max(IMG_LARG_MIN, Math.min(IMG_LARG_MAX, steps));
+      if (lg === el.larg) return;
+      el.larg = lg;
+      $("imgLarg").value = lg;
+      $("imgLargOut").textContent = lg;
     } else {
       var z = Math.max(1, Math.min(6, steps));
       if (z === el.scale) return;
@@ -3452,7 +4447,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     cv.setPointerCapture(e.pointerId);
     if (nPointers() === 2 && els[sel]){
       drag = null; laco = null;
-      pinch = { d0: spread(), base: els[sel].kind === "text" ? els[sel].rowsTarget : els[sel].scale };
+      pinch = { d0: spread(), base: tamanhoDe(els[sel]) };
       return;
     }
     if (pega){
@@ -3727,16 +4722,17 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function legenda(pdf, plano){
     var usadas = linhasUsadas();
     if (!usadas.length) return;
+    var comLetra = temGrafico();
     var util = plano.pageW - PDF_SIDE * 2;
     var y = (plano.land ? 210 : 297) - footMM() + 4;
     var x = 12, linha = 1, max = legendaLinhas();
     pdf.setFontSize(7);
     for (var i = 0; i < usadas.length; i++){
-      var w = 9.5 + pdf.getTextWidth(usadas[i].rotulo);
+      var w = 9.5 + pdf.getTextWidth((comLetra ? usadas[i].letra + "  " : "") + usadas[i].rotulo);
       if (x > 12 && x - 12 + w > util){
         if (linha >= max){
           pdf.setTextColor(120);
-          pdf.text("+ " + (usadas.length - i) + " linhas", x, y);
+          pdf.text("+ " + (usadas.length - i) + " linhas - legenda inteira na ultima folha", x, y);
           return;
         }
         linha++; x = 12; y += FOOT_LINHA;
@@ -3747,8 +4743,55 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       pdf.setLineWidth(0.15);
       pdf.rect(x, y - 2.4, 3.2, 3.2, "FD");
       pdf.setTextColor(60);
-      pdf.text(usadas[i].rotulo, x + 4.6, y);
+      pdf.text((comLetra ? usadas[i].letra + "  " : "") + usadas[i].rotulo, x + 4.6, y);
       x += w;
+    }
+  }
+
+  /* Legenda que não cabe em três linhas de rodapé vira folha. Truncar era a
+     saída certa quando a legenda tinha duas ou três cores — um molde de
+     gráfico colorido tem quinze, e um molde que não diz que linha vai em que
+     letra não é molde, é desenho bonito.
+
+     A folha vem por último e não leva molde nenhum: quem já sabe as linhas não
+     imprime ela. */
+  function folhaLegenda(pdf, plano){
+    var usadas = linhasUsadas();
+    pdf.addPage("a4", "portrait");
+    pdf.setFontSize(15);
+    pdf.setTextColor(20);
+    pdf.text("Linhas do molde", 12, 15);
+    pdf.setFontSize(9);
+    pdf.setTextColor(80);
+    pdf.text("A letra e a que esta escrita dentro de cada quadradinho do molde. " +
+             "Os metros sao de fio como ele passa no furo.", 12, 22);
+
+    var colW = 92, x0 = 12, y0 = 32, passo = 6.4, porCol = Math.floor((280 - y0) / passo);
+    pdf.setFontSize(8);
+    usadas.forEach(function(l, i){
+      var col = Math.floor(i / porCol), y = y0 + (i % porCol) * passo;
+      if (col > 1) return;                   // duas colunas cabem; mais que isso não há
+      var x = x0 + col * colW;
+      var rgb = hexRGB(l.hex);
+      pdf.setFillColor(rgb[0], rgb[1], rgb[2]);
+      pdf.setDrawColor(120);
+      pdf.setLineWidth(0.15);
+      pdf.rect(x, y - 3.2, 4.4, 4.4, "FD");
+      var t = corLegivel(l.hex);
+      pdf.setTextColor(t[0], t[1], t[2]);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(l.letra, x + 7.4, y);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(40);
+      pdf.text(l.nome, x + 12.5, y);
+      pdf.setTextColor(110);
+      pdf.text(l.pontos.toLocaleString("pt-BR") + " pontos", x + 50, y);
+      pdf.text(fmt(l.metros) + " m", x + 74, y);
+    });
+    if (usadas.length > porCol * 2){
+      pdf.setTextColor(120);
+      pdf.text("+ " + (usadas.length - porCol * 2) + " linhas nao couberam nesta folha.",
+               12, y0 + porCol * passo + 6);
     }
   }
 
@@ -3874,23 +4917,48 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
     var p = P();
     pdf.setLineWidth(0.22);
+    /* A letra só entra quando o molde tem gráfico colorido. É ela que faz o
+       molde funcionar impresso em preto e branco — e é assim que ele sai da
+       impressora de casa quase sempre. Num molde de uma cor por peça não há o
+       que confundir, e a letra em cada quadradinho só sujaria o gabarito. */
+    var letras = temGrafico() ? mapaLetras() : null;
+    if (letras){
+      pdf.setFontSize(Math.max(3.2, p * 2.834 * 0.58));
+      pdf.setFont("helvetica", "bold");
+    }
     els.forEach(function(el){
       if (!cabe(el)) return;
-      var rgb = hexRGB(corDe(el).hex);
-      pdf.setDrawColor(rgb[0], rgb[1], rgb[2]);
+      var corEl = corDe(el).hex, atual = "";
       for (var r = 0; r < el.cells.length; r++){
         for (var q = 0; q < el.cells[r].length; q++){
-          if (!el.cells[r][q]) continue;
-          if (fora(localToPaper(el, (q + 0.5) * p, (r + 0.5) * p), p)) continue;
+          var v = el.cells[r][q];
+          if (!v) continue;
+          var meio = localToPaper(el, (q + 0.5) * p, (r + 0.5) * p);
+          if (fora(meio, p)) continue;
+          var sl = corCel(el, v);
+          var hex = sl ? sl.hex : corEl;
+          if (hex !== atual){
+            atual = hex;
+            var rgb = hexRGB(hex);
+            pdf.setDrawColor(rgb[0], rgb[1], rgb[2]);
+            if (letras){
+              var t = corLegivel(hex);
+              pdf.setTextColor(t[0], t[1], t[2]);
+            }
+          }
           var a1 = localToPaper(el, q * p + p * 0.22, r * p + p * 0.22);
           var a2 = localToPaper(el, (q + 1) * p - p * 0.22, (r + 1) * p - p * 0.22);
           var b1 = localToPaper(el, (q + 1) * p - p * 0.22, r * p + p * 0.22);
           var b2 = localToPaper(el, q * p + p * 0.22, (r + 1) * p - p * 0.22);
           pdf.line(ox + (a1.x - vw.x), oy + (a1.y - vw.y), ox + (a2.x - vw.x), oy + (a2.y - vw.y));
           pdf.line(ox + (b1.x - vw.x), oy + (b1.y - vw.y), ox + (b2.x - vw.x), oy + (b2.y - vw.y));
+          if (letras && letras[hex])
+            pdf.text(letras[hex], ox + (meio.x - vw.x), oy + (meio.y - vw.y),
+                     { align: "center", baseline: "middle", angle: -el.rot });
         }
       }
     });
+    if (letras){ pdf.setFont("helvetica", "normal"); pdf.setTextColor(60); }
 
     pdf.setFillColor(15, 15, 15);
     els.forEach(function(el){
@@ -4150,6 +5218,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         if (plano.tiled) vizinhas(pdf, plano, i, ox, oy);
       }
     }
+
+    // a legenda inteira sai em folha à parte quando o rodapé teve de truncar
+    var todas = linhasUsadas();
+    var legendaSolta = todas.length > 0 && legendaCoube(pdf, plano, todas) === false;
+    if (legendaSolta) folhaLegenda(pdf, plano);
 
     var pa = paperMM();
     var folhas = plano.cols * plano.rows;
@@ -4674,7 +5747,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     restored = restoreState(it.dados);
     if (!restored) moldeEmBranco();
     renderChips(); syncControls(); renderMoldes();
-    restorePhoto(); mostraFonte(); draw(); mostraZoom(); guiasSync(); resetHist();
+    restorePhoto(); restoreOrigens(); mostraFonte(); draw(); mostraZoom(); guiasSync(); resetHist();
   }
 
   function abreMolde(id){
@@ -4706,6 +5779,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     if (!confirm("Apagar o molde “" + (it.nome || "sem nome") + "”? Isso não se desfaz.")) return;
     try { localStorage.removeItem(it.dados); } catch (e){}
     try { localStorage.removeItem(it.foto); } catch (e){}
+    try { localStorage.removeItem(IMG_STORE + "/" + it.id); } catch (e){}
     var era = estante.atual === id;
     estante.itens = estante.itens.filter(function(x){ return x.id !== id; });
     if (era){
@@ -4739,18 +5813,22 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     saveState();
     var it = itemAtual();
     if (!it) return;
-    var dados = null, foto = null;
+    var dados = null, foto = null, imgs = null;
     try { dados = localStorage.getItem(it.dados); } catch (e){}
     try { foto = localStorage.getItem(it.foto); } catch (e){}
+    // as imagens das peças vão junto pelo mesmo motivo da foto: molde sem elas
+    // abre desenhado, mas a largura e a sensibilidade ficam travadas no outro
+    // aparelho, e ninguém entenderia por quê
+    try { imgs = JSON.parse(localStorage.getItem(IMG_STORE + "/" + it.id)); } catch (e){}
     if (!dados) return avisaArquivo("Não há nada gravado para salvar.");
     var corpo;
     try {
       corpo = JSON.stringify({ app: "ponto-e-letra", v: 1, nome: it.nome || "sem nome",
                                em: new Date().toISOString(), molde: JSON.parse(dados),
-                               foto: foto || null });
+                               foto: foto || null, imagens: imgs || null });
     } catch (e){ return avisaArquivo("Não consegui montar o arquivo."); }
     deliver(new Blob([corpo], { type: "application/json" }), saveName("json"), null);
-    avisaArquivo("Arquivo salvo com a foto junto.");
+    avisaArquivo("Arquivo salvo com a foto e as imagens das peças junto.");
   }
 
   function importaMolde(arquivo){
@@ -4773,6 +5851,10 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       // a foto é o item que estoura a cota; sem ela o molde ainda vale
       if (typeof a.foto === "string" && a.foto.indexOf("data:image") === 0){
         try { localStorage.setItem(it.foto, a.foto); } catch (e2){}
+      }
+      if (a.imagens && typeof a.imagens === "object"){
+        try { localStorage.setItem(IMG_STORE + "/" + it.id, JSON.stringify(a.imagens)); }
+        catch (e3){}
       }
       salvaEstante();
       abreItem(it);
@@ -4865,12 +5947,14 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     renderMoldes();
     histRender();
     montaMarcas();
+    montaFonteLinhas();
     listaCatalogo();
     contaLinhas();
     renderChips();
     syncControls();
     migraAltura();
     restorePhoto();
+    restoreOrigens();
     mostraFonte();
     draw();
     mostraZoom();
