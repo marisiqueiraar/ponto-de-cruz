@@ -192,10 +192,10 @@ mudança de aplicativo:
 
 `testes/` cobre o repartir em folhas, a posição em cada folha, a emenda, a cor
 por peça, a estante, a montagem da tela no Chromium, as setas e botões de
-alinhar, o arco e o espaçamento das letras, a conta de fio, o ajuste à mão que
-sobrevive à altura, o arraste que acende quadradinho, e o laço que move e apaga
-o bloco.
-São quinze conjuntos; `testes/roda.sh` roda todos. O que **não** existe:
+alinhar, as guias e o ímã delas, o arco e o espaçamento das letras, a conta de
+fio, o ajuste à mão que sobrevive à altura, o arraste que acende quadradinho, e
+o laço que move e apaga o bloco. São dezesseis conjuntos; `testes/roda.sh` roda
+todos. O que **não** existe:
 
 - Nada que exercite o desenho no canvas — `textMatrix()`, que transforma o
   traço da fonte em quadradinhos, é o coração do app e não tem teste nenhum.
