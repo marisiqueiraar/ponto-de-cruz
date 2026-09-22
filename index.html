@@ -679,7 +679,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         <option value="custom">Personalizado</option>
       </select>
     </div>
-    <div class="field">
+    <div class="field" id="paperOrCampo">
       <label for="paperOr">Orientação</label>
       <select id="paperOr"><option value="p" selected>Retrato</option><option value="l">Paisagem</option></select>
     </div>
@@ -689,7 +689,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <div class="field"><label for="paperH">Altura em mm</label><input id="paperH" type="number" min="50" max="600" value="297"></div>
     </div>
     <p class="note" id="paperAviso"></p>
-    <p class="note">As medidas próprias aparecem quando o tamanho é <b>Personalizado</b>.</p>
+    <p class="note" id="paperCabe"></p>
+    <p class="note" id="paperNota">As medidas próprias aparecem quando o tamanho é <b>Personalizado</b>.</p>
   </section>
 
   <section class="pane" data-pane="foto">
@@ -706,7 +707,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         <option value="custom">Personalizado</option>
       </select>
     </div>
-    <div class="field">
+    <div class="field" id="photoOrCampo">
       <label for="photoOr">Orientação</label>
       <select id="photoOr"><option value="p" selected>Retrato</option><option value="l">Paisagem</option></select>
     </div>
@@ -715,6 +716,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <div class="field"><label for="photoHmm">Altura em mm</label><input id="photoHmm" type="number" min="20" max="500" value="150"></div>
     </div>
     <p class="note" id="photoAviso"></p>
+    <p class="note" id="photoNota"></p>
+    <p class="note" id="photoCabe"></p>
     <div class="rule"></div>
     <div class="field">
       <label for="photo">Imagem</label>
@@ -1537,7 +1540,10 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     } else {
       var q = v.split("x"); w = parseFloat(q[0]); h = parseFloat(q[1]);
     }
-    if ($("paperOr").value === "l"){ var t = w; w = h; h = t; }
+    /* No Personalizado quem manda são os dois campos: eles já dizem qual é a
+       largura e qual é a altura, e deixar a orientação trocá-los faria o papel
+       sair do avesso do que está escrito ali. */
+    if (v !== "custom" && $("paperOr").value === "l"){ var t = w; w = h; h = t; }
     return { w: w, h: h };
   }
 
@@ -1549,14 +1555,41 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     } else {
       var q = v.split("x"); w = parseFloat(q[0]); h = parseFloat(q[1]);
     }
-    if ($("photoOr").value === "l"){ var t = w; w = h; h = t; }
+    if (v !== "custom" && $("photoOr").value === "l"){ var t = w; w = h; h = t; }
     return { w: w, h: h };
   }
 
+  /* A foto tem tamanho impresso escolhido, mas quem vai para a impressora é o
+     papel: foto maior que a folha não é foto grande, é foto que não existe —
+     na tela ela cobria o papel inteiro, e no PDF sairia recortada na borda.
+     Então ela entra reduzida, na mesma proporção. A medida escolhida não se
+     perde: ela continua no campo, e assim que o papel comporta, a foto volta
+     sozinha ao tamanho pedido. */
+  var fotoReduzida = false;
+
   function syncPhotoSize(){
-    var z = photoSizeMM();
-    photo.w = z.w; photo.h = z.h;
+    var z = photoSizeMM(), pa = paperMM();
+    var k = Math.min(1, pa.w / z.w, pa.h / z.h);
+    if (!isFinite(k) || k <= 0) k = 1;
+    fotoReduzida = k < 1;
+    photo.w = z.w * k; photo.h = z.h * k;
     clampPhoto();
+    avisaFotoCabe(z, pa);
+  }
+
+  function avisaFotoCabe(z, pa){
+    var txt = fotoReduzida
+      ? "A foto de " + fmt(z.w) + " × " + fmt(z.h) + " mm não cabe num papel de " +
+        fmt(pa.w) + " × " + fmt(pa.h) + " mm: ela entra reduzida, com " +
+        fmt(photo.w) + " × " + fmt(photo.h) + " mm impressos. Aumente o papel — ou " +
+        "diminua a foto — e ela volta ao tamanho escolhido."
+      : "";
+    ["photoCabe", "paperCabe"].forEach(function(id){
+      var p = $(id);
+      if (!p) return;
+      p.textContent = txt;
+      p.classList.toggle("mal", txt !== "");
+    });
   }
 
   function clampPhoto(){
@@ -2506,16 +2539,31 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       if (s.paper.or) $("paperOr").value = s.paper.or;
       if (s.paper.w) $("paperW").value = s.paper.w;
       if (s.paper.h) $("paperH").value = s.paper.h;
+      /* Molde gravado quando a orientação ainda trocava as medidas próprias: a
+         troca entra nos campos de uma vez, e o papel continua do tamanho que
+         era — só que agora dizendo a verdade sobre qual lado é a largura. */
+      if ($("paperSize").value === "custom" && $("paperOr").value === "l"){
+        var pw = $("paperW").value;
+        $("paperW").value = $("paperH").value;
+        $("paperH").value = pw;
+        $("paperOr").value = "p";
+      }
       propriaFirma("paperW"); propriaFirma("paperH"); papelAviso();
-      $("paperCustom").classList.toggle("hide", $("paperSize").value !== "custom");
+      papelPainel();
     }
     if (s.photoBox){
       if (s.photoBox.size) $("photoSize").value = s.photoBox.size;
       if (s.photoBox.or) $("photoOr").value = s.photoBox.or;
       if (s.photoBox.w) $("photoWmm").value = s.photoBox.w;
       if (s.photoBox.h) $("photoHmm").value = s.photoBox.h;
+      if ($("photoSize").value === "custom" && $("photoOr").value === "l"){
+        var fw = $("photoWmm").value;
+        $("photoWmm").value = $("photoHmm").value;
+        $("photoHmm").value = fw;
+        $("photoOr").value = "p";
+      }
       propriaFirma("photoWmm"); propriaFirma("photoHmm"); fotoAviso();
-      $("photoCustom").classList.toggle("hide", $("photoSize").value !== "custom");
+      fotoPainel();
     }
     if (s.mm != null){
       $("mm").value = s.mm;
@@ -2912,14 +2960,35 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     draw(); pushLater();
   });
 
+  function papelPainel(){
+    var prop = $("paperSize").value === "custom";
+    $("paperCustom").classList.toggle("hide", !prop);
+    $("paperOrCampo").classList.toggle("dim", prop);
+    $("paperNota").innerHTML = prop
+      ? "No tamanho <b>Personalizado</b> quem manda são os dois campos acima: a " +
+        "orientação fica de lado, e o papel sai com a largura e a altura que você digitou."
+      : "As medidas próprias aparecem quando o tamanho é <b>Personalizado</b>.";
+  }
+
+  function fotoPainel(){
+    var prop = $("photoSize").value === "custom";
+    $("photoCustom").classList.toggle("hide", !prop);
+    $("photoOrCampo").classList.toggle("dim", prop);
+    $("photoNota").innerHTML = prop
+      ? "No tamanho <b>Personalizado</b> quem manda são os dois campos acima: a " +
+        "orientação fica de lado, e a foto sai com a largura e a altura que você digitou."
+      : "";
+  }
+
   function onPaperChange(){
-    $("paperCustom").classList.toggle("hide", $("paperSize").value !== "custom");
+    papelPainel();
     var before = lastPaper || paperMM();
     var fx = (photo.x + photo.w / 2) / before.w;
     var fy = (photo.y + photo.h / 2) / before.h;
     var dx = [], dy = [];
     els.forEach(function(el){ dx.push(el.x - photo.x); dy.push(el.y - photo.y); });
     var after = paperMM();
+    syncPhotoSize();               // papel menor que a foto encolhe a foto
     photo.x = fx * after.w - photo.w / 2;
     photo.y = fy * after.h - photo.h / 2;
     clampPhoto();
@@ -2935,7 +3004,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   });
 
   function onPhotoChange(){
-    $("photoCustom").classList.toggle("hide", $("photoSize").value !== "custom");
+    fotoPainel();
     syncPhotoSize(); draw(); pushLater();
   }
   ["photoSize","photoOr"].forEach(function(id){ $(id).addEventListener("change", onPhotoChange); });
@@ -4749,6 +4818,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var it = itemAtual();
     restored = !!it && restoreState(it.dados);
     if (!restored) moldeEmBranco();
+    papelPainel(); fotoPainel();
     renderMoldes();
     histRender();
     montaMarcas();

@@ -30,7 +30,8 @@ const perto = (a, b, t) => Math.abs(a - b) <= (t === undefined ? 0.051 : t);
       const idx = JSON.parse(localStorage.getItem("ponto-e-letra/moldes/v1"));
       const it = idx.itens.find(i => i.id === idx.atual);
       const d = JSON.parse(localStorage.getItem(it.dados));
-      return { guias: d.guias, foto: { x: +d.photoBox.x, y: +d.photoBox.y } };
+      return { guias: d.guias, caixa: d.photoBox,
+               foto: { x: +d.photoBox.x, y: +d.photoBox.y } };
     });
   };
   // a proporção do papel na mesa diz que medida está valendo de verdade,
@@ -123,6 +124,57 @@ const perto = (a, b, t) => Math.abs(a - b) <= (t === undefined ? 0.051 : t);
   ok(await pg.inputValue("#paperW") === "210" && await pg.inputValue("#photoWmm") === "120",
      "as medidas próprias voltam com o molde");
   ok(perto(await proporcao(), 210 / 297, 0.01), "e o papel volta do tamanho que era");
+
+  // ---- a orientação não vira as medidas próprias de lado ------------------
+  await pg.click('.rail button[data-pane="papel"]');
+  await pg.waitForTimeout(250);
+  await pg.selectOption("#paperOr", "l");
+  await pg.waitForTimeout(400);
+  ok(perto(await proporcao(), 210 / 297, 0.01),
+     "em Personalizado, Paisagem não troca a largura pela altura");
+  ok(await pg.evaluate(() => document.getElementById("paperOrCampo").classList.contains("dim")),
+     "e o seletor de orientação fica esmaecido, dizendo que não manda ali");
+
+  // ---- a foto entra reduzida quando o papel não a comporta ----------------
+  await digita("#paperW", "100");
+  await digita("#paperH", "80");
+  await pg.click("#paperSize");
+  await pg.waitForTimeout(400);
+  const cabe = await pg.evaluate(() => document.getElementById("paperCabe").textContent);
+  const m = cabe.match(/com ([\d,]+) × ([\d,]+) mm impressos/);
+  ok(!!m, "papel menor que a foto avisa com a medida impressa: \"" + cabe + "\"");
+  const fw = m ? parseFloat(m[1].replace(",", ".")) : 0;
+  const fh = m ? parseFloat(m[2].replace(",", ".")) : 0;
+  ok(fw <= 100.01 && fh <= 80.01, "a foto reduzida cabe no papel (" + fw + " × " + fh + " mm)");
+  ok(perto(fw / fh, 120 / 150, 0.01), "e entra na proporção que foi escolhida");
+  let g = await estado();
+  ok(g.caixa.w === "120" && g.caixa.h === "150",
+     "a medida escolhida não se perde: o molde guarda 120 × 150 (" +
+     g.caixa.w + " × " + g.caixa.h + ")");
+
+  await digita("#paperW", "210");
+  await digita("#paperH", "297");
+  await pg.click("#paperSize");
+  await pg.waitForTimeout(400);
+  ok(await pg.evaluate(() => document.getElementById("paperCabe").textContent) === "",
+     "papel grande de novo: a foto volta ao tamanho escolhido e o aviso some");
+
+  // ---- molde gravado quando a orientação ainda trocava as medidas ---------
+  await pg.waitForTimeout(700);
+  await pg.evaluate(() => {
+    const idx = JSON.parse(localStorage.getItem("ponto-e-letra/moldes/v1"));
+    const it = idx.itens.find(i => i.id === idx.atual);
+    const d = JSON.parse(localStorage.getItem(it.dados));
+    d.paper = { size: "custom", or: "l", w: "150", h: "100" };  // 100 × 150 na prática
+    localStorage.setItem(it.dados, JSON.stringify(d));
+  });
+  await pg.reload();
+  await pg.waitForTimeout(2300);
+  ok(await pg.inputValue("#paperW") === "100" && await pg.inputValue("#paperH") === "150",
+     "o molde antigo volta com as medidas nos campos certos (" +
+     await pg.inputValue("#paperW") + " × " + await pg.inputValue("#paperH") + ")");
+  ok(await pg.inputValue("#paperOr") === "p", "e a orientação já não tem o que trocar");
+  ok(perto(await proporcao(), 100 / 150, 0.01), "o papel continua do tamanho que era");
 
   ok(erros.length === 0, "nenhum erro de JavaScript" +
      (erros.length ? ": " + erros[0] : ""));
