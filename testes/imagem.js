@@ -8,7 +8,6 @@
 // O teste desenha as imagens aqui dentro, em PNG cru, porque a única forma de
 // afirmar "este quadradinho acendeu porque ali era preto" é saber onde estava
 // o preto.
-const zlib = require("zlib");
 let chromium;
 try { chromium = require("playwright").chromium; }
 catch (e){
@@ -19,47 +18,7 @@ const alvo = "file://" + require("path").resolve(__dirname, "..", "index.html");
 let falhas = 0;
 const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falhas++; };
 
-/* ---- um PNG de verdade, escrito à mão -------------------------------
-   Sem biblioteca: o repositório não instala nada, e um PNG sem filtro é
-   cabeçalho, pixels crus e três CRCs. */
-const TABELA = (() => {
-  const t = new Int32Array(256);
-  for (let n = 0; n < 256; n++){
-    let c = n;
-    for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
-    t[n] = c;
-  }
-  return t;
-})();
-const crc32 = (buf) => {
-  let c = 0xFFFFFFFF;
-  for (let i = 0; i < buf.length; i++) c = TABELA[(c ^ buf[i]) & 0xFF] ^ (c >>> 8);
-  return (c ^ 0xFFFFFFFF) >>> 0;
-};
-function png(w, h, cor){
-  const linhas = Buffer.alloc((w * 3 + 1) * h);
-  let o = 0;
-  for (let y = 0; y < h; y++){
-    linhas[o++] = 0;                       // filtro nenhum: o pixel é o pixel
-    for (let x = 0; x < w; x++){
-      const v = cor(x, y);
-      linhas[o++] = v; linhas[o++] = v; linhas[o++] = v;
-    }
-  }
-  const pedaco = (tipo, dados) => {
-    const t = Buffer.from(tipo, "latin1");
-    const len = Buffer.alloc(4); len.writeUInt32BE(dados.length, 0);
-    const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(Buffer.concat([t, dados])), 0);
-    return Buffer.concat([len, t, dados, crc]);
-  };
-  const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4);
-  ihdr[8] = 8; ihdr[9] = 2;                // 8 bits por canal, RGB
-  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
-                        pedaco("IHDR", ihdr),
-                        pedaco("IDAT", zlib.deflateSync(linhas)),
-                        pedaco("IEND", Buffer.alloc(0))]);
-}
+const { png } = require("./png.js");
 
 // 100 × 100 branco com um quadrado preto de 10 a 50: um quarto da imagem,
 // encostado em canto nenhum — assim o corte das bordas vazias tem o que cortar
