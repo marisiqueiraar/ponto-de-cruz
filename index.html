@@ -1559,31 +1559,34 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return { w: w, h: h };
   }
 
-  /* A foto tem tamanho impresso escolhido, mas quem vai para a impressora é o
-     papel: foto maior que a folha não é foto grande, é foto que não existe —
-     na tela ela cobria o papel inteiro, e no PDF sairia recortada na borda.
-     Então ela entra reduzida, na mesma proporção. A medida escolhida não se
-     perde: ela continua no campo, e assim que o papel comporta, a foto volta
-     sozinha ao tamanho pedido. */
-  var fotoReduzida = false;
-
   function syncPhotoSize(){
-    var z = photoSizeMM(), pa = paperMM();
-    var k = Math.min(1, pa.w / z.w, pa.h / z.h);
-    if (!isFinite(k) || k <= 0) k = 1;
-    fotoReduzida = k < 1;
-    photo.w = z.w * k; photo.h = z.h * k;
+    var z = photoSizeMM();
+    photo.w = z.w; photo.h = z.h;
     clampPhoto();
-    avisaFotoCabe(z, pa);
   }
 
-  function avisaFotoCabe(z, pa){
-    var txt = fotoReduzida
-      ? "A foto de " + fmt(z.w) + " × " + fmt(z.h) + " mm não cabe num papel de " +
-        fmt(pa.w) + " × " + fmt(pa.h) + " mm: ela entra reduzida, com " +
-        fmt(photo.w) + " × " + fmt(photo.h) + " mm impressos. Aumente o papel — ou " +
-        "diminua a foto — e ela volta ao tamanho escolhido."
-      : "";
+  /* As duas medidas são livres: a folha é a que você vai imprimir e a foto é a
+     que você mandou revelar, e não cabe ao app escolher uma pela outra. O que
+     ele deve é não deixar a conta passar em silêncio — foto maior que a folha
+     sai recortada na borda do papel, e some do PDF o que ficou de fora. Por
+     isso o aviso não é de um momento: `showFit()` passa por aqui a cada
+     mudança de estado, e enquanto não couber ele fica. */
+  function fotoForaDoPapel(){
+    var pa = paperMM();
+    return photo.x < -0.01 || photo.y < -0.01 ||
+           photo.x + photo.w > pa.w + 0.01 || photo.y + photo.h > pa.h + 0.01;
+  }
+
+  function avisaFotoCabe(){
+    var pa = paperMM(), maior = photo.w > pa.w + 0.01 || photo.h > pa.h + 0.01;
+    var txt = "";
+    if (maior)
+      txt = "A foto de " + fmt(photo.w) + " × " + fmt(photo.h) + " mm é maior que o papel de " +
+        fmt(pa.w) + " × " + fmt(pa.h) + " mm. O molde é recortado no papel, então o que passa " +
+        "da borda não sai no PDF: diminua a foto, ou aumente o papel.";
+    else if (fotoForaDoPapel())
+      txt = "A foto passou da borda do papel de " + fmt(pa.w) + " × " + fmt(pa.h) + " mm. " +
+        "O que está fora não sai no PDF: arraste a foto de volta para dentro da folha.";
     ["photoCabe", "paperCabe"].forEach(function(id){
       var p = $(id);
       if (!p) return;
@@ -2270,15 +2273,27 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       "há furo perto demais da borda do papel, e a folha inteira sairia repartida.";
     var box = $("fitHint"), txt = $("fitTxt"), state = "";
     var fora = pecasForaDoPapel();
+    var fotoFora = fotoForaDoPapel();
+    avisaFotoCabe();               // o aviso dos painéis acompanha o da barra
 
-    if (fora){
+    if (fora || fotoFora){
       // vem antes de tudo: não adianta saber em quantas folhas sai um molde
-      // a que está faltando meia palavra
+      // a que está faltando meia palavra — ou a foto inteira
       state = "over";
-      txt.textContent = fora === 1 ? "1 peça fora do papel" : fora + " peças fora do papel";
-      box.title = (fora === 1 ? "Uma peça passou" : fora + " peças passaram") + " da borda do papel. " +
+      var quem = [];
+      if (fotoFora) quem.push("a foto");
+      if (fora) quem.push(fora === 1 ? "1 peça" : fora + " peças");
+      txt.textContent = quem.join(" e ") + " fora do papel";
+      var pa = paperMM();
+      box.title = (fotoFora
+        ? "A foto tem " + fmt(photo.w) + " × " + fmt(photo.h) + " mm e o papel, " +
+          fmt(pa.w) + " × " + fmt(pa.h) + " mm. "
+        : "") +
+        (fora ? (fora === 1 ? "Uma peça passou" : fora + " peças passaram") +
+                " da borda do papel. " : "") +
         "O molde é recortado no papel, então o que está fora não vai sair no PDF. " +
-        "Arraste de volta, ou use os botões de alinhar na aba peças.";
+        (fotoFora ? "Mude o tamanho da foto ou do papel. " : "") +
+        (fora ? "Arraste de volta, ou use os botões de alinhar na aba peças." : "");
     } else if (plano.tiled){
       var n = plano.cols * plano.rows;
       state = "multi";
@@ -2988,7 +3003,6 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var dx = [], dy = [];
     els.forEach(function(el){ dx.push(el.x - photo.x); dy.push(el.y - photo.y); });
     var after = paperMM();
-    syncPhotoSize();               // papel menor que a foto encolhe a foto
     photo.x = fx * after.w - photo.w / 2;
     photo.y = fy * after.h - photo.h / 2;
     clampPhoto();

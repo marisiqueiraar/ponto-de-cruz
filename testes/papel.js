@@ -135,29 +135,46 @@ const perto = (a, b, t) => Math.abs(a - b) <= (t === undefined ? 0.051 : t);
   ok(await pg.evaluate(() => document.getElementById("paperOrCampo").classList.contains("dim")),
      "e o seletor de orientação fica esmaecido, dizendo que não manda ali");
 
-  // ---- a foto entra reduzida quando o papel não a comporta ----------------
+  // ---- foto maior que a folha: ninguém encolhe, mas ninguém fica calado ---
   await digita("#paperW", "100");
   await digita("#paperH", "80");
   await pg.click("#paperSize");
   await pg.waitForTimeout(400);
-  const cabe = await pg.evaluate(() => document.getElementById("paperCabe").textContent);
-  const m = cabe.match(/com ([\d,]+) × ([\d,]+) mm impressos/);
-  ok(!!m, "papel menor que a foto avisa com a medida impressa: \"" + cabe + "\"");
-  const fw = m ? parseFloat(m[1].replace(",", ".")) : 0;
-  const fh = m ? parseFloat(m[2].replace(",", ".")) : 0;
-  ok(fw <= 100.01 && fh <= 80.01, "a foto reduzida cabe no papel (" + fw + " × " + fh + " mm)");
-  ok(perto(fw / fh, 120 / 150, 0.01), "e entra na proporção que foi escolhida");
+  const barra = () => pg.evaluate(() => ({
+    nota: document.getElementById("paperCabe").textContent,
+    mal: document.getElementById("paperCabe").classList.contains("mal"),
+    naFoto: document.getElementById("photoCabe").textContent,
+    pilula: document.getElementById("fitTxt").textContent,
+    over: document.getElementById("fitHint").className.indexOf("over") >= 0
+  }));
+  let b = await barra();
+  const m = b.nota.match(/A foto de ([\d,]+) × ([\d,]+) mm é maior que o papel/);
+  ok(!!m && b.mal, "papel menor que a foto avisa em vermelho: \"" + b.nota + "\"");
+  ok(!!m && m[1] === "120,0" && m[2] === "150,0",
+     "e a foto segue com os 120 × 150 escolhidos, sem encolher");
+  ok(b.naFoto === b.nota, "o mesmo aviso aparece nas duas abas, papel e foto");
+  ok(/a foto/.test(b.pilula) && b.over,
+     "a barra de cima acende: \"" + b.pilula + "\"");
   let g = await estado();
   ok(g.caixa.w === "120" && g.caixa.h === "150",
-     "a medida escolhida não se perde: o molde guarda 120 × 150 (" +
-     g.caixa.w + " × " + g.caixa.h + ")");
+     "e o molde guarda a medida escolhida (" + g.caixa.w + " × " + g.caixa.h + ")");
 
+  // o aviso é de estado, não de momento: continua lá depois de um redesenho
+  await pg.click('.rail button[data-pane="foto"]');
+  await pg.waitForTimeout(300);
+  b = await barra();
+  ok(/maior que o papel/.test(b.naFoto) && b.over,
+     "o aviso não passa: segue na aba foto e na barra depois de trocar de aba");
+
+  await pg.click('.rail button[data-pane="papel"]');
+  await pg.waitForTimeout(250);
   await digita("#paperW", "210");
   await digita("#paperH", "297");
   await pg.click("#paperSize");
   await pg.waitForTimeout(400);
-  ok(await pg.evaluate(() => document.getElementById("paperCabe").textContent) === "",
-     "papel grande de novo: a foto volta ao tamanho escolhido e o aviso some");
+  b = await barra();
+  ok(b.nota === "" && b.naFoto === "", "papel que comporta a foto recolhe o aviso");
+  ok(!/a foto/.test(b.pilula), "e a barra de cima para de citar a foto: \"" + b.pilula + "\"");
 
   // ---- molde gravado quando a orientação ainda trocava as medidas ---------
   await pg.waitForTimeout(700);
