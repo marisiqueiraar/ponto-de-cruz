@@ -656,6 +656,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <button id="rotPhoto" class="tbtn">girar foto</button>
       <button id="centerPhoto" class="tbtn">centralizar foto</button>
       <button id="centerTop" class="tbtn">centralizar em cima</button>
+      <button id="semFoto" class="tbtn danger" title="Tira a foto do molde. Ela volta pela aba foto, escolhendo um tamanho.">tirar foto</button>
     </span>
   </div>
 
@@ -729,8 +730,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         <option value="100x100">Quadrado — 10 × 10 cm</option>
         <option value="88x107">Polaroid — 8,8 × 10,7 cm</option>
         <option value="custom">Personalizado</option>
+        <option value="none">Sem foto — só o molde</option>
       </select>
     </div>
+    <p class="note hide" id="semFotoNota">Sem foto, o papel é só o molde: nada de retângulo na
+    tela nem no PDF, e as peças novas nascem no meio do papel. Para voltar a mirar numa foto,
+    escolha um tamanho acima.</p>
+    <div id="photoCampos">
     <div class="field" id="photoOrCampo">
       <label for="photoOr">Orientação</label>
       <select id="photoOr"><option value="p" selected>Retrato</option><option value="l">Paisagem</option></select>
@@ -750,6 +756,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <p class="note">A imagem é só para você visualizar o encaixe: aparece a 22% de opacidade na
     tela e no PDF, e não vira furo. Para mover, girar ou centralizar, toque na foto no papel —
     os botões aparecem na barra de cima.</p>
+    </div>
   </section>
 
   <section class="pane on" data-pane="pecas">
@@ -932,6 +939,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <li>Ajuste ponto a ponto <b>sobrevive</b> a mexer na altura, no traço, na sensibilidade e na fonte: o desenho é refeito e os quadradinhos que você acendeu ou apagou vão junto, acompanhando a grade nova. Quem descarta é só o botão <b>recalcular</b>, e ele pergunta antes.</li>
       <li>A peça de <b>imagem</b> lê um arquivo do aparelho e o transforma em quadradinhos na hora. Em <b>1 cor</b> ela é silhueta: o escuro acende, o claro apaga, e vale uma linha só — logo, monograma, brasão, desenho de traço. A <b>sensibilidade</b> decide o que conta como escuro e o <b>inverter</b> serve para desenho claro sobre fundo escuro.</li>
       <li>De <b>2 cores para cima</b> a mesma peça vira <b>gráfico colorido</b>: as cores da imagem são agrupadas nesse número de tons, e cada tom vira a meada mais próxima da cartela escolhida em <b>linhas</b> — inclusive <b>minhas</b>, que usa só o que você já marcou como seu. O <b>fundo</b> tira o que é claro demais para ganhar linha, que é o que apaga o branco em volta de um logo ou o quadriculado de um gráfico pronto. Mais cores é mais fiel e mais meada para comprar; comece em 6 ou 8 e suba se faltar tom.</li>
+      <li>Foto de verdade — gente, bicho, paisagem — e imagem de muitas cores já entram em <b>8 cores</b>, porque em uma cor só a foto vira mancha picotada e o colorido se perde. Logo de uma cor e desenho de traço continuam entrando em 1. Nos dois casos o campo <b>cores</b> muda depois.</li>
+      <li>Se o bordado não vai numa foto, escolha <b>Sem foto</b> no tamanho, na aba <b>foto</b> — ou toque no retângulo da foto e use o <b>tirar foto</b> na barra de cima. Ele some da tela e do PDF, e as peças novas nascem no meio do papel.</li>
       <li>Na aba <b>linha</b>, com um gráfico selecionado, aparece a lista das meadas dele com quantos pontos cada uma tem. Toque numa para escolhê-la e, em seguida, numa cor do catálogo para pôr outra meada no lugar — é assim que se troca o palpite do casamento automático pela linha que você tem na gaveta. O <b>olho</b> esconde uma linha do desenho sem tirá-la da lista, e a linha escolhida é a que o <b>ajustar</b> pinta ponto a ponto.</li>
       <li>Mexer na <b>largura</b> não sorteia meadas novas: as linhas do gráfico ficam como estão, inclusive as que você trocou à mão. Quem pede paleta nova é mudar o número de <b>cores</b>, mudar a cartela em <b>linhas</b>, trocar a imagem ou apertar o <b>recalcular</b>.</li>
       <li>Para o nome curvado por cima da foto, use o campo <b>arco</b> na barra de cima. Se a cursiva fechar demais em letra pequena, abra o <b>espaço</b> entre as letras — ele é contado em quadradinhos, os mesmos que viram furo.</li>
@@ -1048,7 +1057,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   var els = [];
   var sel = 0;
   var photoImg = null, photoURL = null;
-  var photo = { x: 55, y: 60, w: 100, h: 150 };
+  /* `off` é o molde sem foto: bordado em tecido, ou em papel que não leva
+     foto nenhuma. A foto continua existindo por baixo, com lugar e medida,
+     para voltar de onde estava se a pessoa escolher um tamanho de novo; o que
+     some é ela na tela, no toque, no PDF e nas contas de caixa. */
+  var photo = { x: 55, y: 60, w: 100, h: 150, off: false };
   var editing = false;
   var MODO_MOVER = "Arraste a palavra ou a foto para posicionar, ou arraste no vazio para laçar várias e mover juntas. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.";
   var zoom = 1, fitK = 1, mao = false;   /* vista: escala relativa ao encaixe */
@@ -1862,6 +1875,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   function photoSizeMM(){
     var v = $("photoSize").value, w, h;
+    if (v === "none") return { w: photo.w, h: photo.h };
     if (v === "custom"){
       w = propria.photoWmm || 100;
       h = propria.photoHmm || 150;
@@ -1875,6 +1889,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function syncPhotoSize(){
     var z = photoSizeMM();
     photo.w = z.w; photo.h = z.h;
+    photo.off = $("photoSize").value === "none";
+    if (photo.off){ marcaFoto = false; if (focus === "photo") focus = "none"; }
     clampPhoto();
   }
 
@@ -1885,13 +1901,14 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
      isso o aviso não é de um momento: `showFit()` passa por aqui a cada
      mudança de estado, e enquanto não couber ele fica. */
   function fotoForaDoPapel(){
+    if (photo.off) return false;
     var pa = paperMM();
     return photo.x < -0.01 || photo.y < -0.01 ||
            photo.x + photo.w > pa.w + 0.01 || photo.y + photo.h > pa.h + 0.01;
   }
 
   function avisaFotoCabe(){
-    var pa = paperMM(), maior = photo.w > pa.w + 0.01 || photo.h > pa.h + 0.01;
+    var pa = paperMM(), maior = !photo.off && (photo.w > pa.w + 0.01 || photo.h > pa.h + 0.01);
     var txt = "";
     if (maior)
       txt = "A foto de " + fmt(photo.w) + " × " + fmt(photo.h) + " mm é maior que o papel de " +
@@ -2504,7 +2521,12 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var pa = paperMM();
     var sa = stitchArea();
     var minX = photo.x, minY = photo.y, maxX = photo.x + photo.w, maxY = photo.y + photo.h;
-    if (sa){
+    // sem foto, só as peças contam; sem peça também, sobra um ponto no meio
+    // do papel, que é caixa vazia e não pede moldura em lugar nenhum
+    if (photo.off){
+      minX = maxX = pa.w / 2; minY = maxY = pa.h / 2;
+      if (sa){ minX = sa.x; minY = sa.y; maxX = sa.x + sa.w; maxY = sa.y + sa.h; }
+    } else if (sa){
       minX = Math.min(minX, sa.x); minY = Math.min(minY, sa.y);
       maxX = Math.max(maxX, sa.x + sa.w); maxY = Math.max(maxY, sa.y + sa.h);
     }
@@ -2706,6 +2728,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   }
 
   function drawPhoto(ctx, k, region, alpha){
+    if (photo.off) return;
     var X = (photo.x - region.x) * k, Y = (photo.y - region.y) * k;
     var W = photo.w * k, H = photo.h * k;
     ctx.save();
@@ -3658,12 +3681,22 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return pd;
   }
 
+  /* Onde a peça nova nasce: na foto, que é para onde quase toda peça vai.
+     Sem foto, numa caixa do tamanho dela no meio do papel — a mesma conta de
+     sempre, só que mirando o centro da folha em vez de um retângulo que não
+     está lá. */
+  function miraMM(){
+    if (!photo.off) return photo;
+    var pa = paperMM();
+    return { x: (pa.w - photo.w) / 2, y: (pa.h - photo.h) / 2, w: photo.w, h: photo.h };
+  }
+
   function addText(){
-    var pd = comoEstaNaBarra();
+    var pd = comoEstaNaBarra(), m = miraMM();
     var el = { kind:"text", text: pd.text, font: pd.font, rowsTarget: pd.rowsTarget,
                thick: pd.thick, thr: pd.thr, rot: pd.rot,
                esp: pd.esp, arc: pd.arc, flip:0, hv:2, edits:[],
-               x: photo.x, y: photo.y + photo.h - 14, cells:[[0]],
+               x: m.x, y: m.y + m.h - 14, cells:[[0]],
                color: thread, colorName: threadLabel(thread) || thread };
     rebuild(el);
     els.push(el); sel = els.length - 1; soUm(sel); focus = "el";
@@ -3671,7 +3704,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   }
 
   function addSym(){
-    var el = { kind:"sym", sym:"heart", scale:2, rot:0, x: photo.x + photo.w - 20, y: photo.y + photo.h - 20,
+    var m = miraMM();
+    var el = { kind:"sym", sym:"heart", scale:2, rot:0, x: m.x + m.w - 20, y: m.y + m.h - 20,
                flip:0, edits:[], cells:[[0]], color: thread, colorName: threadLabel(thread) || thread };
     rebuild(el);
     els.push(el); sel = els.length - 1; soUm(sel); focus = "el";
@@ -3705,19 +3739,52 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     origens[id] = { url: url, img: c };
   }
 
+  /* Foto de gente, de bicho, de paisagem: em uma cor só ela vira mancha
+     picotada, porque o limiar corta os meios-tons no meio. O que separa foto
+     de logo é quanto da imagem fica fora dos três tons mais comuns: num logo
+     quase nada (o fundo, a tinta e a borda suavizada, que é fina), numa foto
+     um bom pedaço. Logo de muitas cores também passa por foto aqui, e está
+     certo: em uma linha só ele perderia as cores do mesmo jeito. Vale só para
+     a escolha de fábrica: o campo cores continua lá. */
+  var FOTO_CORES = 8;
+  function pareceFoto(el){
+    var img = origemPronta(el);
+    if (!img) return false;
+    // lida numa grade fina, e não na da peça: na grade de 40 a borda de um
+    // logo cai no meio dos quadradinhos e vira meio-tom de mentira
+    var k = Math.min(1, 200 / Math.max(img.width, img.height));
+    var c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(img.width * k));
+    c.height = Math.max(1, Math.round(img.height * k));
+    var x = c.getContext("2d"), data;
+    x.drawImage(img, 0, 0, c.width, c.height);
+    try { data = x.getImageData(0, 0, c.width, c.height).data; } catch (e){ return false; }
+    // 16 níveis por canal: uma foto em preto e branco também tem que passar
+    var conta = {}, n = data.length / 4, tons = 0;     // `tons`: pixels nos 3 tons mais comuns
+    for (var i = 0; i < data.length; i += 4){
+      var q = ((data[i] >> 4) << 8) | ((data[i + 1] >> 4) << 4) | (data[i + 2] >> 4);
+      conta[q] = (conta[q] || 0) + 1;
+    }
+    var maiores = Object.keys(conta).map(function(t){ return conta[t]; })
+      .sort(function(p, q){ return q - p; });
+    for (var j = 0; j < 3 && j < maiores.length; j++) tons += maiores[j];
+    return (n - tons) / n > 0.2;
+  }
+
   function addImg(img, nome){
-    var id = novoId();
+    var id = novoId(), m = miraMM();
     guardaOrigem(id, img);
     var el = { kind:"img", img:id, nome: nome || "imagem",
                larg: 40, thr: 0.5, inv: 0, rot: 0,
-               x: photo.x, y: photo.y, flip:0, edits:[], cells:[[0]],
+               x: m.x, y: m.y, flip:0, edits:[], cells:[[0]],
                color: thread, colorName: threadLabel(thread) || thread };
+    if (pareceFoto(el)){ el.cores = FOTO_CORES; el.corte = 0.1; el.fonte = $("imgFonte").value || "anchor"; }
     rebuild(el);
     // nasce centrada na foto, e não num canto: é de onde quase toda peça é
     // arrastada, e peça nova no canto da folha some atrás da régua
     var b = bboxMM(el);
-    el.x = Math.round((photo.x + (photo.w - b.w) / 2) * 10) / 10;
-    el.y = Math.round((photo.y + (photo.h - b.h) / 2) * 10) / 10;
+    el.x = Math.round((m.x + (m.w - b.w) / 2) * 10) / 10;
+    el.y = Math.round((m.y + (m.h - b.h) / 2) * 10) / 10;
     els.push(el); sel = els.length - 1; soUm(sel); focus = "el";
     renderChips(); syncControls(); draw(); pushHist();
     avisaVazio(el);
@@ -3966,7 +4033,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   }
 
   function fotoPainel(){
-    var prop = $("photoSize").value === "custom";
+    var prop = $("photoSize").value === "custom", sem = $("photoSize").value === "none";
+    $("photoCampos").classList.toggle("hide", sem);
+    $("semFotoNota").classList.toggle("hide", !sem);
+    $("alFoto").classList.toggle("hide", sem);
+    $("alBase").classList.toggle("hide", sem);
     $("photoCustom").classList.toggle("hide", !prop);
     $("photoOrCampo").classList.toggle("dim", prop);
     $("photoNota").innerHTML = prop
@@ -4023,6 +4094,12 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     clampPhoto();
     els.forEach(function(el, i){ el.x = photo.x + dx[i]; el.y = photo.y + dy[i]; });
     draw(); pushHist();
+  });
+
+  $("semFoto").addEventListener("click", function(){
+    $("photoSize").value = "none";
+    onPhotoChange();
+    syncControls(); renderChips();
   });
 
   $("centerPhoto").addEventListener("click", function(){
@@ -4408,7 +4485,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       return;
     }
     var i = hitEl(pt);
-    var onPhoto = pt.x >= photo.x && pt.x <= photo.x + photo.w &&
+    var onPhoto = !photo.off && pt.x >= photo.x && pt.x <= photo.x + photo.w &&
                   pt.y >= photo.y && pt.y <= photo.y + photo.h;
     var soma = !editing && (e.shiftKey || e.ctrlKey || e.metaKey);
     var antes = marca.join(",") + "|" + marcaFoto + "|" + focus + "|" + sel;
@@ -4815,17 +4892,21 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     pdf.setFontSize(9);
     pdf.setTextColor(80);
     var linhas = [
-      "Papel " + fmt(pa.w) + " x " + fmt(pa.h) + " mm   |   foto " + fmt(photo.w) + " x " + fmt(photo.h) +
-        " mm   |   furos de " + fmt(P()) + " mm   |   " + totalCount.toLocaleString("pt-BR") +
+      "Papel " + fmt(pa.w) + " x " + fmt(pa.h) + " mm   |   " +
+        (photo.off ? "sem foto" : "foto " + fmt(photo.w) + " x " + fmt(photo.h) + " mm") +
+        "   |   furos de " + fmt(P()) + " mm   |   " + totalCount.toLocaleString("pt-BR") +
         " pontos, " + totalHoles.toLocaleString("pt-BR") + " furos",
-      "Cole a foto a " + fmt(photo.x) + " mm da borda esquerda e " + fmt(photo.y) +
-        " mm da borda de cima do papel.",
+      photo.off
+        ? "Prenda o molde sobre o papel ou o tecido e fure pelos pontos."
+        : "Cole a foto a " + fmt(photo.x) + " mm da borda esquerda e " + fmt(photo.y) +
+          " mm da borda de cima do papel.",
       plano.tiled
         ? "Recorte pela moldura tracejada. As folhas vizinhas repetem uma faixa do desenho: sobreponha ate os furos coincidirem."
         : (plano.folhaCheia ? "A moldura tracejada e a borda do papel. " : "") +
-          "Sobra: " + fmt(pa.w - photo.x - photo.w) + " mm a direita, " + fmt(pa.h - photo.y - photo.h) + " mm embaixo.",
+          (photo.off ? "" : "Sobra: " + fmt(pa.w - photo.x - photo.w) + " mm a direita, " + fmt(pa.h - photo.y - photo.h) + " mm embaixo."),
       "Imprima em 100%, sem ajustar a pagina. Confira na regua abaixo antes de furar."
     ];
+    linhas = linhas.filter(Boolean);     // sem foto, a linha da sobra fica vazia
     // esta folha não leva molde nenhum: o que ela precisa dizer é onde ele está
     if (plano.capa)
       linhas.splice(2, 0, "Esta folha e so instrucao. O molde esta inteiro na folha 2, em tamanho real; recorte pela moldura tracejada.");
@@ -4876,7 +4957,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
     pdf.setDrawColor(20);
     pdf.setLineWidth(0.4);
-    pdf.rect(ox + (photo.x - vw.x), oy + (photo.y - vw.y), photo.w, photo.h);
+    if (!photo.off) pdf.rect(ox + (photo.x - vw.x), oy + (photo.y - vw.y), photo.w, photo.h);
 
     /* A linha da borda do papel, onde esta folha alcança a borda. Com a
        moldura tracejada valendo o papel inteiro as duas cairiam uma em cima da
@@ -5503,6 +5584,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var notas = eixo === "v"
       ? [0, pa.w / 2, pa.w, photo.x, photo.x + photo.w / 2, photo.x + photo.w]
       : [0, pa.h / 2, pa.h, photo.y, photo.y + photo.h / 2, photo.y + photo.h];
+    if (photo.off) notas = notas.slice(0, 3);
     var dist = FOLGA_PX / (cv._k || 1), achou = null;
     for (var i = 0; i < notas.length; i++){
       var d = Math.abs(notas[i] - v);
@@ -5652,9 +5734,10 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     var el = els[sel];
     if (!el) return;
     var b = elPaperBox(el), pa = paperMM();
+    if (modo === "foto" && photo.off) modo = "papel";
     if (modo === "foto")  moveEl(el, (photo.x + photo.w / 2) - (b.x + b.w / 2), 0);
     if (modo === "papel") moveEl(el, (pa.w / 2) - (b.x + b.w / 2), 0);
-    if (modo === "base")  moveEl(el, 0, (photo.y + photo.h) - (b.y + b.h));
+    if (modo === "base" && !photo.off) moveEl(el, 0, (photo.y + photo.h) - (b.y + b.h));
     // nome em duas linhas: a de baixo centraliza pela de cima, não pela foto
     if (modo === "acima" && sel > 0){
       var c = elPaperBox(els[sel - 1]);

@@ -74,8 +74,13 @@ const FAIXAS = png(120, 160, (x, y) => {
   await campo("imgLarg", 40);
 
   // ---- 1. uma cor é silhueta; de duas para cima é gráfico ---------------
+  // imagem de várias cores já nasce gráfico: em uma linha só ela perderia as
+  // cores, do mesmo jeito que foto vira mancha
   let p = await peca(0);
-  ok(p.cores === 1 && !p.paleta.length, "a peça nasce silhueta, sem paleta");
+  ok(p.cores === 8 && p.paleta.length > 1, "a imagem de quatro cores nasce gráfico, em 8 (" + p.cores + ")");
+  await campo("imgCores", 1);
+  p = await peca(0);
+  ok(p.cores === 1 && !p.paleta.length, "em 1 cor ela é silhueta, sem paleta");
   await campo("imgCores", 4);
   p = await peca(0);
   ok(p.cores === 4, "pedindo 4 cores, a peça vira gráfico");

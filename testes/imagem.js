@@ -171,6 +171,20 @@ const CINZA = png(100, 100, (x, y) => (x >= 10 && x < 50 && y >= 10 && y < 50) ?
   ok(agora.x === lugar.x && agora.y === lugar.y && agora.color === lugar.color,
      "sem sair do lugar nem trocar de linha");
 
+  // ---- 7. foto entra colorida, logo entra em uma cor ---------------------
+  // Em uma cor só, foto vira mancha picotada: o limiar corta os meios-tons no
+  // meio. O quadrado lá de cima, que é logo, entrou em 1; um degradê com um
+  // rosto claro-escuro no meio é foto, e entra em várias
+  const FOTO = png(150, 200, (x, y) => {
+    const d = Math.hypot(x - 75, y - 85);
+    return d < 50 ? Math.min(255, 40 + d * 3 + (x % 11)) : 120 + (y >> 1) % 120;
+  });
+  await escolhe("#addImg", "retrato.png", FOTO);
+  ok(await pg.inputValue("#imgCores") === "8", "a foto entrou como gráfico de 8 cores (entrou com " +
+     await pg.inputValue("#imgCores") + ")");
+  await escolhe("#addImg", "coroa.png", QUADRADO);
+  ok(await pg.inputValue("#imgCores") === "1", "e o logo, logo depois, em 1 cor");
+
   ok(erros.length === 0, "nenhum erro de JavaScript no caminho" +
      (erros.length ? ": " + erros[0] : ""));
 

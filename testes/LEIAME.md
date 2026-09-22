@@ -9,7 +9,7 @@ um.
 testes/roda.sh        # todos, com a extração refeita antes
 ```
 
-Os que rodam só em `node` são os de PDF (`geo`, `pos`, `emenda`, `pdf`, `cor`,
+Os que rodam só em `node` são os de PDF (`geo`, `pos`, `emenda`, `pdf`, `cor`, `semfoto`,
 `grafico.test`) e o `estante.test.js`; todos os outros dirigem um Chromium. O
 `posicao.js` mede as posições lendo o que o app grava no `localStorage`, em vez
 de olhar a tela: assim dá para afirmar "andou 0,5 mm" em vez de "alguma coisa
@@ -34,12 +34,13 @@ em todas as folhas.
 | `pos.test.js` | o retângulo da foto cai no mesmo milímetro de papel em todas as folhas, e nada é desenhado fora da moldura de recorte |
 | `emenda.test.js` | uma peça em cima da junta sai nas duas folhas, nas mesmas coordenadas de papel |
 | `pdf.test.js` | número de páginas, régua de aferição impressa, e o título vindo do nome do molde |
+| `semfoto.test.js` | o molde sem foto não desenha o retângulo dela nem manda colá-la, a caixa do desenho é só a das peças, e a foto de volta volta ao PDF |
 | `cor.test.js` | cada peça sai na sua linha, a legenda não repete cor, e o rodapé mais alto não empurra o molde para fora da folha |
 | `estante.test.js` | o molde antigo migra sem nada ser copiado, apagar tira só as chaves daquele molde, trocar grava antes, e o arquivo sobrevive à volta num navegador zerado |
 | `tela.js` | o app monta num Chromium de verdade, sem erro de JavaScript, e o trilho de sete botões cabe numa tela de 360 px |
 | `letra.js` | o espaçamento alarga a palavra sem mudar a altura, o arco levanta o meio acima das pontas (e o arco negativo inverte), e espelhar inverte as colunas sem mudar a grade e sobrevive ao Recalcular |
 | `ajuste.js` | o quadradinho aceso à mão sobrevive a mexer na altura, no traço e na fonte (e só o Recalcular o descarta), a mesma altura dá a mesma letra com e sem descendente, palavra nova nasce com o que está na barra de cima, e molde gravado antes tem o número da altura convertido sem mudar de tamanho |
-| `imagem.js` | a imagem vira quadradinho com a largura pedida e a proporção dela, o limiar corta na meia tinta, o inverter troca o claro pelo escuro, o desenho e a imagem sobrevivem a reabrir o navegador, e trocar a imagem de uma peça guarda o lugar e a linha dela |
+| `imagem.js` | a imagem vira quadradinho com a largura pedida e a proporção dela, o limiar corta na meia tinta, o inverter troca o claro pelo escuro, o desenho e a imagem sobrevivem a reabrir o navegador, trocar a imagem de uma peça guarda o lugar e a linha dela, e foto entra em várias cores enquanto logo entra em uma |
 | `grafico.js` | a imagem vira paleta de meadas de verdade da cartela pedida, o corte tira o fundo e o olho tira uma linha, mexer na largura NÃO sorteia meadas novas, tocar no catálogo troca só a linha escolhida, e o gráfico sobrevive a reabrir o navegador |
 | `grafico.test.js` | cada quadradinho do gráfico sai na cor da sua linha e com a letra dela dentro do quadradinho, molde sem gráfico não ganha letra nenhuma, e a legenda que não cabe no rodapé vira folha inteira |
 | `fio.js` | os metros na tela batem com a conta que a própria tela diz fazer, a conta responde ao espaçamento entre furos, e a soma por cor fecha com o total de pontos |
