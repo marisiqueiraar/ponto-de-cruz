@@ -21,9 +21,10 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
 - **Foto**: tamanhos de revelação comuns (10×15, 9×13, 13×18, 15×21, quadrado, polaroid) ou
   medida própria, arrastável sobre o papel, com imagem opcional só para visualizar.
 - **Peças bordadas**: quantas quiser, cada uma sendo uma palavra, um símbolo, uma imagem em
-  uma linha só ou um gráfico colorido — dez desenhos prontos:
-  coração cheio, coração vazado, estrela, seta, flor, folha, coroa, lua, sol, infinito e casa. Arraste
-  para posicionar, incline de -45° a 45°, redimensione com dois dedos, espelhe, e ajuste ponto a
+  uma linha só ou um gráfico colorido — dezessete desenhos prontos:
+  coração cheio, coração vazado, estrela, seta, flor, folha, coroa, lua, sol, infinito, casa,
+  floco de neve, boneco de neve, palmeira, guarda-sol, avião e mala de viagem. Arraste para
+  posicionar, incline de -45° a 45°, redimensione com dois dedos, espelhe, e ajuste ponto a
   ponto no modo de edição. Palavra nova nasce com o que está na barra de cima — fonte, altura,
   traço, sensibilidade, espaço, arco e inclinação —, para a segunda linha de um nome sair do
   tamanho da primeira. Duplicar copia a peça com as
