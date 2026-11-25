@@ -158,7 +158,7 @@ Nada falta deste item.
   e não entram na pilha — tirar uma guia sem querer se resolve puxando outra.
   Ficam gravadas com o molde, isso sim.
 - **`testes/amostra.js` tem uma cópia dos desenhos dos símbolos.** Ele desenha
-  sem abrir o app, então repete a tabela do `index.html`. Se os símbolos mudarem,
+  sem abrir o app, então repete a tabela de `js/base.js`. Se os símbolos mudarem,
   a amostra fica mentindo sem ninguém notar.
 - **O laço move e apaga, e só.** Girar, espelhar, duplicar e os botões de
   alinhar continuam valendo para a peça selecionada, uma de cada vez — com um

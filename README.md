@@ -6,14 +6,35 @@ Você define o papel de fundo, encaixa a foto no tamanho em que ela será impres
 posiciona as peças bordadas por cima, e baixa um PDF com o molde de furos na escala exata do
 material.
 
-A aplicação é o arquivo `index.html`: HTML, CSS e JavaScript em um único arquivo, sem build e
-sem backend. Ao lado dele há um único arquivo de dados, `catalogos.js`, com os catálogos de cor
-das marcas de linha — dado puro, sem lógica nenhuma. A tela é um editor: trilho de ícones à esquerda que abre um painel, barra de cima
-que muda conforme o que está selecionado, e o papel no centro sobre uma mesa com réguas em
-centímetros. O `layout.html` na raiz é a maquete dessa arrumação, com os controles inertes —
-serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `cartela.html`
-é a outra página irmã: a ferramenta que lê as cores de uma cartela de linha e alimenta o
-`catalogos.js`.
+A aplicação não tem build nem backend. O `index.html` traz só a página; o estilo mora em
+`css/app.css` e o código em `js/`, um arquivo por área, carregados em ordem pelo próprio
+`index.html` como scripts comuns — o que um arquivo usa ao carregar tem de estar num arquivo
+anterior. Por serem scripts comuns, e não módulos, o app continua abrindo com dois cliques no
+`index.html`, sem servidor:
+
+| arquivo | o que tem |
+|---|---|
+| `js/base.js` | utilidades, os desenhos prontos, o estado do molde e as linhas que você tem |
+| `js/estante.js` | onde o molde é guardado no navegador, e a estante de moldes |
+| `js/cor.js` | cor em Lab, k-médias e o casamento de cor com meada de cartela |
+| `js/linhas.js` | fio por linha, a linha de cada peça e o catálogo das marcas |
+| `js/medidas.js` | espaçamento, medidas próprias, papel e foto |
+| `js/desenho.js` | como cada peça vira quadradinhos: símbolo, imagem, palavra, padrão |
+| `js/geometria.js` | caixas, furos, contagem, e o molde repartido em folhas |
+| `js/tela.js` | o desenho na tela: papel, foto, pontos, réguas |
+| `js/gravar.js` | gravar e restaurar o molde, e o desfazer |
+| `js/controles.js` | painéis e barra de cima: criar peças e mexer nelas |
+| `js/toque.js` | arrastar, pinçar, laçar e acender ponto a ponto |
+| `js/pdf.js` | entregar arquivos e montar o PDF do molde |
+| `js/fontes.js` | a lista de fontes com amostra |
+| `js/vista.js` | zoom, mover a vista e as guias |
+| `js/paineis.js` | painel da linha, alinhar, estante na tela, arquivo do molde e o começo |
+
+Ao lado há um arquivo de dados, `catalogos.js`, com os catálogos de cor das marcas de linha —
+dado puro, sem lógica nenhuma. A tela é um editor: trilho de ícones à esquerda que abre um
+painel, barra de cima que muda conforme o que está selecionado, e o papel no centro sobre uma
+mesa com réguas em centímetros. O `cartela.html` é a página irmã: a ferramenta que lê as cores
+de uma cartela de linha e alimenta o `catalogos.js`.
 
 ## O que ele faz
 
@@ -319,7 +340,7 @@ Nenhuma. Tudo que o app precisa está no repositório, e ele funciona sem rede:
   a mesma cor do `Blanc`. Mandando a cartela da DMC em PDF, essas cores podem ser refeitas do
   mesmo jeito que as da Anchor. Em qualquer caso é referência de tela: monitor, luz e lote
   mudam a cor do fio na mão.
-- **Os três ícones** dos botões de ação são SVG embutidos no `index.html`, vindos do projeto
+- **Os três ícones** dos botões de ação são SVG embutidos no `index.html` e em `js/`, vindos do projeto
   [material-design-icons](https://github.com/google/material-design-icons) do Google, sob
   Apache License 2.0. São três caminhos de ~300 bytes: não há fonte de ícones nem biblioteca.
 

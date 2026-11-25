@@ -17,7 +17,7 @@ mudou". O `guias.js` confere as duas medidas ao
 mesmo tempo — os milímetros gravados e os pixels do risco na tela —, porque
 guia no lugar certo com o número errado engana mais do que guia nenhuma.
 
-`extrai.py` puxa do `index.html` os trechos que cada teste exercita e grava
+`extrai.py` emenda os arquivos de `js/` na ordem em que o `index.html` os carrega, puxa dali os trechos que cada teste exercita e grava
 `geo.js`, `pdfcode.js`, `estante.js` e `app.js` aqui ao lado (todos ignorados
 pelo git). Ela roda **sempre** antes dos testes, e não por capricho: a extração
 já ficou defasada uma vez, e os testes de PDF passaram uma rodada inteira
