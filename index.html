@@ -136,11 +136,15 @@
     </fieldset>
 
     <fieldset id="ctlReto" class="hide">
-      <span class="t"><span>desenho</span><select id="retoDes"></select></span>
+      <span class="t" id="tRetoDes"><span>desenho</span><select id="retoDes"></select></span>
+      <span class="t txt hide" id="tRetoTxt"><span>texto</span><input id="retoTxt" type="text" autocomplete="off" spellcheck="false"></span>
+      <span class="t hide" id="tRetoFont"><span>fonte</span><select id="retoFont"></select></span>
+      <span class="t hide" id="tRetoModo" title="Contorno desenha a borda das manchas escuras — perfil, silhueta, logo cheio. Traço desenha o meio dos riscos — desenho a nanquim, letra feita à mão."><span>linha</span><select id="retoModo"><option value="contorno">contorno</option><option value="traco">traço</option></select></span>
       <span class="t" id="tRetoMed"><span>tamanho</span><input id="retoMed" type="number" min="3" max="300" step="1"><b class="cm" id="retoCm"></b></span>
       <span class="t" title="Comprimento de cada ponto, de um furo ao outro, em milímetros. Mais curto acompanha melhor a curva e faz mais furos; abaixo de 2 mm a tira de papel entre os furos rasga."><span>ponto</span><input id="retoPasso" type="number" min="2" max="8" step="0.5"><b class="cm">mm</b></span>
       <span class="t hide" id="tRetoA"><span id="retoANome"></span><input id="retoA" type="number" step="1"></span>
       <span class="t hide" id="tRetoB"><span id="retoBNome"></span><input id="retoB" type="number" step="1"></span>
+      <button type="button" id="retoInv" class="tbtn hide" title="Troca o claro pelo escuro — para desenho claro sobre fundo escuro.">inverter</button>
     </fieldset>
 
     <span class="grp hide" id="ctlPiece">
@@ -162,6 +166,7 @@
     </span>
     <span class="grp hide" id="ctlActs">
       <button id="edit" class="tbtn" title="ajustar ponto a ponto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18V3H3zm8 16H5v-6h6v6zm0-8H5V5h6v6zm8 8h-6v-6h6v6zm0-8h-6V5h6v6z"/></svg><span id="editLabel">ajustar</span></button>
+      <button id="trocaPonto" class="tbtn hide" title="Passa esta peça para o outro ponto, no mesmo lugar e do mesmo tamanho.">ponto reto</button>
       <button id="flipEl" class="tbtn icon" title="espelhar a peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18"/><path d="M9 7L4 12l5 5z" fill="currentColor"/><path d="M15 7l5 5-5 5z"/></svg></button>
       <button id="dupEl" class="tbtn icon" title="duplicar peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 1H4a2 2 0 00-2 2v12h2V3h11V1zm4 4H8a2 2 0 00-2 2v14a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2zm0 16H8V7h11v14z"/></svg></button>
       <button id="delEl" class="tbtn danger" title="excluir a peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg><span class="hide">excluir</span></button>

@@ -35,8 +35,13 @@ function temPaleta(el){
   return !!(el && el.kind === "img" && (el.cores | 0) > 1);
 }
 
+// a peça que tem imagem: a de quadradinho, e a de ponto reto feita de imagem
+function temOrigem(el){
+  return !!(el && el.img && (el.kind === "img" || (el.kind === "reto" && el.desenho === "imagem")));
+}
+
 function origemPronta(el){
-  var o = el && el.kind === "img" ? origens[el.img] : null;
+  var o = temOrigem(el) ? origens[el.img] : null;
   return o && o.img && o.img.width ? o.img : null;
 }
 
@@ -112,8 +117,10 @@ function nomeSugerido(){
     if (els[i].kind === "text" && (els[i].text || "").trim()) return els[i].text.trim();
   for (var j = 0; j < els.length; j++)
     if (els[j].kind === "img" && (els[j].nome || "").trim()) return els[j].nome.trim();
+  for (var r = 0; r < els.length; r++)
+    if (els[r].kind === "reto" && els[r].desenho === "palavra" && (els[r].texto || "").trim()) return els[r].texto.trim();
   for (var k = 0; k < els.length; k++)
-    if (els[k].kind === "pat") return nomePeca(els[k]);
+    if (els[k].kind === "pat" || els[k].kind === "reto") return nomePeca(els[k]);
   return "";
 }
 var saveTimer = 0;

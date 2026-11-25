@@ -33,6 +33,7 @@ ok(c.length === Math.round(2 * Math.PI * 10 / 2.5), "e são tantos quanto o comp
 // ---- 3. nada colado ------------------------------------------------------------
 for (const k of Object.keys(R.DESENHOS_RETO)){
   const d = R.DESENHOS_RETO[k];
+  if (d.especial) continue;   // palavra e imagem precisam de canvas: testes/reto.js
   for (const passo of [2.5, 3]){
     const o = { passo }; (d.opcoes || []).forEach(op => o[op[0]] = op[2]);
     const pts = R.pontosDoDesenho(d.faz(d.padrao, o), passo);

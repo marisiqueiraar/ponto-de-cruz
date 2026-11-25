@@ -220,6 +220,13 @@ function syncControls(){
   $("ctlActs").classList.toggle("hide", !piece);
   // acender quadradinho não quer dizer nada numa peça sem quadradinho
   $("edit").classList.toggle("hide", !!(el && el.kind === "reto"));
+  /* Um botão só para trocar de ponto, junto de ajustar, espelhar e duplicar:
+     ele diz para onde a peça vai. A palavra e a imagem trocam; símbolo,
+     moldura e desenho pronto, não — cada um só existe num dos dois. */
+  var troca = el && (el.kind === "text" || el.kind === "img" ||
+              (el.kind === "reto" && (el.desenho === "palavra" || el.desenho === "imagem")));
+  $("trocaPonto").classList.toggle("hide", !troca);
+  if (troca) $("trocaPonto").textContent = el.kind === "reto" ? "ponto cruz" : "ponto reto";
   $("ctlNone").classList.toggle("hide", foco !== "none");
   if (foco === "none"){
     var pa = paperMM();
@@ -274,12 +281,28 @@ function syncControls(){
       ? "A imagem desta peça não está mais na memória do navegador. Use o trocar para pôr o arquivo de novo."
       : "Troca o claro pelo escuro — é o que resolve desenho branco sobre fundo escuro.";
   } else if (el.kind === "reto"){
+    var pal = el.desenho === "palavra", ima = el.desenho === "imagem";
+    $("tRetoDes").classList.toggle("hide", ima);
+    $("tRetoTxt").classList.toggle("hide", !pal);
+    $("tRetoFont").classList.toggle("hide", !pal);
+    $("tRetoModo").classList.toggle("hide", !ima);
+    $("retoInv").classList.toggle("hide", !ima);
+    if (pal){ $("retoTxt").value = el.texto || ""; $("retoFont").value = el.font || FONTE_PADRAO; }
+    if (ima){ $("retoModo").value = el.modo || "contorno"; $("retoInv").classList.toggle("on", !!el.inv); }
+    // palavra abaixo de 1,8 cm de maiúscula: o campo avisa, como na fonte em
+    // quadradinho — a peça sai na medida pedida, mas apertada
+    var tm = $("tRetoMed"), baixa = pal && el.medida < RETO_PALAVRA_MIN;
+    tm.classList.toggle("alerta", baixa);
     $("retoDes").value = el.desenho;
     $("retoMed").min = DESENHOS_RETO[el.desenho].min;
     $("retoMed").max = DESENHOS_RETO[el.desenho].max;
     $("retoMed").value = Math.round(el.medida);
     $("retoPasso").value = el.passo;
-    $("tRetoMed").title = "O " + DESENHOS_RETO[el.desenho].medida + ", em milímetros.";
+    $("tRetoMed").title = baixa
+      ? "Abaixo de " + fmt(RETO_PALAVRA_MIN / 10) + " cm de maiúscula as voltas das letras ficam mais " +
+        "estreitas que a distância segura entre furos: o app tira furos para o papel não rasgar, " +
+        "e a letra fica angulosa. Suba o tamanho para ela sair redonda."
+      : "O " + DESENHOS_RETO[el.desenho].medida + ", em milímetros.";
     opcoesNaBarra(el);
   } else if (el.kind === "pat"){
     var faixa = el.arranjo === "faixa";
@@ -452,12 +475,68 @@ function addReto(){
 function montaDesenhosReto(){
   var s = $("retoDes");
   Object.keys(DESENHOS_RETO).forEach(function(k){
+    if (k === "imagem") return;   // a imagem entra pela peça de imagem, não daqui
     var o = document.createElement("option");
     o.value = k; o.textContent = DESENHOS_RETO[k].nome;
     s.appendChild(o);
   });
 }
 montaDesenhosReto();
+// as mesmas fontes da palavra em ponto cruz, sem as amostras: a fonte já foi
+// escolhida vendo o traço, e aqui ela só precisa poder ser trocada
+(function(){
+  var s = $("retoFont");
+  [].forEach.call($("font").querySelectorAll("option"), function(o){
+    var n = document.createElement("option");
+    n.value = o.value; n.textContent = o.textContent;
+    s.appendChild(n);
+  });
+})();
+
+/* Ponto cruz ou ponto reto, peça por peça. A palavra e a imagem passam de um
+   para o outro guardando o que dá para guardar: texto, fonte, imagem, cor,
+   inclinação, o lugar (pelo centro) e o tamanho de verdade — a maiúscula de
+   16 quadradinhos de 2,5 mm vira uma de 40 mm, e volta. */
+function trocaPonto(el){
+  var b = bboxMM(el), cx = b.x + b.w / 2, cy = b.y + b.h / 2, nova, p = P();
+  var comum = { rot: el.rot || 0, flip: el.flip || 0, edits: [], manual: 0, x: 0, y: 0,
+                color: el.color, colorName: el.colorName };
+  if (el.kind === "text"){
+    nova = Object.assign(comum, { kind: "reto", desenho: "palavra", texto: el.text, font: el.font,
+             medida: Math.round(el.rowsTarget * p), passo: RETO_PASSO, opts: {} });
+  } else if (el.kind === "img"){
+    nova = Object.assign(comum, { kind: "reto", desenho: "imagem", img: el.img, nome: el.nome,
+             medida: Math.round(el.larg * p), passo: RETO_PASSO, inv: el.inv || 0, modo: "contorno",
+             opts: { sens: Math.round((el.thr || 0.5) * 100) } });
+  } else if (el.kind === "reto" && el.desenho === "palavra"){
+    nova = Object.assign(comum, { kind: "text", text: el.texto, font: el.font,
+             rowsTarget: Math.max(8, Math.min(60, Math.round(el.medida / p))),
+             thick: 2, thr: 0.35, esp: 0, arc: 0, hv: 2, cells: [[0]] });
+  } else if (el.kind === "reto" && el.desenho === "imagem"){
+    nova = Object.assign(comum, { kind: "img", img: el.img, nome: el.nome || "imagem",
+             larg: Math.max(IMG_LARG_MIN, Math.min(IMG_LARG_MAX, Math.round(el.medida / p))),
+             thr: (opcoesReto(el).sens || 50) / 100, inv: el.inv || 0, cores: 1, cells: [[0]] });
+  } else return;
+  var fam = nova.font || (nova.kind === "text" ? nova.font : null);
+  loadFontThen(function(){
+    rebuild(nova);
+    var nb = bboxMM(nova);
+    nova.x = dec1(cx - nb.w / 2); nova.y = dec1(cy - nb.h / 2);
+    var i = els.indexOf(el);
+    if (i < 0) return;
+    els[i] = nova;
+    renderChips(); syncControls(); renderPaleta(); draw(); pushHist();
+  }, fam || FONTE_PADRAO);
+}
+$("trocaPonto").addEventListener("click", function(){ if (els[sel]) trocaPonto(els[sel]); });
+$("retoInv").addEventListener("click", function(){
+  var el = els[sel];
+  if (!el || el.kind !== "reto" || el.desenho !== "imagem") return;
+  el.inv = el.inv ? 0 : 1;
+  this.classList.toggle("on", !!el.inv);
+  refazNoCentro(el);
+  draw(); pushHist();
+});
 
 // as duas casas de opção da barra, com o nome e os limites do desenho de agora
 function opcoesNaBarra(el){
@@ -807,7 +886,13 @@ function updateSelected(){
       var v = parseFloat($(id).value);
       return isNaN(v) ? alt : Math.max(min, Math.min(max, v));
     };
-    el.desenho = DESENHOS_RETO[$("retoDes").value] ? $("retoDes").value : el.desenho;
+    if (el.desenho !== "imagem")
+      el.desenho = DESENHOS_RETO[$("retoDes").value] ? $("retoDes").value : el.desenho;
+    if (el.desenho === "palavra"){
+      if (el.desenho !== d0){ el.texto = el.texto || "amor"; el.font = el.font || FONTE_PADRAO; }
+      else { el.texto = $("retoTxt").value; el.font = $("retoFont").value || el.font; }
+    }
+    if (el.desenho === "imagem") el.modo = $("retoModo").value === "traco" ? "traco" : "contorno";
     var d = DESENHOS_RETO[el.desenho];
     if (el.desenho !== d0){
       // desenho novo começa do tamanho e das opções de fábrica dele: o lado
@@ -824,9 +909,12 @@ function updateSelected(){
       });
     }
     el.passo = nv("retoPasso", RETO_PASSO_MIN, RETO_PASSO_MAX, el.passo);
-    refazNoCentro(el);
-    if (el.desenho !== d0) syncControls();
-    renderChips(); draw(); pushLater();
+    var refaz = function(){
+      refazNoCentro(el);
+      syncControls();
+      renderChips(); draw(); pushLater();
+    };
+    if (el.desenho === "palavra") loadFontThen(refaz, el.font); else refaz();
     return;
   }
   if (el.kind === "pat"){
@@ -860,7 +948,7 @@ function updateSelected(){
 ["txt","font","rows","thick","thr","esp","arc","sym","symScale",
  "imgLarg","imgThr","imgCorte","imgCores",
  "patArr","patMot","patScale","patGap","patMargem","patRep","patCores",
- "retoDes","retoMed","retoPasso","retoA","retoB"]
+ "retoDes","retoMed","retoPasso","retoA","retoB","retoTxt","retoFont","retoModo"]
   .forEach(function(id){ $(id).addEventListener("input", updateSelected); });
 $("imgFonte").addEventListener("change", function(){
   var el = els[sel];

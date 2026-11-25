@@ -22,6 +22,7 @@ function packReto(el){
   return { kind: "reto", x: el.x, y: el.y, rot: el.rot, flip: el.flip || 0,
            color: el.color || "", colorName: el.colorName || "",
            desenho: el.desenho, medida: el.medida, passo: el.passo, opts: el.opts || {},
+           texto: el.texto, font: el.font, img: el.img, nome: el.nome, inv: el.inv ? 1 : 0, modo: el.modo,
            w: Math.round(el.w * 100) / 100, h: Math.round(el.h * 100) / 100,
            pontos: (el.pontos || []).map(function(pt){
              return { f: pt.fechada ? 1 : 0,
@@ -37,6 +38,16 @@ function unpackReto(r){
              edits: [], manual: 0 };
   var d = DESENHOS_RETO[el.desenho];
   el.medida = Math.max(d.min, Math.min(d.max, el.medida || d.padrao));
+  if (el.desenho === "palavra"){
+    el.texto = typeof r.texto === "string" ? r.texto : "";
+    el.font = fonteConhecida(r.font) ? r.font : (FONTE_TROCADA[r.font] || FONTE_PADRAO);
+  }
+  if (el.desenho === "imagem"){
+    el.img = typeof r.img === "string" ? r.img : "";
+    el.nome = typeof r.nome === "string" && r.nome ? r.nome : "imagem";
+    el.inv = r.inv ? 1 : 0;
+    el.modo = r.modo === "traco" ? "traco" : "contorno";
+  }
   if (typeof r.color === "string" && /^#[0-9A-Fa-f]{6}$/.test(r.color)){
     el.color = r.color;
     el.colorName = typeof r.colorName === "string" ? r.colorName : "";
@@ -378,7 +389,7 @@ function salvaOrigens(){
   if (!it) return;
   var usadas = {}, tem = false;
   els.forEach(function(el){
-    if (el.kind !== "img" || !el.img) return;
+    if (!temOrigem(el)) return;
     var o = origens[el.img];
     if (!o || !o.url) return;
     usadas[el.img] = o.url;

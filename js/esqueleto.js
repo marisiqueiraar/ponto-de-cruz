@@ -127,13 +127,18 @@ function pingos(bin, W, H, pxmm){
 }
 
 // Ramer-Douglas-Peucker: tira os pixels que não mudam a forma
+// No laço fechado o começo e o fim são o mesmo ponto, e a distância até a
+// "reta" entre eles é a distância até esse ponto: sem isso a conta dava zero
+// para tudo, e o laço inteiro — o "o", a volta do "a", o contorno de uma
+// imagem — sumia.
 function simplificaRDP(pts, tol){
   if (pts.length < 3) return pts.slice();
   var a = pts[0], b = pts[pts.length - 1], dx = b[0] - a[0], dy = b[1] - a[1];
-  var L = Math.sqrt(dx * dx + dy * dy) || 1, maxD = -1, idx = 0;
+  var L = Math.sqrt(dx * dx + dy * dy), maxD = -1, idx = 0;
   for (var i = 1; i < pts.length - 1; i++){
-    var d = Math.abs(dy * pts[i][0] - dx * pts[i][1] + b[0] * a[1] - b[1] * a[0]) / L;
-    if (!(L > 1e-9)) d = Math.sqrt(Math.pow(pts[i][0] - a[0], 2) + Math.pow(pts[i][1] - a[1], 2));
+    var d = L > 1e-9
+      ? Math.abs(dy * pts[i][0] - dx * pts[i][1] + b[0] * a[1] - b[1] * a[0]) / L
+      : Math.sqrt(Math.pow(pts[i][0] - a[0], 2) + Math.pow(pts[i][1] - a[1], 2));
     if (d > maxD){ maxD = d; idx = i; }
   }
   if (maxD <= tol) return [a, b];
@@ -168,7 +173,7 @@ function caminhosDoTraco(bin, W, H, pxmm, poda){
   soltos.forEach(function(p){
     var perto = cams.some(function(c){ return c.pts.some(function(q){
       return Math.abs(q[0] - p[0]) < 1.2 * pxmm && Math.abs(q[1] - p[1]) < 1.2 * pxmm; }); });
-    if (!perto) cams.push({ pts: [[p[0] - 0.9 * pxmm, p[1]], [p[0] + 0.9 * pxmm, p[1]]], fechada: false, ponta: false });
+    if (!perto) cams.push({ pts: [[p[0] - 1.2 * pxmm, p[1]], [p[0] + 1.2 * pxmm, p[1]]], fechada: false, ponta: false });
   });
   // juntar as pontas que caíram a menos de 0,6 mm umas das outras
   var juntaPx = 0.6 * pxmm, grupos = [];
@@ -190,6 +195,68 @@ function caminhosDoTraco(bin, W, H, pxmm, poda){
     return { curva: true, fechada: c.fechada,
              pts: (c.fechada ? s.slice(0, -1) : s).map(function(p){ return [p[0] / pxmm, p[1] / pxmm]; }) };
   }).filter(function(c){ return c.pts.length > 1; });
+}
+
+// tira as manchas menores que `minPx` pixels: sujeira da imagem que, em
+// ponto reto, viraria um pontinho perdido no papel
+function limpaManchas(bin, W, H, minPx){
+  var visto = new Uint8Array(W * H), pilha = [], comp = [];
+  for (var i = 0; i < W * H; i++){
+    if (!bin[i] || visto[i]) continue;
+    comp.length = 0; pilha.push(i); visto[i] = 1;
+    while (pilha.length){
+      var j = pilha.pop(); comp.push(j);
+      var x = j % W, y = (j - x) / W;
+      for (var k = 0; k < 8; k++){
+        var xx = x + VIZ8[k][0], yy = y + VIZ8[k][1], jj = yy * W + xx;
+        if (xx < 0 || yy < 0 || xx >= W || yy >= H || !bin[jj] || visto[jj]) continue;
+        visto[jj] = 1; pilha.push(jj);
+      }
+    }
+    if (comp.length < minPx) comp.forEach(function(j){ bin[j] = 0; });
+  }
+  return bin;
+}
+
+/* A imagem em linhas, de dois jeitos:
+     contorno — a borda das manchas escuras: o perfil, a silhueta, o logo
+                cheio vira o desenho do contorno dele;
+     traço    — o meio dos riscos: desenho a nanquim, letra feita à mão,
+                que já são linha e só precisam ser afinados.
+   A largura é em milímetros; a sensibilidade, de 5 a 95, é quanto escuro um
+   ponto precisa ter para contar. */
+function imagemEmLinhas(img, larguraMM, sens, inv, modo){
+  var px = ESQ_PX_MM, W = Math.max(10, Math.min(2400, Math.round(larguraMM * px)));
+  var H = Math.max(10, Math.round(W * img.height / img.width));
+  var c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  var x = c.getContext("2d");
+  x.fillStyle = "#fff"; x.fillRect(0, 0, W, H);
+  x.drawImage(img, 0, 0, W, H);
+  var d = x.getImageData(0, 0, W, H).data, bin = new Uint8Array(W * H), lim = sens / 100;
+  for (var i = 0; i < W * H; i++){
+    var a = d[i * 4 + 3] / 255;
+    var lum = (0.2126 * d[i * 4] + 0.7152 * d[i * 4 + 1] + 0.0722 * d[i * 4 + 2]) / 255;
+    var tinta = (1 - lum) * a;
+    bin[i] = (inv ? 1 - tinta : tinta) > lim ? 1 : 0;
+  }
+  limpaManchas(bin, W, H, Math.round(1.5 * px * 1.5 * px));
+  if (modo !== "traco"){
+    // a borda: o pixel aceso que tem um vizinho apagado
+    var borda = new Uint8Array(W * H);
+    for (var y = 0; y < H; y++)
+      for (var xx = 0; xx < W; xx++){
+        var j = y * W + xx;
+        if (!bin[j]) continue;
+        if (xx === 0 || y === 0 || xx === W - 1 || y === H - 1 ||
+            !bin[j - 1] || !bin[j + 1] || !bin[j - W] || !bin[j + W]) borda[j] = 1;
+      }
+    bin = borda;
+  }
+  var cams = caminhosDoTraco(bin, W, H, px, 2);
+  var cx = caixaCaminhos(cams);
+  cams.forEach(function(cm){ cm.pts = cm.pts.map(function(p){ return [p[0] - cx.x, p[1] - cx.y]; }); });
+  return cams;
 }
 
 /* A palavra em linhas. A altura é a da maiúscula, em milímetros — a mesma

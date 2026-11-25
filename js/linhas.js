@@ -99,6 +99,8 @@ function nomePeca(el){
   if (el.kind === "text") return el.text || "texto";
   if (el.kind === "img") return el.nome || "imagem";
   if (el.kind === "pat") return (el.arranjo === "faixa" ? "faixa de " : "moldura de ") + nomeMotivo(el.motivo);
+  if (el.kind === "reto" && el.desenho === "palavra") return (el.texto || "palavra") + " (ponto reto)";
+  if (el.kind === "reto" && el.desenho === "imagem") return (el.nome || "imagem") + " (ponto reto)";
   if (el.kind === "reto") return ((DESENHOS_RETO[el.desenho] || {}).nome || "desenho") + " em ponto reto";
   return NOMES_SYM[el.sym] || "símbolo";
 }

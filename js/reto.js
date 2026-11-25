@@ -24,6 +24,9 @@
 
 var RETO_PASSO = 2.5;          // mm: o comprimento de ponto de fábrica
 var RETO_PASSO_MIN = 2, RETO_PASSO_MAX = 8;
+// a maiúscula abaixo da qual a palavra em ponto reto fica apertada demais:
+// as voltas do "a" e do "e" ficam mais estreitas que a distância entre furos
+var RETO_PALAVRA_MIN = 18;   // mm
 
 function distR(a, b){ var dx = a[0] - b[0], dy = a[1] - b[1]; return Math.sqrt(dx * dx + dy * dy); }
 function entre(a, b, t){ return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; }
@@ -89,7 +92,102 @@ function pontosDoDesenho(caminhos, L){
     }
     return { furos: furos, fechada: !!c.fechada, fixos: fixos };
   });
-  return juntaFurosPerto(desbasta(pontos, RETO_FURO_MIN), RETO_MESMO_FURO);
+  /* Juntar pontas move furos, e furo movido pode cair perto de outro: a
+     limpeza roda em voltas até não sobrar furo colado, quatro no máximo. Da
+     segunda volta em diante só as pontas de linha são fixas — os cantos de
+     um desenho pronto já estão resolvidos na primeira. */
+  for (var volta = 0; volta < 4; volta++){
+    pontos = juntaPontas(pontos, RETO_FURO_MIN);
+    pontos.forEach(function(pt){
+      if (pt.fixos) return;
+      pt.fixos = {};
+      if (!pt.fechada){ pt.fixos[0] = 1; pt.fixos[pt.furos.length - 1] = 1; }
+    });
+    pontos = semRepetidos(juntaFurosPerto(desbasta(pontos, RETO_FURO_MIN), RETO_MESMO_FURO));
+    if (!temColados(pontos, RETO_FURO_MIN)) break;
+  }
+  return pontos;
+}
+
+// se ainda há dois furos entre 0,3 mm (o mesmo furo) e `dmin` um do outro
+function temColados(pontos, dmin){
+  var grade = {};
+  return pontos.some(function(pt){
+    return pt.furos.some(function(f){
+      var gx = Math.floor(f[0] / dmin), gy = Math.floor(f[1] / dmin), achou = false;
+      for (var dx = -1; dx <= 1 && !achou; dx++)
+        for (var dy = -1; dy <= 1 && !achou; dy++)
+          (grade[(gx + dx) + "," + (gy + dy)] || []).forEach(function(o){
+            var d = distR(o, f);
+            if (d < dmin && d >= 0.3) achou = true;
+          });
+      var k = gx + "," + gy;
+      if (!(grade[k] || []).some(function(o){ return distR(o, f) < 0.3; })) (grade[k] = grade[k] || []).push(f);
+      return achou;
+    });
+  });
+}
+
+/* As pontas de linha — o começo e o fim de cada caminho aberto — que caem a
+   menos de 2 mm umas das outras viram um furo só, no meio delas. Na letra
+   elas estão nos encontros do traço (o afinamento deixa o cruzamento do "t"
+   em três ou quatro pontas vizinhas), e juntá-las é o que se faria à mão.
+   Só pontas: juntar furos do meio das linhas fecharia a volta do "a". */
+function juntaPontas(pontos, dmin){
+  var pontas = [];
+  pontos.forEach(function(pt){
+    if (pt.fechada || pt.furos.length < 2) return;
+    pontas.push({ pt: pt, i: 0 }, { pt: pt, i: pt.furos.length - 1 });
+  });
+  // sem corrente: cada ponta entra no grupo cuja primeira ponta está perto
+  // dela, e não no de qualquer vizinha. Em corrente, A perto de B perto de C
+  // juntava pontas a um centímetro e ligava uma letra na outra
+  var grupos = [];
+  pontas.forEach(function(p){
+    var f = p.pt.furos[p.i], g = null;
+    for (var k = 0; k < grupos.length && !g; k++)
+      if (distR(grupos[k].semente, f) < dmin) g = grupos[k];
+    if (!g){ g = { semente: f, x: 0, y: 0, quem: [] }; grupos.push(g); }
+    g.x += f[0]; g.y += f[1]; g.quem.push(p);
+  });
+  /* Dois grupos cujos centros acabaram perto um do outro — cada um puxou as
+     suas pontas para o meio delas — viram um. É centro com centro, e não
+     ponta com ponta, então não vira corrente: o cruzamento do traço, que o
+     afinamento deixa em várias pontas vizinhas, fecha num furo só. */
+  var junta = true;
+  while (junta){
+    junta = false;
+    for (var a = 0; a < grupos.length && !junta; a++)
+      for (var b = a + 1; b < grupos.length && !junta; b++){
+        var ga = grupos[a], gb = grupos[b];
+        var ca = [ga.x / ga.quem.length, ga.y / ga.quem.length];
+        var cb = [gb.x / gb.quem.length, gb.y / gb.quem.length];
+        if (distR(ca, cb) >= dmin) continue;
+        ga.x += gb.x; ga.y += gb.y; ga.quem = ga.quem.concat(gb.quem);
+        grupos.splice(b, 1);
+        junta = true;
+      }
+  }
+  grupos.forEach(function(g){
+    if (g.quem.length < 2) return;
+    var m = [g.x / g.quem.length, g.y / g.quem.length];
+    g.quem.forEach(function(p){ p.pt.furos[p.i] = m; });
+  });
+  return pontos;
+}
+
+/* O mesmo trecho repetido — o cruzamento do traço deixa às vezes três ou
+   quatro caminhos idênticos entre os mesmos dois furos — fica uma vez só:
+   bordado sete vezes, o mesmo ponto rasgaria os dois furos. */
+function semRepetidos(pontos){
+  var visto = {};
+  return pontos.filter(function(pt){
+    var ida = pt.furos.map(function(f){ return f[0].toFixed(2) + "," + f[1].toFixed(2); });
+    var k1 = ida.join("|"), k2 = ida.slice().reverse().join("|");
+    if (visto[k1] || visto[k2]) return false;
+    visto[k1] = 1;
+    return true;
+  });
 }
 
 /* Na ponta fina — a da estrela, a base do coração, o encontro da nervura com
@@ -97,7 +195,9 @@ function pontosDoDesenho(caminhos, L){
    e pouco um do outro, e a tira de papel entre eles rasga. O furo do meio de
    uma linha que estiver a menos de 2 mm de outro furo (que não seja o vizinho
    dele na mesma linha) sai: o ponto de cada lado se junta num ponto um pouco
-   mais comprido, e a forma fica, porque canto e ponta não saem nunca. */
+   mais comprido, e a forma fica, porque canto e ponta não saem nunca. Vale
+   para o vizinho na mesma linha também: ponto mais curto que 2 mm é a mesma
+   tira estreita de papel. */
 var RETO_FURO_MIN = 2;   // mm
 
 function desbasta(pontos, dmin){
@@ -110,11 +210,6 @@ function desbasta(pontos, dmin){
       (grade[k] = grade[k] || []).push(h);
     });
   });
-  var vizinho = function(h, o){
-    if (h.a !== o.a) return false;
-    var n = pontos[h.a].furos.length, d = Math.abs(h.i - o.i);
-    return d === 1 || (pontos[h.a].fechada && d === n - 1);
-  };
   // os fixos primeiro mandam: quem sai é sempre um furo do meio de linha
   todos.forEach(function(h){
     if (h.fixo) return;
@@ -124,7 +219,9 @@ function desbasta(pontos, dmin){
         var lista = grade[(gx + dx) + "," + (gy + dy)] || [];
         for (var j = 0; j < lista.length; j++){
           var o = lista[j];
-          if (o === h || o.fora || vizinho(h, o)) continue;
+          // o vizinho na linha conta também: ponto mais curto que 2 mm é a
+          // mesma tira de papel estreita, só que costurada
+          if (o === h || o.fora) continue;
           var d = distR(h.f, o.f);
           if (d >= dmin || d < RETO_MESMO_FURO) continue;
           h.fora = true; return;
@@ -206,6 +303,15 @@ function arestasUnicas(poligonos){
    que outras escolhas ele tem — colunas e fileiras da colmeia, nervuras da
    folha. Cada opção é [chave, nome na barra, de fábrica, mínimo, máximo]. */
 var DESENHOS_RETO = {
+  /* A palavra e a imagem não são desenho pronto: os caminhos delas saem do
+     traço da fonte e dos escuros da imagem, num canvas (esqueleto.js). Moram
+     aqui para a barra e a gravação tratarem todas as peças de ponto reto do
+     mesmo jeito; `especial` diz que quem as faz é refazReto. */
+  palavra: { nome: "palavra", medida: "altura da maiúscula", padrao: 18, min: 8, max: 150,
+    opcoes: [], especial: true },
+  imagem: { nome: "imagem em linha", medida: "largura", padrao: 60, min: 15, max: 250,
+    opcoes: [["sens", "sens.", 50, 5, 95]], especial: true },
+
   // colmeia: hexágonos de ponta para cima, lado a lado
   colmeia: { nome: "colmeia", medida: "lado do hexágono", padrao: 6, min: 3, max: 30,
     opcoes: [["cols", "colunas", 4, 1, 20], ["rows", "fileiras", 3, 1, 20]],

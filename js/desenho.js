@@ -694,9 +694,16 @@ function refazNoCentro(el, descarta){
 function refazReto(el){
   var d = DESENHOS_RETO[el.desenho] || DESENHOS_RETO.colmeia;
   el.desenho = DESENHOS_RETO[el.desenho] ? el.desenho : "colmeia";
-  var op = opcoesReto(el);
+  var op = opcoesReto(el), cams;
   op.passo = el.passo || RETO_PASSO;   // a folha precisa saber onde caem os furos da borda
-  var cams = d.faz(el.medida, op);
+  if (el.desenho === "palavra"){
+    cams = palavraEmLinhas(el.texto || " ", el.font || FONTE_PADRAO, el.medida, 0);
+  } else if (el.desenho === "imagem"){
+    var img = origemPronta(el);
+    // imagem que ainda não voltou da memória: os furos gravados continuam
+    if (!img){ if (el.pontos) return; cams = []; }
+    else cams = imagemEmLinhas(img, el.medida, op.sens, el.inv, el.modo);
+  } else cams = d.faz(el.medida, op);
   var pontos = pontosDoDesenho(cams, el.passo || RETO_PASSO);
   var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
   pontos.forEach(function(pt){ pt.furos.forEach(function(f){

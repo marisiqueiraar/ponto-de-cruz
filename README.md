@@ -73,6 +73,25 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   é o do **ponto atrás**: o comprimento na frente e o dobro no avesso, o triplo do desenho mais
   15%. O ajuste ponto a ponto é de quadradinho e não aparece nessa peça. O aviso de furos
   colados vale também dentro dela.
+
+  **Palavra e imagem trocam de ponto.** Com uma palavra ou uma imagem selecionada, o botão
+  **ponto reto**, junto de ajustar e espelhar, passa a peça para ponto reto no mesmo lugar e do
+  mesmo tamanho de verdade — a maiúscula de 16 quadradinhos de 2,5 mm vira 40 mm —, guardando
+  texto, fonte, imagem e linha; na peça de ponto reto o mesmo botão diz **ponto cruz** e volta.
+  A palavra em ponto reto é a linha que a caneta faria: o traço da fonte escrito grande num
+  canvas, afinado até o meio (Zhang-Suen), percorrido e cortado nos cruzamentos, com as
+  pontinhas que o afinamento deixa nas quinas podadas e o pingo do "i" mantido como um ponto
+  curto. A cursiva fina, que em quadradinho vira pontilhado, sai limpa assim. Abaixo de
+  **1,8 cm de maiúscula** o campo de tamanho avisa: as voltas das letras ficam mais estreitas
+  que a distância segura entre furos. A imagem vira **contorno** (a borda das manchas escuras:
+  perfil, silhueta, logo cheio) ou **traço** (o meio dos riscos: desenho a nanquim), com a
+  sensibilidade e o inverter de sempre; ela fica guardada com o molde, então continua se
+  refazendo depois de fechar o navegador.
+
+  Para o papel não rasgar, a limpeza dos furos roda em voltas: pontas de linha a menos de 2 mm
+  viram um furo (o cruzamento do traço deixa várias pontas vizinhas), o furo do meio de linha a
+  menos de 2 mm de outro sai — inclusive do vizinho, porque ponto mais curto que 2 mm é a mesma
+  tira estreita —, e o trecho repetido entre os mesmos dois furos fica uma vez só.
 - **Imagem**: um arquivo do aparelho vira quadradinho na hora, e o que sai é uma peça como as
   outras: arrastável, girável, espelhável e ajustável ponto a ponto. Quem decide o caminho é o
   **cores**, na barra de cima. A **largura** em quadradinhos decide quanto detalhe cabe, e vale
