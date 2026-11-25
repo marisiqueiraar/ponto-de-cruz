@@ -281,7 +281,19 @@ function syncControls(){
       ? "A imagem desta peça não está mais na memória do navegador. Use o trocar para pôr o arquivo de novo."
       : "Troca o claro pelo escuro — é o que resolve desenho branco sobre fundo escuro.";
   } else if (el.kind === "reto"){
-    var pal = el.desenho === "palavra", ima = el.desenho === "imagem";
+    var pal = el.desenho === "palavra", ima = el.desenho === "imagem", arr = el.arranjo || "solta";
+    // palavra e imagem são sempre soltas; os desenhos prontos se repetem
+    $("tRetoArr").classList.toggle("hide", pal || ima);
+    $("retoArr").value = arr;
+    $("tRetoRep").classList.toggle("hide", pal || ima || arr !== "faixa");
+    $("retoDeit").classList.toggle("hide", pal || ima || arr !== "faixa");
+    $("tRetoGap").classList.toggle("hide", pal || ima || arr === "solta" ||
+      (arr === "moldura" && (el.desenho === "ziguezague" || el.desenho === "ondas")));
+    $("tRetoMarg").classList.toggle("hide", pal || ima || arr !== "moldura");
+    $("retoRep").value = el.rep || 6;
+    $("retoGap").value = el.gap == null ? 3 : el.gap;
+    $("retoMarg").value = el.margem == null ? 6 : el.margem;
+    $("retoDeit").classList.toggle("on", !!el.deitada);
     $("tRetoDes").classList.toggle("hide", ima);
     $("tRetoTxt").classList.toggle("hide", !pal);
     $("tRetoFont").classList.toggle("hide", !pal);
@@ -464,6 +476,7 @@ function addText(){
 function addReto(){
   var d = DESENHOS_RETO.colmeia;
   var el = { kind: "reto", desenho: "colmeia", medida: d.padrao, passo: RETO_PASSO, opts: {},
+             arranjo: "solta", rep: 6, gap: 3, margem: 6, deitada: 0,
              rot: 0, flip: 0, edits: [], x: 0, y: 0,
              color: thread, colorName: threadLabel(thread) || thread };
   rebuild(el);
@@ -529,6 +542,14 @@ function trocaPonto(el){
   }, fam || FONTE_PADRAO);
 }
 $("trocaPonto").addEventListener("click", function(){ if (els[sel]) trocaPonto(els[sel]); });
+$("retoDeit").addEventListener("click", function(){
+  var el = els[sel];
+  if (!el || el.kind !== "reto") return;
+  el.deitada = el.deitada ? 0 : 1;
+  this.classList.toggle("on", !!el.deitada);
+  refazNoCentro(el);
+  draw(); pushHist();
+});
 $("retoInv").addEventListener("click", function(){
   var el = els[sel];
   if (!el || el.kind !== "reto" || el.desenho !== "imagem") return;
@@ -909,8 +930,16 @@ function updateSelected(){
       });
     }
     el.passo = nv("retoPasso", RETO_PASSO_MIN, RETO_PASSO_MAX, el.passo);
+    if (el.desenho !== "palavra" && el.desenho !== "imagem"){
+      el.arranjo = $("retoArr").value || "solta";
+      el.rep = nv("retoRep", 1, 40, el.rep || 6);
+      el.gap = nv("retoGap", 0, 30, el.gap == null ? 3 : el.gap);
+      el.margem = nv("retoMarg", 0, 60, el.margem == null ? 6 : el.margem);
+    }
     var refaz = function(){
-      refazNoCentro(el);
+      // a moldura volta para a foto; o resto cresce em volta do próprio centro
+      if (el.arranjo === "moldura"){ rebuild(el); centraNaMira(el); }
+      else refazNoCentro(el);
       syncControls();
       renderChips(); draw(); pushLater();
     };
@@ -948,7 +977,8 @@ function updateSelected(){
 ["txt","font","rows","thick","thr","esp","arc","sym","symScale",
  "imgLarg","imgThr","imgCorte","imgCores",
  "patArr","patMot","patScale","patGap","patMargem","patRep","patCores",
- "retoDes","retoMed","retoPasso","retoA","retoB","retoTxt","retoFont","retoModo"]
+ "retoDes","retoMed","retoPasso","retoA","retoB","retoTxt","retoFont","retoModo",
+ "retoArr","retoRep","retoGap","retoMarg"]
   .forEach(function(id){ $(id).addEventListener("input", updateSelected); });
 $("imgFonte").addEventListener("change", function(){
   var el = els[sel];
@@ -1104,7 +1134,7 @@ function fotoMudou(antes){
   photo.y = antes.y + antes.h / 2 - photo.h / 2;
   clampPhoto();
   els.forEach(function(el){
-    if (el.kind === "pat" && el.arranjo === "moldura") return;   // refazMolduras cuida dela
+    if ((el.kind === "pat" || el.kind === "reto") && el.arranjo === "moldura") return;   // refazMolduras cuida dela
     var b = bboxMM(el), cx = b.x + b.w / 2, cy = b.y + b.h / 2;
     var nx = seguePosicao(cx, antes.x, antes.w, photo.x, photo.w);
     var ny = seguePosicao(cy, antes.y, antes.h, photo.y, photo.h);
@@ -1127,7 +1157,7 @@ function onPhotoChange(){
 function refazMolduras(){
   var mudou = false;
   els.forEach(function(el){
-    if (el.kind !== "pat" || el.arranjo !== "moldura") return;
+    if ((el.kind !== "pat" && el.kind !== "reto") || el.arranjo !== "moldura") return;
     rebuild(el); centraNaMira(el); mudou = true;
   });
   if (mudou){ renderPaleta(); renderFios(); }

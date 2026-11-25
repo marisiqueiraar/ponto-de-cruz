@@ -456,6 +456,86 @@ var DESENHOS_RETO = {
     } }
 };
 
+/* ---- faixa e moldura ------------------------------------------------------
+
+   Os desenhos em linha também se repetem: em fileira, que é o marca-página,
+   e em volta da foto, que é a moldura. Repetir é copiar os caminhos do
+   desenho deslocados; a conta de furos vem depois, no conjunto — e é ela que
+   junta o furo que duas cópias encostadas dividirem.
+
+   Na moldura de ziguezague e de ondas não há cópia: a linha dá a volta na
+   foto, contínua, com os dentes e as ondas repartidos por igual em cada lado
+   e o canto como furo. */
+function copiaCaminhos(cams, dx, dy){
+  return cams.map(function(c){
+    return { curva: c.curva, fechada: c.fechada,
+             pts: c.pts.map(function(p){ return [p[0] + dx, p[1] + dy]; }) };
+  });
+}
+
+function arranjaFaixa(cams, n, gap, deitada){
+  var b = caixaCaminhos(cams), out = [];
+  for (var i = 0; i < n; i++)
+    out = out.concat(copiaCaminhos(cams,
+      deitada ? i * (b.w + gap) - b.x : -b.x,
+      deitada ? -b.y : i * (b.h + gap) - b.y));
+  return out;
+}
+
+// os centros dos motivos em volta de um retângulo: um em cada canto e os
+// lados repartidos por igual, no passo mais perto do pedido — o de cima e o
+// de baixo com um passo, os dos lados com outro, porque motivo alto e
+// estreito, como a folha, cabe mais vezes na horizontal
+function pontosDoAnel(ret, passoH, passoV){
+  var cantos = [[ret.x, ret.y], [ret.x + ret.w, ret.y], [ret.x + ret.w, ret.y + ret.h], [ret.x, ret.y + ret.h]];
+  var out = [];
+  for (var k = 0; k < 4; k++){
+    var a = cantos[k], b = cantos[(k + 1) % 4], passo = k % 2 ? passoV : passoH;
+    var n = Math.max(1, Math.round(distR(a, b) / passo));
+    for (var j = 0; j < n; j++) out.push(entre(a, b, j / n));
+  }
+  return out;
+}
+
+function arranjaMoldura(cams, ret, gap){
+  var b = caixaCaminhos(cams);
+  // os motivos ficam por fora da margem: o centro deles anda meio motivo para
+  // fora — meia largura nos lados, meia altura em cima e embaixo
+  var fora = { x: ret.x - b.w / 2, y: ret.y - b.h / 2, w: ret.w + b.w, h: ret.h + b.h };
+  var out = [];
+  pontosDoAnel(fora, b.w + gap, b.h + gap).forEach(function(c){
+    out = out.concat(copiaCaminhos(cams, c[0] - b.x - b.w / 2, c[1] - b.y - b.h / 2));
+  });
+  return out;
+}
+
+// a linha contínua em volta: cada lado com um número inteiro de dentes (ou de
+// ondas), deslocada para fora e para dentro do retângulo
+function molduraContinua(tipo, ret, o){
+  var onda = tipo === "ondas", passoDente = onda ? (o.onda || 20) : (o.dente || 8);
+  var amp = onda ? (o.alt || 4) : (o.alt || 8) / 2, linhas = onda ? (o.linhas || 1) : 1;
+  var sep = o.sep || 7, out = [];
+  for (var l = 0; l < linhas; l++){
+    var r = { x: ret.x - amp - l * sep, y: ret.y - amp - l * sep, w: ret.w + 2 * (amp + l * sep), h: ret.h + 2 * (amp + l * sep) };
+    var cantos = [[r.x, r.y], [r.x + r.w, r.y], [r.x + r.w, r.y + r.h], [r.x, r.y + r.h]];
+    var pts = [];
+    for (var k = 0; k < 4; k++){
+      var a = cantos[k], b = cantos[(k + 1) % 4], L = distR(a, b);
+      var n = Math.max(1, Math.round(L / passoDente)), nx = (b[1] - a[1]) / L, ny = -(b[0] - a[0]) / L;
+      var amostras = onda ? n * 24 : n * 2;
+      for (var j = 0; j < amostras; j++){
+        var t = j / amostras, base = entre(a, b, t);
+        var desl = onda ? amp * Math.sin(t * n * Math.PI * 2) : (j % 2 ? amp : 0);
+        // o normal aponta para fora; a linha parte do retângulo aumentado e o
+        // dente volta para dentro, sem nunca passar da margem pedida
+        pts.push([base[0] - nx * desl, base[1] - ny * desl]);
+      }
+    }
+    out.push({ pts: pts, curva: onda, fechada: true });
+  }
+  return out;
+}
+
 // as opções de uma peça, com as de fábrica no que faltar
 function opcoesReto(el){
   var d = DESENHOS_RETO[el.desenho], o = {};

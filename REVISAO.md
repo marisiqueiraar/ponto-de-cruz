@@ -31,7 +31,7 @@ você poder responder "pode fazer o A1, o B3 não".
 | A9 lista de fontes | feito — amostra na altura da peça, lista mais larga |
 | A10 ajuste com a linha escolhida | feito |
 | B fontes | feito — 5 saíram, altura mínima de cada uma, Dancing Script de fábrica, leitura em nove encaixes (6% menos traço partido) |
-| B5 palavra em ponto reto | falta — é a fase do ponto reto |
+| B5 palavra em ponto reto | feito — branch `claude/ponto-reto` |
 | C1 um toque, duas coisas | feito — "aplicar na peça" e "minha caixa" separados |
 | C2 várias de uma vez | feito — colar os códigos |
 | C3 Anchor sem nome | não dá: a marca não nomeia as cores |
@@ -46,12 +46,12 @@ você poder responder "pode fazer o A1, o B3 não".
 | E3 uma foto só | falta — BACKLOG |
 | F1–F3 uso da tela | falta — BACKLOG |
 | G1 arquivo único | feito — 15 arquivos em `js/`, `css/app.css` |
-| G2 só quadradinho | falta — é a base do ponto reto |
+| G2 só quadradinho | feito — a peça de ponto reto tem caminhos e furos livres |
 | G3 teste das letras | parcial — `testes/fontes.js` cobre a lista; a qualidade do desenho foi medida à mão |
 | G4 layout.html | feito — saiu |
 | G5 fontes | feito — 0,89 MB |
 | G6 commits no GitHub | feito |
-| H ponto reto | falta — próxima fase |
+| H ponto reto | feito — nove desenhos, palavra, imagem, faixa e moldura; o que ficou está no BACKLOG, 5½ |
 
 ---
 

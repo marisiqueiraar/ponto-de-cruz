@@ -703,7 +703,18 @@ function refazReto(el){
     // imagem que ainda não voltou da memória: os furos gravados continuam
     if (!img){ if (el.pontos) return; cams = []; }
     else cams = imagemEmLinhas(img, el.medida, op.sens, el.inv, el.modo);
-  } else cams = d.faz(el.medida, op);
+  } else {
+    cams = d.faz(el.medida, op);
+    if (el.arranjo === "faixa")
+      cams = arranjaFaixa(cams, Math.max(1, Math.min(40, el.rep | 0 || 1)), +el.gap || 0, el.deitada);
+    else if (el.arranjo === "moldura"){
+      // em volta da foto, centrada nela: o retângulo é a foto mais a margem
+      var mira = miraMM(), mg = +el.margem || 0;
+      var ret = { x: -mira.w / 2 - mg, y: -mira.h / 2 - mg, w: mira.w + 2 * mg, h: mira.h + 2 * mg };
+      cams = (el.desenho === "ziguezague" || el.desenho === "ondas")
+        ? molduraContinua(el.desenho, ret, op) : arranjaMoldura(cams, ret, +el.gap || 0);
+    }
+  }
   var pontos = pontosDoDesenho(cams, el.passo || RETO_PASSO);
   var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
   pontos.forEach(function(pt){ pt.furos.forEach(function(f){

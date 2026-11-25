@@ -74,6 +74,15 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   15%. O ajuste ponto a ponto é de quadradinho e não aparece nessa peça. O aviso de furos
   colados vale também dentro dela.
 
+  **Faixa e moldura em ponto reto.** Os desenhos prontos têm um **arranjo**: solto, **faixa**
+  (o desenho repetido em fileira, em pé ou deitada, com o espaço pedido — o marca-página de
+  corações, de folhas, de estrelas) ou **moldura** (o desenho repetido em volta da foto, por
+  fora da margem, um em cada canto e os lados repartidos por igual — cada lado no passo do
+  motivo naquela direção, então folha alta e estreita cabe mais vezes em cima que dos lados).
+  No ziguezague e nas ondas a moldura é uma linha só, contínua e fechada, com os dentes e as
+  ondas repartidos por igual em cada lado. A moldura de ponto reto acompanha a foto como a de
+  blocos: foto que muda, moldura refeita e centrada.
+
   **Palavra e imagem trocam de ponto.** Com uma palavra ou uma imagem selecionada, o botão
   **ponto reto**, junto de ajustar e espelhar, passa a peça para ponto reto no mesmo lugar e do
   mesmo tamanho de verdade — a maiúscula de 16 quadradinhos de 2,5 mm vira 40 mm —, guardando

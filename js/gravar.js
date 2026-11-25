@@ -23,6 +23,7 @@ function packReto(el){
            color: el.color || "", colorName: el.colorName || "",
            desenho: el.desenho, medida: el.medida, passo: el.passo, opts: el.opts || {},
            texto: el.texto, font: el.font, img: el.img, nome: el.nome, inv: el.inv ? 1 : 0, modo: el.modo,
+           arranjo: el.arranjo || "solta", rep: el.rep, gap: el.gap, margem: el.margem, deitada: el.deitada ? 1 : 0,
            w: Math.round(el.w * 100) / 100, h: Math.round(el.h * 100) / 100,
            pontos: (el.pontos || []).map(function(pt){
              return { f: pt.fechada ? 1 : 0,
@@ -38,6 +39,11 @@ function unpackReto(r){
              edits: [], manual: 0 };
   var d = DESENHOS_RETO[el.desenho];
   el.medida = Math.max(d.min, Math.min(d.max, el.medida || d.padrao));
+  el.arranjo = r.arranjo === "faixa" || r.arranjo === "moldura" ? r.arranjo : "solta";
+  el.rep = Math.max(1, Math.min(40, +r.rep || 6));
+  el.gap = Math.max(0, Math.min(30, r.gap == null ? 3 : +r.gap));
+  el.margem = Math.max(0, Math.min(60, r.margem == null ? 6 : +r.margem));
+  el.deitada = r.deitada ? 1 : 0;
   if (el.desenho === "palavra"){
     el.texto = typeof r.texto === "string" ? r.texto : "";
     el.font = fonteConhecida(r.font) ? r.font : (FONTE_TROCADA[r.font] || FONTE_PADRAO);
