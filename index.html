@@ -81,9 +81,9 @@
         </optgroup>
       </select></span>
       <span class="sep"></span>
-      <span class="t" title="Altura da letra maiúscula, em quadradinhos. É medida na fonte, não na palavra: a mesma altura dá sempre a mesma letra, tenha a palavra “g” e “l” ou não. O que ascende e desce passa disso. A aba molde mostra quanto dá em milímetros."><span>altura</span><input id="rows" type="number" min="8" max="60" step="1" value="16" aria-describedby="alturaDica"><b id="rowsOut" class="hide">16</b></span>
-      <span class="t" title="Engrossa o traço da fonte antes de virar quadradinho, em passos. Letra fina some em quadradinho pequeno; 0 deixa o traço como a fonte desenhou."><span>traço</span><input id="thick" type="number" min="0" max="12" step="1" value="2"><b id="thickOut" class="hide">2</b></span>
-      <span class="t" title="Quanto de tinta um quadradinho precisa ter para acender, em por cento. Menos acende mais quadradinhos e engorda a letra; mais deixa só o miolo do traço."><span>sens.</span><input id="thr" type="number" min="10" max="80" step="5" value="35"><b id="thrOut" class="hide">35</b></span>
+      <span class="t" title="Altura da letra maiúscula, em quadradinhos. É medida na fonte, não na palavra: a mesma altura dá sempre a mesma letra, tenha a palavra “g” e “l” ou não. O que ascende e desce passa disso. A aba molde mostra quanto dá em milímetros."><span>altura</span><input id="rows" type="number" min="8" max="60" step="1" value="16" aria-describedby="alturaDica"><b id="rowsOut" class="hide">16</b><b class="cm" id="rowsCm"></b></span>
+      <span class="t" title="Engrossa o traço da fonte antes de virar quadradinho, em passos. Letra fina some em quadradinho pequeno; 0 deixa o traço como a fonte desenhou."><span>traço</span><input id="thick" type="number" min="0" max="12" step="1" value="2"><b id="thickOut" class="hide">2</b><b class="cm" id="thickRef"></b></span>
+      <span class="t" title="Quanto de tinta um quadradinho precisa ter para acender, em por cento. Menos acende mais quadradinhos e engorda a letra; mais deixa só o miolo do traço."><span>sens.</span><input id="thr" type="number" min="10" max="80" step="5" value="35"><b id="thrOut" class="hide">35</b><b class="cm" id="thrRef"></b></span>
       <span class="t" title="Quadradinhos a mais entre uma letra e outra — o que resolve cursiva fechando em letra pequena."><span>espaço</span><input id="esp" type="number" min="0" max="8" step="1" value="0"><b id="espOut" class="hide">0</b></span>
       <span class="t" title="Curva a palavra inteira, em graus: positivo arqueia para cima, negativo vira vale."><span>arco</span><input id="arc" type="number" min="-120" max="120" step="5" value="0"><b id="arcOut" class="hide">0</b></span>
     </fieldset>
@@ -108,13 +108,13 @@
         <option value="aviao">Avião</option>
         <option value="mala">Mala de viagem</option>
       </select></span>
-      <span class="t"><span>tamanho</span><input id="symScale" type="number" min="1" max="6" step="1" value="1"><b id="symScaleOut" class="hide">1</b></span>
+      <span class="t"><span>tamanho</span><input id="symScale" type="number" min="1" max="6" step="1" value="1"><b id="symScaleOut" class="hide">1</b><b class="cm" id="symCm"></b></span>
     </fieldset>
 
     <fieldset id="ctlImg" class="hide">
-      <span class="t" title="Largura da peça em quadradinhos. A altura vem sozinha, na proporção da imagem. É este número que decide quanto detalhe cabe: imagem estreita perde o traço fino, imagem larga custa ponto."><span>largura</span><input id="imgLarg" type="number" min="10" max="120" step="1" value="40"><b id="imgLargOut" class="hide">40</b></span>
+      <span class="t" title="Largura da peça em quadradinhos. A altura vem sozinha, na proporção da imagem. É este número que decide quanto detalhe cabe: imagem estreita perde o traço fino, imagem larga custa ponto."><span>largura</span><input id="imgLarg" type="number" min="10" max="120" step="1" value="40"><b id="imgLargOut" class="hide">40</b><b class="cm" id="imgCm"></b></span>
       <span class="t" title="Quantas linhas diferentes a peça usa. Em 1 ela é silhueta, numa linha só, e valem a sensibilidade e o inverter. De 2 para cima a imagem vira gráfico colorido: as cores dela são agrupadas nesse número de tons e cada tom vira a meada mais próxima da marca escolhida."><span>cores</span><input id="imgCores" type="number" min="1" max="20" step="1" value="1"><b id="imgCoresOut" class="hide">1</b></span>
-      <span class="t" id="tImgThr" title="Quanto de escuro um quadradinho precisa ter para acender, em por cento. Menos acende mais e engorda o desenho; mais deixa só o que é bem escuro."><span>sens.</span><input id="imgThr" type="number" min="0" max="90" step="5" value="50"><b id="imgThrOut" class="hide">50</b></span>
+      <span class="t" id="tImgThr" title="Quanto de escuro um quadradinho precisa ter para acender, em por cento. Menos acende mais e engorda o desenho; mais deixa só o que é bem escuro."><span>sens.</span><input id="imgThr" type="number" min="0" max="90" step="5" value="50"><b id="imgThrOut" class="hide">50</b><b class="cm" id="imgThrRef"></b></span>
       <span class="t hide" id="tImgCorte" title="Quadradinho com menos escuro que isto fica vazio, sem linha nenhuma — é o que tira o fundo branco de um logo ou o quadriculado de um gráfico. Em 0 nada é descartado e o fundo também ganha meada."><span>fundo</span><input id="imgCorte" type="number" min="0" max="80" step="5" value="10"><b id="imgCorteOut" class="hide">10</b></span>
       <span class="t hide" id="tImgFonte" title="De que cartela as linhas do gráfico são escolhidas. “minhas” usa só o que você já marcou como seu — e aí o gráfico sai com as meadas que você tem em casa."><span>linhas</span><select id="imgFonte"></select></span>
       <button type="button" id="imgInv" class="tbtn" title="Troca o claro pelo escuro — é o que resolve desenho branco sobre fundo escuro.">inverter</button>
@@ -127,7 +127,7 @@
         <option value="faixa">faixa</option>
       </select></span>
       <span class="t"><span>desenho</span><select id="patMot"></select></span>
-      <span class="t" title="Quantas vezes cada quadradinho do desenho é repetido: 2 deixa o bloco com o dobro do lado."><span>tamanho</span><input id="patScale" type="number" min="1" max="4" step="1" value="1"></span>
+      <span class="t" title="Quantas vezes cada quadradinho do desenho é repetido: 2 deixa o bloco com o dobro do lado."><span>tamanho</span><input id="patScale" type="number" min="1" max="4" step="1" value="1"><b class="cm" id="patCm"></b></span>
       <span class="t" title="Quadradinhos vazios entre um bloco e outro."><span>espaço</span><input id="patGap" type="number" min="0" max="10" step="1" value="1"></span>
       <span class="t" id="tPatMargem" title="Folga entre a foto e o lado de dentro da moldura, em milímetros. A moldura ganha ou perde blocos para a foto caber com essa folga."><span>margem</span><input id="patMargem" type="number" min="0" max="60" step="1" value="6"></span>
       <span class="t hide" id="tPatRep" title="Quantas vezes o motivo se repete na faixa."><span>repetir</span><input id="patRep" type="number" min="1" max="40" step="1" value="6"></span>
@@ -361,9 +361,17 @@
     <h2>molde</h2>
     <div class="field">
       <label for="mm">Espaçamento entre furos <b id="mmOut">2,5</b> mm</label>
+      <div class="abas" id="mmAtalhos" role="group" aria-label="espaçamentos mais usados">
+        <button type="button" data-mm="2">delicado · 2 mm</button>
+        <button type="button" data-mm="2.5">padrão · 2,5 mm</button>
+        <button type="button" data-mm="3">firme · 3 mm</button>
+      </div>
       <input id="mm" type="range" min="1" max="6" step="0.5" value="2.5">
-      <p class="note">Vale para o molde inteiro, não só para a peça selecionada. Entre 2,5 e
-      3 mm é o mais seguro neste material.</p>
+      <p class="note">É o lado de cada quadradinho, e vale para o molde inteiro. Ele decide o
+      tamanho de tudo: as peças são contadas em quadradinhos, então mudar o espaçamento aumenta
+      ou diminui todas juntas. Entre 2,5 e 3 mm é o mais seguro no papel; abaixo de 2 mm a tira
+      entre dois furos rasga.</p>
+      <p class="note" id="mmEfeito"></p>
     </div>
     <div class="rule"></div>
     <div class="num"><span>Pontos</span><strong id="count" aria-live="polite">—</strong></div>
@@ -472,6 +480,7 @@
 <!-- ===================== rodapé ===================== -->
 <div class="foot">
   <p class="hint" id="modeHint">Arraste a palavra ou a foto para posicionar, ou arraste no vazio para laçar várias e mover juntas. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.</p>
+  <button type="button" class="saved furos" id="mmFoot" title="O espaçamento entre furos — muda na aba molde."></button>
   <span class="saved" id="manualOut"></span>
   <span class="saved" id="areaOut"></span>
   <span class="saved" id="gravado">salvo neste navegador</span>

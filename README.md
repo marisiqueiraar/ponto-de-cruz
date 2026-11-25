@@ -176,6 +176,14 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   está em cartela nenhuma, o cadastro de **linha avulsa** no pé do painel: marca, código e cor.
   Ela nasce marcada, entra em **minhas** junto com as outras e aparece também na marca
   **avulsas** — onde desmarcar apaga de vez, porque ela só existe por você ter cadastrado.
+- **O que cada número vale**: os campos da barra contam quadradinhos, que é como o desenho é
+  feito, e ao lado de cada um aparece o que ele vale no papel — a altura da letra em
+  centímetros, o tamanho do símbolo, a largura da imagem, o lado do bloco da moldura. Traço e
+  sensibilidade, que não são medida, dizem o efeito numa palavra (*médio*, *grosso*;
+  *engorda*, *afina*). O espaçamento entre furos, que decide o tamanho de tudo, ganhou três
+  atalhos com nome — delicado 2 mm, padrão 2,5 mm, firme 3 mm —, aparece o tempo todo no
+  rodapé, e a aba molde mostra o efeito dele com os números de agora. No computador a barra de
+  cima quebra em duas linhas em vez de esconder campos para lá da borda.
 - **Onde as peças ficam**: o molde novo nasce vazio, e cada peça nova nasce reta, num lugar
   livre — embaixo da foto, que é onde vai o nome; se ali não couber, em cima e depois dos
   lados —, sem encostar na foto nem nas outras peças. Mexer na altura, na fonte, no texto ou

@@ -305,6 +305,7 @@ function draw(){
 
   showFit(cropArea());
   renderFios();
+  mostraMedidas();
   rulers(k);
   agendaColados();
 

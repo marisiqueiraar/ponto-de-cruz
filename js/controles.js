@@ -138,6 +138,47 @@ function renderChips(){
   });
 }
 
+/* ---- o que cada número vale ---------------------------------------------
+
+   Os campos da barra contam quadradinhos, que é como o desenho é feito e
+   como quem borda conta. Mas quem vai à mesa com a foto mede em centímetros:
+   ao lado de cada número aparece o que ele vale no papel, refeito a cada
+   desenho — e por isso acompanha o espaçamento entre furos quando ele muda.
+   Traço e sensibilidade não são medida; ganham uma palavra que diz o efeito. */
+function cm(mm){ return fmt(mm / 10) + " cm"; }
+function palavraTraco(v){
+  return v <= 0 ? "como a fonte" : v <= 2 ? "médio" : v <= 5 ? "grosso" : "muito grosso";
+}
+function palavraSens(pc){
+  return pc <= 25 ? "engorda" : pc <= 45 ? "equilibrado" : "afina";
+}
+function mostraMedidas(){
+  var el = els[sel], p = P();
+  var dim = el ? bboxMM(el) : null;
+  $("rowsCm").textContent = el && el.kind === "text" ? cm(el.rowsTarget * p) : "";
+  $("thickRef").textContent = el && el.kind === "text" ? palavraTraco(el.thick) : "";
+  $("thrRef").textContent = el && el.kind === "text" ? palavraSens(Math.round(el.thr * 100)) : "";
+  $("symCm").textContent = el && el.kind === "sym" ? cm(dim.w) + " × " + cm(dim.h).replace(" cm", "") + " cm" : "";
+  $("imgCm").textContent = el && el.kind === "img" ? cm(dim.w) : "";
+  $("imgThrRef").textContent = el && el.kind === "img" ? palavraSens(Math.round(el.thr * 100)) : "";
+  if (el && el.kind === "pat"){
+    var g = motivosDe(el).map(function(ch){ return gradeMotivo(ch, el.scale); });
+    var lado = Math.max.apply(null, g.map(function(x){ return Math.max(x.length, x[0].length); }));
+    $("patCm").textContent = "bloco " + cm(lado * p);
+  } else $("patCm").textContent = "";
+  $("mmFoot").textContent = "furos a " + fmt(p) + " mm";
+  /* o efeito do espaçamento, com os números de agora: é a resposta para
+     "o que muda se eu passar de 2,5 para 3?" sem ter de experimentar */
+  var ex = el && el.kind === "text" ? el.rowsTarget : 16;
+  $("mmEfeito").innerHTML = "Com furos a <b>" + fmt(p) + " mm</b>, uma letra de " + ex +
+    " quadradinhos tem <b>" + cm(ex * p) + "</b> de maiúscula — a " + fmt(2) + " mm seriam " +
+    cm(ex * 2) + ", a " + fmt(3) + " mm, " + cm(ex * 3) + "." +
+    (el ? " A peça selecionada mede <b>" + cm(dim.w) + " × " + cm(dim.h) + "</b>." : "");
+  [].forEach.call(document.querySelectorAll("#mmAtalhos button"), function(b){
+    b.classList.toggle("on", Math.abs(parseFloat(b.dataset.mm) - p) < 0.01);
+  });
+}
+
 function syncControls(){
   var el = els[sel];
   var piece = foco === "el" && !!el;
@@ -780,6 +821,17 @@ $("rot").addEventListener("input", function(){
 $("mm").addEventListener("input", function(){
   $("mmOut").textContent = fmt(parseFloat($("mm").value));
   draw(); pushLater();
+});
+[].forEach.call(document.querySelectorAll("#mmAtalhos button"), function(b){
+  b.addEventListener("click", function(){
+    $("mm").value = b.dataset.mm;
+    $("mm").dispatchEvent(new Event("input", { bubbles: true }));
+  });
+});
+// o espaçamento no rodapé leva para onde ele se muda
+$("mmFoot").addEventListener("click", function(){
+  var b = document.querySelector('.rail button[data-pane="molde"]');
+  if (b && !b.classList.contains("on")) b.click();
 });
 
 function papelPainel(){
