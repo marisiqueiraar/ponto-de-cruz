@@ -18,11 +18,11 @@
      curva — uma curva desenhada fina, em pedacinhos: os furos são postos a
              distâncias iguais ao longo dela, e os pedacinhos não importam.
 
-   O comprimento de ponto é escolhido na peça (de fábrica, 3 mm). Abaixo de
+   O comprimento de ponto é escolhido na peça (de fábrica, 2,5 mm). Abaixo de
    2 mm a tira de papel entre dois furos rasga — o mesmo limite do ponto
    cruz. */
 
-var RETO_PASSO = 3;            // mm: o comprimento de ponto de fábrica
+var RETO_PASSO = 2.5;          // mm: o comprimento de ponto de fábrica
 var RETO_PASSO_MIN = 2, RETO_PASSO_MAX = 8;
 
 function distR(a, b){ var dx = a[0] - b[0], dy = a[1] - b[1]; return Math.sqrt(dx * dx + dy * dy); }
@@ -79,9 +79,64 @@ var RETO_MESMO_FURO = 1;   // mm
 function pontosDoDesenho(caminhos, L){
   var pontos = caminhos.map(function(c){
     var furos = c.curva ? furosCurva(c.pts, L, c.fechada) : furosReta(c.pts, L, c.fechada);
-    return { furos: furos, fechada: !!c.fechada };
+    // cantos e pontas não saem nunca: são eles que dão a forma
+    var fixos = {};
+    if (!c.fechada){ fixos[0] = 1; fixos[furos.length - 1] = 1; }
+    if (!c.curva){
+      var ch = {};
+      c.pts.forEach(function(p){ ch[p[0].toFixed(3) + "," + p[1].toFixed(3)] = 1; });
+      furos.forEach(function(f, i){ if (ch[f[0].toFixed(3) + "," + f[1].toFixed(3)]) fixos[i] = 1; });
+    }
+    return { furos: furos, fechada: !!c.fechada, fixos: fixos };
   });
-  return juntaFurosPerto(pontos, RETO_MESMO_FURO);
+  return juntaFurosPerto(desbasta(pontos, RETO_FURO_MIN), RETO_MESMO_FURO);
+}
+
+/* Na ponta fina — a da estrela, a base do coração, o encontro da nervura com
+   a borda da folha — os primeiros furos das duas linhas ficam a um milímetro
+   e pouco um do outro, e a tira de papel entre eles rasga. O furo do meio de
+   uma linha que estiver a menos de 2 mm de outro furo (que não seja o vizinho
+   dele na mesma linha) sai: o ponto de cada lado se junta num ponto um pouco
+   mais comprido, e a forma fica, porque canto e ponta não saem nunca. */
+var RETO_FURO_MIN = 2;   // mm
+
+function desbasta(pontos, dmin){
+  var grade = {}, todos = [];
+  pontos.forEach(function(pt, a){
+    pt.furos.forEach(function(f, i){
+      var h = { f: f, a: a, i: i, fixo: !!pt.fixos[i], fora: false };
+      todos.push(h);
+      var k = Math.floor(f[0] / dmin) + "," + Math.floor(f[1] / dmin);
+      (grade[k] = grade[k] || []).push(h);
+    });
+  });
+  var vizinho = function(h, o){
+    if (h.a !== o.a) return false;
+    var n = pontos[h.a].furos.length, d = Math.abs(h.i - o.i);
+    return d === 1 || (pontos[h.a].fechada && d === n - 1);
+  };
+  // os fixos primeiro mandam: quem sai é sempre um furo do meio de linha
+  todos.forEach(function(h){
+    if (h.fixo) return;
+    var gx = Math.floor(h.f[0] / dmin), gy = Math.floor(h.f[1] / dmin);
+    for (var dx = -1; dx <= 1; dx++)
+      for (var dy = -1; dy <= 1; dy++){
+        var lista = grade[(gx + dx) + "," + (gy + dy)] || [];
+        for (var j = 0; j < lista.length; j++){
+          var o = lista[j];
+          if (o === h || o.fora || vizinho(h, o)) continue;
+          var d = distR(h.f, o.f);
+          if (d >= dmin || d < RETO_MESMO_FURO) continue;
+          h.fora = true; return;
+        }
+      }
+  });
+  var sai = {};
+  todos.forEach(function(h){ if (h.fora) sai[h.a + ":" + h.i] = 1; });
+  return pontos.map(function(pt, a){
+    return { fechada: pt.fechada,
+             furos: pt.furos.filter(function(f, i){ return !sai[a + ":" + i]; }) };
+  });
 }
 
 function juntaFurosPerto(pontos, dmin){
@@ -147,9 +202,13 @@ function arestasUnicas(poligonos){
   return out;
 }
 
+/* Cada desenho diz o que a sua medida principal mede, entre que limites, e
+   que outras escolhas ele tem — colunas e fileiras da colmeia, nervuras da
+   folha. Cada opção é [chave, nome na barra, de fábrica, mínimo, máximo]. */
 var DESENHOS_RETO = {
   // colmeia: hexágonos de ponta para cima, lado a lado
-  colmeia: { nome: "colmeia", medida: "lado do hexágono", padrao: 6,
+  colmeia: { nome: "colmeia", medida: "lado do hexágono", padrao: 6, min: 3, max: 30,
+    opcoes: [["cols", "colunas", 4, 1, 20], ["rows", "fileiras", 3, 1, 20]],
     faz: function(lado, o){
       var cols = o.cols || 4, rows = o.rows || 3, w = lado * Math.sqrt(3), polis = [];
       for (var r = 0; r < rows; r++)
@@ -165,7 +224,8 @@ var DESENHOS_RETO = {
     } },
 
   // folha: o contorno, a nervura do meio e as nervuras dos lados
-  folha: { nome: "folha com nervuras", medida: "comprimento", padrao: 60,
+  folha: { nome: "folha com nervuras", medida: "comprimento", padrao: 60, min: 15, max: 200,
+    opcoes: [["nervuras", "nervuras", 5, 0, 12]],
     faz: function(comp, o){
       var larg = comp * (o.proporcao || 0.42), n = o.nervuras || 5, meio = larg / 2;
       var base = [meio, comp], ponta = [meio, 0];
@@ -179,6 +239,10 @@ var DESENHOS_RETO = {
         };
       };
       var esq = amostra(lado(-1), 80), dir = amostra(lado(1), 80);
+      // os furos que a borda vai ter: a nervura termina exatamente num deles,
+      // e os dois dividem o furo em vez de ficarem a um milímetro um do outro
+      var passo = o.passo || RETO_PASSO;
+      var furosBorda = [furosCurva(esq, passo, false), furosCurva(dir, passo, false)];
       var caminhos = [
         { pts: esq, curva: true }, { pts: dir, curva: true },
         { pts: [[meio, comp * 1.12], ponta], curva: false }      // nervura do meio, com o cabo
@@ -186,18 +250,18 @@ var DESENHOS_RETO = {
       // as nervuras dos lados saem da do meio e sobem até a borda
       for (var i = 1; i <= n; i++){
         var t = i / (n + 1), y0 = comp - t * comp * 0.92;
-        [esq, dir].forEach(function(borda){
+        furosBorda.forEach(function(borda){
           var alvoY = y0 - larg * 0.28, melhor = borda[0];
           borda.forEach(function(p){ if (Math.abs(p[1] - alvoY) < Math.abs(melhor[1] - alvoY)) melhor = p; });
-          var fim = entre([meio, y0], melhor, 0.86);
-          caminhos.push({ pts: [[meio, y0], fim], curva: false });
+          caminhos.push({ pts: [[meio, y0], melhor], curva: false });
         });
       }
       return caminhos;
     } },
 
   // losangos: a treliça do azulejo, linhas em diagonal nos dois sentidos
-  losangos: { nome: "losangos", medida: "largura do losango", padrao: 14,
+  losangos: { nome: "losangos", medida: "largura do losango", padrao: 14, min: 5, max: 60,
+    opcoes: [["cols", "colunas", 4, 1, 20], ["rows", "fileiras", 6, 1, 30]],
     faz: function(w, o){
       var cols = o.cols || 4, rows = o.rows || 6, h = w * 1.4, polis = [];
       for (var r = 0; r < rows; r++)
@@ -209,7 +273,8 @@ var DESENHOS_RETO = {
     } },
 
   // ziguezague: uma faixa de dentes
-  ziguezague: { nome: "ziguezague", medida: "comprimento", padrao: 120,
+  ziguezague: { nome: "ziguezague", medida: "comprimento", padrao: 120, min: 20, max: 300,
+    opcoes: [],
     faz: function(comp, o){
       var dente = o.dente || 8, alt = o.alt || 8, pts = [];
       for (var x = 0, i = 0; x <= comp + 0.01; x += dente / 2, i++) pts.push([x, i % 2 ? 0 : alt]);
@@ -217,7 +282,8 @@ var DESENHOS_RETO = {
     } },
 
   // ondas: linhas onduladas paralelas
-  ondas: { nome: "ondas", medida: "comprimento", padrao: 120,
+  ondas: { nome: "ondas", medida: "comprimento", padrao: 120, min: 20, max: 300,
+    opcoes: [["linhas", "linhas", 3, 1, 8]],
     faz: function(comp, o){
       var onda = o.onda || 20, alt = o.alt || 4, linhas = o.linhas || 3, sep = o.sep || 7, out = [];
       for (var l = 0; l < linhas; l++)
@@ -228,7 +294,8 @@ var DESENHOS_RETO = {
     } },
 
   // estrela de cinco pontas, só o contorno
-  estrela: { nome: "estrela", medida: "largura", padrao: 40,
+  estrela: { nome: "estrela", medida: "largura", padrao: 40, min: 10, max: 200,
+    opcoes: [],
     faz: function(w){
       var R = w / 2, r = R * 0.42, pts = [];
       for (var k = 0; k < 10; k++){
@@ -239,7 +306,8 @@ var DESENHOS_RETO = {
     } },
 
   // coração, só o contorno
-  coracao: { nome: "coração", medida: "largura", padrao: 40,
+  coracao: { nome: "coração", medida: "largura", padrao: 40, min: 10, max: 200,
+    opcoes: [],
     faz: function(w){
       var k = w / 34;
       return [{ curva: true, fechada: true, pts: amostra(function(t){
@@ -252,7 +320,8 @@ var DESENHOS_RETO = {
   // flor de seis pétalas, cada uma um laço fechado em volta do miolo. As
   // pétalas não encostam no centro: seis pétalas num furo só são doze pontos
   // passando pelo mesmo buraco, e o papel não aguenta
-  flor: { nome: "flor", medida: "largura", padrao: 44,
+  flor: { nome: "flor", medida: "largura", padrao: 44, min: 10, max: 200,
+    opcoes: [["petalas", "pétalas", 6, 3, 12]],
     faz: function(w, o){
       var R = w / 2, n = o.petalas || 6, out = [], r0 = R * 0.16;
       for (var p = 0; p < n; p++){
@@ -267,7 +336,8 @@ var DESENHOS_RETO = {
     } },
 
   // cruzes de sashiko (jūji-zashi): um xis pequeno em cada casa da grade
-  cruzes: { nome: "cruzes de sashiko", medida: "lado da casa", padrao: 10,
+  cruzes: { nome: "cruzes de sashiko", medida: "lado da casa", padrao: 10, min: 4, max: 40,
+    opcoes: [["cols", "colunas", 8, 1, 30], ["rows", "fileiras", 4, 1, 30]],
     faz: function(lado, o){
       var cols = o.cols || 8, rows = o.rows || 4, out = [], m = lado * 0.5;
       for (var r = 0; r < rows; r++)
@@ -279,6 +349,16 @@ var DESENHOS_RETO = {
       return out;
     } }
 };
+
+// as opções de uma peça, com as de fábrica no que faltar
+function opcoesReto(el){
+  var d = DESENHOS_RETO[el.desenho], o = {};
+  (d ? d.opcoes : []).forEach(function(op){
+    var v = el.opts && el.opts[op[0]] != null ? +el.opts[op[0]] : op[2];
+    o[op[0]] = Math.max(op[3], Math.min(op[4], v));
+  });
+  return o;
+}
 
 // a caixa dos caminhos, para a peça saber o próprio tamanho e encostar no zero
 function caixaCaminhos(caminhos){

@@ -664,7 +664,8 @@ function centraNaMira(el){
    nome embaixo da foto que ganhava uma maiúscula alta subia por cima dela;
    assim ele guarda a distância até a foto, que é a medida que foi acertada. */
 function refazNoCentro(el, descarta){
-  var b0 = el.cells && el.cells.length && el.cells[0].length > 1 ? bboxMM(el) : null;
+  var tem = el.kind === "reto" ? !!el.pontos : el.cells && el.cells.length && el.cells[0].length > 1;
+  var b0 = tem ? bboxMM(el) : null;
   var cx0 = b0 ? elPaperBox(el) : null;
   rebuild(el, descarta);
   if (!b0) return;
@@ -676,10 +677,47 @@ function refazNoCentro(el, descarta){
     else if (cx0.y + cx0.h <= photo.y + 0.05) y = b0.y + b0.h - b1.h;      // em cima: a base fica
   }
   el.y = dec1(y);
+  // a peça que cresceu para fora do papel volta para dentro, se couber nele:
+  // o centro é uma preferência, a borda do papel é onde o molde acaba
+  var pa = paperMM(), c = elPaperBox(el);
+  if (c.w <= pa.w && cx0.x >= -0.05 && cx0.x + cx0.w <= pa.w + 0.05){
+    if (c.x < 0) el.x = dec1(el.x - c.x); else if (c.x + c.w > pa.w) el.x = dec1(el.x - (c.x + c.w - pa.w));
+  }
+  if (c.h <= pa.h && cx0.y >= -0.05 && cx0.y + cx0.h <= pa.h + 0.05){
+    if (c.y < 0) el.y = dec1(el.y - c.y); else if (c.y + c.h > pa.h) el.y = dec1(el.y - (c.y + c.h - pa.h));
+  }
+}
+
+/* A peça de ponto reto não tem células: tem caminhos e, deles, os furos. O
+   desenho é refeito dos números da peça, encostado no zero, e a caixa dela é
+   a dos furos. Espelhar vira o x. */
+function refazReto(el){
+  var d = DESENHOS_RETO[el.desenho] || DESENHOS_RETO.colmeia;
+  el.desenho = DESENHOS_RETO[el.desenho] ? el.desenho : "colmeia";
+  var op = opcoesReto(el);
+  op.passo = el.passo || RETO_PASSO;   // a folha precisa saber onde caem os furos da borda
+  var cams = d.faz(el.medida, op);
+  var pontos = pontosDoDesenho(cams, el.passo || RETO_PASSO);
+  var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  pontos.forEach(function(pt){ pt.furos.forEach(function(f){
+    x0 = Math.min(x0, f[0]); y0 = Math.min(y0, f[1]);
+    x1 = Math.max(x1, f[0]); y1 = Math.max(y1, f[1]);
+  }); });
+  if (!(x1 >= x0)){ x0 = y0 = 0; x1 = y1 = 1; }
+  var w = Math.max(1, x1 - x0), h = Math.max(1, y1 - y0);
+  el.pontos = pontos.map(function(pt){
+    return { fechada: pt.fechada, furos: pt.furos.map(function(f){
+      var x = f[0] - x0, y = f[1] - y0;
+      return [Math.round((el.flip ? w - x : x) * 100) / 100, Math.round(y * 100) / 100];
+    }) };
+  });
+  el.w = w; el.h = h;
+  el.edits = []; el.manual = 0;
 }
 
 // descarta: só o Recalcular pede a peça limpa, e ele avisa antes
 function rebuild(el, descarta){
+  if (el.kind === "reto"){ refazReto(el); return; }
   var rowsAntes = el.cells && el.cells.length ? el.cells.length : 0;
   var colsAntes = rowsAntes && el.cells[0] ? el.cells[0].length : 0;
   var novas;

@@ -4,6 +4,7 @@
    usa ao carregar tem de estar num arquivo anterior. */
 
 function bboxMM(el){
+  if (el.kind === "reto") return { x: el.x, y: el.y, w: el.w || 1, h: el.h || 1 };
   var p = P();
   return { x: el.x, y: el.y, w: el.cells[0].length * p, h: el.cells.length * p };
 }
@@ -28,7 +29,35 @@ function paperToLocal(el, px, py){
   };
 }
 
+// os furos da peça de ponto reto, cada um uma vez — dois caminhos que se
+// encontram dividem o furo
+function furosReto(el){
+  var seen = {}, list = [];
+  (el.pontos || []).forEach(function(pt){ pt.furos.forEach(function(f){
+    var k = f[0] + "," + f[1];
+    if (seen[k]) return;
+    seen[k] = 1;
+    list.push(localToPaper(el, f[0], f[1]));
+  }); });
+  return list;
+}
+
+// quantos pontos, e quanto fio eles somam na frente, em mm
+function pontosReto(el){
+  var n = 0, mm = 0;
+  (el.pontos || []).forEach(function(pt){
+    var f = pt.furos, k = pt.fechada ? f.length : f.length - 1;
+    for (var i = 0; i < k; i++){
+      var a = f[i], b = f[(i + 1) % f.length];
+      mm += Math.sqrt((a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1]));
+      n++;
+    }
+  });
+  return { n: n, mm: mm };
+}
+
 function holesOf(el){
+  if (el.kind === "reto") return furosReto(el);
   var p = P(), seen = {}, list = [];
   for (var r = 0; r < el.cells.length; r++){
     for (var q = 0; q < el.cells[r].length; q++){
@@ -65,6 +94,7 @@ function temGrafico(){
 }
 
 function countOf(el){
+  if (el.kind === "reto") return pontosReto(el).n;
   var n = 0;
   for (var r = 0; r < el.cells.length; r++)
     for (var q = 0; q < el.cells[r].length; q++) if (el.cells[r][q]) n++;
@@ -103,7 +133,9 @@ function furosColados(){
           if (!casa) continue;
           for (var j = 0; j < casa.length; j++){
             var o = casa[j];
-            if (o.i === i) continue;
+            // dentro de uma peça de ponto cruz os furos guardam o espaçamento;
+            // na de ponto reto, não — a palavra pequena aperta a volta do "a"
+            if (o.i === i && els[i].kind !== "reto") continue;
             var d = Math.sqrt((h.x - o.x) * (h.x - o.x) + (h.y - o.y) * (h.y - o.y));
             if (d >= D || d < MESMO_FURO) continue;
             n++;

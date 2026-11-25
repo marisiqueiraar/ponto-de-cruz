@@ -34,28 +34,39 @@ function fioPorPonto(){ return (fioFrente() + fioAvesso()) * PERDA; }
    meada são uma linha só na lista de compras. A letra vem daqui pelo mesmo
    motivo — ela identifica a linha no molde todo, então dois gráficos que
    dividem uma cor dividem a letra dela. */
+/* O fio do ponto reto é outra conta. No ponto atrás cada ponto aparece uma
+   vez na frente, com o comprimento dele, e o fio anda o dobro por trás — a
+   agulha volta um ponto pela frente e avança dois pelo avesso. Frente mais
+   avesso dá três vezes o comprimento do desenho, mais a mesma perda. */
+var RETO_FIO = 3;
+
+function fioReto(el){ return pontosReto(el).mm * RETO_FIO * PERDA; }
+
 function linhasUsadas(){
   var vistas = {}, lista = [];
-  var poe = function(hex, nome, n){
+  var poe = function(hex, nome, n, mm){
     if (!n) return;
     if (!vistas[hex]){
-      vistas[hex] = { hex: hex, nome: nome, pontos: 0 };
+      vistas[hex] = { hex: hex, nome: nome, pontos: 0, mm: 0 };
       lista.push(vistas[hex]);
     }
     vistas[hex].pontos += n;
+    vistas[hex].mm += mm;
   };
+  var porPonto = fioPorPonto();
   els.forEach(function(el){
     if (el.paleta && el.paleta.length){
       var n = contaPorCor(el);
-      el.paleta.forEach(function(sl, i){ poe(sl.hex, sl.rotulo || sl.hex, n[i + 1] || 0); });
+      el.paleta.forEach(function(sl, i){
+        poe(sl.hex, sl.rotulo || sl.hex, n[i + 1] || 0, (n[i + 1] || 0) * porPonto);
+      });
       return;
     }
-    var c = corDe(el);
-    poe(c.hex, c.nome, countOf(el));
+    var c = corDe(el), q = countOf(el);
+    poe(c.hex, c.nome, q, el.kind === "reto" ? fioReto(el) : q * porPonto);
   });
-  var porPonto = fioPorPonto();
   lista.forEach(function(l, i){
-    l.metros = l.pontos * porPonto / 1000;
+    l.metros = l.mm / 1000;
     l.letra = LETRAS[i % LETRAS.length];
     l.rotulo = l.nome + "  ·  " + fmt(l.metros) + " m";
   });
@@ -88,6 +99,7 @@ function nomePeca(el){
   if (el.kind === "text") return el.text || "texto";
   if (el.kind === "img") return el.nome || "imagem";
   if (el.kind === "pat") return (el.arranjo === "faixa" ? "faixa de " : "moldura de ") + nomeMotivo(el.motivo);
+  if (el.kind === "reto") return ((DESENHOS_RETO[el.desenho] || {}).nome || "desenho") + " em ponto reto";
   return NOMES_SYM[el.sym] || "símbolo";
 }
 

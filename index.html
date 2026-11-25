@@ -135,6 +135,14 @@
       <button type="button" id="patDeit" class="tbtn hide" title="Deita a faixa: os motivos passam a se repetir na horizontal.">deitada</button>
     </fieldset>
 
+    <fieldset id="ctlReto" class="hide">
+      <span class="t"><span>desenho</span><select id="retoDes"></select></span>
+      <span class="t" id="tRetoMed"><span>tamanho</span><input id="retoMed" type="number" min="3" max="300" step="1"><b class="cm" id="retoCm"></b></span>
+      <span class="t" title="Comprimento de cada ponto, de um furo ao outro, em milímetros. Mais curto acompanha melhor a curva e faz mais furos; abaixo de 2 mm a tira de papel entre os furos rasga."><span>ponto</span><input id="retoPasso" type="number" min="2" max="8" step="0.5"><b class="cm">mm</b></span>
+      <span class="t hide" id="tRetoA"><span id="retoANome"></span><input id="retoA" type="number" step="1"></span>
+      <span class="t hide" id="tRetoB"><span id="retoBNome"></span><input id="retoB" type="number" step="1"></span>
+    </fieldset>
+
     <span class="grp hide" id="ctlPiece">
       <span class="t"><span>inclinação</span><input id="rot" type="number" min="-45" max="45" step="1" value="0"><b id="rotOut" class="hide">0</b></span>
     </span>
@@ -275,6 +283,7 @@
     <button id="addImg" class="wide">nova imagem</button>
     <button id="addMoldura" class="wide">nova moldura</button>
     <button id="addFaixa" class="wide">nova faixa</button>
+    <button id="addReto" class="wide">novo desenho em ponto reto</button>
     <input id="imgArq" type="file" accept="image/*" class="hide">
 
     <p class="note">A imagem vira quadradinho na hora, e o que sai é uma peça como as outras:
@@ -291,6 +300,10 @@
     em fileira, que é o marca-página: escolha um papel de marca-página na aba papel antes, e
     ela já nasce do comprimento dele. As duas têm uma paleta, como o gráfico colorido — a aba
     <b>linha</b> troca cada meada pela que você tem.</p>
+    <p class="note">O <b>ponto reto</b> é o fio indo de um furo a outro em linha, sem formar
+    xis: colmeia, folha com nervuras, losangos, ondas. Os furos não caem numa grade — ficam no
+    canto do hexágono, ao longo da nervura. Ele mistura com o ponto cruz no mesmo molde, peça
+    por peça.</p>
 
     <div class="alinha hide" id="alinha">
       <label>Alinhar a peça selecionada</label>
@@ -559,6 +572,8 @@
 <script src="js/cor.js"></script>
 <script src="js/linhas.js"></script>
 <script src="js/medidas.js"></script>
+<script src="js/reto.js"></script>
+<script src="js/esqueleto.js"></script>
 <script src="js/desenho.js"></script>
 <script src="js/geometria.js"></script>
 <script src="js/tela.js"></script>
