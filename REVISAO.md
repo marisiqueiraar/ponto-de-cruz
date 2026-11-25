@@ -16,6 +16,43 @@ Como foi feita:
 Nada foi consertado nesta revisão. Cada item tem uma letra e um número para
 você poder responder "pode fazer o A1, o B3 não".
 
+## Situação em 25/11/2026, depois da reforma (branch `claude/reforma`)
+
+| item | situação |
+|---|---|
+| A1 crescer pelo canto | feito — cresce pelo centro; embaixo da foto, para baixo |
+| A2 foto que muda | feito — as peças vão junto |
+| A3 papel que muda | feito — o arranjo entra no papel novo quando cabe |
+| A4 peça nova em cima da foto | feito — nasce num lugar livre |
+| A5 inclinação de -4° | feito — nasce reta |
+| A6 furos colados | feito — aviso na barra e região marcada na tela |
+| A7 "champ" e o nome do molde | feito — molde nasce vazio, o nome acompanha a palavra |
+| A8 campos escondidos na barra | feito — no computador a barra quebra em duas linhas |
+| A9 lista de fontes | feito — amostra na altura da peça, lista mais larga |
+| A10 ajuste com a linha escolhida | feito |
+| B fontes | feito — 5 saíram, altura mínima de cada uma, Dancing Script de fábrica, leitura em nove encaixes (6% menos traço partido) |
+| B5 palavra em ponto reto | falta — é a fase do ponto reto |
+| C1 um toque, duas coisas | feito — "aplicar na peça" e "minha caixa" separados |
+| C2 várias de uma vez | feito — colar os códigos |
+| C3 Anchor sem nome | não dá: a marca não nomeia as cores |
+| C4 linha de fábrica sem código | feito — vira a meada mais próxima |
+| C5 "tenho pouco" / "acabou" | falta — BACKLOG |
+| C6 cores da DMC aproximadas | falta — precisa da cartela da DMC |
+| D1–D4 medidas | feito — centímetros ao lado de cada número, palavras para traço e sensibilidade, atalhos de espaçamento |
+| D5 tamanho real na tela | falta — BACKLOG (precisa calibrar a tela) |
+| D6 texto demais | falta — BACKLOG |
+| E1 Instax | feito — mini, square e wide |
+| E2 papel x folha | feito — folha da impressora A4, A3 ou Carta |
+| E3 uma foto só | falta — BACKLOG |
+| F1–F3 uso da tela | falta — BACKLOG |
+| G1 arquivo único | feito — 15 arquivos em `js/`, `css/app.css` |
+| G2 só quadradinho | falta — é a base do ponto reto |
+| G3 teste das letras | parcial — `testes/fontes.js` cobre a lista; a qualidade do desenho foi medida à mão |
+| G4 layout.html | feito — saiu |
+| G5 fontes | feito — 0,89 MB |
+| G6 commits no GitHub | feito |
+| H ponto reto | falta — próxima fase |
+
 ---
 
 ## Resumo: o que mais pesa

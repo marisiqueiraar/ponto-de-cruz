@@ -232,6 +232,32 @@ para depois:
 
 ---
 
+## 5⅞. O que a revisão deixou para depois
+
+Da [REVISAO.md](REVISAO.md), o que não entrou na reforma de 25/11/2026:
+
+- **Ponto reto** (H1–H6, B5, G2): a próxima fase — tipo de ponto por peça,
+  padrões prontos de linha (colmeia, folha com nervuras, sashiko), palavra em
+  ponto atrás seguindo o traço da fonte, imagem virando contorno, furos livres,
+  moldura e marca-página em ponto reto. Plano na seção 5½.
+- **"Tenho pouco" e "acabou" na caixa de linhas** (C5): hoje é só tenho / não
+  tenho.
+- **Tamanho real na tela** (D5): a tela não sabe quantos pixels tem um
+  milímetro. Dá para calibrar encostando um cartão de crédito (85,6 mm) na tela
+  e ajustando até bater; depois disso, um botão "1:1".
+- **Menos texto na tela** (D6): a aba peças tem cinco parágrafos antes dos
+  botões de alinhar; a aba ajuda tem 25 parágrafos corridos.
+- **Mais de uma foto por molde** (E3): cartão com duas fotos, marca-página com
+  foto embaixo e bordado em cima.
+- **No celular, a barra de cima ocupa um terço da tela** (F1).
+- **Os botões de alinhar ficam no fim da aba peças** (F2), depois dos textos.
+- **Ímã entre peças** (F3): hoje a peça só encosta em guia ligada.
+- **A janela da imagem no Instax**: a foto Instax entra pelo tamanho do cartão;
+  o retângulo da imagem dentro dele (4,6 × 6,2 no mini) não é desenhado, porque
+  a borda de cima não tem medida oficial.
+
+---
+
 ## 6. Ideias do app anterior que ainda valem
 
 Vieram do `BACKLOG.md` da versão React (preservado em `6ce5a7a`) e sobrevivem à
