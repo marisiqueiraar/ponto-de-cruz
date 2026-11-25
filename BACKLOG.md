@@ -201,6 +201,37 @@ dela nessa mesma função, e um `drawStitches` próprio para os riscos.
 
 ---
 
+## 5¾. O que ficou de fora da moldura e do marca-página
+
+Feitos em 25/11/2026 (moldura de blocos, faixa, papéis de marca-página). Ficou
+para depois:
+
+- **Vários marca-páginas numa folha só.** Hoje o PDF de um papel de 5 × 18 cm
+  sai numa A4 com um marca-página só. Falta montar 3 ou 4 lado a lado na mesma
+  folha, cada um com a sua moldura de recorte — o mesmo molde repetido ou
+  moldes diferentes da estante.
+- **A moldura passa da borda num A4 com foto grande.** Com foto de 13 × 18 cm
+  e blocos de 2,5 cm, a moldura fica mais larga que a folha. O aviso vermelho
+  aparece, mas o app não sugere a saída (margem menor, menos espaço entre
+  blocos, ou blocos menores). Falta um "caber no papel" que acerte isso sozinho.
+- **Cor bloco por bloco.** A paleta da moldura se distribui sozinha pelos
+  blocos; não dá para escolher à mão as cores de um bloco só sem passar pelo
+  ajuste ponto a ponto.
+- **Contorno do marca-página no PDF.** A borda do papel sai como moldura de
+  recorte reta; marca-página de canto arredondado e o furo da fita não estão
+  desenhados.
+- **A aba ajuda não fala da moldura nem da faixa.** A explicação está só na
+  aba peças e no README.
+- **O ajuste ponto a ponto com a linha escolhida não tem teste.** A mudança
+  (acender com a linha selecionada na aba linha, e não sempre com a primeira)
+  foi conferida lendo o código, não dirigindo o navegador: o teste precisaria
+  converter um quadradinho da peça em pixel de tela.
+- **O nome do molde não acompanha as peças.** O molde nasce com o nome da
+  primeira palavra ("champ") e continua com ele no cabeçalho do PDF mesmo
+  depois de a palavra ser apagada e só sobrar a moldura.
+
+---
+
 ## 6. Ideias do app anterior que ainda valem
 
 Vieram do `BACKLOG.md` da versão React (preservado em `6ce5a7a`) e sobrevivem à
