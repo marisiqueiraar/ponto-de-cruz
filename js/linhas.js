@@ -244,7 +244,7 @@ function listaCatalogo(){
     grade.innerHTML = '<p class="vazio">Nenhuma cor com esse código ou nome.</p>';
     return;
   }
-  var naCaixa = marcaAtiva === "minhas";
+  var caixa = linhaModo === "caixa", soMinhas = marcaAtiva === "minhas";
   var frag = document.createDocumentFragment();
   vistas.forEach(function(k){
     var reg = catIdx[k];
@@ -252,27 +252,36 @@ function listaCatalogo(){
     var rot = rotulo(reg) + (reg.nome ? " — " + reg.nome : "");
     var b = document.createElement("button");
     b.type = "button";
-    b.className = "cat" + (tem && !naCaixa ? " on" : "");
+    // na caixa, o tique diz "tenho"; na aplicação, um ponto discreto diz o
+    // mesmo sem parecer que a cor está escolhida — e em "minhas" todas são
+    b.className = "cat" + (tem ? (caixa ? " on" : (soMinhas ? "" : " tem")) : "");
     b.style.background = reg.hex;
     b.style.color = tinta(reg.hex);
     b.dataset.k = k;
     b.textContent = reg.code || "—";
     b.title = rot + " " + reg.hex;
     b.setAttribute("aria-label", rot);
-    if (!naCaixa) b.setAttribute("aria-pressed", tem ? "true" : "false");
+    if (caixa) b.setAttribute("aria-pressed", tem ? "true" : "false");
     frag.appendChild(b);
   });
   grade.appendChild(frag);
 }
 
-// marcar é dizer "tenho essa" e, no mesmo gesto, jogar a cor no molde: é para
-// isso que a caixa serve, ver a linha que você tem no arranjo antes de bordar
-function alternaLinha(k, botao){
+/* Dois gestos, um para cada lugar da aba linha. Antes eram um só: tocar
+   numa cor dizia "tenho essa" e pintava a peça no mesmo toque, então
+   experimentar uma cor na peça enchia a caixa de linhas que você não tem, e
+   tirar da caixa não despintava nada. */
+var linhaModo = "peca";   // "peca": o toque pinta; "caixa": o toque marca que tem
+
+function aplicaNaPeca(k){
+  var c = catIdx[k];
+  if (c) usaCor(c.hex, rotulo(c));
+}
+
+// pôr na caixa ou tirar dela, e mais nada: a peça não muda
+function alternaNaCaixa(k, botao){
   var c = catIdx[k];
   if (!c) return;
-  // na caixa toda cor já é sua: clicar ali é escolher a cor da peça, não
-  // tirar da caixa — tirar se faz na marca de onde ela veio
-  if (marcaAtiva === "minhas"){ usaCor(c.hex, rotulo(c)); return; }
   var i = minhas.indexOf(k);
   if (i >= 0){
     minhas.splice(i, 1);
@@ -287,7 +296,6 @@ function alternaLinha(k, botao){
     }
   } else {
     minhas.push(k);
-    usaCor(c.hex, rotulo(c));
   }
   var tem = i < 0;
   if (botao){
@@ -296,7 +304,61 @@ function alternaLinha(k, botao){
   }
   salvaLinhas();
   montaMarcas();
+  // em "minhas", a que saiu da caixa sai da grade também
+  if (marcaAtiva === "minhas" || !minhas.length) listaCatalogo();
   contaLinhas();
+}
+
+/* Várias de uma vez: a lista de códigos que se tem anotada, colada num campo
+   só. Cada código é procurado como está e, não achando, sem os zeros à
+   esquerda (a Anchor escreve 00268 na cartela e 268 aqui) e em maiúsculas
+   (a DMC tem B5200 e ECRU). O aviso diz quantas entraram, quantas já
+   estavam e quais não existem — código digitado errado não pode sumir
+   calado. */
+function poeLote(marca, texto){
+  var codigos = String(texto || "").split(/[\s,;]+/).filter(Boolean);
+  var novas = 0, ja = 0, faltou = [];
+  codigos.forEach(function(cod){
+    var tentativas = [cod, cod.replace(/^0+(?=.)/, ""), cod.toUpperCase(),
+                      cod.charAt(0).toUpperCase() + cod.slice(1).toLowerCase()];
+    var k = null;
+    for (var i = 0; i < tentativas.length && !k; i++)
+      if (catIdx[marca + ":" + tentativas[i]]) k = marca + ":" + tentativas[i];
+    if (!k){ faltou.push(cod); return; }
+    if (minhas.indexOf(k) >= 0){ ja++; return; }
+    minhas.push(k); novas++;
+  });
+  salvaLinhas(); montaMarcas(); montaFonteLinhas(); listaCatalogo(); contaLinhas();
+  return { novas: novas, ja: ja, faltou: faltou };
+}
+
+function montaLote(){
+  var s = $("loteMarca");
+  if (!s) return;
+  var antes = s.value;
+  s.innerHTML = "";
+  CAT.forEach(function(m){
+    if (m.id === "avulsa") return;
+    var o = document.createElement("option");
+    o.value = m.id; o.textContent = m.marca;
+    s.appendChild(o);
+  });
+  if (antes) s.value = antes;
+}
+
+function mudaModoLinha(modo){
+  linhaModo = modo === "caixa" ? "caixa" : "peca";
+  var caixa = linhaModo === "caixa";
+  [].forEach.call(document.querySelectorAll("#linhaModo button"), function(b){
+    var on = b.dataset.modo === linhaModo;
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-selected", on ? "true" : "false");
+  });
+  $("soPeca").classList.toggle("hide", caixa);
+  $("soCaixa").classList.toggle("hide", !caixa);
+  $("soCaixa2").classList.toggle("hide", !caixa);
+  $("catFoot").classList.toggle("hide", !caixa);
+  listaCatalogo();
 }
 
 // Linha que não está em cartela nenhuma: nasce já marcada, porque cadastrar
@@ -314,8 +376,7 @@ function guardaAvulsa(){
   var k = "avulsa:" + proxAvulsa++;
   avulsas[k] = { marca: marca, code: code, hex: hex };
   montaIndice();
-  minhas.push(k);
-  usaCor(hex, rotulo(catIdx[k]));
+  minhas.push(k);   // cadastrar é dizer que tem; pôr na peça é na outra aba
   salvaLinhas();
   montaMarcas(); montaFonteLinhas(); listaCatalogo(); contaLinhas();
   $("avMarca").value = ""; $("avCode").value = ""; $("avAviso").textContent = "";

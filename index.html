@@ -314,6 +314,16 @@
   <section class="pane" data-pane="linha">
     <h2>linha</h2>
 
+    <!-- Dois lugares para duas coisas diferentes: pôr uma cor na peça é
+         experimentar; dizer que tem a meada é inventário. Antes um toque só
+         fazia as duas, e testar uma cor enchia a caixa de linhas que você
+         não tem. -->
+    <div class="abas modo" id="linhaModo" role="tablist" aria-label="o que o toque numa cor faz">
+      <button type="button" class="on" data-modo="peca" role="tab" aria-selected="true">aplicar na peça</button>
+      <button type="button" data-modo="caixa" role="tab" aria-selected="false">minha caixa</button>
+    </div>
+
+    <div id="soPeca">
     <p class="atual"><i id="threadDot"></i><span id="threadAlvo">Linha da próxima peça</span>
       <b id="threadName">—</b></p>
 
@@ -324,6 +334,25 @@
       abaixo entra no lugar dela. O <b>olho</b> esconde a linha do desenho sem tirá-la da
       lista — é assim que se apaga um fundo que o corte não pegou. A linha escolhida é também
       a que o <b>ajustar</b> pinta, ponto a ponto.</p>
+      <div class="rule"></div>
+    </div>
+    <p class="note">Toque numa cor para pô-la na peça selecionada — só isso: experimentar uma
+    cor não a coloca na sua caixa. As que têm um <b>ponto no canto</b> estão na caixa, e a
+    marca <b>minhas</b>, a primeira da fileira, mostra só elas.</p>
+    </div>
+
+    <div id="soCaixa" class="hide">
+      <p class="note">Aqui você diz que linhas tem. Toque numa cor para pôr na caixa ou tirar
+      dela — a peça não muda. O que estiver na caixa aparece na marca <b>minhas</b>, e o gráfico
+      colorido pode ser feito só com elas.</p>
+      <h3 class="subtit">várias de uma vez</h3>
+      <div class="lote">
+        <select id="loteMarca" aria-label="Marca das linhas"></select>
+        <textarea id="loteCodigos" rows="2" placeholder="códigos separados por vírgula ou espaço: 310, 321, 666"
+                  aria-label="Códigos das linhas"></textarea>
+        <button type="button" id="loteAdd">pôr na caixa</button>
+      </div>
+      <p class="note" id="loteAviso"></p>
       <div class="rule"></div>
     </div>
 
@@ -339,16 +368,11 @@
         <button type="button" data-ordem="codigo">por código</button>
       </div>
       <div class="grade" id="catGrade"></div>
-      <div class="catfoot">
+      <div class="catfoot" id="catFoot">
         <span id="catConta">nenhuma linha marcada</span>
         <button type="button" id="catLimpar" class="hide">limpar</button>
       </div>
-      <p class="note">Toque numa cor para dizer que você tem essa linha. Ela entra na marca
-      <b>minhas</b>, a primeira da fileira, e já passa a ser a cor da peça selecionada, que é o
-      jeito de experimentar a cor no arranjo antes de gastar meada. Tocar de novo desmarca —
-      dentro de <b>minhas</b>, tocar só usa a cor; para tirar da caixa, volte à marca de onde
-      ela veio.</p>
-
+      <div id="soCaixa2" class="hide">
       <div class="rule"></div>
       <h3 class="subtit">uma linha fora de cartela</h3>
       <div class="avulsa">
@@ -364,6 +388,7 @@
       marcada, entra na marca <b>minhas</b> junto com as outras e aparece também na marca
       <b>avulsas</b> — onde desmarcar apaga de vez, porque ela só existe porque você a
       cadastrou.</p>
+      </div>
 
       <p class="note">As cores são referência de tela. A da Anchor sai da cartela da própria
       marca; a da DMC vem de tabela pública e é mais aproximada. Monitor, luz e lote mudam o

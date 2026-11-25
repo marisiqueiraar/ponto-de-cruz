@@ -26,7 +26,23 @@ $("avAdd").addEventListener("click", guardaAvulsa);
 // um ouvinte só para a grade inteira: são centenas de quadradinhos
 $("catGrade").addEventListener("click", function(e){
   var b = e.target;                     // o quadradinho não tem filho: é ele mesmo
-  if (b && b.classList && b.classList.contains("cat")) alternaLinha(b.dataset.k, b);
+  if (!b || !b.classList || !b.classList.contains("cat")) return;
+  if (linhaModo === "caixa") alternaNaCaixa(b.dataset.k, b);
+  else aplicaNaPeca(b.dataset.k);
+});
+
+[].forEach.call(document.querySelectorAll("#linhaModo button"), function(b){
+  b.addEventListener("click", function(){ mudaModoLinha(b.dataset.modo); });
+});
+
+$("loteAdd").addEventListener("click", function(){
+  var r = poeLote($("loteMarca").value, $("loteCodigos").value);
+  var partes = [];
+  if (r.novas) partes.push(r.novas + (r.novas === 1 ? " entrou na caixa" : " entraram na caixa"));
+  if (r.ja) partes.push(r.ja + (r.ja === 1 ? " já estava" : " já estavam"));
+  if (r.faltou.length) partes.push("não achei na cartela: " + r.faltou.join(", "));
+  $("loteAviso").textContent = partes.length ? partes.join(" · ") + "." : "Escreva os códigos acima.";
+  if (!r.faltou.length) $("loteCodigos").value = "";
 });
 
 // esvaziar a caixa apaga trabalho de catálogo que não dá para desfazer, então
@@ -353,12 +369,21 @@ function boot(){
   var it = itemAtual();
   restored = !!it && restoreState(it.dados);
   if (!restored) moldeEmBranco();
+  /* A linha de fábrica era uma cor de tela (#B3B347) que não existe em
+     cartela nenhuma: a primeira palavra nascia com uma meada que não se
+     compra. Sem molde gravado, ela vira a meada mais próxima da primeira
+     marca do catálogo. */
+  if (!threadLabel(thread) && CAT.length){
+    var casada = casaPaleta([labHex(thread)], [1], CAT[0].id)[0];
+    if (casada) thread = casada.hex;
+  }
   papelPainel(); fotoPainel();
   renderMoldes();
   histRender();
   montaMarcas();
   montaFonteLinhas();
-  listaCatalogo();
+  montaLote();
+  mudaModoLinha("peca");   // também monta a grade
   contaLinhas();
   renderChips();
   syncControls();

@@ -331,6 +331,17 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
   font-size:9px;line-height:1.3;color:var(--mat);background:#fff;border-radius:3px;
   text-shadow:none}
 .grade .vazio{grid-column:1/-1;font-size:12.5px;color:var(--ink-soft);margin:6px 0}
+/* na aplicação, o ponto no canto diz "está na sua caixa" sem prender o
+   olho como o tique da caixa */
+.cat.tem::before{content:"";position:absolute;right:3px;top:3px;width:6px;height:6px;border-radius:50%;
+  background:currentColor;opacity:.9}
+.abas.modo{margin-bottom:12px}
+#soPeca .note{margin-bottom:12px}
+.lote{display:grid;grid-template-columns:1fr;gap:8px}
+.lote textarea{width:100%;font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;resize:vertical}
+.lote select{height:36px}
+.lote button{height:40px;border:1px solid var(--mat);border-radius:6px;background:#fff;
+  font-family:var(--display);font-size:11px}
 .catfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;
   margin-top:14px;font-size:12.5px;color:var(--ink-soft)}
 .catfoot button{flex:0 0 auto;height:30px;padding:0 12px;border:1px solid var(--line);

@@ -160,20 +160,29 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   que caía metade em cada coluna sumia ou engordava; deslocado um terço, vira linha.
 - **Linhas**: o painel é o catálogo das marcas — 391 cores da Anchor e 455 da DMC — numa
   fileira de marcas e uma grade. Cada quadradinho traz o **código impresso dentro**, que é o
-  que se pede na loja. **Cada peça tem a sua linha**: tocar num quadradinho diz que você tem
-  aquela linha e já pinta a peça selecionada com ela, e a lista de peças mostra um ponto da cor
-  de cada uma, para ver o arranjo inteiro de uma vez. É comparando duas linhas lado a lado no
-  arranjo que a escolha se decide. Tocar de novo desmarca. A busca aceita código ou nome.
+  que se pede na loja. A aba tem **dois lugares**, porque são duas coisas diferentes:
+
+  - **aplicar na peça**: tocar numa cor pinta a peça selecionada, e só. **Cada peça tem a sua
+    linha**, e a lista de peças mostra um ponto da cor de cada uma, para ver o arranjo inteiro
+    de uma vez — é comparando duas linhas lado a lado que a escolha se decide. As cores que
+    estão na sua caixa têm um ponto no canto.
+  - **minha caixa**: tocar numa cor diz que você tem aquela linha, ou que não tem mais — a
+    peça não muda. Aqui também se cadastram **várias de uma vez**, colando os códigos (00268
+    acha a 268 da Anchor; código que não existe é dito pelo nome), e a linha fora de cartela.
+
+  Antes um toque fazia as duas coisas: experimentar uma cor na peça enchia a caixa de linhas
+  que você não tem. A linha de fábrica, que era uma cor de tela sem código, agora é a meada
+  mais próxima da cartela. A busca aceita código ou nome.
 
   As cores saem **por tom**, não por número: a família vem do matiz, em faixas de 15°, e
   dentro dela a escala vai do claro ao escuro, com os neutros no fim — é o que faz a grade
   ler como cartela e deixa os tons vizinhos lado a lado. O botão **por código** troca para a
   ordem numérica quando você já sabe o número que procura.
 
-  O que você marcou vira a marca **minhas**, a primeira da fileira; ali tocar numa cor só a
-  põe na peça, sem tirar da caixa — tirar se faz na marca de onde ela veio. Fica guardado no
-  navegador à parte do molde, e não some quando você recomeça um desenho. Para a meada que não
-  está em cartela nenhuma, o cadastro de **linha avulsa** no pé do painel: marca, código e cor.
+  O que está na caixa vira a marca **minhas**, a primeira da fileira, nos dois lugares. Fica
+  guardado no navegador à parte do molde, e não some quando você recomeça um desenho. Para a
+  meada que não está em cartela nenhuma, o cadastro de **linha avulsa** em minha caixa: marca,
+  código e cor.
   Ela nasce marcada, entra em **minhas** junto com as outras e aparece também na marca
   **avulsas** — onde desmarcar apaga de vez, porque ela só existe por você ter cadastrado.
 - **O que cada número vale**: os campos da barra contam quadradinhos, que é como o desenho é
