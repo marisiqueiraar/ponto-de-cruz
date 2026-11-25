@@ -17,7 +17,8 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
 
 ## O que ele faz
 
-- **Papel**: A4, A5, A3, quadrado, 20×30, 15×20 ou medidas próprias, em retrato ou paisagem.
+- **Papel**: A4, A5, A3, quadrado, 20×30, 15×20, marca-página (5×15, 5×18, 6×20) ou medidas
+  próprias, em retrato ou paisagem.
 - **Foto**: tamanhos de revelação comuns (10×15, 9×13, 13×18, 15×21, quadrado, polaroid) ou
   medida própria, arrastável sobre o papel, com imagem opcional só para visualizar.
 - **Peças bordadas**: quantas quiser, cada uma sendo uma palavra, um símbolo, uma imagem em
@@ -82,6 +83,27 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   são só os dois controles que ficam desligados. O **trocar** põe outro arquivo na mesma peça
   sem ela sair do lugar nem mudar de linha; como a imagem nova é outro desenho, o ajuste ponto a
   ponto dela não sobrevive, e o botão pergunta antes.
+- **Moldura de blocos**: blocos de colcha de retalhos bordados em volta da foto — estrela,
+  estrela de 8 pontas, cata-vento, losango, moinho, cruz, trilha, flor, aliança ou todos
+  **sortidos**. É uma peça só, e não um bloco por peça: vinte blocos soltos seriam vinte
+  peças para alinhar, e a primeira esbarrada desmancharia o espaçamento. Ela conta sozinha
+  quantos blocos vão em cada lado para a foto caber na abertura com a **margem** pedida, e
+  se refaz quando a foto muda de tamanho ou gira, sempre centrada nela.
+
+  Cada bloco é desenhado em três papéis — fundo, pontas e miolo —, e não em três cores. A
+  peça tem uma paleta como a do gráfico colorido, e o bloco de número i usa as linhas
+  i·3 + 1, + 2 e + 3, dando a volta nela: com **3 cores** todos os blocos saem iguais; com
+  **6**, eles se alternam em dois esquemas, e junto com os blocos sortidos se alternando em
+  outro ritmo a moldura sai variada como uma colcha, sem ninguém pintar bloco por bloco. As
+  cores de fábrica são casadas com a meada mais próxima da cartela, e a aba **linha** troca
+  cada uma pela sua. Legenda por letra, conta de fio e ajuste ponto a ponto valem como no
+  gráfico — e o ajuste agora acende com a linha escolhida na lista, como ela promete.
+- **Faixa (marca-página)**: um motivo repetido em fileira — medalhão, cruzes, losangos,
+  flocos, ziguezague, qualquer bloco de retalho ou qualquer símbolo. Nasce de pé no meio do
+  papel, com motivos bastantes para correr o comprimento dele com 1 cm de folga em cada
+  ponta: num papel de marca-página, é o marca-página pronto. **Repetir**, **espaço**,
+  **tamanho** e **deitada** ajustam a fileira, que cresce a partir do meio para não sair do
+  eixo. Com mais de uma cor, os motivos se alternam entre as linhas.
 - **Altura**: é a altura da **letra maiúscula**, contada em quadradinhos e medida na fonte, não
   na palavra escrita. Era a caixa de tinta da palavra — e essa caixa sobe com o "l" e desce com
   o "g", então "amor" e "alegria" na mesma altura saíam com letras de tamanhos bem diferentes,

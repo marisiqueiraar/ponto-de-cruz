@@ -172,6 +172,35 @@ Nada falta deste item.
 
 ---
 
+## 5½. Ponto reto: colmeia, nervura de folha, sashiko
+
+A moldura de blocos e a faixa de marca-página cobrem o que é ponto cruz. O resto
+das referências — a colmeia, a folha com nervuras, o desenho de azulejo por cima
+do céu de um cartão-postal — é **ponto reto** (ponto atrás): o fio vai de um furo
+a outro em linha, sem formar X, e os furos não caem numa grade de quadradinhos.
+
+Isso pede um tipo de peça novo, e não um desenho novo:
+
+- **O desenho são segmentos entre furos**, e não células. A peça guarda uma lista
+  de pontos (em mm ou numa grade fina) e de ligações entre eles.
+- **Os furos saem das pontas dos segmentos.** A colmeia, por exemplo, tem um furo
+  em cada vértice do hexágono, e cada lado é um ponto.
+- **O fio é a soma dos comprimentos**, na frente; o avesso depende da ordem de
+  bordar e entra como suposição, como já entra hoje.
+- **No PDF**, o molde traz os furos e, em cinza claro, o risco de cada ponto, para
+  a pessoa saber de que furo vai a qual.
+- **Desenhos prontos para começar**: colmeia (malha de hexágonos de lado
+  regulável), folha com nervuras (contorno + espinha + nervuras paralelas),
+  ziguezague e pesponto de borda, sashiko (asanoha, seigaiha).
+- **Edição à mão**: tocar num furo e depois noutro liga os dois; tocar num risco
+  o apaga. É o "ajustar" desse tipo de peça.
+
+O PDF e a conta de furos de hoje já trabalham com uma lista de furos por peça
+(`holesOf`), então o caminho é fazer a peça de ponto reto devolver os furos
+dela nessa mesma função, e um `drawStitches` próprio para os riscos.
+
+---
+
 ## 6. Ideias do app anterior que ainda valem
 
 Vieram do `BACKLOG.md` da versão React (preservado em `6ce5a7a`) e sobrevivem à

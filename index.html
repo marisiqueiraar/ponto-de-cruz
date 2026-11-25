@@ -461,6 +461,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 .app.editando #ctlText,
 .app.editando #ctlSym,
 .app.editando #ctlImg,
+.app.editando #ctlPat,
 .app.editando #ctlPiece,
 .app.editando #ctlNone{display:none!important}
 .app.editando #ctlEdit{display:flex!important}
@@ -654,6 +655,20 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <button type="button" id="imgTroca" class="tbtn" title="Põe outra imagem nesta mesma peça, sem perder o lugar nem a linha dela.">trocar</button>
     </fieldset>
 
+    <fieldset id="ctlPat" class="hide">
+      <span class="t" title="Moldura dá a volta na foto; faixa é o motivo repetido em fileira, que é o marca-página."><span>arranjo</span><select id="patArr">
+        <option value="moldura">moldura</option>
+        <option value="faixa">faixa</option>
+      </select></span>
+      <span class="t"><span>desenho</span><select id="patMot"></select></span>
+      <span class="t" title="Quantas vezes cada quadradinho do desenho é repetido: 2 deixa o bloco com o dobro do lado."><span>tamanho</span><input id="patScale" type="number" min="1" max="4" step="1" value="1"></span>
+      <span class="t" title="Quadradinhos vazios entre um bloco e outro."><span>espaço</span><input id="patGap" type="number" min="0" max="10" step="1" value="1"></span>
+      <span class="t" id="tPatMargem" title="Folga entre a foto e o lado de dentro da moldura, em milímetros. A moldura ganha ou perde blocos para a foto caber com essa folga."><span>margem</span><input id="patMargem" type="number" min="0" max="60" step="1" value="6"></span>
+      <span class="t hide" id="tPatRep" title="Quantas vezes o motivo se repete na faixa."><span>repetir</span><input id="patRep" type="number" min="1" max="40" step="1" value="6"></span>
+      <span class="t" title="Quantas linhas a peça usa. Com tantas quantos os papéis do bloco (3 nos blocos de retalho, 1 nos motivos), todos saem iguais; com mais, os blocos se alternam entre as linhas. A aba linha troca cada uma pela sua meada."><span>cores</span><input id="patCores" type="number" min="1" max="8" step="1" value="6"></span>
+      <button type="button" id="patDeit" class="tbtn hide" title="Deita a faixa: os motivos passam a se repetir na horizontal.">deitada</button>
+    </fieldset>
+
     <span class="grp hide" id="ctlPiece">
       <span class="t"><span>inclinação</span><input id="rot" type="number" min="-45" max="45" step="1" value="0"><b id="rotOut" class="hide">0</b></span>
     </span>
@@ -707,6 +722,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         <option value="200x200">Quadrado — 20 × 20 cm</option>
         <option value="200x300">20 × 30 cm</option>
         <option value="150x200">15 × 20 cm</option>
+        <option value="50x150">Marca-página — 5 × 15 cm</option>
+        <option value="50x180">Marca-página — 5 × 18 cm</option>
+        <option value="60x200">Marca-página — 6 × 20 cm</option>
         <option value="custom">Personalizado</option>
       </select>
     </div>
@@ -770,6 +788,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     <button id="addText" class="wide">nova palavra</button>
     <button id="addSym" class="wide">novo símbolo</button>
     <button id="addImg" class="wide">nova imagem</button>
+    <button id="addMoldura" class="wide">nova moldura</button>
+    <button id="addFaixa" class="wide">nova faixa</button>
     <input id="imgArq" type="file" accept="image/*" class="hide">
 
     <p class="note">A imagem vira quadradinho na hora, e o que sai é uma peça como as outras:
@@ -781,6 +801,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     vira a meada mais próxima da cartela escolhida. A aba <b>linha</b> lista as meadas do
     gráfico, e ali se troca uma por outra ou se esconde a que sobrou.</p>
     <p class="note" id="imgAviso"></p>
+    <p class="note">A <b>moldura</b> dá a volta na foto com blocos de retalho bordados, e
+    cresce ou encolhe sozinha quando a foto muda de tamanho. A <b>faixa</b> repete um motivo
+    em fileira, que é o marca-página: escolha um papel de marca-página na aba papel antes, e
+    ela já nasce do comprimento dele. As duas têm uma paleta, como o gráfico colorido — a aba
+    <b>linha</b> troca cada meada pela que você tem.</p>
 
     <div class="alinha hide" id="alinha">
       <label>Alinhar a peça selecionada</label>
@@ -808,7 +833,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       <b id="threadName">—</b></p>
 
     <div class="paleta hide" id="paleta">
-      <h3 class="subtit">as linhas deste gráfico</h3>
+      <h3 class="subtit">as linhas desta peça</h3>
       <div id="paletaLista"></div>
       <p class="note">Toque numa linha da lista para escolhê-la; depois, uma cor do catálogo
       abaixo entra no lugar dela. O <b>olho</b> esconde a linha do desenho sem tirá-la da
@@ -1067,6 +1092,80 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     neve: "floco de neve", boneco: "boneco de neve", palmeira: "palmeira",
     guardasol: "guarda-sol", aviao: "avião", mala: "mala de viagem"
   };
+
+  /* ---- blocos e motivos: a moldura e a faixa ----------------------------
+
+     Os blocos são os de colcha de retalhos — estrela, cata-vento, losango —,
+     que são o que se borda em volta de uma foto. Cada um é desenhado em três
+     papéis, e não em três cores: 1 é o fundo do bloco, 2 as pontas, 3 o miolo.
+     Quem decide a meada de cada papel é a paleta da peça, e é isso que deixa
+     a mesma moldura sair em tons de outono ou em azul e branco sem desenhar
+     nada de novo.
+
+     Só se desenha um quarto. O bloco de espelho repete o quarto virado para os
+     quatro cantos; o de giro repete o quarto girado, que é o que faz o
+     cata-vento rodar em vez de refletir. Um quarto de 5 × 5 dá bloco de
+     10 × 10 — a 2,5 mm, 2,5 cm de lado, o tamanho dos blocos de moldura.
+
+     Os motivos de faixa são de uma linha só (X), em quarto de número ímpar: o
+     meio não se repete, para o motivo ter um quadradinho de centro e a fileira
+     de motivos ficar alinhada pelo eixo do marca-página. */
+  function quartoEspelho(q, impar){
+    var cima = q.map(function(l){
+      var v = l.split(""), volta = v.slice().reverse();
+      return v.concat(impar ? volta.slice(1) : volta).join("");
+    });
+    var baixo = cima.slice().reverse();
+    return cima.concat(impar ? baixo.slice(1) : baixo);
+  }
+  function quartoGiro(q){
+    var gira = function(m){   // 90° no sentido do relógio
+      var n = m.length, out = [];
+      for (var r = 0; r < n; r++){
+        var l = "";
+        for (var c = 0; c < n; c++) l += m[n - 1 - c].charAt(r);
+        out.push(l);
+      }
+      return out;
+    };
+    var a = q, b = gira(a), c = gira(b), d = gira(c);
+    return a.map(function(l, i){ return l + b[i]; })
+            .concat(d.map(function(l, i){ return l + c[i]; }));
+  }
+
+  var BLOCOS = {
+    estrela:   { nome: "estrela",           m: quartoEspelho(["11112","11122","11122","12233","22233"]) },
+    estrela8:  { nome: "estrela de 8 pontas", m: quartoEspelho(["21112","12122","11223","12233","22333"]) },
+    losango:   { nome: "losango",           m: quartoEspelho(["22222","21113","21133","21332","23322"]) },
+    cruz:      { nome: "cruz",              m: quartoEspelho(["11122","13122","11122","22233","22233"]) },
+    catavento: { nome: "cata-vento",        m: quartoGiro(["21111","22111","22211","22221","22222"]) },
+    trilha:    { nome: "trilha",            m: quartoEspelho(["21111","12111","11213","11123","11332"]) },
+    moinho:    { nome: "moinho",            m: quartoGiro(["22222","12222","11223","11133","11113"]) },
+    flor:      { nome: "flor",              m: quartoEspelho(["11111","12212","12222","11233","12233"]) },
+    alianca:   { nome: "aliança",           m: quartoGiro(["11122","11222","12233","22333","22331"]) }
+  };
+  var ORDEM_BLOCOS = ["estrela", "catavento", "losango", "estrela8", "moinho",
+                      "cruz", "trilha", "flor", "alianca"];
+
+  var MOTIVOS = {
+    medalhao:   { nome: "medalhão",   m: quartoEspelho([".....X","....XX","...X.X","..X.XX",".X.X.X","XXXXXX"], true) },
+    cruzes:     { nome: "cruzes",     m: quartoEspelho(["..X..","..XX.",".X...","XXX.X","...XX"], true) },
+    losangos:   { nome: "losangos",   m: quartoEspelho(["...X","..X.",".X.X","X.X."], true) },
+    flocos:     { nome: "flocos",     m: quartoEspelho(["X...X","...XX","..X.X",".XXX.","XXX.X"], true) },
+    // o ziguezague é o único sem simetria: ele só fecha repetido sem espaço,
+    // cada motivo continuando o risco do anterior
+    ziguezague: { nome: "ziguezague", m: ["X....",".X...","..X..","...X.","....X","...X.","..X..",".X..."] }
+  };
+
+  // o nome que a lista de peças e o seletor mostram, para qualquer chave
+  function nomeMotivo(ch){
+    if (ch === "sortido") return "blocos sortidos";
+    var t = ch.slice(0, 2), k = ch.slice(2);
+    if (t === "b:" && BLOCOS[k]) return BLOCOS[k].nome;
+    if (t === "m:" && MOTIVOS[k]) return MOTIVOS[k].nome;
+    if (t === "s:" && NOMES_SYM[k]) return NOMES_SYM[k];
+    return "";
+  }
 
   var els = [];
   var sel = 0;
@@ -1573,6 +1672,13 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     return m ? m.cores.map(function(c){ return m.id + ":" + c[0]; }) : null;
   }
 
+  function nomePeca(el){
+    if (el.kind === "text") return el.text || "texto";
+    if (el.kind === "img") return el.nome || "imagem";
+    if (el.kind === "pat") return (el.arranjo === "faixa" ? "faixa de " : "moldura de ") + nomeMotivo(el.motivo);
+    return NOMES_SYM[el.sym] || "símbolo";
+  }
+
   // o alto do painel diz duas coisas: que peça está sendo pintada e com quê
   function mostraThread(){
     var el = els[sel];
@@ -1583,7 +1689,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       var sl = el.paleta[slotAtivo(el) - 1];
       $("threadDot").style.background = sl.hex;
       $("threadName").textContent = sl.rotulo || sl.hex;
-      $("threadAlvo").textContent = "Linha escolhida de “" + (el.nome || "imagem") + "”";
+      $("threadAlvo").textContent = "Linha escolhida de “" + nomePeca(el) + "”";
       return;
     }
     var cor = corDe(el);
@@ -1591,7 +1697,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     $("threadName").textContent = cor.nome;
     $("threadAlvo").textContent = el
       ? "Linha de " + (el.kind === "text" ? "“" + (el.text || "texto") + "”"
-          : el.kind === "img" ? "“" + (el.nome || "imagem") + "”" : "símbolo")
+          : el.kind === "img" || el.kind === "pat" ? "“" + nomePeca(el) + "”" : "símbolo")
       : "Linha da próxima peça";
   }
 
@@ -2389,12 +2495,160 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     el.manual = el.edits.length;
   }
 
+  /* ---- a peça de padrão: moldura e faixa ------------------------------
+
+     Uma peça só, e não uma peça por bloco. Vinte blocos soltos em volta de
+     uma foto seriam vinte peças para arrastar, alinhar e laçar, e a primeira
+     esbarrada desmancharia o espaçamento que é a graça da moldura. Como peça
+     única ela anda, gira e se ajusta ponto a ponto como as outras.
+
+     As células guardam o índice da linha, como o gráfico colorido — e é por
+     isso que a legenda por letra, a lista de meadas, a troca de uma linha por
+     outra e a conta de fio valem para ela sem uma linha de código a mais. */
+  var CORES_PAT = ["#E9B7C9", "#7B1F33", "#6F8440", "#C7B3DB", "#24395A",
+                   "#E07A3A", "#F3E7C8", "#B3222C"];
+  var PAT_CORES_MAX = 8, PAT_REP_MAX = 40;
+
+  function gradeMotivo(ch, escala){
+    var t = ch.slice(0, 2), k = ch.slice(2), linhas;
+    if (t === "b:" && BLOCOS[k]) linhas = BLOCOS[k].m;
+    else if (t === "m:" && MOTIVOS[k]) linhas = MOTIVOS[k].m;
+    else if (t === "s:" && SYMS[k]) linhas = SYMS[k];
+    else linhas = BLOCOS.estrela.m;
+    var z = Math.max(1, escala | 0), out = [];
+    linhas.forEach(function(l){
+      var row = [];
+      for (var i = 0; i < l.length; i++){
+        var c = l.charAt(i);
+        var v = c === "X" ? 1 : (c >= "1" && c <= "9" ? +c : 0);
+        for (var s = 0; s < z; s++) row.push(v);
+      }
+      for (var s2 = 0; s2 < z; s2++) out.push(row.slice());
+    });
+    return out;
+  }
+
+  function motivosDe(el){
+    return el.motivo === "sortido"
+      ? ORDEM_BLOCOS.map(function(k){ return "b:" + k; })
+      : [el.motivo];
+  }
+
+  /* Quantos blocos a moldura leva de cada lado: os suficientes para a abertura
+     do meio caber a foto com a margem pedida em volta. A medida vem da foto
+     (ou, sem foto, da caixa do meio do papel onde ela estaria), então trocar
+     o tamanho da foto refaz a moldura do tamanho certo. */
+  function aneldaMoldura(el, bh, bw){
+    var m = miraMM(), p = P(), g = el.gap | 0;
+    var nx = 2 + Math.max(1, Math.ceil(((m.w + 2 * el.margem) / p + g) / (bw + g)));
+    var ny = 2 + Math.max(1, Math.ceil(((m.h + 2 * el.margem) / p + g) / (bh + g)));
+    // no sentido do relógio a partir do canto de cima à esquerda: é a ordem em
+    // que os blocos sortidos se alternam, e ela não deixa dois iguais lado a
+    // lado em nenhuma volta
+    var lugares = [], q, r;
+    for (q = 0; q < nx; q++) lugares.push([0, q]);
+    for (r = 1; r < ny; r++) lugares.push([r, nx - 1]);
+    for (q = nx - 2; q >= 0; q--) lugares.push([ny - 1, q]);
+    for (r = ny - 2; r >= 1; r--) lugares.push([r, 0]);
+    return { nx: nx, ny: ny, lugares: lugares };
+  }
+
+  function padraoMatriz(el){
+    var N = el.paleta && el.paleta.length ? el.paleta.length : 1;
+    var grades = motivosDe(el).map(function(ch){ return gradeMotivo(ch, el.scale); });
+    var bh = 0, bw = 0, papeis = 1;
+    grades.forEach(function(gr){
+      bh = Math.max(bh, gr.length);
+      bw = Math.max(bw, gr[0].length);
+      gr.forEach(function(l){ l.forEach(function(v){ if (v > papeis) papeis = v; }); });
+    });
+    var g = Math.max(0, el.gap | 0), lugares, rows, cols;
+    if (el.arranjo === "moldura"){
+      var an = aneldaMoldura(el, bh, bw);
+      lugares = an.lugares;
+      rows = an.ny * bh + (an.ny - 1) * g;
+      cols = an.nx * bw + (an.nx - 1) * g;
+    } else {
+      var n = Math.max(1, Math.min(PAT_REP_MAX, el.rep | 0));
+      lugares = [];
+      for (var i = 0; i < n; i++) lugares.push(el.deitada ? [0, i] : [i, 0]);
+      rows = el.deitada ? bh : n * bh + (n - 1) * g;
+      cols = el.deitada ? n * bw + (n - 1) * g : bw;
+    }
+    var cells = [];
+    for (var r = 0; r < rows; r++){
+      var l0 = [];
+      for (var q = 0; q < cols; q++) l0.push(0);
+      cells.push(l0);
+    }
+    /* A meada de cada papel anda pela paleta de bloco em bloco: o bloco i usa
+       as linhas i·papéis + 1, + 2, + 3, dando a volta na paleta. Com tantas
+       linhas quantos papéis, todo bloco sai igual; com o dobro, eles se
+       alternam em dois esquemas — e, com os blocos sortidos se alternando em
+       outro ritmo, a moldura sai variada como a de retalhos, sem ninguém ter
+       pintado bloco por bloco. */
+    lugares.forEach(function(lg, i){
+      var gr = grades[i % grades.length];
+      var r0 = lg[0] * (bh + g) + Math.floor((bh - gr.length) / 2);
+      var q0 = lg[1] * (bw + g) + Math.floor((bw - gr[0].length) / 2);
+      for (var r = 0; r < gr.length; r++)
+        for (var q = 0; q < gr[r].length; q++){
+          var v = gr[r][q];
+          if (!v) continue;
+          var slot = ((i * papeis + v - 1) % N) + 1;
+          if (el.paleta && el.paleta[slot - 1] && el.paleta[slot - 1].off) continue;
+          cells[r0 + r][q0 + q] = slot;
+        }
+    });
+    return cells;
+  }
+
+  /* A paleta cresce e encolhe sem mexer no que já está nela: as meadas que
+     você trocou à mão ficam, e só as casas novas ganham cor de fábrica. As de
+     fábrica são casadas com a linha mais próxima da cartela, para a legenda
+     já sair com código de loja e não com uma cor de tela. */
+  function paletaPat(el, n){
+    var velha = el.paleta || [];
+    if (velha.length >= n){ el.paleta = velha.slice(0, n); return; }
+    // numa linha só, a faixa nasce com a linha corrente, como palavra e
+    // símbolo; se ela não for meada de cartela nenhuma, vale a mais próxima
+    var daCorrente = n === 1 && !!threadLabel(thread);
+    var novas = [];
+    for (var i = velha.length; i < n; i++){
+      var hex = n === 1 ? thread : CORES_PAT[i % CORES_PAT.length];
+      novas.push({ lab: labHex(hex), hex: hex, chave: "",
+                   rotulo: daCorrente ? threadLabel(thread) : hex, off: 0 });
+    }
+    if (!daCorrente && CAT.length){
+      var casadas = casaPaleta(novas.map(function(s){ return s.lab; }),
+                               novas.map(function(s, i){ return novas.length - i; }),
+                               CAT[0].id);
+      // a casa não pode repetir uma meada que a paleta já tem: seria a mesma
+      // linha duas vezes na legenda
+      var tem = {};
+      velha.forEach(function(s){ tem[s.hex] = 1; });
+      casadas.forEach(function(s, i){ if (s && !tem[s.hex]){ novas[i] = s; tem[s.hex] = 1; } });
+    }
+    el.paleta = velha.concat(novas);
+  }
+
+  // a moldura fica centrada na foto: é a foto que ela emoldura
+  function centraNaMira(el){
+    var m = miraMM(), b = bboxMM(el);
+    el.x = Math.round((m.x + m.w / 2 - b.w / 2) * 10) / 10;
+    el.y = Math.round((m.y + m.h / 2 - b.h / 2) * 10) / 10;
+  }
+
   // descarta: só o Recalcular pede a peça limpa, e ele avisa antes
   function rebuild(el, descarta){
     var rowsAntes = el.cells && el.cells.length ? el.cells.length : 0;
     var colsAntes = rowsAntes && el.cells[0] ? el.cells[0].length : 0;
     var novas;
     if (el.kind === "sym") novas = matrixFromStrings(SYMS[el.sym], el.scale);
+    else if (el.kind === "pat"){
+      paletaPat(el, Math.max(1, Math.min(PAT_CORES_MAX, el.cores | 0)));
+      novas = padraoMatriz(el);
+    }
     else if (el.kind === "img"){
       if (temPaleta(el)){
         // o Recalcular é o único que pede paleta nova: mexer na largura
@@ -3051,6 +3305,15 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         });
         r.paletaDe = el.paletaDe || el.cores;
       }
+    } else if (el.kind === "pat"){
+      r.arranjo = el.arranjo; r.motivo = el.motivo; r.scale = el.scale;
+      r.gap = el.gap; r.margem = el.margem; r.rep = el.rep;
+      r.deitada = el.deitada ? 1 : 0; r.cores = el.cores; r.flip = el.flip || 0;
+      r.paleta = (el.paleta || []).map(function(sl){
+        return { lab: sl.lab.map(function(v){ return Math.round(v * 100) / 100; }),
+                 hex: sl.hex, chave: sl.chave || "",
+                 rotulo: sl.rotulo || "", off: sl.off ? 1 : 0 };
+      });
     } else {
       r.sym = el.sym; r.scale = el.scale;
     }
@@ -3067,7 +3330,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       }
       return line;
     });
-    var kind = r.kind === "sym" ? "sym" : (r.kind === "img" ? "img" : "text");
+    var kind = r.kind === "sym" || r.kind === "img" || r.kind === "pat" ? r.kind : "text";
     var el = { kind: kind, cells: cells,
                x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0, manual: +r.manual || 0,
                edits: [] };
@@ -3117,6 +3380,22 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         });
         el.paletaDe = +r.paletaDe || el.cores;
       }
+    } else if (el.kind === "pat"){
+      el.arranjo = r.arranjo === "faixa" ? "faixa" : "moldura";
+      el.motivo = typeof r.motivo === "string" && (r.motivo === "sortido" || nomeMotivo(r.motivo))
+        ? r.motivo : "sortido";
+      el.scale = Math.max(1, Math.min(4, +r.scale || 1));
+      el.gap = Math.max(0, Math.min(10, r.gap == null ? 1 : +r.gap));
+      el.margem = Math.max(0, Math.min(60, r.margem == null ? 6 : +r.margem));
+      el.rep = Math.max(1, Math.min(PAT_REP_MAX, +r.rep || 6));
+      el.deitada = r.deitada ? 1 : 0;
+      el.cores = Math.max(1, Math.min(PAT_CORES_MAX, +r.cores || 1));
+      el.flip = r.flip ? 1 : 0;
+      el.paleta = (r.paleta || []).map(function(sl){
+        return { lab: (sl.lab || [0, 0, 0]).map(Number),
+                 hex: /^#[0-9A-Fa-f]{6}$/.test(sl.hex || "") ? sl.hex : "#888888",
+                 chave: sl.chave || "", rotulo: sl.rotulo || "", off: sl.off ? 1 : 0 };
+      });
     } else {
       el.sym = SYMS[r.sym] ? r.sym : "heart";
       el.scale = +r.scale || 1;
@@ -3553,9 +3832,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
         pt.title = cor.nome;
         b.appendChild(pt);
       }
-      b.appendChild(document.createTextNode(el.kind === "text" ? (el.text || "texto")
-        : el.kind === "img" ? (el.nome || "imagem")
-        : (NOMES_SYM[el.sym] || "símbolo")));
+      b.appendChild(document.createTextNode(nomePeca(el)));
       // com Shift (ou Ctrl) a ficha soma ao laço em vez de trocar a seleção:
       // é o caminho para laçar duas peças distantes sem passar por cima do resto
       b.addEventListener("click", function(e){
@@ -3590,7 +3867,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       $("delLaco").title = (n === 1 ? "apagar a peça laçada" : "apagar as " + n + " peças laçadas") +
         (marcaFoto ? " — a moldura da foto não é peça e fica onde está" : "") +
         ". O desfazer devolve tudo num passo.";
-      ["alinha", "ctlPhoto", "ctlPiece", "ctlActs", "ctlNone", "ctlText", "ctlSym", "ctlImg"]
+      ["alinha", "ctlPhoto", "ctlPiece", "ctlActs", "ctlNone", "ctlText", "ctlSym", "ctlImg", "ctlPat"]
         .forEach(function(id){ $(id).classList.add("hide"); });
       return;
     }
@@ -3606,11 +3883,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       $("ctlNone").textContent = fmt(pa.w / 10) + " × " + fmt(pa.h / 10) + " cm";
     }
     if (!piece){
-      ["ctlText", "ctlSym", "ctlImg"].forEach(function(id){ $(id).classList.add("hide"); });
+      ["ctlText", "ctlSym", "ctlImg", "ctlPat"].forEach(function(id){ $(id).classList.add("hide"); });
       return;
     }
     // uma barra por tipo de peça: mostrar a certa é esconder as outras duas
-    var barras = { text: "ctlText", sym: "ctlSym", img: "ctlImg" };
+    var barras = { text: "ctlText", sym: "ctlSym", img: "ctlImg", pat: "ctlPat" };
     Object.keys(barras).forEach(function(k){
       $(barras[k]).classList.toggle("hide", el.kind !== k);
     });
@@ -3652,6 +3929,20 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       $("imgInv").title = semImg
         ? "A imagem desta peça não está mais na memória do navegador. Use o trocar para pôr o arquivo de novo."
         : "Troca o claro pelo escuro — é o que resolve desenho branco sobre fundo escuro.";
+    } else if (el.kind === "pat"){
+      var faixa = el.arranjo === "faixa";
+      $("patArr").value = el.arranjo;
+      $("patMot").value = el.motivo;
+      $("patScale").value = el.scale;
+      $("patGap").value = el.gap;
+      $("patMargem").value = el.margem;
+      $("patRep").value = el.rep;
+      $("patCores").value = el.cores;
+      $("patDeit").classList.toggle("on", !!el.deitada);
+      // a margem é da foto e a repetição é da fileira: cada arranjo mostra a sua
+      $("tPatMargem").classList.toggle("hide", faixa);
+      $("tPatRep").classList.toggle("hide", !faixa);
+      $("patDeit").classList.toggle("hide", !faixa);
     } else {
       $("sym").value = el.sym;
       $("symScale").value = el.scale; $("symScaleOut").textContent = el.scale;
@@ -3725,6 +4016,71 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     els.push(el); sel = els.length - 1; soUm(sel); focus = "el";
     renderChips(); syncControls(); draw(); pushHist();
   }
+
+  /* A moldura nasce em volta da foto, com os blocos sortidos e seis linhas
+     — o bastante para os blocos se alternarem em dois esquemas de cor. */
+  function addMoldura(){
+    var el = { kind:"pat", arranjo:"moldura", motivo:"sortido", scale:1, gap:1,
+               margem:6, rep:6, deitada:0, cores:6, rot:0, flip:0, edits:[],
+               x:0, y:0, cells:[[0]] };
+    rebuild(el);
+    centraNaMira(el);
+    els.push(el); sel = els.length - 1; soUm(sel); focus = "el";
+    renderChips(); syncControls(); renderPaleta(); renderFios(); draw(); pushHist();
+  }
+
+  /* A faixa nasce de pé, no meio do papel, com motivos bastantes para correr
+     o comprimento dele com 1 cm de folga em cada ponta: num papel de
+     marca-página, é o marca-página pronto. Num A4 é uma fileira longa, que se
+     encurta no repetir. */
+  function addFaixa(){
+    var el = { kind:"pat", arranjo:"faixa", motivo:"m:medalhao", scale:1, gap:1,
+               margem:6, rep:1, deitada:0, cores:1, rot:0, flip:0, edits:[],
+               x:0, y:0, cells:[[0]] };
+    var pa = paperMM(), p = P(), h = gradeMotivo(el.motivo, 1).length;
+    el.rep = Math.max(1, Math.min(PAT_REP_MAX,
+      Math.floor(((pa.h - 20) / p + el.gap) / (h + el.gap))));
+    rebuild(el);
+    var b = bboxMM(el);
+    el.x = Math.round((pa.w - b.w) / 2 * 10) / 10;
+    el.y = Math.round((pa.h - b.h) / 2 * 10) / 10;
+    els.push(el); sel = els.length - 1; soUm(sel); focus = "el";
+    renderChips(); syncControls(); renderPaleta(); renderFios(); draw(); pushHist();
+  }
+
+  // o seletor de desenho: os blocos de retalho primeiro, que são da moldura,
+  // depois os motivos de faixa e por fim os símbolos, que também repetem bem
+  function montaMotivos(){
+    var s = $("patMot");
+    var grupo = function(rot, itens){
+      var g = document.createElement("optgroup");
+      g.label = rot;
+      itens.forEach(function(it){
+        var o = document.createElement("option");
+        o.value = it[0]; o.textContent = it[1];
+        g.appendChild(o);
+      });
+      s.appendChild(g);
+    };
+    grupo("blocos de retalho", [["sortido", "sortidos"]].concat(
+      ORDEM_BLOCOS.map(function(k){ return ["b:" + k, BLOCOS[k].nome]; })));
+    grupo("motivos de faixa", Object.keys(MOTIVOS).map(function(k){ return ["m:" + k, MOTIVOS[k].nome]; }));
+    grupo("símbolos", Object.keys(NOMES_SYM).map(function(k){ return ["s:" + k, NOMES_SYM[k]]; }));
+  }
+  montaMotivos();
+
+  $("patDeit").addEventListener("click", function(){
+    var el = els[sel];
+    if (!el || el.kind !== "pat") return;
+    var b0 = bboxMM(el);
+    el.deitada = el.deitada ? 0 : 1;
+    this.classList.toggle("on", !!el.deitada);
+    rebuild(el);
+    var b1 = bboxMM(el);
+    el.x = Math.round((b0.x + b0.w / 2 - b1.w / 2) * 10) / 10;
+    el.y = Math.round((b0.y + b0.h / 2 - b1.h / 2) * 10) / 10;
+    draw(); pushHist();
+  });
 
   /* A imagem entra reduzida, como a foto, e pelo mesmo motivo: o que ela vai
      virar são quadradinhos, e 512 px já dão mais pixels por quadradinho do que
@@ -3892,6 +4248,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     loadFontThen(addText, comoEstaNaBarra().font);
   });
   $("addSym").addEventListener("click", addSym);
+  $("addMoldura").addEventListener("click", addMoldura);
+  $("addFaixa").addEventListener("click", addFaixa);
   $("delEl").addEventListener("click", function(){
     if (!els.length) return;
     els.splice(sel, 1);
@@ -3977,6 +4335,33 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       renderChips(); draw(); pushLater();
       return;
     }
+    if (el.kind === "pat"){
+      var num = function(id, min, max, alt){
+        var v = parseInt($(id).value, 10);
+        return isNaN(v) ? alt : Math.max(min, Math.min(max, v));
+      };
+      var b0 = bboxMM(el);
+      var arranjoAntes = el.arranjo;
+      el.arranjo = $("patArr").value === "faixa" ? "faixa" : "moldura";
+      el.motivo = $("patMot").value || el.motivo;
+      el.scale = num("patScale", 1, 4, el.scale);
+      el.gap = num("patGap", 0, 10, el.gap);
+      el.margem = num("patMargem", 0, 60, el.margem);
+      el.rep = num("patRep", 1, PAT_REP_MAX, el.rep);
+      el.cores = num("patCores", 1, PAT_CORES_MAX, el.cores);
+      rebuild(el);
+      // a moldura volta para a foto; a faixa cresce a partir do meio dela, que
+      // é o que mantém a fileira no eixo do marca-página
+      if (el.arranjo === "moldura") centraNaMira(el);
+      else {
+        var b1 = bboxMM(el);
+        el.x = Math.round((b0.x + b0.w / 2 - b1.w / 2) * 10) / 10;
+        el.y = Math.round((b0.y + b0.h / 2 - b1.h / 2) * 10) / 10;
+      }
+      if (arranjoAntes !== el.arranjo) syncControls();
+      renderPaleta(); renderFios(); renderChips(); draw(); pushLater();
+      return;
+    }
     el.sym = $("sym").value;
     el.scale = parseInt($("symScale").value, 10);
     $("symScaleOut").textContent = el.scale;
@@ -3985,7 +4370,8 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   }
 
   ["txt","font","rows","thick","thr","esp","arc","sym","symScale",
-   "imgLarg","imgThr","imgCorte","imgCores"]
+   "imgLarg","imgThr","imgCorte","imgCores",
+   "patArr","patMot","patScale","patGap","patMargem","patRep","patCores"]
     .forEach(function(id){ $(id).addEventListener("input", updateSelected); });
   $("imgFonte").addEventListener("change", function(){
     var el = els[sel];
@@ -4084,7 +4470,20 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 
   function onPhotoChange(){
     fotoPainel();
-    syncPhotoSize(); draw(); pushLater();
+    syncPhotoSize();
+    refazMolduras();
+    draw(); pushLater();
+  }
+
+  // a moldura é da foto: foto que muda de tamanho pede outra quantidade de
+  // blocos, e a moldura volta a ficar centrada nela
+  function refazMolduras(){
+    var mudou = false;
+    els.forEach(function(el){
+      if (el.kind !== "pat" || el.arranjo !== "moldura") return;
+      rebuild(el); centraNaMira(el); mudou = true;
+    });
+    if (mudou){ renderPaleta(); renderFios(); }
   }
   ["photoSize","photoOr"].forEach(function(id){ $(id).addEventListener("change", onPhotoChange); });
   ["photoWmm","photoHmm"].forEach(function(id){
@@ -4107,6 +4506,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
     photo.y = cy - photo.h / 2;
     clampPhoto();
     els.forEach(function(el, i){ el.x = photo.x + dx[i]; el.y = photo.y + dy[i]; });
+    refazMolduras();
     draw(); pushHist();
   });
 
@@ -4226,7 +4626,7 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function tamanhoDe(el){
     if (el.kind === "text") return el.rowsTarget;
     if (el.kind === "img") return el.larg;
-    return el.scale;
+    return el.scale;   // símbolo e padrão: o tamanho de cada motivo
   }
 
   function resizeSelected(steps){
@@ -4248,6 +4648,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
       el.larg = lg;
       $("imgLarg").value = lg;
       $("imgLargOut").textContent = lg;
+    } else if (el.kind === "pat"){
+      var zp = Math.max(1, Math.min(4, steps));
+      if (zp === el.scale) return;
+      el.scale = zp;
+      $("patScale").value = zp;
     } else {
       var z = Math.max(1, Math.min(6, steps));
       if (z === el.scale) return;
@@ -4457,7 +4862,9 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   function pintaCelula(q, r){
     var el = pinta.el;
     if (!el.cells[r] || el.cells[r][q] === undefined) return 0;
-    if (pinta.val < 0) pinta.val = el.cells[r][q] ? 0 : 1;
+    // numa peça de paleta acende com a linha escolhida na aba linha, que é o
+    // que a lista de meadas promete; nas outras, slotAtivo dá 1
+    if (pinta.val < 0) pinta.val = el.cells[r][q] ? 0 : slotAtivo(el);
     if (el.cells[r][q] === pinta.val) return 0;
     el.cells[r][q] = pinta.val;
     marcaEdit(el, r, q, pinta.val);
