@@ -168,6 +168,13 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   e leva as peças junto, cada uma à mesma distância da borda mais perto. O papel que muda leva
   o arranjo inteiro para o lugar equivalente da folha nova e, quando ele cabe, para dentro
   dela. O nome do molde acompanha a primeira palavra até você escrever um.
+- **Furos colados**: dentro de uma peça os furos guardam o espaçamento, mas entre duas peças
+  ninguém garantia nada — um nome encostado na moldura e dois furos caíam a um milímetro um do
+  outro, e no papel essa tira rasga. Quando um furo fica a menos de 2 mm de um furo de outra
+  peça (ou a menos de 80% do espaçamento, num molde mais fino que isso), a barra de cima avisa
+  em vermelho e a região aparece tracejada na tela. Furo exatamente no mesmo lugar não avisa:
+  é um furo só, usado pelas duas peças. A busca roda quando a peça para de andar, e não a
+  cada movimento do arraste.
 - **Posicionar com precisão**: as setas do teclado movem a peça selecionada de meio milímetro, ou
   de cinco com Shift — com a foto selecionada, movem a foto. Na aba peças, três botões alinham a
   peça: centralizar na foto, centralizar no papel, alinhar pela base da foto — e, quando há uma

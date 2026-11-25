@@ -72,6 +72,61 @@ function countOf(el){
 }
 
 // a caixa da peça já girada, em mm de papel
+/* ---- furos colados ------------------------------------------------------
+
+   Dentro de uma peça os furos guardam o espaçamento, sempre. Entre duas peças
+   não há quem garanta nada: um nome encostado na moldura, um símbolo em cima
+   de uma palavra, e dois furos caem a um milímetro um do outro. No papel a
+   tira entre eles rasga na primeira passada da agulha — e o molde impresso
+   não tem como avisar, porque cada furo, sozinho, está certo.
+
+   Furo exatamente no mesmo lugar não é problema: é um furo só, usado pelas
+   duas peças. O perigo é o quase — mais perto que 2 mm (ou que 80% do
+   espaçamento, num molde mais fino que isso) e mais longe que 0,3 mm.
+
+   A busca é por uma grade do tamanho da distância mínima: cada furo só é
+   comparado com os da sua casa e das oito vizinhas, então o custo cresce com
+   o número de furos, e não com o quadrado dele. */
+var FURO_MIN = 2;          // mm entre furos de peças diferentes
+var MESMO_FURO = 0.3;      // mm: mais perto que isso é o mesmo furo
+
+function distMinFuros(){ return Math.min(FURO_MIN, P() * 0.8); }
+
+function furosColados(){
+  var D = distMinFuros(), grade = {}, pares = {}, n = 0;
+  els.forEach(function(el, i){
+    holesOf(el).forEach(function(h){
+      var gx = Math.floor(h.x / D), gy = Math.floor(h.y / D);
+      for (var dx = -1; dx <= 1; dx++)
+        for (var dy = -1; dy <= 1; dy++){
+          var casa = grade[(gx + dx) + "," + (gy + dy)];
+          if (!casa) continue;
+          for (var j = 0; j < casa.length; j++){
+            var o = casa[j];
+            if (o.i === i) continue;
+            var d = Math.sqrt((h.x - o.x) * (h.x - o.x) + (h.y - o.y) * (h.y - o.y));
+            if (d >= D || d < MESMO_FURO) continue;
+            n++;
+            // cada par de peças guarda a caixa de onde os furos se encostam:
+            // é ela que a tela marca, e não furo por furo — centenas de
+            // marcas juntas viram uma mancha que esconde os próprios pontos
+            var ch = Math.min(i, o.i) + "-" + Math.max(i, o.i);
+            var c = pares[ch] || (pares[ch] = { x0: 1e9, y0: 1e9, x1: -1e9, y1: -1e9 });
+            c.x0 = Math.min(c.x0, h.x, o.x); c.y0 = Math.min(c.y0, h.y, o.y);
+            c.x1 = Math.max(c.x1, h.x, o.x); c.y1 = Math.max(c.y1, h.y, o.y);
+          }
+        }
+      var k = gx + "," + gy;
+      (grade[k] = grade[k] || []).push({ x: h.x, y: h.y, i: i });
+    });
+  });
+  return { n: n, d: D,
+           pares: Object.keys(pares).map(function(k){
+             var c = pares[k], ij = k.split("-").map(Number);
+             return { i: ij[0], j: ij[1], x: c.x0, y: c.y0, w: c.x1 - c.x0, h: c.y1 - c.y0 };
+           }) };
+}
+
 function elPaperBox(el){
   var b = bboxMM(el);
   var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;

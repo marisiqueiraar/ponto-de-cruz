@@ -86,6 +86,7 @@ function paint(ctx, k, region, opts){
     if (opts.outline && marcado(i)) drawOutline(ctx, el, k, region);
   });
   if (opts.outline && marcaFoto) drawFotoOutline(ctx, k, region);
+  if (opts.outline) drawColados(ctx, k, region);
   if (opts.outline && laco) drawLaco(ctx, k, region);
 }
 
@@ -163,6 +164,15 @@ function showFit(cr){
       "O molde é recortado no papel, então o que está fora não vai sair no PDF. " +
       (fotoFora ? "Mude o tamanho da foto ou do papel. " : "") +
       (fora ? "Arraste de volta, ou use os botões de alinhar na aba peças." : "");
+  } else if (colados && colados.n){
+    // furo colado rasga o papel: vem logo depois do que está fora dele
+    state = "over";
+    var np = colados.pares.length;
+    txt.textContent = "furos colados entre " + (np === 1 ? "2 peças" : np + " pares de peças");
+    box.title = colados.n + (colados.n === 1 ? " furo fica" : " furos ficam") +
+      " a menos de " + fmt(colados.d) + " mm de um furo de outra peça. No papel a tira " +
+      "entre eles rasga. A região tracejada em vermelho mostra onde: afaste as peças, ou " +
+      "encoste-as até os furos coincidirem — furo no mesmo lugar vira um furo só.";
   } else if (plano.tiled){
     var n = plano.cols * plano.rows;
     state = "multi";
@@ -228,6 +238,40 @@ function rulers(k){
   guiasRender(ox, oy, k);      // as guias medem pela mesma origem que a régua
 }
 
+/* A busca de furos colados roda depois do último desenho, e não a cada um:
+   num arraste são dezenas de desenhos por segundo, e o que interessa é onde
+   a peça foi solta. Enquanto se mexe, as marcas somem; paradas, voltam. */
+var colados = null, coladosTimer = 0, coladosDesenhando = false;
+function agendaColados(){
+  if (coladosDesenhando) return;
+  colados = null;
+  clearTimeout(coladosTimer);
+  coladosTimer = setTimeout(function(){
+    colados = furosColados();
+    coladosDesenhando = true;
+    try { draw(); } finally { coladosDesenhando = false; }
+  }, 200);
+}
+
+// a região onde duas peças se encostam, tracejada em vermelho por cima, com
+// uma folga em volta para o traço não cobrir os furos que ele aponta
+function drawColados(ctx, k, region){
+  if (!colados || !colados.pares.length) return;
+  ctx.save();
+  ctx.strokeStyle = "#D7263D";
+  ctx.fillStyle = "rgba(215, 38, 61, 0.08)";
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 4]);
+  var m = Math.max(4, colados.d * k);
+  colados.pares.forEach(function(c){
+    var x = (c.x - region.x) * k - m, y = (c.y - region.y) * k - m;
+    var w = c.w * k + 2 * m, h = c.h * k + 2 * m;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeRect(x, y, w, h);
+  });
+  ctx.restore();
+}
+
 function draw(){
   var cv = $("grid"), ctx = cv.getContext("2d");
   var pa = paperMM();
@@ -262,9 +306,11 @@ function draw(){
   showFit(cropArea());
   renderFios();
   rulers(k);
+  agendaColados();
 
   // toda alteração de estado passa por aqui, então é o único lugar que precisa
   // pedir a gravação; o adiamento junta as centenas de draws de um arraste num
-  // único write ao fim do gesto
-  scheduleSave();
+  // único write ao fim do gesto. O desenho que só acrescenta as marcas de
+  // furos colados não mudou nada no molde, e não adia a gravação
+  if (!coladosDesenhando) scheduleSave();
 }
