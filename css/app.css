@@ -14,16 +14,12 @@
 @font-face{font-family:"EB Garamond";font-style:italic;src:url("../fonts/eb-garamond.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Grand Hotel";src:url("../fonts/grand-hotel.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Great Vibes";src:url("../fonts/great-vibes.woff2") format("woff2");font-display:swap}
-@font-face{font-family:"Herr Von Muellerhoff";src:url("../fonts/herr-von-muellerhoff.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Homemade Apple";src:url("../fonts/homemade-apple.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Indie Flower";src:url("../fonts/indie-flower.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Italianno";src:url("../fonts/italianno.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Kaushan Script";src:url("../fonts/kaushan-script.woff2") format("woff2");font-display:swap}
-@font-face{font-family:"League Script";src:url("../fonts/league-script.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Lobster";src:url("../fonts/lobster.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Marck Script";src:url("../fonts/marck-script.woff2") format("woff2");font-display:swap}
-@font-face{font-family:"Monsieur La Doulaise";src:url("../fonts/monsieur-la-doulaise.woff2") format("woff2");font-display:swap}
-@font-face{font-family:"Mrs Saint Delafield";src:url("../fonts/mrs-saint-delafield.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Norican";src:url("../fonts/norican.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Pacifico";src:url("../fonts/pacifico.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Parisienne";src:url("../fonts/parisienne.woff2") format("woff2");font-display:swap}
@@ -33,7 +29,6 @@
 @font-face{font-family:"Pixelify Sans";src:url("../fonts/pixelify-sans.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Playfair Display";font-style:italic;src:url("../fonts/playfair-display.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Press Start 2P";src:url("../fonts/press-start-2p.woff2") format("woff2");font-display:swap}
-@font-face{font-family:"Rouge Script";src:url("../fonts/rouge-script.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Sacramento";src:url("../fonts/sacramento.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Satisfy";src:url("../fonts/satisfy.woff2") format("woff2");font-display:swap}
 @font-face{font-family:"Shadows Into Light";src:url("../fonts/shadows-into-light.woff2") format("woff2");font-display:swap}
@@ -141,7 +136,7 @@ button:focus-visible,.chip:focus-visible,.cat:focus-visible,.rail button:focus-v
   text-overflow:ellipsis;text-align:left}
 
 /* ---- escolha de fonte com amostra ----------------------------------- */
-.pop{position:fixed;z-index:60;width:330px;max-height:min(560px,calc(100vh - 90px));
+.pop{position:fixed;z-index:60;width:410px;max-height:min(560px,calc(100vh - 90px));
   background:#fff;border:1px solid var(--line);border-radius:8px;
   box-shadow:0 12px 40px rgba(56,73,89,.28);display:flex;flex-direction:column;overflow:hidden}
 .pop .busca{padding:10px;border-bottom:1px solid var(--line);flex:0 0 auto}
@@ -156,15 +151,20 @@ button:focus-visible,.chip:focus-visible,.cat:focus-visible,.rail button:focus-v
 .pop .lista{overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:5px;flex:1 1 auto;min-height:0}
 .pop .vazio{padding:18px 10px;font-size:13.5px;color:var(--ink-soft)}
 
-.fcard{display:flex;align-items:center;gap:10px;width:100%;padding:7px 9px;text-align:left;
+.fcard{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;width:100%;padding:8px 10px;text-align:left;
   border:1px solid transparent;border-radius:7px;background:#fff;min-height:52px}
 .fcard:hover{background:var(--paper)}
 .fcard.on{border-color:var(--mat);box-shadow:inset 4px 0 0 var(--lemon)}
 .fcard .amostra{flex:1 1 auto;min-width:0;font-size:23px;line-height:1.15;color:var(--ink);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fcard canvas{flex:0 0 auto;image-rendering:pixelated;max-width:104px;height:auto}
-.fcard .nome{flex:0 0 74px;font-family:var(--display);font-size:8.5px;color:var(--ink-soft);
+.fcard canvas{flex:0 0 auto;order:4;image-rendering:pixelated;max-width:100%;height:auto;margin-top:2px}
+.fcard .nome{flex:0 0 96px;font-family:var(--display);font-size:8.5px;color:var(--ink-soft);
   line-height:1.35;text-align:right;overflow-wrap:anywhere}
+/* a altura mínima ocupa uma linha só dela, embaixo do nome, e fica laranja
+   quando a peça está abaixo dela */
+.fcard .min{flex:1 1 100%;order:3;font-size:11px;color:var(--ink-soft)}
+.fcard.baixa .min{color:var(--danger);font-weight:600}
+.tools .t.alerta{border-color:var(--danger);box-shadow:inset 0 -3px 0 var(--danger)}
 
 .tbtn{height:36px;padding:0 12px;flex:0 0 auto;border:1px solid var(--line);border-radius:6px;
   background:#fff;font-family:var(--display);font-size:11px;letter-spacing:.02em;white-space:nowrap;

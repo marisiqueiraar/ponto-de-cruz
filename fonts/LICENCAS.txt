@@ -1,4 +1,4 @@
-As 40 fontes desta pasta vêm do catálogo do Google Fonts e estão guardadas aqui para
+As 35 fontes desta pasta vêm do catálogo do Google Fonts e estão guardadas aqui para
 o app funcionar sem rede. Cada arquivo é o subconjunto latino servido pelo próprio
 Google, no peso e estilo que o app usa — regular, ou itálico nas três serifadas.
 
@@ -23,16 +23,12 @@ Dancing Script            Impallari Type                      SIL Open Font Lice
 EB Garamond (itálico)     Georg Duffner, Octavio Pardo        SIL Open Font License 1.1
 Grand Hotel               Astigmatic                          SIL Open Font License 1.1
 Great Vibes               Robert Leuschke                     SIL Open Font License 1.1
-Herr Von Muellerhoff      Sudtipos                            SIL Open Font License 1.1
 Homemade Apple            Font Diner                          Apache License 2.0
 Indie Flower              Kimberly Geswein                    SIL Open Font License 1.1
 Italianno                 Robert Leuschke                     SIL Open Font License 1.1
 Kaushan Script            Impallari Type                      SIL Open Font License 1.1
-League Script             Haley Fiege                         SIL Open Font License 1.1
 Lobster                   Impallari Type                      SIL Open Font License 1.1
 Marck Script              Denis Masharov                      SIL Open Font License 1.1
-Monsieur La Doulaise      Sudtipos                            SIL Open Font License 1.1
-Mrs Saint Delafield       Sudtipos                            SIL Open Font License 1.1
 Norican                   Vernon Adams                        SIL Open Font License 1.1
 Pacifico                  Vernon Adams, Jacques Le Bailly, B  SIL Open Font License 1.1
 Parisienne                Astigmatic                          SIL Open Font License 1.1
@@ -42,7 +38,6 @@ Pirata One                Rodrigo Fuenzalida, Nicolas Massi   SIL Open Font Lice
 Pixelify Sans             Stefie Justprince                   SIL Open Font License 1.1
 Playfair Display (itálico)  Claus Eggers Sørensen               SIL Open Font License 1.1
 Press Start 2P            CodeMan38                           SIL Open Font License 1.1
-Rouge Script              Sabrina Mariela Lopez               SIL Open Font License 1.1
 Sacramento                Astigmatic                          SIL Open Font License 1.1
 Satisfy                   Sideshow                            Apache License 2.0
 Shadows Into Light        Kimberly Geswein                    SIL Open Font License 1.1

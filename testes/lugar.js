@@ -5,7 +5,7 @@
 //   2. peça nova nasce reta, num lugar livre: embaixo da foto, sem encostar
 //      nela nem nas outras peças, e dentro do papel;
 //   3. mexer na altura ou no texto não tira a palavra do lugar: ela cresce em
-//      volta do próprio centro;
+//      volta do próprio centro — e, embaixo da foto, para baixo;
 //   4. foto que muda de tamanho leva as peças junto — o nome que estava
 //      embaixo continua embaixo, à mesma distância;
 //   5. papel que muda leva o arranjo inteiro, e ele entra no papel novo
@@ -77,12 +77,15 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   await pg.fill("#txt", "amor");
   await pg.dispatchEvent("#txt", "input");
   st = await estado();
-  const c0 = centro(st.els[0]);
+  const c0 = centro(st.els[0]), topo0 = st.els[0].y;
   await campo("rows", 24);
   st = await estado();
   let c1 = centro(st.els[0]);
-  ok(perto(c1.x, c0.x, 1.3) && perto(c1.y, c0.y, 1.3),
-     "altura 16 → 24: o centro fica (andou " + (c1.x - c0.x).toFixed(1) + ", " + (c1.y - c0.y).toFixed(1) + " mm)");
+  ok(perto(c1.x, c0.x, 1.3), "altura 16 → 24: cresce para os dois lados (andou " + (c1.x - c0.x).toFixed(1) + " mm)");
+  // embaixo da foto, a palavra cresce para baixo: o que foi acertado é a
+  // distância até a foto, e subir a deixaria por cima dela
+  ok(perto(st.els[0].y, topo0, 0.11), "e, embaixo da foto, para baixo: o topo fica (" +
+     topo0.toFixed(1) + " → " + st.els[0].y.toFixed(1) + ")");
   await campo("txt", "amor eterno");
   st = await estado();
   c1 = centro(st.els[0]);

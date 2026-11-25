@@ -156,7 +156,8 @@ const CINZA = png(100, 100, (x, y) => (x >= 10 && x < 50 && y >= 10 && y < 50) ?
     const it = idx.itens.find(x => x.id === idx.atual);
     const e = JSON.parse(localStorage.getItem(it.dados)).els[1];
     const mm = parseFloat(JSON.parse(localStorage.getItem(it.dados)).mm);
-    return { cx: e.x + e.cells[0].length * mm / 2, cy: e.y + e.cells.length * mm / 2, color: e.color };
+    return { cx: e.x + e.cells[0].length * mm / 2, cy: e.y + e.cells.length * mm / 2,
+             y: e.y, h: e.cells.length * mm, color: e.color };
   });
   const FAIXA = png(100, 100, (x, y) => (y >= 20 && y < 40) ? 0 : 255);
   await escolhe("#imgTroca", "faixa.png", FAIXA);
@@ -170,12 +171,14 @@ const CINZA = png(100, 100, (x, y) => (x >= 10 && x < 50 && y >= 10 && y < 50) ?
     const it = idx.itens.find(x => x.id === idx.atual);
     const e = JSON.parse(localStorage.getItem(it.dados)).els[1];
     const mm = parseFloat(JSON.parse(localStorage.getItem(it.dados)).mm);
-    return { cx: e.x + e.cells[0].length * mm / 2, cy: e.y + e.cells.length * mm / 2, color: e.color };
+    return { cx: e.x + e.cells[0].length * mm / 2, cy: e.y + e.cells.length * mm / 2,
+             y: e.y, h: e.cells.length * mm, color: e.color };
   });
-  // o lugar é o centro: a imagem nova tem outra proporção, e é em volta do
-  // centro que ela cresce ou encolhe
-  ok(Math.abs(agora.cx - lugar.cx) < 0.11 && Math.abs(agora.cy - lugar.cy) < 0.11 &&
-     agora.color === lugar.color, "sem sair do lugar nem trocar de linha");
+  // o lugar é o centro na horizontal; na vertical, o centro — ou, para a
+  // peça que está embaixo da foto, o topo, que é a distância até ela
+  const vert = Math.abs(agora.cy - lugar.cy) < 0.11 || Math.abs(agora.y - lugar.y) < 0.11;
+  ok(Math.abs(agora.cx - lugar.cx) < 0.11 && vert && agora.color === lugar.color,
+     "sem sair do lugar nem trocar de linha");
 
   // ---- 7. foto entra colorida, logo entra em uma cor ---------------------
   // Em uma cor só, foto vira mancha picotada: o limiar corta os meios-tons no

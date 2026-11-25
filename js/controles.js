@@ -186,6 +186,7 @@ function syncControls(){
     $(barras[k]).classList.toggle("hide", el.kind !== k);
   });
   if (el.kind === "text"){
+    avisaAlturaFonte(el);
     $("txt").value = el.text;
     $("font").value = el.font;
     mostraFonte();
@@ -244,6 +245,21 @@ function syncControls(){
   $("rot").value = el.rot; $("rotOut").textContent = el.rot;
 }
 
+/* Abaixo da altura mínima da fonte, o campo de altura fica marcado e diz por
+   quê: a palavra continua sendo feita na altura pedida — quem manda é você —,
+   mas sem o aviso a letra borrada parecia defeito do app, e não da altura. */
+function avisaAlturaFonte(el){
+  var t = $("rows").parentNode;
+  if (!t.dataset.titulo) t.dataset.titulo = t.title;
+  var min = fonteMin(el.font), baixa = el.rowsTarget < min;
+  t.classList.toggle("alerta", baixa);
+  t.title = baixa
+    ? el.font + " fica legível a partir de " + min + " quadradinhos (" + fmt(min * P() / 10) +
+      " cm de maiúscula). Abaixo disso as curvas viram pontilhado. Suba a altura, ou escolha " +
+      "uma fonte de traço mais firme — a lista de fontes diz a altura de cada uma."
+    : t.dataset.titulo;
+}
+
 function loadFontThen(fn, fam){
   var f = fam || $("font").value;
   if (document.fonts && document.fonts.load){
@@ -263,7 +279,7 @@ function loadFontThen(fn, fam){
    gosto, não um pedido, e palavra torta sem ninguém ter mandado é ajuste a
    mais para desfazer. */
 function comoEstaNaBarra(){
-  var pd = { text:"amor", font:"Great Vibes", rowsTarget:16, thick:2, thr:0.35,
+  var pd = { text:"amor", font: FONTE_PADRAO, rowsTarget:16, thick:2, thr:0.35,
              esp:0, arc:0, rot:0 };
   var temTexto = false;
   els.forEach(function(el){ if (el.kind === "text") temTexto = true; });
@@ -659,6 +675,7 @@ function updateSelected(){
     $("thrOut").textContent = $("thr").value;
     $("espOut").textContent = el.esp;
     $("arcOut").textContent = el.arc;
+    avisaAlturaFonte(el);
     loadFontThen(function(){ refazNoCentro(el); renderChips(); draw(); pushLater(); });
     return;
   }

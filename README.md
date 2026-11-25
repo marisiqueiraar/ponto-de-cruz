@@ -137,11 +137,27 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   letra por letra é o jeito comum e rompe as ligaduras da cursiva, e ligadura é o que faz a
   palavra parecer escrita à mão. Há também **espaçamento entre letras**, contado em
   quadradinhos, que é o que resolve cursiva fechando em letra pequena.
-- **Fontes**: 40 famílias do Google Fonts agrupadas por caráter — caligrafia fina, cursiva
+- **Fontes**: 35 famílias do Google Fonts agrupadas por caráter — caligrafia fina, cursiva
   encorpada, letra de mão, serifada itálica, gótica, pixel e bloco. A escolha é por amostra,
-  não por nome: cada linha mostra a sua palavra escrita naquela fonte e, ao lado, a mesma
-  palavra já em quadradinhos, que é o que vira furo. Com busca e filtro por grupo. Os cartões
-  pedem a fonte só quando chegam à vista, então abrir a lista não baixa as 40 famílias.
+  não por nome: cada cartão mostra a sua palavra escrita naquela fonte e, embaixo, a mesma
+  palavra já em quadradinhos **na altura da peça**, que é exatamente o que vira furo. Com busca
+  e filtro por grupo. Os cartões pedem a fonte só quando chegam à vista, então abrir a lista
+  não baixa as 35 famílias.
+
+  Cada fonte tem a **altura a partir da qual fica legível** em quadradinho, medida escrevendo a
+  mesma palavra em todas elas: 12 para a maioria, 20 ou 24 para as caligrafias finas, em que a
+  minúscula tem um terço da maiúscula. O cartão diz esse número, e fica laranja quando a peça
+  está abaixo dele; na barra de cima, o campo de altura fica marcado e explica por quê. A palavra
+  continua saindo na altura pedida — o aviso é para a letra borrada não parecer defeito do app.
+  A fonte de fábrica é a **Dancing Script**, legível desde 12. Cinco fontes saíram por não
+  ficarem legíveis em altura nenhuma (League Script, Mrs Saint Delafield, Herr Von Muellerhoff,
+  Monsieur La Doulaise e Rouge Script); molde gravado com uma delas abre igual e, refeito, passa
+  para a parecida.
+
+  Para virar quadradinho, a palavra é lida em até nove encaixes da grade — deslocada zero, um
+  terço e dois terços de quadradinho em cada eixo — e fica a leitura mais limpa: a de menor
+  erro somado, com multa para cada pedaço solto de traço. Um traço da largura de um quadradinho
+  que caía metade em cada coluna sumia ou engordava; deslocado um terço, vira linha.
 - **Linhas**: o painel é o catálogo das marcas — 391 cores da Anchor e 455 da DMC — numa
   fileira de marcas e uma grade. Cada quadradinho traz o **código impresso dentro**, que é o
   que se pede na loja. **Cada peça tem a sua linha**: tocar num quadradinho diz que você tem
@@ -336,11 +352,11 @@ do app e o app não depende dela.
 
 Nenhuma. Tudo que o app precisa está no repositório, e ele funciona sem rede:
 
-- **As 40 fontes** ficam em `fonts/`, uma por família, no subconjunto latino e no peso que o
-  app usa (0,94 MB somadas). O navegador só baixa a fonte que for realmente usada. Isso não é
+- **As 35 fontes** ficam em `fonts/`, uma por família, no subconjunto latino e no peso que o
+  app usa (0,89 MB somadas). O navegador só baixa a fonte que for realmente usada. Isso não é
   só conforto offline: a grade é amostrada a partir do traço da fonte, então uma fonte que não
   chega faz o canvas desenhar numa cursiva genérica e o molde sair errado **sem avisar**.
-  Créditos e licenças em [`fonts/LICENCAS.txt`](fonts/LICENCAS.txt) — 37 sob SIL Open Font
+  Créditos e licenças em [`fonts/LICENCAS.txt`](fonts/LICENCAS.txt) — 32 sob SIL Open Font
   License 1.1 e 3 sob Apache 2.0.
 - **jsPDF 2.5.1** está em `vendor/jspdf.umd.min.js` (MIT, cabeçalho de licença no próprio
   arquivo). Antes vinha do cdnjs, o que deixava a entrega final do app — o molde em PDF —

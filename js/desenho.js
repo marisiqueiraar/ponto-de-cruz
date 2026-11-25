@@ -363,24 +363,86 @@ function textMatrix(text, fam, targetRows, thick, thr, esp, arco){
     }
   }
 
-  var cols = Math.floor(alvo.width / S), rowsN = Math.floor(alvo.height / S);
   var data = ax.getImageData(0, 0, alvo.width, alvo.height).data;
-  var cells = [];
-  for (var r = 0; r < rowsN; r++){
-    var line = [];
-    for (var q = 0; q < cols; q++){
-      var on = 0;
-      for (var yy = 0; yy < S; yy++){
-        for (var xx = 0; xx < S; xx++){
-          var i = (((r * S + yy) * alvo.width) + (q * S + xx)) * 4 + 3;
-          if (data[i] > 90) on++;
-        }
-      }
-      line.push(on / (S * S) > thr ? 1 : 0);
+  return trim(amostraComEncaixe(data, alvo.width, alvo.height, S, thr));
+}
+
+/* Onde a grade cai sobre o traço decide a letra. Com a grade num lugar
+   qualquer, um traço da largura de um quadradinho cai metade numa coluna e
+   metade na outra: nenhuma das duas passa do limite, e o traço some — ou as
+   duas passam, e ele engorda. Deslocar a grade um terço de quadradinho
+   transforma "pontilhado" em "linha".
+
+   Então a palavra é lida em até nove encaixes — zero, um terço e dois terços
+   de quadradinho, em cada eixo — e fica o que tiver a leitura mais limpa:
+   o menor erro somado (o quanto cada quadradinho ficou longe de "cheio" ou
+   "vazio") mais uma multa por pedaço solto, porque traço partido em ilhas é
+   o defeito que mais se vê no bordado. O encaixe zero vem primeiro e ganha os
+   empates: palavra que já saía limpa não muda.
+
+   A tinta de cada quadradinho sai de uma tabela de somas acumuladas, quatro
+   leituras por quadradinho em qualquer encaixe — por isso nove leituras
+   custam quase o mesmo que uma. */
+var MULTA_ILHA = 1.5;   // quadradinhos de erro que um pedaço solto custa
+
+function amostraComEncaixe(data, W, H, S, thr){
+  var W1 = W + 1, I = new Int32Array(W1 * (H + 1));
+  for (var y = 0; y < H; y++){
+    var linha = 0;
+    for (var x = 0; x < W; x++){
+      linha += data[(y * W + x) * 4 + 3] > 90 ? 1 : 0;
+      I[(y + 1) * W1 + x + 1] = I[y * W1 + x + 1] + linha;
     }
-    cells.push(line);
   }
-  return trim(cells);
+  var passos = S >= 3 ? [0, Math.round(S / 3), Math.round(2 * S / 3)] : (S === 2 ? [0, 1] : [0]);
+  var area = S * S, melhor = null;
+  passos.forEach(function(oy){
+    passos.forEach(function(ox){
+      var cols = Math.floor((W - ox) / S), rows = Math.floor((H - oy) / S);
+      var cells = [], erro = 0;
+      for (var r = 0; r < rows; r++){
+        var line = [], y0 = oy + r * S;
+        for (var q = 0; q < cols; q++){
+          var x0 = ox + q * S;
+          var soma = I[(y0 + S) * W1 + x0 + S] - I[y0 * W1 + x0 + S] -
+                     I[(y0 + S) * W1 + x0] + I[y0 * W1 + x0];
+          var cob = soma / area, on = cob > thr;
+          erro += on ? 1 - cob : cob;
+          line.push(on ? 1 : 0);
+        }
+        cells.push(line);
+      }
+      var nota = erro + MULTA_ILHA * ilhas(cells);
+      if (!melhor || nota < melhor.nota - 1e-9) melhor = { nota: nota, cells: cells };
+    });
+  });
+  return melhor.cells;
+}
+
+// pedaços soltos de quadradinhos acesos, contando a vizinhança das diagonais:
+// no bordado, dois pontos que se tocam pela quina são o mesmo traço
+function ilhas(cells){
+  var rows = cells.length, cols = rows ? cells[0].length : 0;
+  var visto = new Uint8Array(rows * cols), n = 0, pilha = [];
+  for (var r = 0; r < rows; r++)
+    for (var q = 0; q < cols; q++){
+      if (!cells[r][q] || visto[r * cols + q]) continue;
+      n++;
+      visto[r * cols + q] = 1;
+      pilha.push(r, q);
+      while (pilha.length){
+        var qq = pilha.pop(), rr = pilha.pop();
+        for (var dy = -1; dy <= 1; dy++)
+          for (var dx = -1; dx <= 1; dx++){
+            var r2 = rr + dy, q2 = qq + dx;
+            if (r2 < 0 || q2 < 0 || r2 >= rows || q2 >= cols) continue;
+            if (!cells[r2][q2] || visto[r2 * cols + q2]) continue;
+            visto[r2 * cols + q2] = 1;
+            pilha.push(r2, q2);
+          }
+      }
+    }
+  return n;
 }
 
 // espelhar troca a ordem das colunas, e mais nada: as células acesas à mão
@@ -595,14 +657,25 @@ function centraNaMira(el){
    texto ou na largura espera que a peça cresça ou encolha em volta de onde
    ela está — e não a partir do canto de cima à esquerda, que era o que o
    `rebuild` sozinho fazia: cada ajuste desalinhava o que já estava alinhado,
-   e o alinhamento tinha de ser refeito à mão a cada mudança. */
+   e o alinhamento tinha de ser refeito à mão a cada mudança.
+
+   Na vertical há uma exceção, a da foto: a peça que está inteira embaixo da
+   foto cresce para baixo, e a que está inteira em cima cresce para cima. O
+   nome embaixo da foto que ganhava uma maiúscula alta subia por cima dela;
+   assim ele guarda a distância até a foto, que é a medida que foi acertada. */
 function refazNoCentro(el, descarta){
   var b0 = el.cells && el.cells.length && el.cells[0].length > 1 ? bboxMM(el) : null;
+  var cx0 = b0 ? elPaperBox(el) : null;
   rebuild(el, descarta);
   if (!b0) return;
   var b1 = bboxMM(el);
   el.x = dec1(b0.x + b0.w / 2 - b1.w / 2);
-  el.y = dec1(b0.y + b0.h / 2 - b1.h / 2);
+  var y = b0.y + b0.h / 2 - b1.h / 2;
+  if (!photo.off && !el.rot){
+    if (cx0.y >= photo.y + photo.h - 0.05) y = b0.y;                       // embaixo: o topo fica
+    else if (cx0.y + cx0.h <= photo.y + 0.05) y = b0.y + b0.h - b1.h;      // em cima: a base fica
+  }
+  el.y = dec1(y);
 }
 
 // descarta: só o Recalcular pede a peça limpa, e ele avisa antes

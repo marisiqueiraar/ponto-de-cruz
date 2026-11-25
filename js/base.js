@@ -21,6 +21,35 @@ var SUPER = 6;   // pixels por quadradinho no rascunho, quando cabe
    não da resolução do rascunho —, só o traço fica um pouco mais grosseiro
    antes de virar furo. Melhor um traço mais grosseiro do que uma peça vazia. */
 var TETO_CANVAS = 4000;
+/* As fontes em ponto cruz.
+
+   A fonte de fábrica é a Dancing Script: cursiva de traço firme, que sai
+   legível desde 12 quadradinhos. A de antes, Great Vibes, só fica legível
+   a partir de uns 24 — numa folha de 2,5 mm, uma maiúscula de 6 cm.
+
+   Cada fonte tem a altura a partir da qual ela fica legível em quadradinho,
+   medida escrevendo a mesma palavra em todas elas (REVISAO.md, seção B).
+   As caligrafias finas têm a minúscula com um terço da maiúscula, e abaixo
+   da altura delas o "a" fica com cinco quadradinhos: as curvas viram
+   pontilhado. As outras ficam em 12.
+
+   Cinco fontes saíram por não ficarem legíveis em altura nenhuma. Molde
+   gravado com uma delas abre igual — as células estão gravadas —, e só ao
+   ser refeito passa para a parecida que está aqui. */
+var FONTE_PADRAO = "Dancing Script";
+var FONTE_MIN_PADRAO = 12;
+var FONTE_MIN = {
+  "Great Vibes": 24, "Pinyon Script": 24, "Allura": 24, "Alex Brush": 24,
+  "Tangerine": 24, "Italianno": 24, "Parisienne": 24, "UnifrakturMaguntia": 24,
+  "Petit Formal Script": 20, "Sacramento": 20
+};
+var FONTE_TROCADA = {
+  "League Script": "Petit Formal Script", "Mrs Saint Delafield": "Great Vibes",
+  "Herr Von Muellerhoff": "Pinyon Script", "Monsieur La Doulaise": "Great Vibes",
+  "Rouge Script": "Allura"
+};
+function fonteMin(fam){ return FONTE_MIN[fam] || FONTE_MIN_PADRAO; }
+
 var ITALIC = { "Cormorant Garamond":1, "EB Garamond":1, "Playfair Display":1 };
 function fontStr(size, fam){ return (ITALIC[fam] ? "italic " : "") + size + 'px "' + fam + '", cursive'; }
 // milímetro com uma casa: é a precisão com que o molde guarda posição

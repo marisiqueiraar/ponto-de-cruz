@@ -32,20 +32,34 @@ function palavraAmostra(){
   return (t || "amor").slice(0, 9);
 }
 
-// a mesma grade do molde, em miniatura: é o que a peça vira de verdade.
+/* A altura em que a amostra é desenhada: a da palavra selecionada, ou a que
+   está na barra. Era sempre 7 quadradinhos — e em 7 quase toda cursiva vira
+   borrão, então a amostra não deixava julgar fonte nenhuma. Na altura da
+   peça, ela mostra exatamente o que vai virar furo. */
+function alturaAmostra(){
+  var el = els[sel];
+  if (el && el.kind === "text") return el.rowsTarget;
+  var v = parseInt($("rows").value, 10);
+  return isNaN(v) ? 16 : Math.max(8, Math.min(60, v));
+}
+
+// a mesma grade do molde, na altura da peça: é o que ela vira de verdade.
 // O cache guarda as células, não o canvas: clonar um canvas copia o elemento
 // e deixa o desenho para trás, porque o bitmap não faz parte do DOM.
+var AMOSTRA_LARG = 330;   // px que a grade ocupa no cartão, no máximo
 function amostraFuros(fam, palavra){
   var el = els[sel];
   var esp = el && el.kind === "text" ? el.thick : 2;
   var sens = el && el.kind === "text" ? el.thr : 0.35;
-  var chave = fam + "|" + palavra + "|" + esp + "|" + sens;
+  var alt = alturaAmostra();
+  var chave = fam + "|" + palavra + "|" + esp + "|" + sens + "|" + alt;
   var cells = cacheAmostra[chave];
   if (!cells){
-    try { cells = textMatrix(palavra, fam, 7, esp, sens); } catch (e){ cells = [[0]]; }
+    try { cells = textMatrix(palavra, fam, alt, esp, sens); } catch (e){ cells = [[0]]; }
     cacheAmostra[chave] = cells;
   }
-  var lin = cells.length, col = cells[0] ? cells[0].length : 1, px = 3;
+  var lin = cells.length, col = cells[0] ? cells[0].length : 1;
+  var px = Math.max(1.5, Math.min(4, AMOSTRA_LARG / col));
   var c = document.createElement("canvas");
   c.width = Math.max(1, col * px); c.height = Math.max(1, lin * px);
   var x = c.getContext("2d");
@@ -71,7 +85,7 @@ function encheCartao(b){
   var por = function(){
     var velho = b.querySelector("canvas");
     var novo = amostraFuros(fam, palavra);
-    if (velho) b.replaceChild(novo, velho); else b.insertBefore(novo, b.lastChild);
+    if (velho) b.replaceChild(novo, velho); else b.appendChild(novo);
   };
   if (document.fonts && document.fonts.load){
     document.fonts.load(fontStr(100, fam)).then(por).catch(por);
@@ -101,11 +115,15 @@ function listaFontes(){
   vistas.forEach(function(f){
     var b = document.createElement("button");
     b.type = "button";
-    b.className = "fcard" + (f.valor === selFonte.value ? " on" : "");
+    // a altura mínima vai no cartão, e o cartão avisa quando a peça está
+    // abaixo dela: é na hora de escolher a fonte que isso importa
+    var min = fonteMin(f.valor), baixa = alturaAmostra() < min;
+    b.className = "fcard" + (f.valor === selFonte.value ? " on" : "") + (baixa ? " baixa" : "");
     b.dataset.fam = f.valor;
-    b.innerHTML = '<span class="amostra"></span><span class="nome"></span>';
+    b.innerHTML = '<span class="amostra"></span><span class="nome"></span><span class="min"></span>';
     b.querySelector(".amostra").textContent = palavraAmostra();
     b.querySelector(".nome").textContent = f.rotulo;
+    b.querySelector(".min").textContent = "legível a partir de " + min + " quadradinhos";
     b.addEventListener("click", function(){
       selFonte.value = f.valor;
       selFonte.dispatchEvent(new Event("input", { bubbles: true }));

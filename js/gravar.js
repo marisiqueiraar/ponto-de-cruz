@@ -96,7 +96,7 @@ function unpackEl(r){
   }
   if (el.kind === "text"){
     el.text = typeof r.text === "string" ? r.text : "";
-    el.font = fonteConhecida(r.font) ? r.font : "Great Vibes";
+    el.font = fonteConhecida(r.font) ? r.font : (FONTE_TROCADA[r.font] || FONTE_PADRAO);
     el.hv = +r.hv || 1;   // 1 é altura contada pela caixa de tinta da palavra
     el.rowsTarget = +r.rowsTarget || 16;
     el.thick = r.thick == null ? 2 : +r.thick;
