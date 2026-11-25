@@ -181,7 +181,7 @@ function saveState(){
     localStorage.setItem(it.dados, JSON.stringify({
       v: 1,
       paper: { size: $("paperSize").value, or: $("paperOr").value,
-               w: $("paperW").value, h: $("paperH").value },
+               w: $("paperW").value, h: $("paperH").value, folha: folhaAtual.id },
       photoBox: { size: $("photoSize").value, or: $("photoOr").value,
                   w: $("photoWmm").value, h: $("photoHmm").value,
                   x: Math.round(photo.x * 10) / 10, y: Math.round(photo.y * 10) / 10 },
@@ -237,6 +237,9 @@ function restoreState(chave){
   if (!pieces.length) return false;
 
   if (s.paper){
+    // molde gravado antes da escolha da folha saía sempre em A4
+    folhaAtual = FOLHAS[s.paper.folha] || FOLHAS.a4;
+    $("folha").value = folhaAtual.id;
     if (s.paper.size) $("paperSize").value = s.paper.size;
     if (s.paper.or) $("paperOr").value = s.paper.or;
     if (s.paper.w) $("paperW").value = s.paper.w;

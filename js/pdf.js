@@ -183,7 +183,7 @@ function legenda(pdf, plano){
   if (!usadas.length) return;
   var comLetra = temGrafico();
   var util = plano.pageW - PDF_SIDE * 2;
-  var y = (plano.land ? 210 : 297) - footMM() + 4;
+  var y = folhaH(plano.land) - footMM() + 4;
   var x = 12, linha = 1, max = legendaLinhas();
   pdf.setFontSize(7);
   for (var i = 0; i < usadas.length; i++){
@@ -216,7 +216,7 @@ function legenda(pdf, plano){
    imprime ela. */
 function folhaLegenda(pdf, plano){
   var usadas = linhasUsadas();
-  pdf.addPage("a4", "portrait");
+  pdf.addPage(folhaAtual.jspdf, "portrait");
   pdf.setFontSize(15);
   pdf.setTextColor(20);
   pdf.text("Linhas do molde", 12, 15);
@@ -657,7 +657,7 @@ function montaPDF(){
      o celular ainda precisa baixar. Duas casas em pt são 3,5 milésimos de
      milímetro: mais fino do que qualquer agulha alcança. */
   var pdf = new window.jspdf.jsPDF({
-    unit: "mm", format: "a4", orientation: plano.land ? "landscape" : "portrait",
+    unit: "mm", format: folhaAtual.jspdf, orientation: plano.land ? "landscape" : "portrait",
     compress: true, floatPrecision: 2
   });
 
@@ -666,12 +666,12 @@ function montaPDF(){
     // inteiro não caberia numa folha só
     cabecalho(pdf, plano, 0);
     legenda(pdf, plano);
-    pdf.addPage("a4", plano.land ? "landscape" : "portrait");
+    pdf.addPage(folhaAtual.jspdf, plano.land ? "landscape" : "portrait");
     moldeNaFolha(pdf, { x: R.x, y: R.y, w: plano.tw, h: plano.th },
                  (plano.pageW - plano.tw) / 2, plano.top);
   } else {
     for (var i = 0; i < plano.cols * plano.rows; i++){
-      if (i) pdf.addPage("a4", plano.land ? "landscape" : "portrait");
+      if (i) pdf.addPage(folhaAtual.jspdf, plano.land ? "landscape" : "portrait");
       var vw = { x: R.x + plano.xs[i % plano.cols], y: R.y + plano.ys[Math.floor(i / plano.cols)],
                  w: plano.tw, h: plano.th };
       var ox = (plano.pageW - plano.tw) / 2, oy = plano.top;

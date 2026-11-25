@@ -898,6 +898,11 @@ function onPaperChange(){
   draw();
 }
 ["paperSize","paperOr"].forEach(function(id){ $(id).addEventListener("change", onPaperChange); });
+// a folha só muda o PDF: nada no papel da peça sai do lugar
+$("folha").addEventListener("change", function(){
+  folhaAtual = FOLHAS[this.value] || FOLHAS.a4;
+  draw(); pushLater();
+});
 ["paperW","paperH"].forEach(function(id){
   $(id).addEventListener("input", function(){ propriaLe(id); papelAviso(); onPaperChange(); });
   $(id).addEventListener("change", function(){ propriaFirma(id); papelAviso(); onPaperChange(); });

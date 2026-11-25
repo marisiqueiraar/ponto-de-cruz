@@ -124,7 +124,7 @@ var AVISO_CAPA = "O que vai ser recortado não cabe embaixo do cabeçalho, entã
 
 function showFit(cr){
   var plano = pdfPlan(cr, contentArea());
-  var pageH = plano.land ? 210 : 297;
+  var pageH = folhaH(plano.land), nomeF = folhaAtual.nome;
   /* A folga é medida contra a folha que o PDF vai mesmo usar. Na folha de
      instrução o molde ganha a página inteira, e aí quem manda é a distância
      do furo à borda, não da região: a folga em volta do desenho pode encostar
@@ -177,18 +177,18 @@ function showFit(cr){
     var n = plano.cols * plano.rows;
     state = "multi";
     txt.textContent = "tamanho real em " + n + " folhas";
-    box.title = "Área do molde: " + area + " — não cabe numa A4 inteira, então o PDF sai " +
+    box.title = "Área do molde: " + area + " — não cabe numa folha " + nomeF + " inteira, então o PDF sai " +
       "em " + n + " folhas (" + plano.rows + " × " + plano.cols + "), todas em tamanho real. " +
       "As vizinhas repetem uma faixa do desenho: é por ela que você sobrepõe uma na outra " +
       "até os furos coincidirem.";
   } else if (folga < 5){
     state = "tight";
-    txt.textContent = "cabe em A4 · " + fmt(folga) + " mm de folga";
-    box.title = "Área do molde: " + area + ". Cabe numa folha A4 em tamanho real, com " +
+    txt.textContent = "cabe em " + nomeF + " · " + fmt(folga) + " mm de folga";
+    box.title = "Área do molde: " + area + ". Cabe numa folha " + nomeF + " em tamanho real, com " +
       fmt(folga) + " mm de sobra até a margem." + recorte + (plano.capa ? " " + AVISO_CAPA : "");
   } else {
-    txt.textContent = "cabe em A4 · tamanho real";
-    box.title = "Área do molde: " + area + ". Cabe numa folha A4 em tamanho real." +
+    txt.textContent = "cabe em " + nomeF + " · tamanho real";
+    box.title = "Área do molde: " + area + ". Cabe numa folha " + nomeF + " em tamanho real." +
       recorte + (plano.capa ? " " + AVISO_CAPA : "");
   }
   box.className = "fit" + (state ? " " + state : "");

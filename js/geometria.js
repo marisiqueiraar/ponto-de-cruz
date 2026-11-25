@@ -238,6 +238,20 @@ function folhaCheia(R){
 // a tela e o PDF decidem por aqui se cabe, para nunca discordarem.
 var PDF_SIDE = 10, PDF_TOP = 46, PDF_FOOT = 8, FOOT_LINHA = 4.2;
 
+/* A folha da impressora não é o papel da peça. O papel é onde se borda — o
+   300g, o cartão, o marca-página; a folha é onde o PDF sai, na impressora
+   do escritório. Antes a folha era sempre A4, escrita como 210 e 297 em
+   doze lugares; agora ela é escolhida na aba papel, e toda conta de caber
+   passa por aqui. `land` deita a folha. */
+var FOLHAS = {
+  a4:    { id: "a4",    nome: "A4",    w: 210,   h: 297,   jspdf: "a4" },
+  a3:    { id: "a3",    nome: "A3",    w: 297,   h: 420,   jspdf: "a3" },
+  carta: { id: "carta", nome: "Carta", w: 215.9, h: 279.4, jspdf: "letter" }
+};
+var folhaAtual = FOLHAS.a4;
+function folhaW(land){ return land ? folhaAtual.h : folhaAtual.w; }
+function folhaH(land){ return land ? folhaAtual.w : folhaAtual.h; }
+
 /* Quanto rodapé a legenda das linhas pede. A conta é feita sem o jsPDF,
    porque quem pergunta se o molde cabe é a tela, a cada desenho, e ela não
    tem documento nenhum na mão. Helvetica de 7 pt não passa de 1,45 mm por
@@ -246,7 +260,7 @@ var PDF_SIDE = 10, PDF_TOP = 46, PDF_FOOT = 8, FOOT_LINHA = 4.2;
 function legendaLinhas(){
   var usadas = linhasUsadas();
   if (!usadas.length) return 1;
-  var util = 210 - PDF_SIDE * 2;
+  var util = folhaW(false) - PDF_SIDE * 2;
   var n = 1, x = 0;
   usadas.forEach(function(c){
     var w = 9 + c.rotulo.length * 1.45;
@@ -279,7 +293,7 @@ function legendaCoube(pdf, plano, usadas){
 
 function pdfFit(R){
   var land = R.w > R.h;
-  var pageW = land ? 297 : 210, pageH = land ? 210 : 297;
+  var pageW = folhaW(land), pageH = folhaH(land);
   var maxW = pageW - PDF_SIDE * 2, maxH = pageH - PDF_TOP - footMM();
   return { land: land, pageW: pageW, scale: Math.min(1, maxW / R.w, maxH / R.h) };
 }
@@ -288,7 +302,7 @@ function pdfFit(R){
 
    Molde reduzido para caber numa folha é molde errado: o furo sai fora do
    lugar e isso só se descobre com a agulha na mão, depois de colar a foto.
-   Então o que não cabe numa A4 sai em várias, sempre em tamanho real.
+   Então o que não cabe numa folha sai em várias, sempre em tamanho real.
 
    Folhas vizinhas repetem pelo menos SOBRA mm do desenho. É essa faixa
    repetida que deixa sobrepor uma na outra até os furos coincidirem —
@@ -323,7 +337,7 @@ function cabeSolta(R, C){
   if (!C) C = R;
   var op = R.w > R.h ? [true, false] : [false, true];
   for (var i = 0; i < op.length; i++){
-    var w = op[i] ? 297 : 210, h = op[i] ? 210 : 297;
+    var w = folhaW(op[i]), h = folhaH(op[i]);
     if (R.w > w + 1e-9 || R.h > h + 1e-9) continue;
     var cx = (w - R.w) / 2 + (C.x - R.x), cy = (h - R.h) / 2 + (C.y - R.y);
     // a menor das quatro bordas até o furo, descontada a que a impressora come:
@@ -363,8 +377,8 @@ function pdfPlan(R, C){
              cols: 1, rows: 1, tw: R.w, th: R.h, xs: [0], ys: [0] };
 
   function grade(land){
-    var uw = (land ? 297 : 210) - PDF_SIDE * 2;
-    var uh = (land ? 210 : 297) - TILE_TOP - footMM();
+    var uw = folhaW(land) - PDF_SIDE * 2;
+    var uh = folhaH(land) - TILE_TOP - footMM();
     var cols = nFolhas(R.w, uw), rows = nFolhas(R.h, uh);
     return { land: land, uw: uw, uh: uh, cols: cols, rows: rows, n: cols * rows };
   }
@@ -372,7 +386,7 @@ function pdfPlan(R, C){
   var ret = grade(false), dei = grade(true);
   var g = (dei.n < ret.n || (dei.n === ret.n && R.w > R.h)) ? dei : ret;
   return {
-    tiled: true, capa: false, land: g.land, pageW: g.land ? 297 : 210, top: TILE_TOP,
+    tiled: true, capa: false, land: g.land, pageW: folhaW(g.land), top: TILE_TOP,
     cols: g.cols, rows: g.rows,
     tw: Math.min(g.uw, R.w), th: Math.min(g.uh, R.h),
     xs: inicios(R.w, g.uw, g.cols), ys: inicios(R.h, g.uh, g.rows)

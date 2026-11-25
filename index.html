@@ -179,6 +179,10 @@
 
   <section class="pane" data-pane="papel">
     <h2>papel</h2>
+    <p class="note">São duas coisas diferentes: o <b>papel da peça</b> é onde você borda — o
+    300g, o cartão, o marca-página — e a <b>folha da impressora</b> é onde o molde sai, para ir
+    por cima dele.</p>
+    <h3 class="subtit">papel da peça</h3>
     <div class="field">
       <label for="paperSize">Tamanho</label>
       <select id="paperSize">
@@ -206,6 +210,18 @@
     <p class="note" id="paperAviso"></p>
     <p class="note" id="paperCabe"></p>
     <p class="note" id="paperNota">As medidas próprias aparecem quando o tamanho é <b>Personalizado</b>.</p>
+    <div class="rule"></div>
+    <h3 class="subtit">folha da impressora</h3>
+    <div class="field">
+      <label for="folha">Folha em que o molde sai</label>
+      <select id="folha">
+        <option value="a4" selected>A4 — 21 × 29,7 cm</option>
+        <option value="a3">A3 — 29,7 × 42 cm</option>
+        <option value="carta">Carta — 21,6 × 27,9 cm</option>
+      </select>
+    </div>
+    <p class="note">O molde sai sempre em tamanho real. O que não cabe na folha é repartido em
+    várias, que se emendam sobrepondo os furos — nunca reduzido.</p>
   </section>
 
   <section class="pane" data-pane="foto">
@@ -219,6 +235,9 @@
         <option value="150x210">15 × 21 cm</option>
         <option value="100x100">Quadrado — 10 × 10 cm</option>
         <option value="88x107">Polaroid — 8,8 × 10,7 cm</option>
+        <option value="54x86">Instax mini — 5,4 × 8,6 cm (imagem 4,6 × 6,2)</option>
+        <option value="72x86">Instax square — 7,2 × 8,6 cm (imagem 6,2 × 6,2)</option>
+        <option value="108x86">Instax wide — 10,8 × 8,6 cm (imagem 9,9 × 6,2)</option>
         <option value="custom">Personalizado</option>
         <option value="none">Sem foto — só o molde</option>
       </select>
