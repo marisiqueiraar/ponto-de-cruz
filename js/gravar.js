@@ -194,7 +194,15 @@ function saveState(){
   salvaOrigens();
   it.em = Date.now();
   it.pecas = els.length;
-  if (!it.nome) it.nome = nomeSugerido();
+  /* O nome que o app sugeriu acompanha as peças até você escrever um: antes
+     ele era tirado uma vez só, da primeira palavra, e ficava — o molde
+     continuava "champ" no cabeçalho do PDF depois de a palavra ser apagada.
+     `auto` marca o nome sugerido; escrever no campo desliga isso. Molde
+     gravado antes, sem a marca, guarda o nome que tem. */
+  if (!it.nome || it.auto){
+    it.nome = nomeSugerido();
+    it.auto = 1;
+  }
   salvaEstante();
   renderMoldes();
 }

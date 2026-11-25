@@ -112,6 +112,8 @@ function nomeSugerido(){
     if (els[i].kind === "text" && (els[i].text || "").trim()) return els[i].text.trim();
   for (var j = 0; j < els.length; j++)
     if (els[j].kind === "img" && (els[j].nome || "").trim()) return els[j].nome.trim();
+  for (var k = 0; k < els.length; k++)
+    if (els[k].kind === "pat") return nomePeca(els[k]);
   return "";
 }
 var saveTimer = 0;

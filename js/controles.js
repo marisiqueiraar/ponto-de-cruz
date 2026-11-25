@@ -82,7 +82,7 @@ function renderPaleta(){
     var escondeIsto = function(e){
       e.stopPropagation();
       sl.off = sl.off ? 0 : 1;
-      rebuild(el);
+      refazNoCentro(el);
       renderPaleta(); renderChips(); renderFios(); draw(); pushHist();
     };
     olho.addEventListener("click", escondeIsto);
@@ -257,12 +257,14 @@ function loadFontThen(fn, fam){
    devolvia uma palavra de outro tamanho, e não havia como saber por quê: os
    controles mostravam uma coisa e a peça nova tinha nascido de outra. Só a
    primeira palavra de um molde em branco usa os valores de fábrica, porque aí
-   não há barra nenhuma de onde herdar. */
+   não há barra nenhuma de onde herdar.
+
+   De fábrica ela nasce reta: a inclinação de -4° que vinha antes era um
+   gosto, não um pedido, e palavra torta sem ninguém ter mandado é ajuste a
+   mais para desfazer. */
 function comoEstaNaBarra(){
-  // 16 pela maiúscula é o tamanho que 18 dava quando a altura era a caixa
-  // de tinta de "champ" em Great Vibes: a folha em branco continua a mesma
-  var pd = { text:"champ", font:"Great Vibes", rowsTarget:16, thick:2, thr:0.35,
-             esp:0, arc:0, rot:-4 };
+  var pd = { text:"amor", font:"Great Vibes", rowsTarget:16, thick:2, thr:0.35,
+             esp:0, arc:0, rot:0 };
   var temTexto = false;
   els.forEach(function(el){ if (el.kind === "text") temTexto = true; });
   if (!temTexto) return pd;
@@ -280,33 +282,92 @@ function comoEstaNaBarra(){
   return pd;
 }
 
-/* Onde a peça nova nasce: na foto, que é para onde quase toda peça vai.
-   Sem foto, numa caixa do tamanho dela no meio do papel — a mesma conta de
-   sempre, só que mirando o centro da folha em vez de um retângulo que não
-   está lá. */
+/* A caixa para onde as peças miram: a foto. Sem foto, uma caixa do tamanho
+   dela no meio do papel — a mesma conta de sempre, só que mirando o centro da
+   folha em vez de um retângulo que não está lá. */
 function miraMM(){
   if (!photo.off) return photo;
   var pa = paperMM();
   return { x: (pa.w - photo.w) / 2, y: (pa.h - photo.h) / 2, w: photo.w, h: photo.h };
 }
 
+/* Onde a peça nova nasce: num lugar livre, perto da foto. Antes a palavra
+   nascia em cima da borda de baixo da foto e o símbolo dentro dela, no
+   canto — toda peça nova começava trepada em alguma coisa, e o primeiro
+   gesto era sempre tirá-la dali.
+
+   A ordem dos lugares é a de quem borda sobre foto: embaixo, que é onde vai
+   o nome; em cima; dos lados. Cada lugar é empurrado para longe da foto até
+   não encostar em peça nenhuma, e vale o primeiro que couber inteiro no
+   papel. Se nada couber, a peça vai para embaixo da foto assim mesmo — o
+   aviso de peça fora do papel diz o resto. Sem foto, ela nasce no meio do
+   papel, descendo até achar espaço. */
+var FOLGA_NOVA = 5;   // mm entre a peça nova e o que já está no papel
+
+function encosta(a, b, folga){
+  return a.x < b.x + b.w + folga && b.x < a.x + a.w + folga &&
+         a.y < b.y + b.h + folga && b.y < a.y + a.h + folga;
+}
+
+function poeEmLugarLivre(el){
+  var pa = paperMM(), b = elPaperBox(el), w = b.w, h = b.h, F = FOLGA_NOVA;
+  var outras = els.filter(function(o){ return o !== el; }).map(elPaperBox);
+  var livre = function(c){
+    if (c.x < 0 || c.y < 0 || c.x + w > pa.w || c.y + h > pa.h) return false;
+    var cx = { x: c.x, y: c.y, w: w, h: h };
+    if (!photo.off && encosta(cx, photo, F - 0.01)) return false;
+    return !outras.some(function(o){ return encosta(cx, o, F - 0.01); });
+  };
+  // cada candidato é um ponto de partida e uma direção para andar
+  var cands = [];
+  if (!photo.off){
+    var f = photo;
+    cands.push({ x: f.x + (f.w - w) / 2, y: f.y + f.h + F, dx: 0, dy: 1 });
+    cands.push({ x: f.x + (f.w - w) / 2, y: f.y - F - h, dx: 0, dy: -1 });
+    cands.push({ x: f.x + f.w + F, y: f.y + (f.h - h) / 2, dx: 1, dy: 0 });
+    cands.push({ x: f.x - F - w, y: f.y + (f.h - h) / 2, dx: -1, dy: 0 });
+  } else {
+    cands.push({ x: (pa.w - w) / 2, y: (pa.h - h) / 2, dx: 0, dy: 1 });
+    cands.push({ x: (pa.w - w) / 2, y: (pa.h - h) / 2, dx: 0, dy: -1 });
+  }
+  var achou = null;
+  for (var i = 0; i < cands.length && !achou; i++){
+    var c = { x: cands[i].x, y: cands[i].y };
+    for (var passo = 0; passo < 200; passo++){
+      if (livre(c)){ achou = c; break; }
+      c.x += cands[i].dx * 2; c.y += cands[i].dy * 2;
+      if (c.x < -w || c.y < -h || c.x > pa.w || c.y > pa.h) break;
+    }
+  }
+  if (!achou) achou = { x: cands[0].x, y: cands[0].y };
+  // a caixa girada e a caixa da peça têm o mesmo centro
+  var bb = bboxMM(el);
+  el.x = dec1(achou.x + w / 2 - bb.w / 2);
+  el.y = dec1(achou.y + h / 2 - bb.h / 2);
+}
+
 function addText(){
-  var pd = comoEstaNaBarra(), m = miraMM();
+  var pd = comoEstaNaBarra();
   var el = { kind:"text", text: pd.text, font: pd.font, rowsTarget: pd.rowsTarget,
              thick: pd.thick, thr: pd.thr, rot: pd.rot,
              esp: pd.esp, arc: pd.arc, flip:0, hv:2, edits:[],
-             x: m.x, y: m.y + m.h - 14, cells:[[0]],
+             x: 0, y: 0, cells:[[0]],
              color: thread, colorName: threadLabel(thread) || thread };
   rebuild(el);
+  poeEmLugarLivre(el);
   els.push(el); sel = els.length - 1; soUm(sel); foco = "el";
   renderChips(); syncControls(); draw(); pushHist();
+  // o texto de fábrica é só um lugar para escrever: ele já vem selecionado,
+  // e a primeira tecla o substitui
+  var campo = $("txt");
+  if (campo && campo.offsetParent){ campo.focus(); campo.select(); }
 }
 
 function addSym(){
-  var m = miraMM();
-  var el = { kind:"sym", sym:"heart", scale:2, rot:0, x: m.x + m.w - 20, y: m.y + m.h - 20,
+  var el = { kind:"sym", sym:"heart", scale:2, rot:0, x: 0, y: 0,
              flip:0, edits:[], cells:[[0]], color: thread, colorName: threadLabel(thread) || thread };
   rebuild(el);
+  poeEmLugarLivre(el);
   els.push(el); sel = els.length - 1; soUm(sel); foco = "el";
   renderChips(); syncControls(); draw(); pushHist();
 }
@@ -366,13 +427,9 @@ montaMotivos();
 $("patDeit").addEventListener("click", function(){
   var el = els[sel];
   if (!el || el.kind !== "pat") return;
-  var b0 = bboxMM(el);
   el.deitada = el.deitada ? 0 : 1;
   this.classList.toggle("on", !!el.deitada);
-  rebuild(el);
-  var b1 = bboxMM(el);
-  el.x = Math.round((b0.x + b0.w / 2 - b1.w / 2) * 10) / 10;
-  el.y = Math.round((b0.y + b0.h / 2 - b1.h / 2) * 10) / 10;
+  refazNoCentro(el);
   draw(); pushHist();
 });
 
@@ -444,11 +501,9 @@ function addImg(img, nome){
              color: thread, colorName: threadLabel(thread) || thread };
   if (pareceFoto(el)){ el.cores = FOTO_CORES; el.corte = 0.1; el.fonte = $("imgFonte").value || "anchor"; }
   rebuild(el);
-  // nasce centrada na foto, e não num canto: é de onde quase toda peça é
-  // arrastada, e peça nova no canto da folha some atrás da régua
-  var b = bboxMM(el);
-  el.x = Math.round((m.x + (m.w - b.w) / 2) * 10) / 10;
-  el.y = Math.round((m.y + (m.h - b.h) / 2) * 10) / 10;
+  // nasce num lugar livre, como as outras peças: uma imagem grande no meio da
+  // foto escondia a própria foto que ela devia acompanhar
+  poeEmLugarLivre(el);
   els.push(el); sel = els.length - 1; soUm(sel); foco = "el";
   renderChips(); syncControls(); draw(); pushHist();
   avisaVazio(el);
@@ -481,7 +536,7 @@ function trocaImagem(el, img, nome){
   guardaOrigem(id, img);
   el.img = id;
   if (nome) el.nome = nome;
-  rebuild(el, true);
+  refazNoCentro(el, true);
   renderChips(); syncControls(); draw(); pushHist();
   avisaVazio(el);
 }
@@ -604,7 +659,7 @@ function updateSelected(){
     $("thrOut").textContent = $("thr").value;
     $("espOut").textContent = el.esp;
     $("arcOut").textContent = el.arc;
-    loadFontThen(function(){ rebuild(el); renderChips(); draw(); pushLater(); });
+    loadFontThen(function(){ refazNoCentro(el); renderChips(); draw(); pushLater(); });
     return;
   }
   if (el.kind === "img"){
@@ -621,7 +676,7 @@ function updateSelected(){
     $("imgThrOut").textContent = Math.round(el.thr * 100);
     $("imgCorteOut").textContent = Math.round(el.corte * 100);
     $("imgCoresOut").textContent = el.cores;
-    rebuild(el);
+    refazNoCentro(el);
     avisaVazio(el);
     // a barra troca de campos quando a peça deixa de ser silhueta, e a lista
     // de linhas do gráfico nasce ou some junto
@@ -634,7 +689,6 @@ function updateSelected(){
       var v = parseInt($(id).value, 10);
       return isNaN(v) ? alt : Math.max(min, Math.min(max, v));
     };
-    var b0 = bboxMM(el);
     var arranjoAntes = el.arranjo;
     el.arranjo = $("patArr").value === "faixa" ? "faixa" : "moldura";
     el.motivo = $("patMot").value || el.motivo;
@@ -643,15 +697,10 @@ function updateSelected(){
     el.margem = num("patMargem", 0, 60, el.margem);
     el.rep = num("patRep", 1, PAT_REP_MAX, el.rep);
     el.cores = num("patCores", 1, PAT_CORES_MAX, el.cores);
-    rebuild(el);
     // a moldura volta para a foto; a faixa cresce a partir do meio dela, que
     // é o que mantém a fileira no eixo do marca-página
-    if (el.arranjo === "moldura") centraNaMira(el);
-    else {
-      var b1 = bboxMM(el);
-      el.x = Math.round((b0.x + b0.w / 2 - b1.w / 2) * 10) / 10;
-      el.y = Math.round((b0.y + b0.h / 2 - b1.h / 2) * 10) / 10;
-    }
+    if (el.arranjo === "moldura"){ rebuild(el); centraNaMira(el); }
+    else refazNoCentro(el);
     if (arranjoAntes !== el.arranjo) syncControls();
     renderPaleta(); renderFios(); renderChips(); draw(); pushLater();
     return;
@@ -659,7 +708,7 @@ function updateSelected(){
   el.sym = $("sym").value;
   el.scale = parseInt($("symScale").value, 10);
   $("symScaleOut").textContent = el.scale;
-  rebuild(el);
+  refazNoCentro(el);
   renderChips(); draw(); pushLater();
 }
 
@@ -674,7 +723,7 @@ $("imgFonte").addEventListener("change", function(){
   // trocar de cartela é pedir paleta nova: as meadas de outra marca não são
   // as mesmas cores com outro número
   el.paleta = null; el.paletaDe = 0;
-  rebuild(el);
+  refazNoCentro(el);
   syncControls(); renderPaleta(); renderFios(); renderChips(); draw(); pushHist();
 });
 
@@ -701,7 +750,7 @@ $("imgInv").addEventListener("click", function(){
   if (!el || el.kind !== "img") return;
   el.inv = el.inv ? 0 : 1;
   this.classList.toggle("on", !!el.inv);
-  rebuild(el);
+  refazNoCentro(el);
   avisaVazio(el);
   draw(); pushHist();
 });
@@ -740,18 +789,41 @@ function fotoPainel(){
     : "";
 }
 
+/* O papel mudou: o arranjo inteiro — foto e peças juntas — vai para o
+   lugar equivalente do papel novo, e, se couber nele, entra inteiro. Antes
+   quem ia para o lugar equivalente era só a foto, e as peças seguiam presas
+   a ela: um nome embaixo da foto num A4 caía para fora de um A5, mesmo
+   havendo lugar para tudo. Tamanho não muda nunca — o molde é em tamanho
+   real —, então o que não cabe continua não cabendo, e o aviso diz isso. */
+function caixaDoArranjo(){
+  var cx = [];
+  if (!photo.off) cx.push({ x: photo.x, y: photo.y, w: photo.w, h: photo.h });
+  els.forEach(function(el){ cx.push(elPaperBox(el)); });
+  if (!cx.length) return null;
+  var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  cx.forEach(function(b){
+    x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y);
+    x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h);
+  });
+  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+}
+
 function onPaperChange(){
   papelPainel();
   var before = lastPaper || paperMM();
-  var fx = (photo.x + photo.w / 2) / before.w;
-  var fy = (photo.y + photo.h / 2) / before.h;
-  var dx = [], dy = [];
-  els.forEach(function(el){ dx.push(el.x - photo.x); dy.push(el.y - photo.y); });
   var after = paperMM();
-  photo.x = fx * after.w - photo.w / 2;
-  photo.y = fy * after.h - photo.h / 2;
+  var g = caixaDoArranjo();
+  if (g && (before.w !== after.w || before.h !== after.h)){
+    var nx = (g.x + g.w / 2) / before.w * after.w - g.w / 2;
+    var ny = (g.y + g.h / 2) / before.h * after.h - g.h / 2;
+    // cabendo, entra inteiro; não cabendo, fica centrado — sobra igual dos dois lados
+    nx = g.w <= after.w ? Math.max(0, Math.min(after.w - g.w, nx)) : (after.w - g.w) / 2;
+    ny = g.h <= after.h ? Math.max(0, Math.min(after.h - g.h, ny)) : (after.h - g.h) / 2;
+    var dx = nx - g.x, dy = ny - g.y;
+    photo.x += dx; photo.y += dy;
+    els.forEach(function(el){ el.x = dec1(el.x + dx); el.y = dec1(el.y + dy); });
+  }
   clampPhoto();
-  els.forEach(function(el, i){ el.x = photo.x + dx[i]; el.y = photo.y + dy[i]; });
   lastPaper = after;
   guiasApara();        // a guia que sobrou fora da folha nova mediria mentira
   draw();
@@ -762,9 +834,40 @@ function onPaperChange(){
   $(id).addEventListener("change", function(){ propriaFirma(id); papelAviso(); onPaperChange(); });
 });
 
+/* A foto mudou de tamanho ou girou: ela cresce em volta do próprio centro, e
+   as peças vão junto. Antes a foto crescia a partir do canto de cima e as
+   peças ficavam onde estavam — o nome que estava embaixo da foto acabava em
+   cima dela.
+
+   Cada peça guarda a relação que tinha com a foto, eixo por eixo: a que
+   estava fora (embaixo, em cima, dos lados) continua à mesma distância da
+   borda mais perto; a que estava dentro continua na mesma proporção. */
+function seguePosicao(c, a0, l0, a1, l1){
+  if (c <= a0) return a1 - (a0 - c);
+  if (c >= a0 + l0) return a1 + l1 + (c - a0 - l0);
+  return a1 + (c - a0) / l0 * l1;
+}
+
+function fotoMudou(antes){
+  if (photo.w === antes.w && photo.h === antes.h) return;
+  photo.x = antes.x + antes.w / 2 - photo.w / 2;
+  photo.y = antes.y + antes.h / 2 - photo.h / 2;
+  clampPhoto();
+  els.forEach(function(el){
+    if (el.kind === "pat" && el.arranjo === "moldura") return;   // refazMolduras cuida dela
+    var b = bboxMM(el), cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+    var nx = seguePosicao(cx, antes.x, antes.w, photo.x, photo.w);
+    var ny = seguePosicao(cy, antes.y, antes.h, photo.y, photo.h);
+    el.x = dec1(el.x + nx - cx);
+    el.y = dec1(el.y + ny - cy);
+  });
+}
+
 function onPhotoChange(){
+  var antes = { x: photo.x, y: photo.y, w: photo.w, h: photo.h };
   fotoPainel();
   syncPhotoSize();
+  fotoMudou(antes);
   refazMolduras();
   draw(); pushLater();
 }
@@ -791,15 +894,10 @@ function flip(id){
 }
 
 $("rotPhoto").addEventListener("click", function(){
-  var cx = photo.x + photo.w / 2, cy = photo.y + photo.h / 2;
-  var dx = [], dy = [];
-  els.forEach(function(el){ dx.push(el.x - photo.x); dy.push(el.y - photo.y); });
+  var antes = { x: photo.x, y: photo.y, w: photo.w, h: photo.h };
   flip("photoOr");
   syncPhotoSize();
-  photo.x = cx - photo.w / 2;
-  photo.y = cy - photo.h / 2;
-  clampPhoto();
-  els.forEach(function(el, i){ el.x = photo.x + dx[i]; el.y = photo.y + dy[i]; });
+  fotoMudou(antes);
   refazMolduras();
   draw(); pushHist();
 });
@@ -854,8 +952,8 @@ $("edit").addEventListener("click", function(){
 function recalc(todas){
   // forEach(rebuild) entregaria o índice como segundo argumento, que aqui é o
   // "descarta" — e a peça 0 não descartaria nada
-  if (todas) els.forEach(function(el){ rebuild(el, true); });
-  else if (els[sel]) rebuild(els[sel], true);
+  if (todas) els.forEach(function(el){ refazNoCentro(el, true); });
+  else if (els[sel]) refazNoCentro(els[sel], true);
   draw(); pushHist();
 }
 

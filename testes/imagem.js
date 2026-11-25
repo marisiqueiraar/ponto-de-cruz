@@ -15,6 +15,7 @@ catch (e){
   catch (e2){ console.log("pulado: precisa do playwright e de um Chromium."); process.exit(0); }
 }
 const alvo = "file://" + require("path").resolve(__dirname, "..", "index.html");
+const comecaComPalavra = require("./comeco.js");
 let falhas = 0;
 const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falhas++; };
 
@@ -34,6 +35,7 @@ const CINZA = png(100, 100, (x, y) => (x >= 10 && x < 50 && y >= 10 && y < 50) ?
   pg.on("pageerror", e => erros.push(e.message));
   await pg.goto(alvo);
   await pg.waitForTimeout(2300);
+  await comecaComPalavra(pg);
 
   // o molde gravado é a janela para dentro do app, como nos outros testes:
   // ele traz as células como elas estão
@@ -153,7 +155,8 @@ const CINZA = png(100, 100, (x, y) => (x >= 10 && x < 50 && y >= 10 && y < 50) ?
     const idx = JSON.parse(localStorage.getItem("ponto-e-letra/moldes/v1"));
     const it = idx.itens.find(x => x.id === idx.atual);
     const e = JSON.parse(localStorage.getItem(it.dados)).els[1];
-    return { x: e.x, y: e.y, color: e.color };
+    const mm = parseFloat(JSON.parse(localStorage.getItem(it.dados)).mm);
+    return { cx: e.x + e.cells[0].length * mm / 2, cy: e.y + e.cells.length * mm / 2, color: e.color };
   });
   const FAIXA = png(100, 100, (x, y) => (y >= 20 && y < 40) ? 0 : 255);
   await escolhe("#imgTroca", "faixa.png", FAIXA);
@@ -166,10 +169,13 @@ const CINZA = png(100, 100, (x, y) => (x >= 10 && x < 50 && y >= 10 && y < 50) ?
     const idx = JSON.parse(localStorage.getItem("ponto-e-letra/moldes/v1"));
     const it = idx.itens.find(x => x.id === idx.atual);
     const e = JSON.parse(localStorage.getItem(it.dados)).els[1];
-    return { x: e.x, y: e.y, color: e.color };
+    const mm = parseFloat(JSON.parse(localStorage.getItem(it.dados)).mm);
+    return { cx: e.x + e.cells[0].length * mm / 2, cy: e.y + e.cells.length * mm / 2, color: e.color };
   });
-  ok(agora.x === lugar.x && agora.y === lugar.y && agora.color === lugar.color,
-     "sem sair do lugar nem trocar de linha");
+  // o lugar é o centro: a imagem nova tem outra proporção, e é em volta do
+  // centro que ela cresce ou encolhe
+  ok(Math.abs(agora.cx - lugar.cx) < 0.11 && Math.abs(agora.cy - lugar.cy) < 0.11 &&
+     agora.color === lugar.color, "sem sair do lugar nem trocar de linha");
 
   // ---- 7. foto entra colorida, logo entra em uma cor ---------------------
   // Em uma cor só, foto vira mancha picotada: o limiar corta os meios-tons no

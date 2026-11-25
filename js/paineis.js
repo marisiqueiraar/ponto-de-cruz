@@ -176,9 +176,9 @@ function moldeEmBranco(){
   photo.x = (pa.w - photo.w) / 2;
   photo.y = pa.h * 0.14;
   photoImg = null; photoURL = null;
-  addText();
-  els[0].x = photo.x - 6;
-  els[0].y = photo.y + photo.h - 10;
+  // molde novo nasce vazio: a palavra de exemplo que vinha antes ("champ")
+  // era a primeira coisa a apagar em todo molde
+  sel = 0; marca = []; marcaFoto = false; foco = "none";
 }
 
 function apagaMolde(id){
@@ -284,6 +284,7 @@ $("moldeNome").addEventListener("input", function(){
   var it = itemAtual();
   if (!it) return;
   it.nome = this.value.trim();
+  it.auto = it.nome ? 0 : 1;   // campo vazio devolve o nome para o app
   salvaEstante();
   var alvo = $("moldeLista").querySelector(".mold.on .nm");
   if (alvo) alvo.textContent = it.nome || "sem nome";

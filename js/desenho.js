@@ -591,6 +591,20 @@ function centraNaMira(el){
   el.y = Math.round((m.y + m.h / 2 - b.h / 2) * 10) / 10;
 }
 
+/* Refazer a peça sem tirá-la do lugar. Quem mexe na altura, na fonte, no
+   texto ou na largura espera que a peça cresça ou encolha em volta de onde
+   ela está — e não a partir do canto de cima à esquerda, que era o que o
+   `rebuild` sozinho fazia: cada ajuste desalinhava o que já estava alinhado,
+   e o alinhamento tinha de ser refeito à mão a cada mudança. */
+function refazNoCentro(el, descarta){
+  var b0 = el.cells && el.cells.length && el.cells[0].length > 1 ? bboxMM(el) : null;
+  rebuild(el, descarta);
+  if (!b0) return;
+  var b1 = bboxMM(el);
+  el.x = dec1(b0.x + b0.w / 2 - b1.w / 2);
+  el.y = dec1(b0.y + b0.h / 2 - b1.h / 2);
+}
+
 // descarta: só o Recalcular pede a peça limpa, e ele avisa antes
 function rebuild(el, descarta){
   var rowsAntes = el.cells && el.cells.length ? el.cells.length : 0;

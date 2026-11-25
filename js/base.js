@@ -23,6 +23,8 @@ var SUPER = 6;   // pixels por quadradinho no rascunho, quando cabe
 var TETO_CANVAS = 4000;
 var ITALIC = { "Cormorant Garamond":1, "EB Garamond":1, "Playfair Display":1 };
 function fontStr(size, fam){ return (ITALIC[fam] ? "italic " : "") + size + 'px "' + fam + '", cursive'; }
+// milímetro com uma casa: é a precisão com que o molde guarda posição
+function dec1(v){ return Math.round(v * 10) / 10; }
 function fmt(v){ return (Math.round(v * 10) / 10).toFixed(1).replace(".", ","); }
 
 var SYMS = {

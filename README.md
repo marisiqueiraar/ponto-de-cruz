@@ -160,6 +160,14 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   está em cartela nenhuma, o cadastro de **linha avulsa** no pé do painel: marca, código e cor.
   Ela nasce marcada, entra em **minhas** junto com as outras e aparece também na marca
   **avulsas** — onde desmarcar apaga de vez, porque ela só existe por você ter cadastrado.
+- **Onde as peças ficam**: o molde novo nasce vazio, e cada peça nova nasce reta, num lugar
+  livre — embaixo da foto, que é onde vai o nome; se ali não couber, em cima e depois dos
+  lados —, sem encostar na foto nem nas outras peças. Mexer na altura, na fonte, no texto ou
+  na largura faz a peça crescer em volta do próprio centro, e não a partir do canto: o que foi
+  alinhado continua alinhado. A foto que muda de tamanho ou gira cresce em volta do centro dela
+  e leva as peças junto, cada uma à mesma distância da borda mais perto. O papel que muda leva
+  o arranjo inteiro para o lugar equivalente da folha nova e, quando ele cabe, para dentro
+  dela. O nome do molde acompanha a primeira palavra até você escrever um.
 - **Posicionar com precisão**: as setas do teclado movem a peça selecionada de meio milímetro, ou
   de cinco com Shift — com a foto selecionada, movem a foto. Na aba peças, três botões alinham a
   peça: centralizar na foto, centralizar no papel, alinhar pela base da foto — e, quando há uma

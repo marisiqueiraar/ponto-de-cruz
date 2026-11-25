@@ -18,6 +18,7 @@ catch (e){
 }
 const alvo = "file://" + require("path").resolve(__dirname, "..", "index.html");
 
+const comecaComPalavra = require("./comeco.js");
 let falhas = 0;
 const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falhas++; };
 const acesos = cells => cells.reduce((n, l) => n + (l.match(/1/g) || []).length, 0);
@@ -27,6 +28,7 @@ const acesos = cells => cells.reduce((n, l) => n + (l.match(/1/g) || []).length,
   const pg = await nav.newPage({ viewport: { width: 1280, height: 820 } });
   await pg.goto(alvo);
   await pg.waitForTimeout(2300);
+  await comecaComPalavra(pg);
 
   const estado = async () => {
     await pg.waitForTimeout(600);          // a gravação é adiada em 400 ms

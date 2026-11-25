@@ -9,6 +9,7 @@ catch (e){
   catch (e2){ console.log("pulado: precisa do playwright e de um Chromium."); process.exit(0); }
 }
 const alvo = "file://" + require("path").resolve(__dirname, "..", "index.html");
+const comecaComPalavra = require("./comeco.js");
 let falhas = 0;
 const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falhas++; };
 const num = t => parseFloat(String(t).replace(",", "."));
@@ -18,6 +19,7 @@ const num = t => parseFloat(String(t).replace(",", "."));
   const pg = await nav.newPage({ viewport: { width: 1280, height: 900 } });
   await pg.goto(alvo);
   await pg.waitForTimeout(2300);
+  await comecaComPalavra(pg);
   await pg.click('.rail button[data-pane="molde"]');
   await pg.waitForTimeout(400);
 

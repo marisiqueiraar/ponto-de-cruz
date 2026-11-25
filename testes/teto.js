@@ -12,6 +12,7 @@ catch (e){
 }
 const alvo = "file://" + require("path").resolve(__dirname, "..", "index.html");
 const TETO = 4000, SUPER = 6;
+const comecaComPalavra = require("./comeco.js");
 let falhas = 0;
 const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falhas++; };
 
@@ -22,6 +23,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   pg.on("pageerror", e => erros.push(e.message));
   await pg.goto(alvo);
   await pg.waitForTimeout(2300);
+  await comecaComPalavra(pg);
   await pg.click('.rail button[data-pane="pecas"]');
   await pg.waitForTimeout(300);
   await pg.click(".chip");
