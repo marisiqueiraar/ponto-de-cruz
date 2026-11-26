@@ -30,7 +30,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   });
   const aviso = () => pg.locator("#moldeAviso").textContent();
   const mexe = async () => {                       // qualquer gesto dispara gravação
-    await pg.click('.rail button[data-pane="pecas"]');
+    await pg.evaluate(() => abreAba("pecas"));
     await pg.waitForTimeout(200);
     await pg.click(".chip");
     await pg.locator("body").press("ArrowRight");
@@ -54,7 +54,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   ok(r.cheia, "com a memória recusando, o rodapé fica vermelho");
   ok(/não coube/.test(r.texto), "e diz o que houve: \"" + r.texto + "\"");
   ok(/arquivo do molde/.test(r.titulo), "o título explica o que fazer");
-  await pg.click('.rail button[data-pane="moldes"]');
+  await pg.evaluate(() => abreAba("moldes"));
   await pg.waitForTimeout(300);
   const a = await aviso();
   ok(/encheu/.test(a) && /apague um molde/.test(a),
@@ -66,7 +66,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   r = await rodape();
   ok(!r.cheia, "voltando a caber, o vermelho sai");
   ok(/salvo neste navegador/.test(r.texto), "e o rodapé volta ao normal");
-  await pg.click('.rail button[data-pane="moldes"]');
+  await pg.evaluate(() => abreAba("moldes"));
   await pg.waitForTimeout(300);
   ok(!/encheu/.test(await aviso()), "o recado da aba moldes também sai");
 
@@ -84,7 +84,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
       return real(k, v);
     };
   });
-  await cel.click('.rail button[data-pane="pecas"]');
+  await cel.evaluate(() => abreAba("pecas"));
   await cel.waitForTimeout(200);
   await cel.click(".chip");
   await cel.locator("body").press("ArrowRight");

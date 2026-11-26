@@ -46,7 +46,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
     sel = els.length - 1; soUm(sel); foco = "el";
     renderChips(); syncControls(); renderPaleta(); draw();
   });
-  await pg.click('#rail button[data-pane="linha"]');
+  await pg.evaluate(() => abreAba("linha"));
   await pg.click("#paletaLista .sl:nth-child(2)");
   ok(await pg.evaluate(() => slotAtivo(els[sel])) === 2, "a segunda linha do gráfico fica escolhida na aba linha");
   await pg.click("#edit");
@@ -83,7 +83,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   ok(tm.bordas, "a grade sai sem fileira nem coluna vazia na borda");
 
   // ---- 3. arrastar a peça -----------------------------------------------------------------
-  await pg.click('#rail button[data-pane="pecas"]');
+  await pg.evaluate(() => abreAba("pecas"));
   await pg.click("#addText");
   await pg.waitForTimeout(500);
   await pg.evaluate(() => document.activeElement.blur());

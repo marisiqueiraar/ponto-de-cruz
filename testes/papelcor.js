@@ -25,7 +25,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   await pg.waitForTimeout(2300);
   await pg.click("#addText");
   await pg.waitForTimeout(400);
-  await pg.click('#rail button[data-pane="papel"]');
+  await pg.evaluate(() => abreAba("papel"));
 
   const cores = await pg.evaluate(() => document.querySelectorAll("#papelCores .papel").length);
   ok(cores >= 9, "a aba papel oferece " + cores + " cores de papel (com a livre)");

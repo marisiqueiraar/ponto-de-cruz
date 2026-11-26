@@ -43,14 +43,14 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   ok(/^Anchor \d+$/.test(s.nome), "a palavra nasce com uma meada de verdade (" + s.nome + ")");
 
   // ---- 1. aplicar só pinta -------------------------------------------------
-  await pg.click('.rail button[data-pane="linha"]');
+  await pg.evaluate(() => abreAba("linha"));
   await toca("anchor:403");
   s = await estado();
   ok(s.nome === "Anchor 403", "em aplicar na peça, o toque pinta a peça (" + s.nome + ")");
   ok(s.tenho.length === 0, "e a caixa continua vazia");
 
   // ---- 2. a caixa só marca -------------------------------------------------
-  await pg.click('#linhaModo button[data-modo="caixa"]');
+  await pg.evaluate(() => abreAba("caixa"));
   await toca("anchor:9046");
   s = await estado();
   ok(s.tenho.join() === "anchor:9046", "em minha caixa, o toque põe na caixa");
@@ -71,7 +71,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
      "o aviso conta as novas, a que já estava e diz o código que não existe: \"" + aviso + "\"");
 
   // ---- 3. o ponto no canto -------------------------------------------------
-  await pg.click('#linhaModo button[data-modo="peca"]');
+  await pg.evaluate(() => abreAba("linha"));
   await pg.waitForTimeout(200);
   const classes = await pg.evaluate(() => ({
     tem: document.querySelector('#catGrade .cat[data-k="anchor:9046"]').className,

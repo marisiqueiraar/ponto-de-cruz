@@ -54,7 +54,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
     await pg.dispatchEvent("#" + id, "input");
     await pg.waitForTimeout(300);
   };
-  const aba = n => pg.click('#rail button[data-pane="' + n + '"]');
+  const aba = n => pg.evaluate(x => abreAba(x), n);
 
   // ---- 1. molde novo, vazio ------------------------------------------------
   let s = await pg.evaluate(() => document.querySelectorAll("#chips .chip").length);

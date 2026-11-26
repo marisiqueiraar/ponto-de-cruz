@@ -138,7 +138,7 @@ function caixa(el, mm){
      s.guias.h.length + " sobrou)");
 
   // ---- o ímã: arrastar a peça encosta ela na guia ---------------------------
-  await pg.click('.rail button[data-pane="pecas"]');
+  await pg.evaluate(() => abreAba("pecas"));
   await pg.waitForTimeout(300);
   await pg.click(".chip");
   await pg.waitForTimeout(300);
@@ -202,7 +202,7 @@ function caixa(el, mm){
   ok(noCanvas, "as guias moram fora do canvas — o PDF sai do canvas");
 
   // ---- a troca de papel não deixa guia medindo mentira ----------------------
-  await pg.click('.rail button[data-pane="papel"]');
+  await pg.evaluate(() => abreAba("papel"));
   await pg.waitForTimeout(300);
   await pg.selectOption("#paperSize", "148x210");      // A5
   await pg.waitForTimeout(500);

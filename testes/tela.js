@@ -35,32 +35,31 @@ const path = "file://" + require("path").resolve(__dirname, "..", "index.html");
        (faltou.length ? " — faltou: " + faltou.join(", ") : ""));
     ok(erros.length === 0, nome + ": console limpo" +
        (erros.length ? " — " + erros.join(" | ") : ""));
-    ok(await pg.locator('.rail button[data-pane="moldes"]').isVisible(), nome + ": o botão moldes existe no trilho");
+    ok(await pg.locator("#menuBtn").isVisible(), nome + ": o menu do logo existe");
 
-    // o trilho inteiro cabe sem cortar nenhum botão?
+    // as quatro etapas cabem sem cortar nenhuma?
     const trilho = await pg.evaluate(() => {
       const r = document.querySelector(".rail");
       return { largura: r.clientWidth, conteudo: r.scrollWidth, botoes: r.querySelectorAll("button").length };
     });
-    ok(trilho.botoes === 7, nome + ": sete botões no trilho");
-    if (nome === "celular")
-      ok(trilho.conteudo <= trilho.largura + 1,
-         "celular: os sete botões cabem sem rolar (" + trilho.conteudo + " em " + trilho.largura + " px)");
+    ok(trilho.botoes === 4, nome + ": quatro etapas");
+    ok(trilho.conteudo <= trilho.largura + 1,
+       nome + ": as quatro etapas cabem sem rolar (" + trilho.conteudo + " em " + trilho.largura + " px)");
 
-    await pg.click('.rail button[data-pane="moldes"]');
+    await pg.evaluate(() => abreAba("moldes"));
     await pg.waitForTimeout(400);
     ok(await pg.locator("#moldeNome").isVisible(), nome + ": o painel de moldes abre");
     ok(await pg.locator("#moldeSalvar").isVisible(), nome + ": com o botão de salvar arquivo");
     const nMoldes = await pg.locator(".mold").count();
     ok(nMoldes >= 1, nome + ": a estante já mostra o molde aberto (" + nMoldes + ")");
 
-    await pg.click('.rail button[data-pane="linha"]');
+    await pg.evaluate(() => abreAba("linha"));
     await pg.waitForTimeout(300);
     ok(/Linha de/.test(await pg.locator("#threadAlvo").textContent()),
        nome + ": o painel de linha diz de que peça é a cor — \"" +
        (await pg.locator("#threadAlvo").textContent()) + "\"");
 
-    await pg.click('.rail button[data-pane="pecas"]');
+    await pg.evaluate(() => abreAba("pecas"));
     await pg.waitForTimeout(300);
     ok(await pg.locator(".chip .pt").first().isVisible(), nome + ": a peça na lista tem o ponto da cor");
 

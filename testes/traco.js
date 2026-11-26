@@ -79,7 +79,7 @@ const acesos = cells => cells.reduce((n, l) => n + (l.match(/1/g) || []).length,
     await pg.mouse.up();
   };
 
-  await pg.click('.rail button[data-pane="pecas"]');
+  await pg.evaluate(() => abreAba("pecas"));
   await pg.waitForTimeout(300);
   await pg.click(".chip");
   await pg.waitForTimeout(300);

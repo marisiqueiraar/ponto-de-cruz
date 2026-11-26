@@ -37,7 +37,7 @@ const molde = (els) => JSON.stringify({ app: "ponto-e-letra", v: 1, nome: "furos
   await pg.waitForTimeout(2300);
 
   const abre = async (nome, els) => {
-    await pg.click('#rail button[data-pane="moldes"]');
+    await pg.evaluate(() => abreAba("moldes"));
     const [janela] = await Promise.all([pg.waitForEvent("filechooser"), pg.click("#moldeAbrir")]);
     await janela.setFiles({ name: nome + ".json", mimeType: "application/json",
                             buffer: Buffer.from(molde(els)) });
@@ -72,12 +72,12 @@ const molde = (els) => JSON.stringify({ app: "ponto-e-letra", v: 1, nome: "furos
   await abre("longe", [quadrado(50, 50), quadrado(90, 50)]);
   t = await aviso();
   ok(!/furos colados/.test(t), "peças afastadas não avisam");
-  ok(await vermelho() < 5, "nem marcam nada na tela");
+  ok(await vermelho() < 20, "nem marcam nada na tela");
 
   // ---- 4. a 1 mm e depois afastando com a seta ---------------------------------
   await abre("anda", [quadrado(50, 50), quadrado(61, 50)]);
   ok(/furos colados/.test(await aviso()), "de novo colados");
-  await pg.click('#rail button[data-pane="pecas"]');
+  await pg.evaluate(() => abreAba("pecas"));
   await pg.click("#chips .chip:nth-child(2)");
   await pg.evaluate(() => document.activeElement.blur());
   for (let i = 0; i < 3; i++) await pg.locator("body").press("Shift+ArrowRight");

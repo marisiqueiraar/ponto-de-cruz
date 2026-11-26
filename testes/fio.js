@@ -20,7 +20,7 @@ const num = t => parseFloat(String(t).replace(",", "."));
   await pg.goto(alvo);
   await pg.waitForTimeout(2300);
   await comecaComPalavra(pg);
-  await pg.click('.rail button[data-pane="molde"]');
+  await pg.evaluate(() => abreAba("molde"));
   await pg.waitForTimeout(400);
 
   const lido = async () => {
@@ -80,15 +80,15 @@ const num = t => parseFloat(String(t).replace(",", "."));
   await pg.waitForTimeout(500);
 
   // ---- duas linhas, duas somas separadas ---------------------------------
-  await pg.click('.rail button[data-pane="pecas"]');
+  await pg.evaluate(() => abreAba("pecas"));
   await pg.waitForTimeout(300);
   await pg.click("#addSym");
   await pg.waitForTimeout(600);
-  await pg.click('.rail button[data-pane="linha"]');
+  await pg.evaluate(() => abreAba("linha"));
   await pg.waitForTimeout(400);
   await pg.click(".grade .cat:nth-child(2)");   // outra cor, tirada da cartela
   await pg.waitForTimeout(600);
-  await pg.click('.rail button[data-pane="molde"]');
+  await pg.evaluate(() => abreAba("molde"));
   const r3 = await lido();
   ok(r3.linhas.length === 2, "duas cores, duas linhas na lista (" + r3.linhas.length + ")");
   const soma = r3.linhas.reduce((a, l) => a + parseInt(l.titulo.replace(/\D/g, ""), 10), 0);

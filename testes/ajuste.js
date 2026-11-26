@@ -59,7 +59,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
       const pane = document.querySelector(".pane.on");
       return !(pane && pane.dataset.pane === n && !app.classList.contains("fechado"));
     }, nome);
-    if (precisa){ await pg.click('.rail button[data-pane="' + nome + '"]'); await pg.waitForTimeout(350); }
+    if (precisa){ await pg.evaluate(x => abreAba(x), nome); await pg.waitForTimeout(350); }
   };
   const campo = async (id, v) => {
     await pg.fill("#" + id, String(v));
@@ -121,7 +121,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   ok(outraFonte.manual === 1, "trocar a fonte também leva o ajuste junto");
 
   // e o Recalcular continua sendo quem descarta
-  await abre("molde");
+  await abre("pecas");
   await pg.click("#reset");
   await pg.waitForTimeout(300);
   if (await pg.isVisible("#modalYes")) await pg.click("#modalYes");
@@ -214,7 +214,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   ok(migrada.rowsTarget !== 24 && migrada.rowsTarget >= 8 && migrada.rowsTarget <= 60,
      "o número velho da altura foi convertido na volta (24 → " + migrada.rowsTarget + ")");
 
-  await abre("molde");
+  await abre("pecas");
   await pg.click("#reset");
   await pg.waitForTimeout(800);
   if (await pg.isVisible("#modalYes")) await pg.click("#modalYes");

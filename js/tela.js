@@ -325,7 +325,7 @@ function showFit(cr){
               " da borda do papel. " : "") +
       "O molde é recortado no papel, então o que está fora não vai sair no PDF. " +
       (fotoFora ? "Mude o tamanho da foto ou do papel. " : "") +
-      (fora ? "Arraste de volta, ou use os botões de alinhar na aba peças." : "");
+      (fora ? "Arraste de volta, ou use os botões de alinhar no painel da peça." : "");
   } else if (colados && colados.n){
     // furo colado rasga o papel: vem logo depois do que está fora dele
     state = "over";
@@ -465,6 +465,7 @@ function recorteNaMesa(ctx, k, pa){
 
 function draw(){
   acompanhaAlvos();
+  if (typeof renderChecagem === "function") renderChecagem();
   var cv = $("grid"), ctx = cv.getContext("2d");
   var pa = paperMM();
   var box = cv.parentNode;

@@ -40,7 +40,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
     return -1;
   });
 
-  await pg.click('.rail button[data-pane="pecas"]');
+  await pg.evaluate(() => abreAba("pecas"));
   await pg.waitForTimeout(300);
   await pg.click(".chip");
   await pg.waitForTimeout(300);
@@ -127,7 +127,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   // ---- espelho sobrevive ao Recalcular ------------------------------------
   await pg.click("#flipEl");
   await pg.waitForTimeout(400);
-  await pg.click('.rail button[data-pane="molde"]');
+  await pg.evaluate(() => abreAba("pecas"));
   await pg.waitForTimeout(300);
   await pg.click("#reset");
   await pg.waitForTimeout(400);

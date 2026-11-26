@@ -177,6 +177,7 @@ function renderMoldes(){
   // o campo do nome não é reescrito enquanto estão digitando nele
   var at = itemAtual(), campo = $("moldeNome");
   if (at && campo && campo !== document.activeElement) campo.value = at.nome || "";
+  if ($("moldeTit")) $("moldeTit").textContent = (at && at.nome) || "sem nome";
 }
 
 /* Abrir outro molde é trocar tudo o que está na tela: peças, papel, foto,
@@ -405,20 +406,218 @@ $("moldeArq").addEventListener("change", function(e){
   e.target.value = "";     // o mesmo arquivo pode ser aberto de novo
 });
 
-/* ---- trilho e painéis ---------------------------------------------- */
+/* ---- etapas, menu e painéis -----------------------------------------
+   Quatro etapas na barra de cima, na ordem em que se trabalha: papel e
+   foto, peças, linhas e imprimir. O que não é passo do molde — a lista de
+   moldes, a caixa de linhas, a ajuda — abre pelo menu do logo, no mesmo
+   painel, com um "voltar" para a etapa em que se estava.
+
+   Os nomes antigos continuam valendo (foto, molde, moldes), para quem chama
+   abreAba de fora — e são os mesmos que o README e os testes usam. */
+var ETAPAS = ["papel", "pecas", "linha", "imprimir"];
+var APELIDO = { foto: "papel", molde: "imprimir" };
+var etapaAtual = "pecas";
+
+function abreAba(nome, ancora){
+  nome = APELIDO[nome] || nome;
+  var app = document.querySelector(".app");
+  var etapa = ETAPAS.indexOf(nome) >= 0;
+  if (etapa) etapaAtual = nome;
+  [].forEach.call(document.querySelectorAll(".rail button"), function(x){
+    x.classList.toggle("on", x.dataset.pane === nome);
+    if (x.dataset.pane === nome) x.setAttribute("aria-current", "step"); else x.removeAttribute("aria-current");
+  });
+  [].forEach.call(document.querySelectorAll(".pane"), function(pane){
+    pane.classList.toggle("on", pane.dataset.pane === nome);
+  });
+  // o catálogo de cores é um só: na caixa ele marca o que você tem, nas
+  // linhas ele pinta a peça
+  var caixa = nome === "caixa";
+  var casa = $(caixa ? "caixaCat" : "linhaCat");
+  if ($("catalogo").parentNode !== casa) casa.appendChild($("catalogo"));
+  if ((linhaModo === "caixa") !== caixa) mudaModoLinha(caixa ? "caixa" : "peca");
+  if (nome === "imprimir") renderChecagem();
+  app.classList.remove("fechado");
+  app.classList.add("painelAberto");   // no celular, a gaveta passa a mostrar a etapa
+  fechaMenu();
+  if (ancora && $(ancora)) $(ancora).scrollIntoView({ block: "start" });
+  else document.querySelector(".panel").scrollTop = 0;
+  draw();   /* a gaveta do celular muda a altura da mesa */
+}
+
 [].forEach.call(document.querySelectorAll(".rail button"), function(b){
   b.addEventListener("click", function(){
-    [].forEach.call(document.querySelectorAll(".rail button"), function(x){ x.classList.remove("on"); });
     var app = document.querySelector(".app");
-    var jaAberto = b.classList.contains("on") && !app.classList.contains("fechado");
-    b.classList.add("on");
-    [].forEach.call(document.querySelectorAll(".pane"), function(pane){
-      pane.classList.toggle("on", pane.dataset.pane === b.dataset.pane);
-    });
-    app.classList.toggle("fechado", jaAberto);
-    draw();   /* a gaveta do celular muda a altura da mesa */
+    // no celular, tocar de novo na etapa aberta fecha a gaveta
+    var vendo = !app.classList.contains("comSel") || app.classList.contains("painelAberto");
+    if (celular && celular.matches && b.classList.contains("on") && vendo){
+      app.classList.toggle("fechado");
+      draw();
+      return;
+    }
+    abreAba(b.dataset.pane);
   });
 });
+[].forEach.call(document.querySelectorAll("[data-vai]"), function(b){
+  b.addEventListener("click", function(){ abreAba(b.dataset.vai); });
+});
+
+// os painéis do menu ganham um "voltar" para a etapa em que se estava
+[].forEach.call(document.querySelectorAll(".menuPane"), function(pane){
+  var v = document.createElement("button");
+  v.type = "button"; v.className = "voltar";
+  v.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>voltar ao molde';
+  v.addEventListener("click", function(){ abreAba(etapaAtual); });
+  pane.insertBefore(v, pane.firstChild);
+});
+
+/* As explicações ficam atrás de um "?" no título de cada painel: o que é
+   texto corrido (nota sem id, fora dos "como funciona") some, e o "?" mostra
+   tudo de uma vez. As notas com id são avisos que o app escreve na hora —
+   essas ficam sempre à vista. */
+[].forEach.call(document.querySelectorAll(".pane"), function(pane){
+  var notas = [].filter.call(pane.querySelectorAll("p.note"), function(p){
+    return !p.id && !p.closest("details");
+  });
+  if (!notas.length) return;
+  notas.forEach(function(p){ p.classList.add("expl"); });
+  var h = pane.querySelector("h2");
+  if (!h) return;
+  var q = document.createElement("button");
+  q.type = "button"; q.className = "qq"; q.textContent = "?";
+  q.setAttribute("aria-expanded", "false");
+  q.setAttribute("aria-label", "explicações de " + h.textContent);
+  q.addEventListener("click", function(){
+    var on = pane.classList.toggle("explica");
+    q.setAttribute("aria-expanded", on ? "true" : "false");
+  });
+  h.appendChild(q);
+});
+
+/* No painel da direita, o campo que tem explicação ganha um "?" ao lado do
+   nome: o texto que antes só aparecia passando o mouse (e nunca no celular)
+   abre embaixo do campo. */
+[].forEach.call(document.querySelectorAll(".sel .t[title]"), function(t){
+  var nome = t.querySelector("span");
+  if (!nome) return;
+  var q = document.createElement("button");
+  q.type = "button"; q.className = "q"; q.textContent = "?";
+  q.setAttribute("aria-expanded", "false");
+  q.setAttribute("aria-label", "o que é " + nome.textContent);
+  q.addEventListener("click", function(){
+    var aberta = t.nextElementSibling && t.nextElementSibling.classList.contains("dica");
+    if (aberta) t.parentNode.removeChild(t.nextElementSibling);
+    else {
+      var d = document.createElement("p");
+      d.className = "dica"; d.textContent = t.title;
+      t.parentNode.insertBefore(d, t.nextSibling);
+    }
+    q.setAttribute("aria-expanded", aberta ? "false" : "true");
+  });
+  nome.appendChild(q);
+});
+
+/* ---- o menu do logo ---- */
+function abreMenu(){
+  renderMenu();
+  $("menu").classList.remove("hide");
+  $("menuBtn").setAttribute("aria-expanded", "true");
+}
+function fechaMenu(){
+  $("menu").classList.add("hide");
+  $("menuBtn").setAttribute("aria-expanded", "false");
+}
+$("menuBtn").addEventListener("click", function(e){
+  e.stopPropagation();
+  if ($("menu").classList.contains("hide")) abreMenu(); else fechaMenu();
+});
+document.addEventListener("click", function(e){
+  if (!$("menu").classList.contains("hide") && !$("menu").contains(e.target)) fechaMenu();
+});
+document.addEventListener("keydown", function(e){
+  if (e.key === "Escape" && !$("menu").classList.contains("hide")){ fechaMenu(); $("menuBtn").focus(); }
+});
+
+// os três moldes do alto da estante, para trocar sem abrir a lista
+function renderMenu(){
+  var box = $("menuMoldes");
+  box.innerHTML = "";
+  estante.itens.slice(0, 3).forEach(function(it){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "mm" + (it.id === estante.atual ? " on" : "");
+    b.setAttribute("role", "menuitem");
+    var nm = document.createElement("span");
+    nm.textContent = it.nome || "sem nome";
+    var qd = document.createElement("small");
+    qd.textContent = (it.pecas || 0) + ((it.pecas === 1) ? " peça" : " peças") + " · " + (it.id === estante.atual ? "aberto agora" : quando(it.em));
+    nm.appendChild(qd);
+    b.appendChild(nm);
+    b.addEventListener("click", function(){ fechaMenu(); abreMolde(it.id); });
+    box.appendChild(b);
+  });
+  var n = minhas.length, compra = acabadas().length + minhas.filter(function(k){ return estoque[k] === "pouco"; }).length;
+  $("menuCaixa").textContent = (n ? n + (n === 1 ? " linha" : " linhas") : "nenhuma linha marcada") +
+    (compra ? " · " + compra + " para comprar" : "");
+}
+[].forEach.call(document.querySelectorAll("#menu [data-pane]"), function(b){
+  b.addEventListener("click", function(){ abreAba(b.dataset.pane, b.dataset.ancora); });
+});
+var instalar = null;
+window.addEventListener("beforeinstallprompt", function(e){
+  e.preventDefault(); instalar = e;
+  $("menuInstalar").classList.remove("hide");
+});
+[].forEach.call(document.querySelectorAll("#menu [data-faz]"), function(b){
+  b.addEventListener("click", function(){
+    var f = b.dataset.faz;
+    fechaMenu();
+    if (f === "calibrar") abreCalib();
+    else if (f === "instalar"){ if (instalar){ instalar.prompt(); instalar = null; $("menuInstalar").classList.add("hide"); } }
+    else { $(f).click(); if (f === "moldeNovo" || f === "moldeDup") abreAba(etapaAtual); }
+  });
+});
+
+/* ---- antes de baixar: o que conferir ----
+   A lista da etapa imprimir junta os avisos que antes ficavam espalhados —
+   o rodapé de cabe/não cabe, os furos colados, as linhas que você não tem —
+   e cada um que precisa de gesto leva à etapa em que ele se resolve. */
+function renderChecagem(){
+  var box = $("checa");
+  if (!box || !document.querySelector('.pane[data-pane="imprimir"]').classList.contains("on")) return;
+  var itens = [];
+  var fit = $("fitHint"), txt = ($("fitTxt").textContent || "").trim();
+  if (!els.length) itens.push({ c: "meio", t: "O molde ainda não tem peça nenhuma.", vai: "pecas", l: "pôr uma peça" });
+  if (txt) itens.push({ c: fit.classList.contains("over") ? "mal" : (fit.classList.contains("tight") ? "meio" : ""),
+                        t: txt.charAt(0).toUpperCase() + txt.slice(1) + ".",
+                        vai: fit.classList.contains("over") ? "pecas" : "", l: "ver na mesa" });
+  var falta = linhasUsadas().filter(function(l){
+    return !minhas.concat(acabadas()).some(function(k){ return nomeLinha(k) === l.nome && estadoLinha(k) !== "acabou"; });
+  });
+  if (els.length && minhas.length){
+    if (falta.length) itens.push({ c: "meio", t: (falta.length === 1 ? "1 linha do molde não está" : falta.length + " linhas do molde não estão") +
+                                   " na sua caixa: " + falta.slice(0, 3).map(function(l){ return l.nome; }).join(", ") + (falta.length > 3 ? "…" : "") + ".",
+                                   vai: "linha", l: "ver as linhas" });
+    else itens.push({ c: "", t: "Todas as linhas do molde estão na sua caixa." });
+  }
+  box.innerHTML = "";
+  itens.forEach(function(it){
+    var d = document.createElement("div");
+    d.className = it.c;
+    var b = document.createElement("b");
+    b.textContent = it.c === "mal" || it.c === "meio" ? "!" : "✓";
+    var s = document.createElement("span");
+    s.textContent = it.t + " ";
+    if (it.vai){
+      var a = document.createElement("a");
+      a.textContent = it.l; a.tabIndex = 0;
+      a.addEventListener("click", function(){ abreAba(it.vai); });
+      s.appendChild(a);
+    }
+    d.appendChild(b); d.appendChild(s);
+    box.appendChild(d);
+  });
+}
+$("pdf2").addEventListener("click", function(){ $("pdf").click(); });
 
 window.addEventListener("resize", draw);
 
@@ -453,22 +652,15 @@ function migraAltura(){
   Promise.all(cargas).then(converte)["catch"](converte);
 }
 
-/* No celular a barra de cima tinha três linhas — o aviso e o PDF, depois
-   desfazer e as ações da peça, depois os campos — e comia quase um terço da
-   tela. As ações e o desfazer passam para dentro da fileira de campos, que já
-   rola de lado, e a barra fica com duas. No computador voltam para a direita. */
+/* No celular as etapas descem para o pé da tela, como abas; no computador
+   ficam no meio da barra de cima. */
 var celular = window.matchMedia ? window.matchMedia("(max-width:860px)") : null;
 function arrumaBarra(){
-  var tools = document.querySelector(".tools"), right = document.querySelector(".right");
-  if (!tools || !right) return;
+  var rail = $("rail"), app = document.querySelector(".app"), right = document.querySelector(".right");
   if (celular && celular.matches){
-    if ($("hist").parentNode !== tools){
-      tools.insertBefore($("ctlActs"), tools.firstChild);
-      tools.insertBefore($("hist"), tools.firstChild);
-    }
-  } else if ($("hist").parentNode !== right){
-    right.insertBefore($("ctlActs"), $("fitHint"));
-    right.insertBefore($("hist"), $("ctlActs"));
+    if (rail.parentNode !== app) app.appendChild(rail);
+  } else if (rail.parentNode !== right.parentNode){
+    right.parentNode.insertBefore(rail, right);
   }
 }
 if (celular){

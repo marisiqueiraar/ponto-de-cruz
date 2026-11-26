@@ -29,7 +29,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   pg.on("pageerror", e => erros.push(e.message));
   await pg.goto(alvo);
   await pg.waitForTimeout(2300);
-  const aba = n => pg.click('#rail button[data-pane="' + n + '"]');
+  const aba = n => pg.evaluate(x => abreAba(x), n);
   const linhas = () => pg.evaluate(() => JSON.parse(localStorage.getItem("ponto-e-letra/linhas/v1")));
   const prateleira = () => pg.evaluate(() => JSON.parse(localStorage.getItem("ponto-e-letra/moldes/v1")));
 
@@ -41,7 +41,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   const k = await pg.evaluate(() => [...document.querySelectorAll("#catGrade .cat")].slice(0, 3).map(b => b.dataset.k));
   await pg.click('#catGrade .cat[data-k="' + k[0] + '"]');           // aplicar na peça
   await pg.waitForTimeout(300);
-  await pg.click('#linhaModo button[data-modo="caixa"]');
+  await pg.evaluate(() => abreAba("caixa"));
   await pg.click('#toqueCaixa button[data-est="pouco"]');
   await pg.click('#catGrade .cat[data-k="' + k[0] + '"]');
   await pg.click('#toqueCaixa button[data-est="acabou"]');
@@ -58,14 +58,14 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
      "a lista de compras tem a que acabou e a que está no fim: " + compra);
   ok(await pg.evaluate(k1 => document.querySelector('#catGrade .cat[data-k="' + k1 + '"]').classList.contains("acabou"), k[1]),
      "na caixa, a que acabou aparece riscada");
-  await aba("molde");
-  ok(/tenho pouco/.test(await pg.textContent("#fios")), "a lista de fio do molde avisa que a linha da palavra está no fim");
   await aba("linha");
+  ok(/tenho pouco/.test(await pg.textContent("#fios")), "a lista de fio do molde avisa que a linha da palavra está no fim");
+  await aba("caixa");
   await pg.click('#toqueCaixa button[data-est="acabou"]');
   await pg.click('#catGrade .cat[data-k="' + k[1] + '"]');          // tocar de novo tira
   l = await linhas();
   ok(!l.estoque[k[1]] && l.tenho.indexOf(k[1]) < 0, "tocar de novo no mesmo estado tira a linha da caixa");
-  await pg.click('#linhaModo button[data-modo="peca"]');
+  await pg.evaluate(() => abreAba("linha"));
 
   // ---- 5. o nome com espera ------------------------------------------------------
   await aba("moldes");

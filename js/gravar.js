@@ -263,7 +263,7 @@ function marcaMemoria(cheia, oQue){
     g.textContent = cheia ? "não coube na memória" : "salvo neste navegador";
     g.classList.toggle("cheia", cheia);
     g.title = cheia
-      ? "O navegador ficou sem espaço. Salve o arquivo do molde na aba moldes e apague um molde antigo."
+      ? "O navegador ficou sem espaço. Salve o arquivo do molde, pelo menu do logo, e apague um molde antigo."
       : "";
   }
   var a = $("moldeAviso");

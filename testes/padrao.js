@@ -40,7 +40,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
     await pg.dispatchEvent("#" + id, "input");
     await pg.waitForTimeout(300);
   };
-  const aba = (n) => pg.click('#rail button[data-pane="' + n + '"]');
+  const aba = (n) => pg.evaluate(x => abreAba(x), n);
   const P = 2.5;   // o quadradinho de fábrica, em mm
   // a foto como o molde a grava: lugar em mm e tamanho pelo nome da medida
   const fotoDe = (m) => {

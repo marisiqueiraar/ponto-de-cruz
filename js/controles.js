@@ -20,9 +20,17 @@ function renderFios(){
   // o estado na caixa, pelo nome que a lista mostra ("Anchor 268")
   var est = {};
   minhas.concat(acabadas()).forEach(function(k){ est[nomeLinha(k)] = estadoLinha(k); });
+  if (linhaAlvo && !lista.some(function(l){ return l.hex === linhaAlvo.hex; })) linhaAlvo = null;
+  if ($("trocaTodo")){
+    $("trocaTodo").classList.toggle("hide", !linhaAlvo);
+    $("trocaTodoNome").textContent = linhaAlvo ? linhaAlvo.nome : "";
+  }
   lista.forEach(function(l){
-    var d = document.createElement("div");
-    d.className = "fio";
+    var d = document.createElement("button");
+    d.type = "button";
+    d.className = "fio" + (linhaAlvo && linhaAlvo.hex === l.hex ? " on" : "");
+    d.setAttribute("aria-pressed", linhaAlvo && linhaAlvo.hex === l.hex ? "true" : "false");
+    d.addEventListener("click", function(){ escolheLinhaAlvo(l); });
     var e = est[l.nome];
     d.title = l.pontos.toLocaleString("pt-BR") + " pontos";
     var pt = document.createElement("span");
@@ -197,9 +205,54 @@ function mostraMedidas(){
   });
 }
 
+/* O painel da direita diz o que está selecionado e só mostra o que vale para
+   isso: sem nada selecionado, um convite; com uma peça, o nome, as ações, os
+   campos dela, a linha e a posição; com a foto, as ações da foto. */
+function tipoDe(el){
+  if (el.kind === "text") return "palavra · ponto cruz";
+  if (el.kind === "sym") return "símbolo · ponto cruz";
+  if (el.kind === "img") return (el.paleta && el.paleta.length ? "gráfico colorido" : "imagem") + " · ponto cruz";
+  if (el.kind === "pat") return (el.arranjo === "faixa" ? "faixa" : "moldura") + " de retalhos · ponto cruz";
+  if (el.kind === "foto") return "foto a mais";
+  if (el.kind === "reto") return el.desenho === "palavra" ? "palavra · ponto reto" : el.desenho === "imagem" ? "imagem · ponto reto" : "ponto reto";
+  return "";
+}
+var ultimaSel = "";
+function mostraSel(){
+  var el = els[sel], piece = foco === "el" && !!el, bloco = noLaco();
+  var foto = !bloco && foco === "photo" && !photo.off;
+  var algo = piece || bloco || foto || editing;
+  var app = document.querySelector(".app");
+  app.classList.toggle("comSel", !!algo);
+  // escolher outra coisa na mesa traz a gaveta do celular de volta para ela
+  var chave = foco + "|" + sel + "|" + marca.join(",") + "|" + marcaFoto + "|" + editing;
+  if (algo && chave !== ultimaSel) app.classList.remove("painelAberto", "fechado");
+  ultimaSel = chave;
+  $("selVazio").classList.toggle("hide", !!algo);
+  $("selCab").classList.toggle("hide", bloco || !(piece || foto));
+  if (piece && !bloco){
+    $("selNome").textContent = el.kind === "text" ? (el.text || "texto") : nomePeca(el);
+    $("selTipo").textContent = tipoDe(el);
+  } else if (foto){
+    $("selNome").textContent = "Foto";
+    $("selTipo").textContent = fmt(photo.w / 10) + " × " + fmt(photo.h / 10) + " cm";
+  }
+  var linha = piece && !bloco && el.kind !== "foto";
+  $("selLinha").classList.toggle("hide", !linha);
+  if (linha){
+    var pal = el.paleta && el.paleta.length, c = pal ? el.paleta[slotAtivo(el) - 1] : corDe(el);
+    $("selCor").style.background = c.hex;
+    $("selCorNome").textContent = pal ? el.paleta.length + " linhas · " + (c.rotulo || c.hex) : c.nome;
+    var mm = el.kind === "reto" ? fioReto(el) : countOf(el) * fioPorPonto();
+    $("selFio").textContent = fmt(mm / 1000) + " m de fio";
+  }
+}
+$("selTroca").addEventListener("click", function(){ abreAba("linha"); });
+
 function syncControls(){
   var el = els[sel];
   var piece = foco === "el" && !!el;
+  mostraSel();
   // com uma linha por peça, o painel precisa dizer qual peça ele está
   // pintando — senão o quadradinho marcado vira adivinhação
   mostraThread();
@@ -892,8 +945,8 @@ function avisaVazio(el){
   // o controle que resolve não é o mesmo nos dois caminhos, e mandar mexer
   // no que está escondido na barra é pior do que não avisar nada
   avisaImagem(temPaleta(el)
-    ? "Essa imagem não acendeu nenhum quadradinho: o corte de fundo levou tudo. Baixe o fundo na barra de cima."
-    : "Essa imagem não acendeu nenhum quadradinho. Baixe a sensibilidade na barra de cima — ou use o inverter, se o desenho for claro sobre fundo escuro.");
+    ? "Essa imagem não acendeu nenhum quadradinho: o corte de fundo levou tudo. Baixe o fundo no painel da peça."
+    : "Essa imagem não acendeu nenhum quadradinho. Baixe a sensibilidade no painel da peça — ou use o inverter, se o desenho for claro sobre fundo escuro.");
 }
 
 /* Trocar a imagem de uma peça guarda o lugar, a inclinação e a linha dela —
@@ -1205,10 +1258,7 @@ $("mm").addEventListener("input", function(){
   });
 });
 // o espaçamento no rodapé leva para onde ele se muda
-$("mmFoot").addEventListener("click", function(){
-  var b = document.querySelector('.rail button[data-pane="molde"]');
-  if (b && !b.classList.contains("on")) b.click();
-});
+$("mmFoot").addEventListener("click", function(){ abreAba("imprimir", "mm"); });
 
 /* A cor do papel. Os papéis 300g que se acham em papelaria, mais um campo
    de cor livre. A sugestão olha as linhas que o molde usa e põe na frente os
@@ -1294,7 +1344,7 @@ function papelPainel(){
   $("paperNota").innerHTML = prop
     ? "No tamanho <b>Personalizado</b> quem manda são os dois campos acima: a " +
       "orientação fica de lado, e o papel sai com a largura e a altura que você digitou."
-    : "As medidas próprias aparecem quando o tamanho é <b>Personalizado</b>.";
+    : "";
 }
 
 function fotoPainel(){

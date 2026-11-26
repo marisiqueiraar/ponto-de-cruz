@@ -24,7 +24,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   await pg.goto(alvo);
   await pg.waitForTimeout(2300);
   await comecaComPalavra(pg);
-  await pg.click('.rail button[data-pane="pecas"]');
+  await pg.evaluate(() => abreAba("pecas"));
   await pg.waitForTimeout(300);
   await pg.click(".chip");
   await pg.waitForTimeout(300);

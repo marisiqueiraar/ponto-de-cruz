@@ -39,7 +39,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
                                           cor: corDe(els[0]).nome, corReto: corDe(els[1]).nome }));
 
   // ---- 1. exportar -------------------------------------------------------------------
-  await pg.click('#rail button[data-pane="moldes"]');
+  await pg.evaluate(() => abreAba("moldes"));
   const [d] = await Promise.all([pg.waitForEvent("download"), pg.click("#oxsSalvar")]);
   const arq = path.join(tmp, "molde.oxs");
   fs.copyFileSync(await d.path(), arq);

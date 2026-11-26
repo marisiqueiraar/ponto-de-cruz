@@ -30,21 +30,20 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
     await pg.waitForTimeout(500);
 
     // ---- 4. nenhum campo escondido -----------------------------------------
+    // os campos da peça moram no painel da direita: todos dentro dele, sem
+    // sair da tela pela direita
     const r = await pg.evaluate(() => {
       const caixa = e => e.getBoundingClientRect();
-      const direita = caixa(document.querySelector(".right"));
+      const painel = caixa(document.getElementById("sel"));
       const campos = [...document.querySelectorAll("#ctlText .t, #ctlPiece .t")].map(caixa);
-      const encosta = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
       return {
         n: campos.length,
-        dentro: campos.every(c => c.right <= innerWidth && c.bottom <= document.querySelector(".top").getBoundingClientRect().bottom),
-        livres: campos.every(c => !encosta(c, direita)),
+        dentro: campos.every(c => c.left >= painel.left - 0.5 && c.right <= painel.right + 0.5 && c.right <= innerWidth),
         alto: document.querySelector(".top").getBoundingClientRect().height
       };
     });
-    ok(r.n === 8 && r.dentro, largura + " px: os 8 campos da palavra estão à vista");
-    ok(r.livres, largura + " px: nenhum embaixo dos botões da direita");
-    ok(r.alto < 110, largura + " px: a barra cabe em duas linhas (" + Math.round(r.alto) + " px)");
+    ok(r.n === 8 && r.dentro, largura + " px: os 8 campos da palavra estão dentro do painel da peça");
+    ok(r.alto <= 60, largura + " px: a barra de cima tem uma linha só (" + Math.round(r.alto) + " px)");
 
     if (largura !== 1280){ await pg.close(); continue; }
 
@@ -64,7 +63,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
     ok((await pg.textContent("#thrRef")).trim() === "equilibrado", "sensibilidade 35 é equilibrada");
 
     // ---- 3. atalhos de espaçamento --------------------------------------------
-    await pg.click('.rail button[data-pane="molde"]');
+    await pg.evaluate(() => abreAba("molde"));
     await pg.click('#mmAtalhos button[data-mm="3"]');
     await pg.waitForTimeout(500);
     ok(await pg.inputValue("#mm") === "3", "o atalho firme põe 3 mm");
