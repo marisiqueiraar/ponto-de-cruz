@@ -129,9 +129,11 @@
       <span class="t"><span>desenho</span><select id="patMot"></select></span>
       <span class="t" title="Quantas vezes cada quadradinho do desenho é repetido: 2 deixa o bloco com o dobro do lado."><span>tamanho</span><input id="patScale" type="number" min="1" max="4" step="1" value="1"><b class="cm" id="patCm"></b></span>
       <span class="t" title="Quadradinhos vazios entre um bloco e outro."><span>espaço</span><input id="patGap" type="number" min="0" max="10" step="1" value="1"></span>
+      <span class="t hide" id="tPatAlvo" title="A moldura dá a volta na foto ou numa peça — um nome, uma imagem — e acompanha a peça quando ela anda."><span>em volta de</span><select id="patAlvo"></select></span>
       <span class="t" id="tPatMargem" title="Folga entre a foto e o lado de dentro da moldura, em milímetros. A moldura ganha ou perde blocos para a foto caber com essa folga."><span>margem</span><input id="patMargem" type="number" min="0" max="60" step="1" value="6"></span>
       <span class="t hide" id="tPatRep" title="Quantas vezes o motivo se repete na faixa."><span>repetir</span><input id="patRep" type="number" min="1" max="40" step="1" value="6"></span>
       <span class="t" title="Quantas linhas a peça usa. Com tantas quantos os papéis do bloco (3 nos blocos de retalho, 1 nos motivos), todos saem iguais; com mais, os blocos se alternam entre as linhas. A aba linha troca cada uma pela sua meada."><span>cores</span><input id="patCores" type="number" min="1" max="8" step="1" value="6"></span>
+      <button type="button" id="patBlocos" class="tbtn hide" title="Liga um modo em que cada toque num bloco da moldura passa ele para o próximo esquema de cores da paleta.">cores por bloco</button>
       <button type="button" id="patCabe" class="tbtn hide" title="Diminui a margem, depois o espaço entre os blocos, até a moldura caber no papel.">caber no papel</button>
       <button type="button" id="patDeit" class="tbtn hide" title="Deita a faixa: os motivos passam a se repetir na horizontal.">deitada</button>
     </fieldset>
@@ -148,6 +150,7 @@
       <span class="t hide" id="tRetoB"><span id="retoBNome"></span><input id="retoB" type="number" step="1"></span>
       <span class="t hide" id="tRetoRep" title="Quantas vezes o desenho se repete na faixa."><span>repetir</span><input id="retoRep" type="number" min="1" max="40" step="1"></span>
       <span class="t hide" id="tRetoGap" title="Espaço entre um desenho e o próximo, em milímetros."><span>espaço</span><input id="retoGap" type="number" min="0" max="30" step="1"><b class="cm">mm</b></span>
+      <span class="t hide" id="tRetoAlvo" title="A moldura dá a volta na foto ou numa peça — um nome, uma imagem — e acompanha a peça quando ela anda."><span>em volta de</span><select id="retoAlvo"></select></span>
       <span class="t hide" id="tRetoMarg" title="Folga entre a foto e a moldura, em milímetros."><span>margem</span><input id="retoMarg" type="number" min="0" max="60" step="1"><b class="cm">mm</b></span>
       <button type="button" id="retoCabe" class="tbtn hide" title="Diminui a margem, o espaço entre os desenhos e, se preciso, o tamanho deles, até a moldura caber no papel.">caber no papel</button>
       <button type="button" id="retoDeit" class="tbtn hide" title="Deita a faixa: os desenhos passam a se repetir na horizontal.">deitada</button>

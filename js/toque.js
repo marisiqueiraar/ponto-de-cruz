@@ -270,6 +270,43 @@ $("delLaco").addEventListener("click", apagaLaco);
    deslizante já era. */
 var pinta = null;
 
+/* O ajustar da peça de ponto reto: tocar num furo o escolhe; tocar noutro
+   liga os dois com um ponto. Tocar no meio de um ponto (longe dos furos) o
+   corta. Tocar de novo no furo escolhido desfaz a escolha. A folga do toque
+   é medida em pixels de tela, como a do ímã, e vira mm pelo zoom. */
+function ajustaReto(el, pt){
+  var l = paperToLocal(el, pt.x, pt.y), k = cv._k || 1;
+  var tol = Math.max(1.2, 10 / k);           // ~10 px de dedo
+  // o furo só é pego bem perto dele — até um terço do ponto —, senão o toque
+  // no meio de um ponto curto cairia sempre num dos furos das pontas
+  var f = furoPerto(el, [l.x, l.y], Math.min(tol, (el.passo || RETO_PASSO) * 0.34));
+  el.maos = el.maos || [];
+  if (f){
+    if (el._escolhido && Math.abs(el._escolhido[0] - f[0]) < 1e-6 && Math.abs(el._escolhido[1] - f[1]) < 1e-6){
+      el._escolhido = null; draw(); return;
+    }
+    if (!el._escolhido){ el._escolhido = f.slice(); draw(); return; }
+    el.maos.push({ t: "liga", a: el._escolhido.slice(), b: f.slice() });
+    el._escolhido = null;
+  } else {
+    // o ponto mais perto do toque: distância do toque ao segmento
+    var melhor = null, dm = tol * 0.8;
+    (el.pontos || []).forEach(function(p){
+      var fs = p.furos, n = fs.length, lim = p.fechada ? n : n - 1;
+      for (var i = 0; i < lim; i++){
+        var a = fs[i], b = fs[(i + 1) % n], dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy;
+        var t = L2 ? Math.max(0, Math.min(1, ((l.x - a[0]) * dx + (l.y - a[1]) * dy) / L2)) : 0;
+        var d = Math.sqrt(Math.pow(a[0] + t * dx - l.x, 2) + Math.pow(a[1] + t * dy - l.y, 2));
+        if (d < dm){ dm = d; melhor = [a, b]; }
+      }
+    });
+    if (!melhor) return;
+    el.maos.push({ t: "corta", a: melhor[0].slice(), b: melhor[1].slice() });
+  }
+  rebuild(el);
+  renderFios(); draw(); pushHist();
+}
+
 function celulaEm(el, pt){
   var l = paperToLocal(el, pt.x, pt.y);
   var p = P();
@@ -326,6 +363,8 @@ cv.addEventListener("pointerdown", function(e){
     return;
   }
   var i = hitEl(pt);
+  // cores por bloco: o toque troca o esquema do bloco, e não começa arraste
+  if (modoBloco && i === sel && trocaEsquemaEm(els[sel], pt)) return;
   var onPhoto = !photo.off && pt.x >= photo.x && pt.x <= photo.x + photo.w &&
                 pt.y >= photo.y && pt.y <= photo.y + photo.h;
   var soma = !editing && (e.shiftKey || e.ctrlKey || e.metaKey);
@@ -352,6 +391,10 @@ cv.addEventListener("pointerdown", function(e){
   }
   if (antes !== marca.join(",") + "|" + marcaFoto + "|" + foco + "|" + sel){
     syncControls(); renderChips();
+  }
+  if (editing && els[sel] && els[sel].kind === "reto"){
+    ajustaReto(els[sel], pt);
+    return;
   }
   if (editing){
     var el = els[sel]; if (!el) return;

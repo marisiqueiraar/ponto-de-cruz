@@ -179,15 +179,15 @@ nove desenhos prontos, palavra em ponto atrás, imagem em contorno e em traço,
 faixa e moldura, a troca de ponto peça por peça, o PDF com o risco cinza.
 Ficou para depois:
 
-- **Mais desenhos prontos**: seigaiha (ondas em escama), asanoha (folha de
+- ~~**Mais desenhos prontos**~~ (feito em 26/11/2026): seigaiha (ondas em escama), asanoha (folha de
   cânhamo), espiral, ramo de folhinhas, estrela de 8 pontas.
 - ~~**A ordem dos pontos numerada no PDF**~~ (feito em 26/11/2026), para quem quer seguir um caminho.
-- **Mexer à mão nos furos** da peça de ponto reto: tocar num furo e noutro
+- ~~**Mexer à mão nos furos**~~ (feito em 26/11/2026) da peça de ponto reto: tocar num furo e noutro
   liga os dois; tocar num risco o apaga.
-- **Palavra em arco** em ponto reto: o arco é do ponto cruz e ainda não vale
+- ~~**Palavra em arco**~~ (feito em 26/11/2026) em ponto reto: o arco é do ponto cruz e ainda não vale
   na palavra de ponto reto.
-- **Espaço entre letras** em ponto reto: idem.
-- **Moldura de ponto reto em volta de outra coisa que não a foto** — de um
+- ~~**Espaço entre letras**~~ (feito em 26/11/2026) em ponto reto: idem.
+- ~~**Moldura de ponto reto em volta de outra coisa que não a foto**~~ (feito em 26/11/2026) — de um
   nome, de uma imagem.
 
 ---
@@ -205,7 +205,7 @@ para depois:
   e blocos de 2,5 cm, a moldura fica mais larga que a folha. O aviso vermelho
   aparece, mas o app não sugere a saída (margem menor, menos espaço entre
   blocos, ou blocos menores). Falta um "caber no papel" que acerte isso sozinho.
-- **Cor bloco por bloco.** A paleta da moldura se distribui sozinha pelos
+- ~~**Cor bloco por bloco.**~~ — feito em 26/11/2026. A paleta da moldura se distribui sozinha pelos
   blocos; não dá para escolher à mão as cores de um bloco só sem passar pelo
   ajuste ponto a ponto.
 - ~~**Contorno do marca-página no PDF.**~~ — feito em 26/11/2026. A borda do papel sai como moldura de

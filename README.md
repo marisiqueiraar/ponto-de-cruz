@@ -74,6 +74,22 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   15%. O ajuste ponto a ponto é de quadradinho e não aparece nessa peça. O aviso de furos
   colados vale também dentro dela.
 
+  **Mais desenhos e ajustes.** Além dos nove primeiros há estrela de 8 pontas, espiral, ramo de
+  folhinhas, seigaiha (ondas em escama, cada fileira cobrindo a de cima) e asanoha (folha de
+  cânhamo: a grade de triângulos e as linhas dos cantos até o meio de cada um). A palavra em
+  ponto reto tem **arco** e **espaço entre letras**, como a de quadradinho, e a troca de ponto
+  leva os dois junto. O **ajustar** também vale no ponto reto: tocar num furo e noutro liga os
+  dois com um ponto, tocar no meio de um ponto o corta. O ajuste fica numa lista por cima do
+  desenho e é aplicado a cada vez que a peça é refeita, achando os furos pela posição — se o
+  desenho mudar a ponto de o furo não existir mais, ele fica sem efeito em vez de ligar furos
+  errados; o recalcular o descarta.
+
+  **A moldura em volta de uma peça.** A moldura — de retalhos ou de ponto reto — pode ir em
+  volta da foto ou de uma peça escolhida em **em volta de**: um nome, uma imagem. Ela acompanha a
+  peça quando ela anda, cresce ou muda, porque cada peça tem uma identidade que não muda quando
+  a lista muda de ordem. Na moldura de retalhos, **cores por bloco** liga um modo em que o toque
+  num bloco passa só ele para o próximo esquema de cores da paleta.
+
   **Faixa e moldura em ponto reto.** Os desenhos prontos têm um **arranjo**: solto, **faixa**
   (o desenho repetido em fileira, em pé ou deitada, com o espaço pedido — o marca-página de
   corações, de folhas, de estrelas) ou **moldura** (o desenho repetido em volta da foto, por

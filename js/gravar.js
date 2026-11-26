@@ -19,11 +19,12 @@ function celChar(v){ return (v | 0).toString(36); }
    com as células: é o desenho final, que abre igual mesmo que a conta de
    furos mude numa versão futura. */
 function packReto(el){
-  return { kind: "reto", x: el.x, y: el.y, rot: el.rot, flip: el.flip || 0,
+  return { kind: "reto", uid: el.uid, alvo: el.alvo || "", x: el.x, y: el.y, rot: el.rot, flip: el.flip || 0,
            color: el.color || "", colorName: el.colorName || "",
            desenho: el.desenho, medida: el.medida, passo: el.passo, opts: el.opts || {},
            texto: el.texto, font: el.font, img: el.img, nome: el.nome, inv: el.inv ? 1 : 0, modo: el.modo,
            arranjo: el.arranjo || "solta", rep: el.rep, gap: el.gap, margem: el.margem, deitada: el.deitada ? 1 : 0,
+           maos: (el.maos || []).map(function(m){ return { t: m.t, a: m.a, b: m.b }; }),
            w: Math.round(el.w * 100) / 100, h: Math.round(el.h * 100) / 100,
            pontos: (el.pontos || []).map(function(pt){
              return { f: pt.fechada ? 1 : 0,
@@ -32,7 +33,9 @@ function packReto(el){
 }
 
 function unpackReto(r){
-  var el = { kind: "reto", x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0, flip: r.flip ? 1 : 0,
+  var el = { kind: "reto", uid: typeof r.uid === "string" && r.uid ? r.uid : novoId(),
+             alvo: typeof r.alvo === "string" ? r.alvo : "",
+             x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0, flip: r.flip ? 1 : 0,
              desenho: DESENHOS_RETO[r.desenho] ? r.desenho : "colmeia",
              medida: +r.medida || 0, passo: Math.max(RETO_PASSO_MIN, Math.min(RETO_PASSO_MAX, +r.passo || RETO_PASSO)),
              opts: r.opts && typeof r.opts === "object" ? r.opts : {},
@@ -40,6 +43,10 @@ function unpackReto(r){
   var d = DESENHOS_RETO[el.desenho];
   el.medida = Math.max(d.min, Math.min(d.max, el.medida || d.padrao));
   el.arranjo = r.arranjo === "faixa" || r.arranjo === "moldura" ? r.arranjo : "solta";
+  el.maos = (r.maos || []).filter(function(m){
+    return m && (m.t === "liga" || m.t === "corta") && m.a && m.b && m.a.length === 2 && m.b.length === 2;
+  }).map(function(m){ return { t: m.t, a: [+m.a[0], +m.a[1]], b: [+m.b[0], +m.b[1]] }; });
+  el.manual = el.maos.length;
   el.rep = Math.max(1, Math.min(40, +r.rep || 6));
   el.gap = Math.max(0, Math.min(30, r.gap == null ? 3 : +r.gap));
   el.margem = Math.max(0, Math.min(60, r.margem == null ? 6 : +r.margem));
@@ -71,7 +78,7 @@ function unpackReto(r){
 
 function packEl(el){
   if (el.kind === "reto") return packReto(el);
-  var r = { kind: el.kind, x: el.x, y: el.y, rot: el.rot, manual: el.manual || 0,
+  var r = { kind: el.kind, uid: el.uid, alvo: el.alvo || "", x: el.x, y: el.y, rot: el.rot, manual: el.manual || 0,
             color: el.color || "", colorName: el.colorName || "",
             // a lista dos ajustes à mão vai junto com as células, e não no
             // lugar delas: as células são o desenho final, a lista é o que
@@ -107,6 +114,7 @@ function packEl(el){
     r.arranjo = el.arranjo; r.motivo = el.motivo; r.scale = el.scale;
     r.gap = el.gap; r.margem = el.margem; r.rep = el.rep;
     r.deitada = el.deitada ? 1 : 0; r.cores = el.cores; r.flip = el.flip || 0;
+    r.esquemas = el.esquemas || {};
     r.paleta = (el.paleta || []).map(function(sl){
       return { lab: sl.lab.map(function(v){ return Math.round(v * 100) / 100; }),
                hex: sl.hex, chave: sl.chave || "",
@@ -130,7 +138,9 @@ function unpackEl(r){
     return line;
   });
   var kind = r.kind === "sym" || r.kind === "img" || r.kind === "pat" ? r.kind : "text";
-  var el = { kind: kind, cells: cells,
+  // a identidade da peça: é por ela que uma moldura sabe em volta de quem está
+  var el = { kind: kind, cells: cells, uid: typeof r.uid === "string" && r.uid ? r.uid : novoId(),
+             alvo: typeof r.alvo === "string" ? r.alvo : "",
              x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0, manual: +r.manual || 0,
              edits: [] };
   var rowsEl = cells.length, colsEl = cells[0] ? cells[0].length : 0;
@@ -190,6 +200,9 @@ function unpackEl(r){
     el.deitada = r.deitada ? 1 : 0;
     el.cores = Math.max(1, Math.min(PAT_CORES_MAX, +r.cores || 1));
     el.flip = r.flip ? 1 : 0;
+    el.esquemas = {};
+    if (r.esquemas && typeof r.esquemas === "object")
+      Object.keys(r.esquemas).forEach(function(k){ if (+r.esquemas[k]) el.esquemas[k] = +r.esquemas[k] | 0; });
     el.paleta = (r.paleta || []).map(function(sl){
       return { lab: (sl.lab || [0, 0, 0]).map(Number),
                hex: /^#[0-9A-Fa-f]{6}$/.test(sl.hex || "") ? sl.hex : "#888888",

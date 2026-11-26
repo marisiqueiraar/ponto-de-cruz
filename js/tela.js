@@ -50,6 +50,11 @@ function drawReto(ctx, el, k, region, color, lw){
     if (pt.fechada) ctx.closePath();
     ctx.stroke();
   });
+  if (editing && el._escolhido){
+    ctx.strokeStyle = "#D7263D"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(el._escolhido[0] * k, el._escolhido[1] * k, Math.max(5, 1.2 * k), 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = color;
+  }
   ctx.fillStyle = "#26323D";
   var r = Math.max(1, Math.min(2.2, 0.32 * k));
   (el.pontos || []).forEach(function(pt){ pt.furos.forEach(function(f){
@@ -331,6 +336,7 @@ function recorteNaMesa(ctx, k, pa){
 }
 
 function draw(){
+  acompanhaAlvos();
   var cv = $("grid"), ctx = cv.getContext("2d");
   var pa = paperMM();
   var box = cv.parentNode;

@@ -59,7 +59,24 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   ok(/fora do papel|colados/.test(await pg.textContent("#fitTxt")) === false, "sem peça fora do papel nem furo colado");
 
   // ---- 3. sem ajustar ponto a ponto --------------------------------------------
-  ok(await pg.isHidden("#edit"), "o ajustar ponto a ponto some para a peça de ponto reto");
+  ok(await pg.isVisible("#edit"), "o ajustar aparece para a peça de ponto reto: nela ele liga e corta pontos");
+  // ligar dois furos e cortar um ponto, direto pela função do toque, com os
+  // furos da própria peça convertidos para o papel
+  const maos = await pg.evaluate(() => {
+    const el = els[1], f = el.pontos[0].furos, g = el.pontos[el.pontos.length - 1].furos;
+    const antes = el.pontos.length;
+    const papel = q => localToPaper(el, q[0], q[1]);
+    editing = true;
+    ajustaReto(el, papel(f[0])); ajustaReto(el, papel(g[g.length - 1]));
+    const ligou = el.pontos.length === antes + 1 && el.maos.length === 1;
+    const a = el.pontos[1].furos[0], b = el.pontos[1].furos[1];
+    ajustaReto(el, papel([(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]));
+    const cortou = el.maos.length === 2 && el.maos[1].t === "corta";
+    editing = false;
+    return { ligou, cortou };
+  });
+  ok(maos.ligou, "no ajustar, tocar num furo e noutro liga os dois com um ponto");
+  ok(maos.cortou, "e tocar no meio de um ponto o corta");
 
   // ---- 2. trocar e refazer no lugar -----------------------------------------------
   const c0 = centro(r);

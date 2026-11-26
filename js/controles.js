@@ -220,7 +220,8 @@ function syncControls(){
   $("ctlPiece").classList.toggle("hide", !piece);
   $("ctlActs").classList.toggle("hide", !piece);
   // acender quadradinho não quer dizer nada numa peça sem quadradinho
-  $("edit").classList.toggle("hide", !!(el && el.kind === "reto"));
+  // no ponto reto o ajustar liga e corta pontos, em vez de acender quadradinho
+  $("edit").classList.toggle("hide", false);
   /* Um botão só para trocar de ponto, junto de ajustar, espelhar e duplicar:
      ele diz para onde a peça vai. A palavra e a imagem trocam; símbolo,
      moldura e desenho pronto, não — cada um só existe num dos dois. */
@@ -291,6 +292,8 @@ function syncControls(){
     $("tRetoGap").classList.toggle("hide", pal || ima || arr === "solta" ||
       (arr === "moldura" && (el.desenho === "ziguezague" || el.desenho === "ondas")));
     $("tRetoMarg").classList.toggle("hide", pal || ima || arr !== "moldura");
+    $("tRetoAlvo").classList.toggle("hide", pal || ima || arr !== "moldura");
+    if (arr === "moldura") montaAlvos($("retoAlvo"), el);
     $("retoRep").value = el.rep || 6;
     $("retoGap").value = el.gap == null ? 3 : el.gap;
     $("retoMarg").value = el.margem == null ? 6 : el.margem;
@@ -329,6 +332,13 @@ function syncControls(){
     $("patDeit").classList.toggle("on", !!el.deitada);
     // a margem é da foto e a repetição é da fileira: cada arranjo mostra a sua
     $("tPatMargem").classList.toggle("hide", faixa);
+    $("tPatAlvo").classList.toggle("hide", faixa);
+    if (!faixa) montaAlvos($("patAlvo"), el);
+    // trocar o esquema de um bloco só faz sentido com mais de um esquema
+    var temEsq = (el.paleta || []).length > 3;
+    $("patBlocos").classList.toggle("hide", !temEsq);
+    if (!temEsq && modoBloco) modoBloco = false;
+    $("patBlocos").classList.toggle("on", modoBloco);
     $("tPatRep").classList.toggle("hide", !faixa);
     $("patDeit").classList.toggle("hide", !faixa);
   } else {
@@ -513,11 +523,13 @@ montaDesenhosReto();
    16 quadradinhos de 2,5 mm vira uma de 40 mm, e volta. */
 function trocaPonto(el){
   var b = bboxMM(el), cx = b.x + b.w / 2, cy = b.y + b.h / 2, nova, p = P();
-  var comum = { rot: el.rot || 0, flip: el.flip || 0, edits: [], manual: 0, x: 0, y: 0,
+  var comum = { uid: uidDe(el), rot: el.rot || 0, flip: el.flip || 0, edits: [], manual: 0, x: 0, y: 0,
                 color: el.color, colorName: el.colorName };
   if (el.kind === "text"){
     nova = Object.assign(comum, { kind: "reto", desenho: "palavra", texto: el.text, font: el.font,
-             medida: Math.round(el.rowsTarget * p), passo: RETO_PASSO, opts: {} });
+             medida: Math.round(el.rowsTarget * p), passo: RETO_PASSO,
+             // o espaço do ponto cruz é em quadradinhos; aqui, em milímetros
+             opts: { arco: el.arc || 0, esp: Math.round((el.esp || 0) * p) } });
   } else if (el.kind === "img"){
     nova = Object.assign(comum, { kind: "reto", desenho: "imagem", img: el.img, nome: el.nome,
              medida: Math.round(el.larg * p), passo: RETO_PASSO, inv: el.inv || 0, modo: "contorno",
@@ -525,7 +537,8 @@ function trocaPonto(el){
   } else if (el.kind === "reto" && el.desenho === "palavra"){
     nova = Object.assign(comum, { kind: "text", text: el.texto, font: el.font,
              rowsTarget: Math.max(8, Math.min(60, Math.round(el.medida / p))),
-             thick: 2, thr: 0.35, esp: 0, arc: 0, hv: 2, cells: [[0]] });
+             thick: 2, thr: 0.35, esp: Math.max(0, Math.min(8, Math.round((opcoesReto(el).esp || 0) / p))),
+             arc: opcoesReto(el).arco || 0, hv: 2, cells: [[0]] });
   } else if (el.kind === "reto" && el.desenho === "imagem"){
     nova = Object.assign(comum, { kind: "img", img: el.img, nome: el.nome || "imagem",
              larg: Math.max(IMG_LARG_MIN, Math.min(IMG_LARG_MAX, Math.round(el.medida / p))),
@@ -605,6 +618,58 @@ function molduraCabe(el){
   refaz();
   return false;
 }
+/* Cores por bloco: com o modo ligado, o toque num bloco da moldura (ou da
+   faixa) não arrasta — passa o bloco para o próximo esquema de cores. */
+var modoBloco = false;
+$("patBlocos").addEventListener("click", function(){
+  modoBloco = !modoBloco;
+  this.classList.toggle("on", modoBloco);
+  $("modeHint").textContent = modoBloco
+    ? "Toque num bloco para passar ele ao próximo esquema de cores. Toque de novo em cores por bloco para voltar a arrastar."
+    : MODO_MOVER;
+});
+function trocaEsquemaEm(el, pt){
+  if (!el || el.kind !== "pat" || !el._blocos) return false;
+  var c = celulaEm(el, pt), achou = null;
+  el._blocos.forEach(function(b){
+    if (c.r >= b.r && c.r < b.r + b.h && c.q >= b.q && c.q < b.q + b.w) achou = b;
+  });
+  if (!achou) return false;
+  el.esquemas = el.esquemas || {};
+  var n = Math.max(1, Math.ceil((el.paleta || []).length / 3));
+  el.esquemas[achou.i] = ((el.esquemas[achou.i] | 0) + 1) % n;
+  if (!el.esquemas[achou.i]) delete el.esquemas[achou.i];
+  rebuild(el);
+  renderFios(); draw(); pushHist();
+  return true;
+}
+
+// a lista do "em volta de": a foto e as outras peças que não são moldura
+function montaAlvos(sel2, el){
+  sel2.innerHTML = "";
+  var o = document.createElement("option");
+  o.value = ""; o.textContent = photo.off ? "o meio do papel" : "a foto";
+  sel2.appendChild(o);
+  els.forEach(function(x){
+    if (x === el || x.arranjo === "moldura") return;
+    var op = document.createElement("option");
+    op.value = uidDe(x); op.textContent = nomePeca(x);
+    sel2.appendChild(op);
+  });
+  sel2.value = el.alvo || "";
+  if (sel2.value !== (el.alvo || "")) sel2.value = "";
+}
+["patAlvo", "retoAlvo"].forEach(function(id){
+  $(id).addEventListener("change", function(){
+    var el = els[sel];
+    if (!el) return;
+    el.alvo = this.value || "";
+    el._alvoChave = null;
+    rebuild(el); centraNaMira(el);
+    renderChips(); draw(); pushHist();
+  });
+});
+
 function botaoCabe(el){
   var moldura = el && el.arranjo === "moldura", fora = false;
   if (moldura){
@@ -914,6 +979,7 @@ $("dupEl").addEventListener("click", function(){
   // e com elas os ajustes feitos ponto a ponto
   var copia = unpackEl(packEl(el));
   if (!copia) return;
+  copia.uid = novoId();      // a cópia é outra peça: a moldura não a confunde com a original
   var pa = paperMM();
   var b = bboxMM(el);
   copia.x = Math.min(el.x + 4, Math.max(0, pa.w - b.w));
@@ -1363,9 +1429,12 @@ $("edit").addEventListener("click", function(){
   $("ctlEdit").classList.toggle("hide", !editing);
   $("editLabel").textContent = editing ? "terminar" : "ajustar";
   draw();   // a grade ganha ou devolve a altura do painel
-  $("modeHint").textContent = editing
-    ? "Toque num quadradinho da peça selecionada para acender ou apagar. Arrastando sem soltar, o traço inteiro segue o primeiro."
-    : MODO_MOVER;
+  var elE = els[sel];
+  if (elE) elE._escolhido = null;
+  $("modeHint").textContent = !editing ? MODO_MOVER
+    : elE && elE.kind === "reto"
+      ? "Toque num furo e depois noutro para ligar os dois com um ponto. Toque no meio de um ponto para cortá-lo."
+      : "Toque num quadradinho da peça selecionada para acender ou apagar. Arrastando sem soltar, o traço inteiro segue o primeiro.";
 });
 
 /* Recalcular refaz as células a partir dos controles, então apaga tudo que
