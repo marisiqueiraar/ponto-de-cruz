@@ -422,6 +422,8 @@ cv.addEventListener("pointerdown", function(e){
     stage.classList.add("pegando");
     return;
   }
+  // marcando o que já foi bordado, o toque marca — não seleciona nem arrasta
+  if (acompanha){ comecaBorda(e, pt); return; }
   var i = hitEl(pt);
   // cores por bloco: o toque troca o esquema do bloco, e não começa arraste
   if (modoBloco && i === sel && trocaEsquemaEm(els[sel], pt)) return;
@@ -485,6 +487,7 @@ cv.addEventListener("pointerdown", function(e){
 
 cv.addEventListener("pointermove", function(e){
   if (cpts[e.pointerId]) cpts[e.pointerId] = { x: e.clientX, y: e.clientY };
+  if (borda){ e.preventDefault(); segueBorda(e); return; }
   if (pinta){
     if (e.pointerId !== pinta.id) return;
     e.preventDefault();
@@ -542,6 +545,7 @@ cv.addEventListener("pointermove", function(e){
 });
 
 function endDrag(e){
+  fimBorda(e);
   imaVisto = null;           // a linha do ímã é só durante o arraste
   var mexeu = !!(drag || (pinch && !pinch.vista));
   if (laco){

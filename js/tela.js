@@ -172,6 +172,8 @@ function paint(ctx, k, region, opts){
     else { totalHoles += holesOf(el).length; drawStitches(ctx, el, k, region, cor, lw); }
     if (opts.outline && marcado(i)) drawOutline(ctx, el, k, region);
   });
+  if (opts.outline) drawFeitos(ctx, k, region);
+  if (opts.outline && acompanha) mostraProgresso();
   if (opts.outline && marcaFoto) drawFotoOutline(ctx, k, region);
   if (opts.outline) drawColados(ctx, k, region);
   if (opts.outline && imaVisto && (imaVisto.x !== null || imaVisto.y !== null)){

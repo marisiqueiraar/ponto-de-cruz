@@ -18,6 +18,21 @@ function celChar(v){ return (v | 0).toString(36); }
    ponto, opções — e com os furos como estão, do mesmo jeito que as outras vão
    com as células: é o desenho final, que abre igual mesmo que a conta de
    furos mude numa versão futura. */
+/* O que já foi bordado (acompanha.js) vai com a peça, como lista de chaves.
+   Sem marca nenhuma, o campo nem aparece. */
+function packFeito(el){
+  var f = el.feito;
+  if (!f || !f.k) return undefined;
+  var ks = Object.keys(f.k);
+  return ks.length ? { d: f.d || "", k: ks } : undefined;
+}
+function unpackFeito(f){
+  if (!f || !f.k || !f.k.length) return null;
+  var k = {};
+  f.k.forEach(function(c){ if (typeof c === "string") k[c] = 1; });
+  return { d: typeof f.d === "string" ? f.d : "", k: k };
+}
+
 function packReto(el){
   return { kind: "reto", uid: uidDe(el), alvo: el.alvo || "", x: el.x, y: el.y, rot: el.rot, flip: el.flip || 0,
            color: el.color || "", colorName: el.colorName || "",
@@ -25,6 +40,7 @@ function packReto(el){
            texto: el.texto, font: el.font, img: el.img, nome: el.nome, inv: el.inv ? 1 : 0, modo: el.modo,
            arranjo: el.arranjo || "solta", rep: el.rep, gap: el.gap, margem: el.margem, deitada: el.deitada ? 1 : 0,
            maos: (el.maos || []).map(function(m){ return { t: m.t, a: m.a, b: m.b }; }),
+           feito: packFeito(el),
            w: Math.round(el.w * 100) / 100, h: Math.round(el.h * 100) / 100,
            pontos: (el.pontos || []).map(function(pt){
              return { f: pt.fechada ? 1 : 0,
@@ -47,6 +63,7 @@ function unpackReto(r){
     return m && (m.t === "liga" || m.t === "corta") && m.a && m.b && m.a.length === 2 && m.b.length === 2;
   }).map(function(m){ return { t: m.t, a: [+m.a[0], +m.a[1]], b: [+m.b[0], +m.b[1]] }; });
   el.manual = el.maos.length;
+  el.feito = unpackFeito(r.feito);
   el.rep = Math.max(1, Math.min(40, +r.rep || 6));
   el.gap = Math.max(0, Math.min(30, r.gap == null ? 3 : +r.gap));
   el.margem = Math.max(0, Math.min(60, r.margem == null ? 6 : +r.margem));
@@ -84,6 +101,7 @@ function packEl(el){
             // lugar delas: as células são o desenho final, a lista é o que
             // permite refazer o desenho sem perder a correção
             edits: (el.edits || []).map(function(e){ return e.r + "," + e.q + "," + e.v; }),
+            feito: packFeito(el),
             cells: el.cells.map(function(row){ return row.map(celChar).join(""); }) };
   if (el.kind === "text"){
     r.text = el.text; r.font = el.font;
@@ -142,7 +160,7 @@ function unpackEl(r){
   var el = { kind: kind, cells: cells, uid: typeof r.uid === "string" && r.uid ? r.uid : novoId(),
              alvo: typeof r.alvo === "string" ? r.alvo : "",
              x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0, manual: +r.manual || 0,
-             edits: [] };
+             edits: [], feito: unpackFeito(r.feito) };
   var rowsEl = cells.length, colsEl = cells[0] ? cells[0].length : 0;
   if (r.edits && r.edits.length){
     r.edits.forEach(function(t){

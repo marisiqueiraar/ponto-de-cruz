@@ -78,6 +78,7 @@ $("zVal").addEventListener("click", function(){ setZoom(1); });
 /* A dica do rodapé tem três donos — a mãozinha, as guias e o arraste comum —
    e sai de um lugar só para nenhum deles apagar o aviso do outro. */
 function mostraDica(){
+  if (acompanha) return mostraProgresso();
   $("modeHint").textContent = mao
     ? "Arraste para mover a vista. Toque de novo na mãozinha para voltar a posicionar as peças."
     : guias.on

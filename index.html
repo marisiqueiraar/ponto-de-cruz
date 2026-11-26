@@ -613,12 +613,14 @@
     <button id="zVal" title="encaixar o papel na tela">100%</button>
     <button id="zIn" title="aproximar" aria-label="aproximar">+</button>
     <button id="z11" title="tamanho real na tela (calibre uma vez com um cartão)">1:1</button>
+    <button id="zFeito" title="marcar o que já bordei" aria-label="marcar o que já bordei" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <button id="zPan" title="mover a vista" aria-label="mover a vista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5.5a1.5 1.5 0 013 0v5h.5V7a1.5 1.5 0 013 0v8.5a5.5 5.5 0 01-5.5 5.5h-1.8a5 5 0 01-3.7-1.63L4.6 15.6a1.5 1.5 0 012.1-2.13L8.5 15V4.5a1.5 1.5 0 013 0V10H13V5.5z"/></svg></button>
   </div>
 </div>
 
 <!-- ===================== rodapé ===================== -->
 <div class="foot">
+  <button id="feitoLimpa" class="tbtn hide">desmarcar tudo</button>
   <p class="hint" id="modeHint">Arraste a palavra ou a foto para posicionar, ou arraste no vazio para laçar várias e mover juntas. Dois dedos sobre a peça selecionada aumentam ou diminuem a letra.</p>
   <button type="button" class="saved furos" id="mmFoot" title="O espaçamento entre furos — muda na aba molde."></button>
   <span class="saved" id="manualOut"></span>
@@ -678,6 +680,7 @@
 <script src="js/gravar.js"></script>
 <script src="js/controles.js"></script>
 <script src="js/toque.js"></script>
+<script src="js/acompanha.js"></script>
 <script src="js/pdf.js"></script>
 <script src="js/fontes.js"></script>
 <script src="js/vista.js"></script>
