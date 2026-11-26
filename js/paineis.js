@@ -362,7 +362,31 @@ function migraAltura(){
   Promise.all(cargas).then(converte)["catch"](converte);
 }
 
+/* No celular a barra de cima tinha três linhas — o aviso e o PDF, depois
+   desfazer e as ações da peça, depois os campos — e comia quase um terço da
+   tela. As ações e o desfazer passam para dentro da fileira de campos, que já
+   rola de lado, e a barra fica com duas. No computador voltam para a direita. */
+var celular = window.matchMedia ? window.matchMedia("(max-width:860px)") : null;
+function arrumaBarra(){
+  var tools = document.querySelector(".tools"), right = document.querySelector(".right");
+  if (!tools || !right) return;
+  if (celular && celular.matches){
+    if ($("hist").parentNode !== tools){
+      tools.insertBefore($("ctlActs"), tools.firstChild);
+      tools.insertBefore($("hist"), tools.firstChild);
+    }
+  } else if ($("hist").parentNode !== right){
+    right.insertBefore($("ctlActs"), $("fitHint"));
+    right.insertBefore($("hist"), $("ctlActs"));
+  }
+}
+if (celular){
+  if (celular.addEventListener) celular.addEventListener("change", function(){ arrumaBarra(); draw(); });
+  else if (celular.addListener) celular.addListener(function(){ arrumaBarra(); draw(); });
+}
+
 function boot(){
+  arrumaBarra();
   ["paperW","paperH","photoWmm","photoHmm"].forEach(propriaIni);
   carregaLinhas();          // antes de restaurar: a caixa é a primeira marca
   carregaEstante();         // e antes do molde: é ela que diz qual abrir

@@ -98,18 +98,41 @@ function evPos(e){
    dela a deixaria torta. Três referências por eixo — os dois lados e o meio
    —, porque tanto faz alinhar duas palavras pela esquerda ou pelo centro,
    e a guia não tem como adivinhar qual das duas você quis. */
-function imanta(b){
+/* O ímã. Além das guias ligadas, a peça que anda encosta nas bordas e no
+   meio das outras peças, nas bordas e no meio da foto e no meio do papel —
+   é onde quase todo alinhamento cai, e antes só havia ímã com guia ligada.
+   `quem` é o que está andando (a peça, a lista do laço, ou "foto"), para não
+   encostar em si mesmo. Quando encosta em algo que não é guia, a linha em que
+   encostou aparece na mesa enquanto se arrasta (`imaVisto`). */
+var imaVisto = null;
+
+function imanta(b, quem){
   var g = { x: 0, y: 0 };
-  if (!guias.on) return g;
+  imaVisto = { x: null, y: null };
   var folga = FOLGA_PX / (cv._k || 1);
-  [["x", "w", guias.v], ["y", "h", guias.h]].forEach(function(eixo){
+  var linhas = { x: [], y: [] };
+  if (guias.on){
+    guias.v.forEach(function(v){ linhas.x.push({ v: v, guia: 1 }); });
+    guias.h.forEach(function(v){ linhas.y.push({ v: v, guia: 1 }); });
+  }
+  var anda = function(o){ return o === quem || (quem && quem.indexOf && quem.indexOf(o) >= 0); };
+  var poe = function(c){
+    linhas.x.push({ v: c.x }, { v: c.x + c.w / 2 }, { v: c.x + c.w });
+    linhas.y.push({ v: c.y }, { v: c.y + c.h / 2 }, { v: c.y + c.h });
+  };
+  els.forEach(function(o){ if (!anda(o)) poe(elPaperBox(o)); });
+  if (!photo.off && quem !== "foto" && !(quem && quem.foto)) poe(photo);
+  var pa = paperMM();
+  linhas.x.push({ v: pa.w / 2 }); linhas.y.push({ v: pa.h / 2 });
+  [["x", "w"], ["y", "h"]].forEach(function(eixo){
     var bordas = [b[eixo[0]], b[eixo[0]] + b[eixo[1]] / 2, b[eixo[0]] + b[eixo[1]]];
-    var dist = folga;
+    var dist = folga, achou = null;
     for (var i = 0; i < bordas.length; i++)
-      for (var j = 0; j < eixo[2].length; j++){
-        var d = eixo[2][j] - bordas[i];
-        if (Math.abs(d) < dist){ dist = Math.abs(d); g[eixo[0]] = d; }
-      }
+      linhas[eixo[0]].forEach(function(l){
+        var d = l.v - bordas[i];
+        if (Math.abs(d) < dist){ dist = Math.abs(d); g[eixo[0]] = d; achou = l; }
+      });
+    if (achou && !achou.guia) imaVisto[eixo[0]] = achou.v;
   });
   return g;
 }
@@ -211,7 +234,9 @@ function arrastaLaco(pt){
      existe para preservar. Depois de encostar, o passo passa pela foto de
      novo — encostar numa guia não é motivo para a foto sair do papel. */
   var c = drag.caixa;
-  var g = imanta({ x: c.x + p.x, y: c.y + p.y, w: c.w, h: c.h });
+  var noBloco = drag.itens.map(function(it){ return els[it.i]; });
+  if (drag.foto) noBloco.foto = true;
+  var g = imanta({ x: c.x + p.x, y: c.y + p.y, w: c.w, h: c.h }, noBloco);
   if (g.x || g.y) p = seguraPasso(p.x + g.x, p.y + g.y, f.x, f.y);
   drag.itens.forEach(function(it){
     els[it.i].x = Math.round((it.x + p.x) * 10) / 10;
@@ -251,6 +276,41 @@ function apagaLaco(){
 }
 
 $("delLaco").addEventListener("click", apagaLaco);
+
+/* Duplicar o bloco: cada peça laçada ganha uma cópia, 5 mm para o lado e para
+   baixo, com identidade nova; o laço passa para as cópias, que é o que se
+   quer mover em seguida. A moldura copiada que estava em volta de uma peça
+   do bloco passa a ficar em volta da cópia dessa peça. */
+function duplicaLaco(){
+  if (!marca.length) return;
+  var novos = [], troca = {};
+  marca.slice().sort(function(a, b){ return a - b; }).forEach(function(i){
+    var c = unpackEl(packEl(els[i]));
+    if (!c) return;
+    troca[uidDe(els[i])] = c.uid = novoId();
+    c.x = dec1(c.x + 5); c.y = dec1(c.y + 5);
+    novos.push(c);
+  });
+  novos.forEach(function(c){ if (c.alvo && troca[c.alvo]) c.alvo = troca[c.alvo]; });
+  var ini = els.length;
+  els = els.concat(novos);
+  marca = novos.map(function(_, k){ return ini + k; });
+  marcaFoto = false;
+  sel = marca[0];
+  renderChips(); syncControls(); draw(); pushHist();
+}
+
+// o bloco inteiro para o meio do papel, pela caixa de tudo o que está nele
+function centralizaLaco(){
+  var c = caixaDoLaco(), pa = paperMM();
+  if (!c) return;
+  var dx = pa.w / 2 - (c.x + c.w / 2), dy = pa.h / 2 - (c.y + c.h / 2);
+  marca.forEach(function(i){ els[i].x = dec1(els[i].x + dx); els[i].y = dec1(els[i].y + dy); });
+  if (marcaFoto){ photo.x += dx; photo.y += dy; clampPhoto(); }
+  draw(); pushHist();
+}
+$("dupLaco").addEventListener("click", duplicaLaco);
+$("meioLaco").addEventListener("click", centralizaLaco);
 
 /* ---- acender e apagar em traço -------------------------------------
    Um toque acende ou apaga um quadradinho; o dedo (ou o botão do mouse)
@@ -469,11 +529,11 @@ cv.addEventListener("pointermove", function(e){
   if (drag.kind === "el"){
     var el = els[drag.i];
     var b = elPaperBox(el);      // onde a caixa girada está agora...
-    g = imanta({ x: b.x + nx - el.x, y: b.y + ny - el.y, w: b.w, h: b.h });  // ...e onde ia parar
+    g = imanta({ x: b.x + nx - el.x, y: b.y + ny - el.y, w: b.w, h: b.h }, el);  // ...e onde ia parar
     el.x = Math.round((nx + g.x) * 10) / 10;
     el.y = Math.round((ny + g.y) * 10) / 10;
   } else {
-    g = imanta({ x: nx, y: ny, w: photo.w, h: photo.h });
+    g = imanta({ x: nx, y: ny, w: photo.w, h: photo.h }, "foto");
     photo.x = Math.round((nx + g.x) * 10) / 10;
     photo.y = Math.round((ny + g.y) * 10) / 10;
     clampPhoto();
@@ -482,6 +542,7 @@ cv.addEventListener("pointermove", function(e){
 });
 
 function endDrag(e){
+  imaVisto = null;           // a linha do ímã é só durante o arraste
   var mexeu = !!(drag || (pinch && !pinch.vista));
   if (laco){
     var r = lacoRect();

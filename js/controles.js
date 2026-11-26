@@ -351,6 +351,17 @@ function syncControls(){
 /* Abaixo da altura mínima da fonte, o campo de altura fica marcado e diz por
    quê: a palavra continua sendo feita na altura pedida — quem manda é você —,
    mas sem o aviso a letra borrada parecia defeito do app, e não da altura. */
+/* O espaço entre letras depende do navegador saber espaçar o texto no
+   canvas. Quase todos sabem; o que não sabe deixava o campo na barra sem
+   fazer nada, e campo que não faz nada sem dizer por quê é pior que campo
+   nenhum. Então ele fica desligado e diz o motivo. */
+var SEM_ESPACO = !("letterSpacing" in document.createElement("canvas").getContext("2d"));
+if (SEM_ESPACO){
+  $("esp").disabled = true;
+  $("esp").parentNode.title = "Este navegador não sabe espaçar as letras do desenho, então o espaço " +
+    "entre letras fica desligado aqui. Num Chrome, Edge ou Safari atualizado ele funciona.";
+}
+
 function avisaAlturaFonte(el){
   var t = $("rows").parentNode;
   if (!t.dataset.titulo) t.dataset.titulo = t.title;

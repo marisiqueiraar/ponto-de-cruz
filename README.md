@@ -285,7 +285,8 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   está, pára em milímetro inteiro quando solta longe de tudo, e encaixa sozinha nas bordas e no
   meio do papel e da foto, que é onde quase toda referência cai.
   Arrastando uma peça ou a foto, os dois lados e o centro dela **encostam na guia** quando
-  passam perto — e um bloco laçado encosta pela caixa de tudo o que está nele, e não peça por
+  passam perto — e, mesmo sem guia, nas bordas e no meio das outras peças, da foto e do
+  papel, com uma linha magenta mostrando onde encostou — e um bloco laçado encosta pela caixa de tudo o que está nele, e não peça por
   peça, senão o arranjo que se acabou de laçar chegaria do outro lado desmanchado — a folga do ímã é medida em pixels de tela, então ela é sempre a mesma
   distância para o dedo, em qualquer zoom. As guias são de cada molde, ficam gravadas com ele
   e não entram no PDF: são risco de tela, como a régua da mesa.
@@ -357,7 +358,9 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   com a roda do mouse aproximando no ponto sob o cursor, e uma mãozinha que troca o arraste de
   "posicionar a peça" para "mover a vista" — no toque, com ela ligada, a pinça muda o zoom. A
   porcentagem é relativa ao encaixe do papel na tela: **100% é o papel inteiro visível**, não
-  tamanho físico. Tamanho real é promessa do PDF, que a tela não tem como garantir.
+  tamanho físico. Para ver no **tamanho real**, o botão **1:1**: na primeira vez ele pede um
+  cartão de banco encostado na tela (todo cartão desses tem 85,6 mm) e guarda a medida da tela
+  neste aparelho; depois, um toque vai direto para o tamanho real, e toque longo recalibra.
 - **Laço**: arrastar no vazio desenha um retângulo, e o que couber **inteiro** dentro dele —
   peças e a foto — passa a andar junto, no arraste e nas setas. É "couber inteiro" e não
   "encostar" por causa da foto: ela costuma estar embaixo de tudo, e pelo encostar um laço em
@@ -365,7 +368,8 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   tira uma peça do laço, na mesa ou nas fichas da aba peças. Quem segura o bloco é a foto: ela
   não sai do papel, e o bloco inteiro para com ela em vez de se desmanchar na borda. Com um
   bloco laçado, a barra de cima troca os campos da peça por quem está no laço e um botão que
-  **apaga as peças laçadas de uma vez** — a moldura da foto não é peça e fica onde está, e um
+  **apaga as peças laçadas de uma vez**, mais **duplicar** (as cópias saem 5 mm para o lado e
+  ficam laçadas) e **centralizar no papel** — a moldura da foto não é peça e fica onde está, e um
   desfazer devolve o bloco inteiro. Com as guias ligadas, o bloco encosta nelas inteiro.
 - **Modo ponto a ponto**: um toque acende ou apaga um quadradinho, e arrastar sem soltar
   acende ou apaga a fileira inteira por onde o dedo (ou o botão) passa — quem decide se o

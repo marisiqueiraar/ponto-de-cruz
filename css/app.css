@@ -190,6 +190,11 @@ button:focus-visible,.chip:focus-visible,.cat:focus-visible,.rail button:focus-v
   margin:0 0 12px;color:var(--ink)}
 .modal p{margin:0 0 10px;font-size:14.5px;line-height:1.5}
 .modal p.warn{color:var(--danger)}
+.calibcaixa{overflow:hidden;margin:6px 0 10px}
+#calibCartao{height:auto;aspect-ratio:85.6/53.98;border:2px solid var(--mat);border-radius:10px;
+  background:repeating-linear-gradient(45deg,#fff 0 8px,var(--paper) 8px 16px)}
+#calib input[type=range]{width:100%}
+#calib .acts{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
 .modal .acts{display:flex;gap:10px;margin-top:18px}
 .modal .acts button{flex:1 1 0;height:44px;border-radius:6px;font-family:var(--display);
   font-size:11px;letter-spacing:.02em;border:1px solid var(--line);background:#fff;color:var(--ink)}
@@ -520,6 +525,11 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   #pdf{order:2;padding:0 12px}
   #hist{order:4;flex:0 0 auto}
   #ctlActs{order:5;flex:0 0 auto}
+  /* dentro da fileira de campos (arrumaBarra): só o tamanho delas */
+  .tools #hist,.tools #ctlActs{order:0}
+  .top{row-gap:4px}
+  #pdf{height:38px}
+  .fit{height:38px}
   /* No celular a barra rola, e o que rola para fora da máscara é o que estiver
      por último. Entre dizer o que está laçado e poder apagar, fica o botão:
      ele já traz a conta no rótulo, e os contornos na grade mostram o resto. */
@@ -564,3 +574,15 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
   .foot #modeHint{font-size:11px}
 }
 
+
+/* os botões de criar em duas colunas, e as explicações recolhidas: a aba peças
+   abre com o que se faz, e o como funciona fica a um toque */
+.novos{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}
+.novos .wide{margin:0}
+details.como{margin:10px 0;border-top:1px solid var(--line);padding-top:8px}
+details.como summary{cursor:pointer;font-family:var(--display);font-size:10px;letter-spacing:.03em;
+  color:var(--ink-soft);list-style:none;padding:4px 0}
+details.como summary::-webkit-details-marker{display:none}
+details.como summary::before{content:"+ ";}
+details.como[open] summary::before{content:"– ";}
+details.como ul{margin:6px 0 0;padding-left:18px}

@@ -108,6 +108,57 @@ function drawOutline(ctx, el, k, region){
   ctx.restore();
 }
 
+/* O desenho de cada peça, guardado pronto. Arrastar uma peça num molde grande
+   redesenhava dezenas de milhares de cruzinhas a cada movimento do dedo; o
+   custo é o canvas traçando, e não as contas. Então cada peça é traçada uma
+   vez numa imagem do tamanho dela, já na escala da tela, e o arraste só
+   desenha essa imagem no lugar novo. A imagem é refeita quando muda o que se
+   vê nela: as células (ou os furos), a cor, a paleta, a escala ou o
+   espaçamento. A conta dos furos vai junto, pela mesma chave. */
+function chaveDesenho(el, k, cor){
+  var h = 0, i, j;
+  if (el.kind === "reto"){
+    (el.pontos || []).forEach(function(pt){
+      h = (h * 31 + (pt.fechada ? 7 : 3)) | 0;
+      pt.furos.forEach(function(f){ h = (h * 31 + Math.round(f[0] * 100)) | 0; h = (h * 31 + Math.round(f[1] * 100)) | 0; });
+    });
+    if (editing && el._escolhido) h = (h * 31 + 1) | 0;
+  } else {
+    for (i = 0; i < el.cells.length; i++){
+      var l = el.cells[i];
+      h = (h * 31 + l.length) | 0;
+      for (j = 0; j < l.length; j++) h = (h * 31 + l[j]) | 0;
+    }
+  }
+  var pal = (el.paleta || []).map(function(s){ return s.hex + (s.off ? "-" : ""); }).join(",");
+  return [k.toFixed(4), window.devicePixelRatio || 1, cor, pal, P(), el.w || 0, el.h || 0, h].join("|");
+}
+
+function drawStitchesGuardado(ctx, el, k, region, cor, lw){
+  var chave = chaveDesenho(el, k, cor), c = el._desenho;
+  if (!c || c.chave !== chave){
+    var b = bboxMM(el), dpr = window.devicePixelRatio || 1, m = 4;   // folga em px para o traço da borda
+    var cv2 = document.createElement("canvas");
+    cv2.width = Math.max(1, Math.ceil((b.w * k + m * 2) * dpr));
+    cv2.height = Math.max(1, Math.ceil((b.h * k + m * 2) * dpr));
+    var x = cv2.getContext("2d");
+    x.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // desenha a peça reta, sem giro, com o canto dela em (m, m)
+    var sombra = { kind: el.kind, cells: el.cells, pontos: el.pontos, paleta: el.paleta, w: el.w, h: el.h,
+                   x: m / k, y: m / k, rot: 0, _escolhido: el._escolhido };
+    drawStitches(x, sombra, k, { x: 0, y: 0 }, cor, lw);
+    c = el._desenho = { chave: chave, canvas: cv2, m: m, furos: holesOf(el).length };
+  }
+  var bb = bboxMM(el);
+  ctx.save();
+  ctx.translate((bb.x - region.x + bb.w / 2) * k, (bb.y - region.y + bb.h / 2) * k);
+  ctx.rotate(el.rot * Math.PI / 180);
+  ctx.drawImage(c.canvas, -bb.w / 2 * k - c.m, -bb.h / 2 * k - c.m,
+                c.canvas.width / (window.devicePixelRatio || 1), c.canvas.height / (window.devicePixelRatio || 1));
+  ctx.restore();
+  return c.furos;
+}
+
 function paint(ctx, k, region, opts){
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, region.w * k, region.h * k);
@@ -115,12 +166,23 @@ function paint(ctx, k, region, opts){
   totalCount = 0; totalHoles = 0;
   els.forEach(function(el, i){
     totalCount += countOf(el);
-    totalHoles += holesOf(el).length;
-    drawStitches(ctx, el, k, region, corDe(el).hex, Math.max(1.3, P() * k * 0.15));
+    var cor = corDe(el).hex, lw = Math.max(1.3, P() * k * 0.15);
+    // só a mesa usa o guardado; o PNG e a miniatura desenham direto
+    if (opts.outline) totalHoles += drawStitchesGuardado(ctx, el, k, region, cor, lw);
+    else { totalHoles += holesOf(el).length; drawStitches(ctx, el, k, region, cor, lw); }
     if (opts.outline && marcado(i)) drawOutline(ctx, el, k, region);
   });
   if (opts.outline && marcaFoto) drawFotoOutline(ctx, k, region);
   if (opts.outline) drawColados(ctx, k, region);
+  if (opts.outline && imaVisto && (imaVisto.x !== null || imaVisto.y !== null)){
+    ctx.save();
+    ctx.strokeStyle = "#C2185B"; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
+    ctx.beginPath();
+    if (imaVisto.x !== null){ ctx.moveTo((imaVisto.x - region.x) * k, 0); ctx.lineTo((imaVisto.x - region.x) * k, region.h * k); }
+    if (imaVisto.y !== null){ ctx.moveTo(0, (imaVisto.y - region.y) * k); ctx.lineTo(region.w * k, (imaVisto.y - region.y) * k); }
+    ctx.stroke();
+    ctx.restore();
+  }
   if (opts.outline && laco) drawLaco(ctx, k, region);
 }
 

@@ -266,3 +266,58 @@ posições, não seleção. Laço é para onde você está olhando, não é part
 `testes/laco.js` prova o que dá para provar num Chromium: que o bloco anda
 inteiro, que as distâncias entre as peças não mudam nem quando a foto bate na
 borda, e que o arraste do bloco é um passo só no desfazer.
+
+## 7. O backlog — o que eu decidi sozinho
+
+Em 26/11/2026 fiz os itens do [BACKLOG.md](BACKLOG.md). Onde o item deixava
+escolha, escolhi assim:
+
+**Impressão.**
+- **Várias numa folha** só oferece moldes **do mesmo tamanho de papel**. Misturar
+  tamanhos pediria um encaixe de peças de quebra-cabeça, e o caso real é o
+  marca-página: três ou quatro iguais, ou parecidos, numa A4.
+- **O furo da fita** tem 5 mm e fica a 12 mm da borda de cima, no meio (na
+  borda esquerda, se o papel estiver deitado). É a medida comum de marca-página
+  com fita de cetim de 3 mm; mude `FITA_DIAM` e `FITA_DIST` em `js/geometria.js`
+  se a sua fita for outra.
+- **Caber no papel** tenta, nessa ordem: trazer o arranjo para dentro (se o
+  tamanho já cabe), diminuir a margem, diminuir o espaço entre os desenhos e,
+  por último, diminuir o desenho. O desenho é o que você escolheu; o resto é
+  folga.
+- **A ordem numerada** vale só para o ponto reto: cada linha é numerada a partir
+  do primeiro furo dela. No ponto cruz a ordem é a da grade e não precisa de
+  número. Os números saem pequenos e cinza para não esconder o furo.
+
+**Peças.**
+- **Cores por bloco**: um toque no bloco passa para o próximo esquema da paleta;
+  não há escolha direta de esquema, porque a moldura tem poucos e girar entre
+  eles é mais rápido que abrir uma lista.
+- **Moldura em volta de uma peça**: a moldura segue a peça quando ela anda ou
+  muda. Se a peça for apagada, a moldura volta a ficar em volta da foto (ou do
+  meio do papel).
+
+**Tela e uso.**
+- **Ímã**: a peça encosta nas bordas e no meio das outras peças, da foto e do
+  papel, com a mesma força das guias (alguns pixels de tela). Uma linha magenta
+  mostra onde encostou. Não há jeito de desligar esse ímã; se ele atrapalhar um
+  ajuste fino, as setas do teclado andam sem ímã.
+- **Tamanho real**: calibra com um cartão de banco (85,6 mm), uma vez por
+  aparelho. Um toque no 1:1 vai para o tamanho real; toque longo (ou Shift)
+  recalibra.
+- **A guia e a peça debaixo dela**: o toque só pega a guia quando cai a 2 px ou
+  menos do risco e há uma peça ali; fora disso, quem recebe é a peça.
+- **O desenho guardado** é uma imagem por peça, feita de novo quando muda a peça,
+  o zoom, a cor da linha ou a tela. Gasta memória: num molde com dez peças
+  grandes, alguns MB.
+- **O laço** duplica 5 mm para o lado e para baixo, e o laço passa para as
+  cópias. **Centralizar** leva o bloco inteiro (com a foto, se ela estiver
+  laçada) para o meio do papel. Girar e espelhar o bloco ficaram de fora: girar
+  um bloco é girar cada peça em volta de um centro comum, e isso muda as
+  molduras de um jeito que eu não quis inventar.
+- **As guias continuam fora do desfazer.** São coisa de tela, como o zoom; o
+  desfazer devolve o molde. Tirar uma guia sem querer se conserta puxando outra.
+- **O espaço entre letras**, num navegador que não sabe espaçar letras no canvas,
+  fica desligado com uma explicação no próprio campo, em vez de fingir que
+  funciona.
+- **No celular**, desfazer/refazer e os botões da peça descem para a barra das
+  ferramentas: a barra de cima caiu de 185 px para 95 px num iPhone 13.

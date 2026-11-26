@@ -26,6 +26,8 @@
     <span class="none" id="ctlNone">&nbsp;</span>
     <span class="grp hide" id="ctlEdit"><span class="none" id="ctlEditTxt">ajustando ponto a ponto</span></span>
     <span class="grp hide" id="ctlGrupo"><span class="none" id="ctlGrupoTxt"></span>
+      <button id="dupLaco" class="tbtn" title="Duplica as peças laçadas, um pouco para o lado, e laça as cópias.">duplicar</button>
+      <button id="meioLaco" class="tbtn" title="Leva o bloco inteiro para o meio do papel, sem desmanchar o arranjo.">centralizar no papel</button>
       <button id="delLaco" class="tbtn danger"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg><span id="delLacoTxt">apagar</span></button>
     </span>
 
@@ -313,33 +315,19 @@
 
   <section class="pane on" data-pane="pecas">
     <h2>peças</h2>
-    <button id="addText" class="wide">nova palavra</button>
-    <button id="addSym" class="wide">novo símbolo</button>
-    <button id="addImg" class="wide">nova imagem</button>
-    <button id="addMoldura" class="wide">nova moldura</button>
-    <button id="addFaixa" class="wide">nova faixa</button>
-    <button id="addReto" class="wide">novo desenho em ponto reto</button>
+    <div class="novos">
+      <button id="addText" class="wide">nova palavra</button>
+      <button id="addSym" class="wide">novo símbolo</button>
+      <button id="addImg" class="wide">nova imagem</button>
+      <button id="addReto" class="wide">ponto reto</button>
+      <button id="addMoldura" class="wide">nova moldura</button>
+      <button id="addFaixa" class="wide">nova faixa</button>
+    </div>
     <input id="imgArq" type="file" accept="image/*" class="hide">
-
-    <p class="note">A imagem vira quadradinho na hora, e o que sai é uma peça como as outras:
-    arrastável, espelhável e ajustável ponto a ponto. O controle que decide tudo é o
-    <b>cores</b>, na barra de cima.</p>
-    <p class="note">Em <b>1 cor</b> ela é silhueta: o escuro acende, o claro apaga, e a peça usa
-    uma linha só. Serve para logo, monograma, brasão e desenho de traço. De <b>2 cores para
-    cima</b> ela vira gráfico: as cores da imagem são agrupadas nesse número de tons e cada tom
-    vira a meada mais próxima da cartela escolhida. A aba <b>linha</b> lista as meadas do
-    gráfico, e ali se troca uma por outra ou se esconde a que sobrou.</p>
     <p class="note" id="imgAviso"></p>
-    <p class="note">A <b>moldura</b> dá a volta na foto com blocos de retalho bordados, e
-    cresce ou encolhe sozinha quando a foto muda de tamanho. A <b>faixa</b> repete um motivo
-    em fileira, que é o marca-página: escolha um papel de marca-página na aba papel antes, e
-    ela já nasce do comprimento dele. As duas têm uma paleta, como o gráfico colorido — a aba
-    <b>linha</b> troca cada meada pela que você tem.</p>
-    <p class="note">O <b>ponto reto</b> é o fio indo de um furo a outro em linha, sem formar
-    xis: colmeia, folha com nervuras, losangos, ondas. Os furos não caem numa grade — ficam no
-    canto do hexágono, ao longo da nervura. Ele mistura com o ponto cruz no mesmo molde, peça
-    por peça.</p>
 
+    <!-- o alinhar vem logo depois de criar: é o segundo gesto com qualquer peça,
+         e antes ficava embaixo de cinco parágrafos -->
     <div class="alinha hide" id="alinha">
       <label>Alinhar a peça selecionada</label>
       <button type="button" id="alFoto">centralizar na foto</button>
@@ -348,15 +336,25 @@
       <button type="button" id="alAcima" class="hide">alinhar com a peça de cima</button>
     </div>
 
-    <p class="note" id="setasDica">As setas do teclado movem a peça selecionada de meio milímetro.
-      Com Shift, de cinco.</p>
-
     <div class="rule"></div>
     <div class="chips" id="chips"></div>
-    <p class="note">Toque numa peça para selecioná-la: os ajustes dela aparecem na barra de cima.
-    O botão <b>ajustar</b> abre o modo ponto a ponto, onde cada toque acende ou apaga um
-    quadradinho — e arrastar sem soltar acende ou apaga a fileira inteira por onde passa,
-    do jeito que o primeiro quadradinho do traço mandou.</p>
+
+    <details class="como">
+      <summary>como funciona</summary>
+      <p class="note">Toque numa peça para selecioná-la: os ajustes dela aparecem na barra de cima.
+      As setas do teclado movem a peça selecionada de meio milímetro; com Shift, de cinco.</p>
+      <p class="note" id="setasDica">O botão <b>ajustar</b> abre o modo ponto a ponto: cada toque
+      acende ou apaga um quadradinho, e arrastar sem soltar acende ou apaga a fileira inteira por
+      onde passa. No ponto reto, ele liga dois furos com um ponto ou corta um ponto.</p>
+      <p class="note">A <b>imagem</b> vira quadradinho na hora. Em <b>1 cor</b> é silhueta — logo,
+      monograma, desenho de traço; de <b>2 cores para cima</b> vira gráfico, com cada tom casado
+      com a meada mais próxima da cartela. A aba <b>linha</b> troca uma meada por outra.</p>
+      <p class="note">A <b>moldura</b> dá a volta na foto (ou numa peça) com blocos de retalho, e
+      a <b>faixa</b> repete um motivo em fileira, que é o marca-página.</p>
+      <p class="note">O <b>ponto reto</b> é o fio de um furo a outro, em linha: colmeia, folha,
+      ondas, sashiko. Mistura com o ponto cruz no mesmo molde, e palavra e imagem trocam de um
+      para o outro pelo botão ao lado do ajustar.</p>
+    </details>
   </section>
 
   <section class="pane" data-pane="linha">
@@ -529,31 +527,68 @@
 
   <section class="pane notes" data-pane="ajuda">
     <h2>do arquivo ao material</h2>
-    <ul>
-      <li>Cole a foto no papel usando a medida que aparece no cabeçalho do PDF: distância da borda esquerda e da borda de cima. É essa posição que faz o molde bater.</li>
-      <li>Antes de furar, meça a régua impressa no cabeçalho: se os 50 mm dela não derem 50 mm na sua régua, a impressora reduziu a página e nenhum furo vai bater. Imprima de novo em 100%, sem "ajustar à página".</li>
-      <li>Recorte o molde impresso pela moldura tracejada: ela é a borda do papel da peça, então a folha recortada sai do tamanho exato dele. Se o papel da peça for A4 e você imprimir em A4, a moldura cai na borda da própria folha impressa e não há o que recortar — a folha já é o molde. Prenda sobre o conjunto encostando borda com borda, que o retângulo impresso cai em cima da foto de verdade, fita crepe nos quatro cantos. (Só quando há furo perto demais da borda do papel a moldura encolhe para a caixa do desenho, e aí a mira volta a ser o retângulo da foto.)</li>
-      <li>O cabeçalho do PDF ocupa 46 mm da página, e uma moldura do tamanho da folha não cabe embaixo dele — nem um molde que use quase toda a folha. Quando isso acontece o PDF sai em duas páginas: a primeira só com as instruções, a régua e a legenda, e a segunda com o molde sozinho na folha, inteiro e em tamanho real. É só a segunda que você imprime e recorta.</li>
-      <li>Molde maior que a folha inteira sai em várias folhas, todas em tamanho real. Cada uma diz qual é no cabeçalho, e as vizinhas repetem uma faixa do desenho: sobreponha uma na outra até os furos da faixa coincidirem, e só então prenda. As margens dizem qual folha continua de cada lado.</li>
-      <li>Fure ponto a ponto com agulha grossa, apoiado em EVA ou cortiça. Cada quadradinho usa quatro furos, compartilhados com os vizinhos — por isso o número de furos é menor que o dobro de pontos.</li>
-      <li>Se o rodapé ficar vermelho dizendo <b>não coube na memória</b>, salve o arquivo do molde na aba <b>moldes</b> e apague um molde antigo. A partir desse momento o trabalho parou de ser guardado.</li>
-      <li>A <b>altura</b> na barra de cima é a altura da letra maiúscula, em quadradinhos, medida na fonte e não na palavra. Por isso duas palavras na mesma altura saem com letras do mesmo tamanho, mesmo que uma tenha “g” e “l” e a outra não — o que ascende e desce passa da altura pedida. A aba <b>molde</b> diz quanto isso dá em milímetros, e palavra nova nasce com o que estiver na barra.</li>
-      <li>Ajuste ponto a ponto <b>sobrevive</b> a mexer na altura, no traço, na sensibilidade e na fonte: o desenho é refeito e os quadradinhos que você acendeu ou apagou vão junto, acompanhando a grade nova. Quem descarta é só o botão <b>recalcular</b>, e ele pergunta antes.</li>
-      <li>A peça de <b>imagem</b> lê um arquivo do aparelho e o transforma em quadradinhos na hora. Em <b>1 cor</b> ela é silhueta: o escuro acende, o claro apaga, e vale uma linha só — logo, monograma, brasão, desenho de traço. A <b>sensibilidade</b> decide o que conta como escuro e o <b>inverter</b> serve para desenho claro sobre fundo escuro.</li>
-      <li>De <b>2 cores para cima</b> a mesma peça vira <b>gráfico colorido</b>: as cores da imagem são agrupadas nesse número de tons, e cada tom vira a meada mais próxima da cartela escolhida em <b>linhas</b> — inclusive <b>minhas</b>, que usa só o que você já marcou como seu. O <b>fundo</b> tira o que é claro demais para ganhar linha, que é o que apaga o branco em volta de um logo ou o quadriculado de um gráfico pronto. Mais cores é mais fiel e mais meada para comprar; comece em 6 ou 8 e suba se faltar tom.</li>
-      <li>Foto de verdade — gente, bicho, paisagem — e imagem de muitas cores já entram em <b>8 cores</b>, porque em uma cor só a foto vira mancha picotada e o colorido se perde. Logo de uma cor e desenho de traço continuam entrando em 1. Nos dois casos o campo <b>cores</b> muda depois.</li>
-      <li>Se o bordado não vai numa foto, escolha <b>Sem foto</b> no tamanho, na aba <b>foto</b> — ou toque no retângulo da foto e use o <b>tirar foto</b> na barra de cima. Ele some da tela e do PDF, e as peças novas nascem no meio do papel.</li>
-      <li>Na aba <b>linha</b>, com um gráfico selecionado, aparece a lista das meadas dele com quantos pontos cada uma tem. Toque numa para escolhê-la e, em seguida, numa cor do catálogo para pôr outra meada no lugar — é assim que se troca o palpite do casamento automático pela linha que você tem na gaveta. O <b>olho</b> esconde uma linha do desenho sem tirá-la da lista, e a linha escolhida é a que o <b>ajustar</b> pinta ponto a ponto.</li>
-      <li>Mexer na <b>largura</b> não sorteia meadas novas: as linhas do gráfico ficam como estão, inclusive as que você trocou à mão. Quem pede paleta nova é mudar o número de <b>cores</b>, mudar a cartela em <b>linhas</b>, trocar a imagem ou apertar o <b>recalcular</b>.</li>
-      <li>Para o nome curvado por cima da foto, use o campo <b>arco</b> na barra de cima. Se a cursiva fechar demais em letra pequena, abra o <b>espaço</b> entre as letras — ele é contado em quadradinhos, os mesmos que viram furo.</li>
-      <li>Para posicionar fino, use as setas do teclado: meio milímetro por toque, cinco com Shift. Os três botões na aba <b>peças</b> centralizam a peça na foto ou no papel, e encostam ela na base da foto.</li>
-      <li>O botão da cruz pontilhada, no canto da mesa, liga as <b>guias</b>: linhas pontilhadas que atravessam a mesa inteira. Puxe uma de dentro da régua para soltar outra, e leve-a de volta para a régua para tirá-la. Arrastando, a peça encosta sozinha na guia — é o jeito de alinhar no olho sem sair torto. Um bloco laçado encosta inteiro, pela caixa de tudo o que está nele. Elas ficam na tela e não saem no PDF.</li>
-      <li>Guarde o arquivo do molde na aba <b>moldes</b> antes de mudar de aparelho ou limpar o navegador. O que fica só no navegador não vai a lugar nenhum e some com os dados do site.</li>
-      <li>A aba <b>molde</b> diz quantos metros cada linha pede, e mostra a conta que usou. A frente é exata; o avesso e os 15% de perda são estimativa, então compre com folga.</li>
-      <li>Cada peça pode ter a sua linha: selecione a peça e toque na cor. O rodapé do PDF lista as linhas usadas com o código da marca — a cor impressa é referência de tela, o código é o que se compra.</li>
-      <li>Borde com 2 ou 3 fios de meada. Em furo que atravessa foto e papel, puxe devagar: papel fotográfico não fecha depois de rasgar.</li>
-      <li>Espaçamento entre 2,5 e 3 mm é o mais seguro nesse material. Abaixo de 2 mm a tira de papel entre dois furos vira pó.</li>
-    </ul>
+    <details class="como" open>
+      <summary>imprimir, recortar e furar</summary>
+      <ul>
+        <li>Cole a foto no papel usando a medida que aparece no cabeçalho do PDF: distância da borda esquerda e da borda de cima. É essa posição que faz o molde bater.</li>
+        <li>Antes de furar, meça a régua impressa no cabeçalho: se os 50 mm dela não derem 50 mm na sua régua, a impressora reduziu a página e nenhum furo vai bater. Imprima de novo em 100%, sem "ajustar à página".</li>
+        <li>Recorte o molde impresso pela moldura tracejada: ela é a borda do papel da peça, então a folha recortada sai do tamanho exato dele. Se o papel da peça for A4 e você imprimir em A4, a moldura cai na borda da própria folha impressa e não há o que recortar — a folha já é o molde. Prenda sobre o conjunto encostando borda com borda, que o retângulo impresso cai em cima da foto de verdade, fita crepe nos quatro cantos. (Só quando há furo perto demais da borda do papel a moldura encolhe para a caixa do desenho, e aí a mira volta a ser o retângulo da foto.)</li>
+        <li>O cabeçalho do PDF ocupa 46 mm da página, e uma moldura do tamanho da folha não cabe embaixo dele — nem um molde que use quase toda a folha. Quando isso acontece o PDF sai em duas páginas: a primeira só com as instruções, a régua e a legenda, e a segunda com o molde sozinho na folha, inteiro e em tamanho real. É só a segunda que você imprime e recorta.</li>
+        <li>Molde maior que a folha inteira sai em várias folhas, todas em tamanho real. Cada uma diz qual é no cabeçalho, e as vizinhas repetem uma faixa do desenho: sobreponha uma na outra até os furos da faixa coincidirem, e só então prenda. As margens dizem qual folha continua de cada lado.</li>
+        <li>Fure ponto a ponto com agulha grossa, apoiado em EVA ou cortiça. Cada quadradinho usa quatro furos, compartilhados com os vizinhos — por isso o número de furos é menor que o dobro de pontos.</li>
+        <li>Borde com 2 ou 3 fios de meada. Em furo que atravessa foto e papel, puxe devagar: papel fotográfico não fecha depois de rasgar.</li>
+        <li>Espaçamento entre 2,5 e 3 mm é o mais seguro nesse material. Abaixo de 2 mm a tira de papel entre dois furos vira pó.</li>
+      </ul>
+    </details>
+    <details class="como">
+      <summary>moldura, marca-página e ponto reto</summary>
+      <ul>
+        <li>A <b>moldura</b> de retalhos dá a volta na foto, ou numa peça escolhida em <b>em volta de</b>, e se refaz quando ela muda. Se passar da borda do papel, o botão <b>caber no papel</b> põe o arranjo para dentro ou diminui margem e espaço. Com 6 cores, <b>cores por bloco</b> troca o esquema de um bloco com um toque.</li>
+        <li>Para <b>marca-página</b>, escolha um papel de marca-página na aba papel e crie uma <b>faixa</b>: ela já nasce do comprimento dele. Na aba papel dá para pôr <b>cantos arredondados</b> e o <b>furo da fita</b>, e — quando o papel cabe mais de uma vez na folha — <b>cópias</b> e outros moldes do mesmo tamanho na mesma impressão.</li>
+        <li>O <b>ponto reto</b> é o fio de furo a furo, em linha. Os desenhos prontos têm um <b>arranjo</b> — solto, faixa ou moldura —, e a palavra e a imagem passam de ponto cruz para ponto reto pelo botão ao lado do ajustar. Palavra em ponto reto pede pelo menos 1,8 cm de maiúscula. No PDF, o risco do ponto sai em cinza claro; na aba molde dá para numerar a ordem dos pontos.</li>
+        <li>Furos de peças diferentes a menos de 2 mm acendem o aviso <b>furos colados</b> e a região aparece tracejada em vermelho: no papel essa tira rasga. Afaste as peças, ou encoste até os furos coincidirem.</li>
+      </ul>
+    </details>
+    <details class="como">
+      <summary>letras</summary>
+      <ul>
+        <li>A <b>altura</b> na barra de cima é a altura da letra maiúscula, em quadradinhos, medida na fonte e não na palavra. Por isso duas palavras na mesma altura saem com letras do mesmo tamanho, mesmo que uma tenha “g” e “l” e a outra não — o que ascende e desce passa da altura pedida. A aba <b>molde</b> diz quanto isso dá em milímetros, e palavra nova nasce com o que estiver na barra.</li>
+        <li>Ajuste ponto a ponto <b>sobrevive</b> a mexer na altura, no traço, na sensibilidade e na fonte: o desenho é refeito e os quadradinhos que você acendeu ou apagou vão junto, acompanhando a grade nova. Quem descarta é só o botão <b>recalcular</b>, e ele pergunta antes.</li>
+        <li>Para o nome curvado por cima da foto, use o campo <b>arco</b> na barra de cima. Se a cursiva fechar demais em letra pequena, abra o <b>espaço</b> entre as letras — ele é contado em quadradinhos, os mesmos que viram furo.</li>
+      </ul>
+    </details>
+    <details class="como">
+      <summary>imagem e gráfico colorido</summary>
+      <ul>
+        <li>A peça de <b>imagem</b> lê um arquivo do aparelho e o transforma em quadradinhos na hora. Em <b>1 cor</b> ela é silhueta: o escuro acende, o claro apaga, e vale uma linha só — logo, monograma, brasão, desenho de traço. A <b>sensibilidade</b> decide o que conta como escuro e o <b>inverter</b> serve para desenho claro sobre fundo escuro.</li>
+        <li>De <b>2 cores para cima</b> a mesma peça vira <b>gráfico colorido</b>: as cores da imagem são agrupadas nesse número de tons, e cada tom vira a meada mais próxima da cartela escolhida em <b>linhas</b> — inclusive <b>minhas</b>, que usa só o que você já marcou como seu. O <b>fundo</b> tira o que é claro demais para ganhar linha, que é o que apaga o branco em volta de um logo ou o quadriculado de um gráfico pronto. Mais cores é mais fiel e mais meada para comprar; comece em 6 ou 8 e suba se faltar tom.</li>
+        <li>Foto de verdade — gente, bicho, paisagem — e imagem de muitas cores já entram em <b>8 cores</b>, porque em uma cor só a foto vira mancha picotada e o colorido se perde. Logo de uma cor e desenho de traço continuam entrando em 1. Nos dois casos o campo <b>cores</b> muda depois.</li>
+        <li>Na aba <b>linha</b>, com um gráfico selecionado, aparece a lista das meadas dele com quantos pontos cada uma tem. Toque numa para escolhê-la e, em seguida, numa cor do catálogo para pôr outra meada no lugar — é assim que se troca o palpite do casamento automático pela linha que você tem na gaveta. O <b>olho</b> esconde uma linha do desenho sem tirá-la da lista, e a linha escolhida é a que o <b>ajustar</b> pinta ponto a ponto.</li>
+        <li>Mexer na <b>largura</b> não sorteia meadas novas: as linhas do gráfico ficam como estão, inclusive as que você trocou à mão. Quem pede paleta nova é mudar o número de <b>cores</b>, mudar a cartela em <b>linhas</b>, trocar a imagem ou apertar o <b>recalcular</b>.</li>
+      </ul>
+    </details>
+    <details class="como">
+      <summary>linhas e fio</summary>
+      <ul>
+        <li>A aba <b>molde</b> diz quantos metros cada linha pede, e mostra a conta que usou. A frente é exata; o avesso e os 15% de perda são estimativa, então compre com folga.</li>
+        <li>Cada peça pode ter a sua linha: selecione a peça e toque na cor. O rodapé do PDF lista as linhas usadas com o código da marca — a cor impressa é referência de tela, o código é o que se compra.</li>
+      </ul>
+    </details>
+    <details class="como">
+      <summary>posicionar</summary>
+      <ul>
+        <li>Se o bordado não vai numa foto, escolha <b>Sem foto</b> no tamanho, na aba <b>foto</b> — ou toque no retângulo da foto e use o <b>tirar foto</b> na barra de cima. Ele some da tela e do PDF, e as peças novas nascem no meio do papel.</li>
+        <li>Para posicionar fino, use as setas do teclado: meio milímetro por toque, cinco com Shift. Os três botões na aba <b>peças</b> centralizam a peça na foto ou no papel, e encostam ela na base da foto.</li>
+        <li>O botão da cruz pontilhada, no canto da mesa, liga as <b>guias</b>: linhas pontilhadas que atravessam a mesa inteira. Puxe uma de dentro da régua para soltar outra, e leve-a de volta para a régua para tirá-la. Arrastando, a peça encosta sozinha na guia — é o jeito de alinhar no olho sem sair torto. Um bloco laçado encosta inteiro, pela caixa de tudo o que está nele. Elas ficam na tela e não saem no PDF.</li>
+      </ul>
+    </details>
+    <details class="como">
+      <summary>guardar o trabalho</summary>
+      <ul>
+        <li>Se o rodapé ficar vermelho dizendo <b>não coube na memória</b>, salve o arquivo do molde na aba <b>moldes</b> e apague um molde antigo. A partir desse momento o trabalho parou de ser guardado.</li>
+        <li>Guarde o arquivo do molde na aba <b>moldes</b> antes de mudar de aparelho ou limpar o navegador. O que fica só no navegador não vai a lugar nenhum e some com os dados do site.</li>
+      </ul>
+    </details>
   </section>
 
 </div>
@@ -570,6 +605,7 @@
     <button id="zOut" title="afastar" aria-label="afastar">−</button>
     <button id="zVal" title="encaixar o papel na tela">100%</button>
     <button id="zIn" title="aproximar" aria-label="aproximar">+</button>
+    <button id="z11" title="tamanho real na tela (calibre uma vez com um cartão)">1:1</button>
     <button id="zPan" title="mover a vista" aria-label="mover a vista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5.5a1.5 1.5 0 013 0v5h.5V7a1.5 1.5 0 013 0v8.5a5.5 5.5 0 01-5.5 5.5h-1.8a5 5 0 01-3.7-1.63L4.6 15.6a1.5 1.5 0 012.1-2.13L8.5 15V4.5a1.5 1.5 0 013 0V10H13V5.5z"/></svg></button>
   </div>
 </div>
@@ -589,6 +625,21 @@
   <div class="busca"><input id="fontBusca" type="text" placeholder="buscar fonte" autocomplete="off" spellcheck="false"></div>
   <div class="grupos" id="fontGrupos"></div>
   <div class="lista" id="fontLista"></div>
+</div>
+
+<div class="modal hide" id="calib" role="dialog" aria-modal="true" aria-labelledby="calibTit">
+  <div class="card">
+    <h3 id="calibTit">tamanho real na tela</h3>
+    <p>Encoste um cartão de banco (ou de crédito) na tela, sobre o retângulo, e mova o controle até
+    a largura dos dois bater. Todo cartão desse tipo tem 85,6 mm — é a régua que todo mundo tem no
+    bolso. Faz uma vez só neste aparelho.</p>
+    <div class="calibcaixa"><div id="calibCartao"></div></div>
+    <input id="calibLarg" type="range" min="150" max="700" step="1" value="323" aria-label="largura do cartão na tela">
+    <div class="acts">
+      <button id="calibNo">cancelar</button>
+      <button id="calibSim" class="perigo">pronto</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal hide" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTit">

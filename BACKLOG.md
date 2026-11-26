@@ -139,28 +139,28 @@ Nada falta deste item.
   rede de segurança, não limitação sentida.
 - **O nome do molde grava a cada tecla digitada.** Sem espera. É uma escrita
   pequena no índice, mas é uma escrita por tecla.
-- **Arrastar num molde grande anda a 20 quadros por segundo.** Medido: 50 ms por
+- ~~**Arrastar num molde grande anda a 20 quadros por segundo.**~~ — feito em 26/11/2026: o desenho de cada peça fica guardado numa imagem e só se refaz quando ela muda; com 13 mil pontos, desenhar caiu de 12 ms para 2 ms. Medido: 50 ms por
   movimento com 16 375 pontos em cinco peças, contra 17 ms num molde leve. Fui
   conferir se tinha sido eu — as contas de fio e do rodapé do PDF passaram a
   varrer as células a cada desenho — e **não foi**: a mesma medida na versão
   anterior à sessão dá 50,4 ms. O custo é o canvas desenhando dezesseis mil
   cruzinhas, e quem quiser atacar isso ataca o desenho, não as varreduras.
-- **O espaçamento entre letras não avisa quando o navegador não o suporta.** O
+- ~~**O espaçamento entre letras não avisa quando o navegador não o suporta.**~~ — feito em 26/11/2026. O
   código confere `"letterSpacing" in ctx` e, se não houver, simplesmente não
   espaça — o controle fica na barra sem fazer nada. Em 2026 isso é raro, mas
   controle que não faz nada e não diz por quê é pior que controle ausente.
-- **A faixa de pegar a guia rouba o toque da peça que está debaixo dela.** São
+- ~~**A faixa de pegar a guia rouba o toque da peça que está debaixo dela.**~~ — feito em 26/11/2026. São
   9 px em volta do risco, com o risco no meio: pegar 1 px com o dedo seria
   sorte, mas a peça que cai exatamente sobre a guia precisa ser pega um pouco
   ao lado. Vale o mesmo para a mãozinha: arrastar a vista começando em cima de
   uma guia arrasta a guia.
-- **As guias ficam de fora do desfazer.** Elas são móvel de tela, como o zoom,
+- ~~**As guias ficam de fora do desfazer.**~~ — decidido em 26/11/2026: continuam de fora (o porquê está no [REVISAR.md](REVISAR.md), item 7). Elas são móvel de tela, como o zoom,
   e não entram na pilha — tirar uma guia sem querer se resolve puxando outra.
   Ficam gravadas com o molde, isso sim.
 - **`testes/amostra.js` tem uma cópia dos desenhos dos símbolos.** Ele desenha
   sem abrir o app, então repete a tabela de `js/base.js`. Se os símbolos mudarem,
   a amostra fica mentindo sem ninguém notar.
-- **O laço move e apaga, e só.** Girar, espelhar, duplicar e os botões de
+- ~~**O laço move e apaga, e só.**~~ — feito em 26/11/2026: agora também duplica o bloco e o leva para o meio do papel. Girar e espelhar o bloco continuam de fora. Girar, espelhar, duplicar e os botões de
   alinhar continuam valendo para a peça selecionada, uma de cada vez — com um
   bloco laçado a barra esconde esses campos em vez de mexer em uma só das
   laçadas. É decisão de escopo, não limitação: está em
@@ -211,7 +211,7 @@ para depois:
 - ~~**Contorno do marca-página no PDF.**~~ — feito em 26/11/2026. A borda do papel sai como moldura de
   recorte reta; marca-página de canto arredondado e o furo da fita não estão
   desenhados.
-- **A aba ajuda não fala da moldura nem da faixa.** A explicação está só na
+- ~~**A aba ajuda não fala da moldura nem da faixa.**~~ — feito em 26/11/2026. A explicação está só na
   aba peças e no README.
 - **O ajuste ponto a ponto com a linha escolhida não tem teste.** A mudança
   (acender com a linha selecionada na aba linha, e não sempre com a primeira)
@@ -233,16 +233,16 @@ Da [REVISAO.md](REVISAO.md), o que não entrou na reforma de 25/11/2026:
   moldura e marca-página em ponto reto. Plano na seção 5½.
 - **"Tenho pouco" e "acabou" na caixa de linhas** (C5): hoje é só tenho / não
   tenho.
-- **Tamanho real na tela** (D5): a tela não sabe quantos pixels tem um
+- ~~**Tamanho real na tela**~~ — feito em 26/11/2026. (D5): a tela não sabe quantos pixels tem um
   milímetro. Dá para calibrar encostando um cartão de crédito (85,6 mm) na tela
   e ajustando até bater; depois disso, um botão "1:1".
-- **Menos texto na tela** (D6): a aba peças tem cinco parágrafos antes dos
+- ~~**Menos texto na tela**~~ — feito em 26/11/2026. (D6): a aba peças tem cinco parágrafos antes dos
   botões de alinhar; a aba ajuda tem 25 parágrafos corridos.
 - **Mais de uma foto por molde** (E3): cartão com duas fotos, marca-página com
   foto embaixo e bordado em cima.
-- **No celular, a barra de cima ocupa um terço da tela** (F1).
-- **Os botões de alinhar ficam no fim da aba peças** (F2), depois dos textos.
-- **Ímã entre peças** (F3): hoje a peça só encosta em guia ligada.
+- ~~**No celular, a barra de cima ocupa um terço da tela**~~ — feito em 26/11/2026. (F1).
+- ~~**Os botões de alinhar ficam no fim da aba peças**~~ — feito em 26/11/2026. (F2), depois dos textos.
+- ~~**Ímã entre peças**~~ — feito em 26/11/2026. (F3): hoje a peça só encosta em guia ligada.
 - **A janela da imagem no Instax**: a foto Instax entra pelo tamanho do cartão;
   o retângulo da imagem dentro dele (4,6 × 6,2 no mini) não é desenhado, porque
   a borda de cima não tem medida oficial.
