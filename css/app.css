@@ -286,6 +286,11 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
 .mold .apaga{flex:0 0 auto;width:38px;border:0;border-left:1px solid var(--line);
   background:transparent;color:var(--ink-soft);font-size:17px;line-height:1}
 .mold .apaga:hover{background:var(--danger);color:#fff}
+.mold .fixa{flex:0 0 auto;width:34px;border:0;border-left:1px solid var(--line);background:transparent;
+  color:var(--ink-soft);opacity:.45;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.mold .fixa svg{width:15px;height:15px;fill:currentColor}
+.mold .fixa.on{opacity:1;color:var(--mat)}
+.mold .fixa:hover{opacity:1}
 /* o PDF já gerado usa a mesma fileira: a miniatura na frente é o que deixa
    reconhecer um molde sem abrir, que é a única coisa que o nome não diz */
 .mold .thumb{width:40px;flex:0 0 auto;align-self:stretch;object-fit:contain;

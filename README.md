@@ -289,7 +289,8 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   meio do papel e da foto, que é onde quase toda referência cai.
   Arrastando uma peça ou a foto, os dois lados e o centro dela **encostam na guia** quando
   passam perto — e, mesmo sem guia, nas bordas e no meio das outras peças, da foto e do
-  papel, com uma linha magenta mostrando onde encostou — e um bloco laçado encosta pela caixa de tudo o que está nele, e não peça por
+  papel, com uma linha magenta mostrando onde encostou (desliga em "ímã entre peças", na aba
+  peças; segurar Alt solta tudo durante o arraste) — e um bloco laçado encosta pela caixa de tudo o que está nele, e não peça por
   peça, senão o arranjo que se acabou de laçar chegaria do outro lado desmanchado — a folga do ímã é medida em pixels de tela, então ela é sempre a mesma
   distância para o dedo, em qualquer zoom. As guias são de cada molde, ficam gravadas com ele
   e não entram no PDF: são risco de tela, como a régua da mesa.
@@ -372,7 +373,8 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   não sai do papel, e o bloco inteiro para com ela em vez de se desmanchar na borda. Com um
   bloco laçado, a barra de cima troca os campos da peça por quem está no laço e um botão que
   **apaga as peças laçadas de uma vez**, mais **duplicar** (as cópias saem 5 mm para o lado e
-  ficam laçadas) e **centralizar no papel** — a moldura da foto não é peça e fica onde está, e um
+  ficam laçadas), **centralizar no papel**, **girar** 15° por toque em volta do meio do bloco
+  (até 45° de inclinação) e **espelhar** — a moldura da foto não é peça e fica onde está, e um
   desfazer devolve o bloco inteiro. Com as guias ligadas, o bloco encosta nelas inteiro.
 - **Modo ponto a ponto**: um toque acende ou apaga um quadradinho, e arrastar sem soltar
   acende ou apaga a fileira inteira por onde o dedo (ou o botão) passa — quem decide se o
@@ -396,11 +398,13 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   troca entre eles. Antes havia um molde só: começar um desenho novo apagava o anterior sem
   volta. O molde que já estava gravado entra na lista como está, sem nada ser copiado. A lista
   fica por **ordem de uso** (o molde aberto sobe para o topo), a data é a da última mudança de
-  verdade, e **duplicar este molde** faz uma cópia com foto e tudo, que já abre.
+  verdade, e **duplicar este molde** faz uma cópia com foto e tudo, que já abre. O alfinete
+  de cada molde o fixa no topo da lista.
 - **Mais de uma foto**: na aba foto, **pôr mais uma foto** cria uma peça de foto — o retângulo de
   uma foto revelada, com a imagem para ver o encaixe e nenhum furo. Ela anda, encosta, entra no
   laço, muda de tamanho e deita pela barra de cima, e uma moldura pode ir em volta dela (em
-  **em volta de**). No PDF sai como retângulo, igual à foto principal.
+  **em volta de**). No PDF sai como retângulo, com uma linha dizendo onde colar; em tamanho
+  Instax, ela também mostra a janela da imagem.
 - **Janela do Instax**: com um tamanho Instax, a mesa mostra o cartão branco e a imagem só na
   janela dela (46 × 62 mm no mini), tracejada também no PDF. Os lados são iguais; a borda de
   cima, que a Fujifilm não publica, é um campo da aba foto (6 mm de partida) para medir uma vez

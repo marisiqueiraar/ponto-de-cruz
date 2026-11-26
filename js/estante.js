@@ -78,7 +78,10 @@ function criaMolde(nome){
   var id = novoId();
   var it = { id: id, nome: nome || "", em: Date.now(), pecas: 0,
              dados: STORE + "/" + id, foto: PHOTO_STORE + "/" + id };
-  estante.itens.unshift(it);
+  // o molde novo é o mais recente, mas não passa à frente dos fixados
+  var topo = 0;
+  while (topo < estante.itens.length && estante.itens[topo].fixo) topo++;
+  estante.itens.splice(topo, 0, it);
   estante.atual = id;
   salvaEstante();
   return it;

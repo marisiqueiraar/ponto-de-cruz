@@ -29,6 +29,9 @@
     <span class="grp hide" id="ctlGrupo"><span class="none" id="ctlGrupoTxt"></span>
       <button id="dupLaco" class="tbtn" title="Duplica as peças laçadas, um pouco para o lado, e laça as cópias.">duplicar</button>
       <button id="meioLaco" class="tbtn" title="Leva o bloco inteiro para o meio do papel, sem desmanchar o arranjo.">centralizar no papel</button>
+      <button id="giraLacoE" class="tbtn icon" title="Gira o bloco 15° para a esquerda, em volta do meio dele." aria-label="girar o bloco para a esquerda">⟲</button>
+      <button id="giraLacoD" class="tbtn icon" title="Gira o bloco 15° para a direita, em volta do meio dele." aria-label="girar o bloco para a direita">⟳</button>
+      <button id="espLaco" class="tbtn" title="Espelha o bloco: troca a esquerda pela direita, e cada peça se espelha junto.">espelhar</button>
       <button id="delLaco" class="tbtn danger"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg><span id="delLacoTxt">apagar</span></button>
     </span>
 
@@ -359,6 +362,8 @@
       <button type="button" id="alBase">pela base da foto</button>
       <button type="button" id="alAcima" class="hide">alinhar com a peça de cima</button>
     </div>
+
+    <label class="check" title="Arrastando, a peça encosta nas bordas e no meio das outras peças, da foto e do papel. Segurar Alt durante o arraste solta o ímã de passagem."><input type="checkbox" id="imaPecas" checked> ímã entre peças (Alt solta)</label>
 
     <div class="rule"></div>
     <div class="chips" id="chips"></div>

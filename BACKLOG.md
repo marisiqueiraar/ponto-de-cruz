@@ -165,7 +165,7 @@ Nada falta deste item.
 - ~~**`testes/amostra.js` tem uma cópia dos desenhos dos símbolos.**~~ — feito em 26/11/2026. Ele desenha
   sem abrir o app, então repete a tabela de `js/base.js`. Se os símbolos mudarem,
   a amostra fica mentindo sem ninguém notar.
-- ~~**O laço move e apaga, e só.**~~ — feito em 26/11/2026: agora também duplica o bloco e o leva para o meio do papel. Girar e espelhar o bloco continuam de fora. Girar, espelhar, duplicar e os botões de
+- ~~**O laço move e apaga, e só.**~~ — feito em 26/11/2026: agora também duplica o bloco, o leva para o meio do papel, gira e espelha. Girar, espelhar, duplicar e os botões de
   alinhar continuam valendo para a peça selecionada, uma de cada vez — com um
   bloco laçado a barra esconde esses campos em vez de mexer em uma só das
   laçadas. É decisão de escopo, não limitação: está em
@@ -271,7 +271,7 @@ mudança de aplicativo:
 
 ## 7. Sobre os testes
 
-`testes/roda.sh` roda 41 conjuntos: o repartir em folhas, a posição em cada
+`testes/roda.sh` roda 46 conjuntos: o repartir em folhas, a posição em cada
 folha, a emenda, a cor por peça, a estante, a tela no Chromium, alinhar, as
 guias e o ímã, as letras, a conta de fio, o ajuste à mão, o laço, o ponto reto,
 a impressão, as peças, a caixa de linhas, o acompanhamento, a cor do papel, o

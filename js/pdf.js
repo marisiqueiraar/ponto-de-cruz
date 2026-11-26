@@ -288,6 +288,13 @@ function cabecalho(pdf, plano, idx){
         (photo.off ? "" : "Sobra: " + fmt(pa.w - photo.x - photo.w) + " mm a direita, " + fmt(pa.h - photo.y - photo.h) + " mm embaixo."),
     "Imprima em 100%, sem ajustar a pagina. Confira na regua abaixo antes de furar."
   ];
+  // as fotos a mais: onde colar cada uma, pelo canto de cima à esquerda
+  var outras = els.filter(function(el){ return el.kind === "foto"; }).map(function(el){
+    var b = elPaperBox(el);
+    return fmt(el.w) + " x " + fmt(el.h) + " mm a " + fmt(b.x) + " da esquerda e " + fmt(b.y) + " de cima" +
+      (el.rot ? " (inclinada " + Math.abs(el.rot) + " graus)" : "");
+  });
+  if (outras.length) linhas.splice(2, 0, (outras.length === 1 ? "Outra foto: " : "Outras fotos: ") + outras.join("; ") + ".");
   linhas = linhas.filter(Boolean);     // sem foto, a linha da sobra fica vazia
   // esta folha não leva molde nenhum: o que ela precisa dizer é onde ele está
   if (plano.capa)
@@ -347,6 +354,15 @@ function moldeNaFolha(pdf, vw, ox, oy){
       var q = localToPaper(el, c[0], c[1]); return [ox + (q.x - vw.x), oy + (q.y - vw.y)];
     });
     pdf.lines(cs.slice(1).map(function(c, i){ return [c[0] - cs[i][0], c[1] - cs[i][1]]; }), cs[0][0], cs[0][1], [1, 1], "S", true);
+    var j = janelaDaFoto(el);
+    if (j){
+      var js_ = [[j.x, j.y], [j.x + j.w, j.y], [j.x + j.w, j.y + j.h], [j.x, j.y + j.h]].map(function(c){
+        var q = localToPaper(el, c[0], c[1]); return [ox + (q.x - vw.x), oy + (q.y - vw.y)];
+      });
+      pdf.setDrawColor(170); pdf.setLineWidth(0.12);
+      pdf.lines(js_.slice(1).map(function(c, i){ return [c[0] - js_[i][0], c[1] - js_[i][1]]; }), js_[0][0], js_[0][1], [1, 1], "S", true);
+      pdf.setDrawColor(20); pdf.setLineWidth(0.4);
+    }
   });
   var jan = janelaInstax();
   if (jan){

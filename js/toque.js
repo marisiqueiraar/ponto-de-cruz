@@ -106,16 +106,25 @@ function evPos(e){
    encostar em si mesmo. Quando encosta em algo que não é guia, a linha em que
    encostou aparece na mesa enquanto se arrasta (`imaVisto`). */
 var imaVisto = null;
+/* Dá para desligar o ímã de duas maneiras: na aba peças, "ímã entre peças"
+   (fica gravado neste aparelho) desliga o encostar nas peças, na foto e no
+   meio do papel — as guias ligadas continuam puxando, porque guia existe
+   para isso; e segurar Alt durante o arraste solta tudo, guias inclusive,
+   para um ajuste fino de passagem. */
+var imaPecas = true, imaSolto = false;
+try { imaPecas = JSON.parse(localStorage.getItem("ponto-e-letra/tela/v1") || "{}").ima !== 0; } catch (e){}
 
 function imanta(b, quem){
   var g = { x: 0, y: 0 };
   imaVisto = { x: null, y: null };
+  if (imaSolto) return g;
   var folga = FOLGA_PX / (cv._k || 1);
   var linhas = { x: [], y: [] };
   if (guias.on){
     guias.v.forEach(function(v){ linhas.x.push({ v: v, guia: 1 }); });
     guias.h.forEach(function(v){ linhas.y.push({ v: v, guia: 1 }); });
   }
+  if (!imaPecas) return achaIma(b, g, linhas, folga);
   var anda = function(o){ return o === quem || (quem && quem.indexOf && quem.indexOf(o) >= 0); };
   var poe = function(c){
     linhas.x.push({ v: c.x }, { v: c.x + c.w / 2 }, { v: c.x + c.w });
@@ -125,6 +134,10 @@ function imanta(b, quem){
   if (!photo.off && quem !== "foto" && !(quem && quem.foto)) poe(photo);
   var pa = paperMM();
   linhas.x.push({ v: pa.w / 2 }); linhas.y.push({ v: pa.h / 2 });
+  return achaIma(b, g, linhas, folga);
+}
+
+function achaIma(b, g, linhas, folga){
   [["x", "w"], ["y", "h"]].forEach(function(eixo){
     var bordas = [b[eixo[0]], b[eixo[0]] + b[eixo[1]] / 2, b[eixo[0]] + b[eixo[1]]];
     var dist = folga, achou = null;
@@ -310,6 +323,58 @@ function centralizaLaco(){
   if (marcaFoto){ photo.x += dx; photo.y += dy; clampPhoto(); }
   draw(); pushHist();
 }
+/* Girar o bloco: cada peça anda em volta do meio do bloco e inclina junto,
+   15° por toque. A inclinação de uma peça vai até 45° para cada lado (é o
+   limite do campo), então o giro que passaria disso não acontece, e o
+   rodapé diz por quê. A moldura não gira: ela segue a foto ou a peça em
+   volta da qual está. E com a foto no laço o bloco não gira — a foto não
+   inclina, só deita. */
+var GIRO_LACO = 15;
+function giraLaco(sentido){
+  var c = caixaDoLaco();
+  if (!c) return;
+  if (marcaFoto){
+    $("modeHint").textContent = "Com a foto no laço o bloco não gira: a foto não inclina, só deita (girar foto). Tire a foto do laço com Shift e um toque nela.";
+    return;
+  }
+  var a = sentido * GIRO_LACO, giram = marca.filter(function(i){ return els[i].arranjo !== "moldura"; });
+  if (giram.some(function(i){ return Math.abs((els[i].rot || 0) + a) > 45; })){
+    $("modeHint").textContent = "Uma peça do bloco já está inclinada perto de 45°, que é o máximo: o bloco não gira mais para esse lado.";
+    return;
+  }
+  var cx = c.x + c.w / 2, cy = c.y + c.h / 2, r = a * Math.PI / 180, cs = Math.cos(r), sn = Math.sin(r);
+  giram.forEach(function(i){
+    var el = els[i], b = bboxMM(el), px = b.x + b.w / 2 - cx, py = b.y + b.h / 2 - cy;
+    el.x = dec1(cx + px * cs - py * sn - b.w / 2);
+    el.y = dec1(cy + px * sn + py * cs - b.h / 2);
+    el.rot = (el.rot || 0) + a;
+  });
+  syncControls(); draw(); pushHist();
+}
+
+// espelhar o bloco: as posições trocam de lado em volta do meio dele, cada
+// inclinação troca de sinal e cada peça se espelha; a foto laçada só troca
+// de lado (a imagem é só referência)
+function espelhaLaco(){
+  var c = caixaDoLaco();
+  if (!c) return;
+  var cx = c.x + c.w / 2;
+  marca.forEach(function(i){
+    var el = els[i], b = bboxMM(el);
+    el.x = dec1(2 * cx - (b.x + b.w / 2) - b.w / 2);
+    if (el.arranjo === "moldura") return;
+    el.rot = -(el.rot || 0);
+    espelhaPeca(el);
+    var b2 = bboxMM(el);                  // o ponto reto refeito pode mudar de largura
+    el.x = dec1(2 * cx - (b.x + b.w / 2) - b2.w / 2);
+  });
+  if (marcaFoto){ photo.x = 2 * cx - photo.x - photo.w; clampPhoto(); }
+  renderChips(); syncControls(); draw(); pushHist();
+}
+
+$("giraLacoE").addEventListener("click", function(){ giraLaco(-1); });
+$("giraLacoD").addEventListener("click", function(){ giraLaco(1); });
+$("espLaco").addEventListener("click", espelhaLaco);
 $("dupLaco").addEventListener("click", duplicaLaco);
 $("meioLaco").addEventListener("click", centralizaLaco);
 
@@ -487,6 +552,7 @@ cv.addEventListener("pointerdown", function(e){
 });
 
 cv.addEventListener("pointermove", function(e){
+  imaSolto = !!e.altKey;
   if (cpts[e.pointerId]) cpts[e.pointerId] = { x: e.clientX, y: e.clientY };
   if (borda){ e.preventDefault(); segueBorda(e); return; }
   if (pinta){

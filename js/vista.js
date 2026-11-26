@@ -20,6 +20,21 @@ var TELA = "ponto-e-letra/tela/v1", CARTAO_MM = 85.6;
 var pxPorMm = 0;
 try { pxPorMm = +(JSON.parse(localStorage.getItem(TELA) || "{}").pxmm) || 0; } catch (e){}
 
+// o que é deste aparelho mora numa chave só; cada campo é gravado sem apagar os outros
+function guardaTela(campo, valor){
+  try {
+    var t = JSON.parse(localStorage.getItem(TELA) || "{}") || {};
+    t[campo] = valor;
+    localStorage.setItem(TELA, JSON.stringify(t));
+  } catch (e){}
+}
+
+$("imaPecas").checked = imaPecas;
+$("imaPecas").addEventListener("change", function(){
+  imaPecas = this.checked;
+  guardaTela("ima", imaPecas ? 1 : 0);
+});
+
 function tamanhoReal(){
   if (!(pxPorMm > 0) || !(fitK > 0)) return false;
   setZoom(pxPorMm / fitK);
@@ -35,7 +50,7 @@ $("calibLarg").addEventListener("input", function(){ $("calibCartao").style.widt
 $("calibNo").addEventListener("click", function(){ $("calib").classList.add("hide"); });
 $("calibSim").addEventListener("click", function(){
   pxPorMm = parseFloat($("calibLarg").value) / CARTAO_MM;
-  try { localStorage.setItem(TELA, JSON.stringify({ pxmm: pxPorMm })); } catch (e){}
+  guardaTela("pxmm", pxPorMm);
   $("calib").classList.add("hide");
   tamanhoReal();
 });

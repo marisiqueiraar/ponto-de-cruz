@@ -299,8 +299,9 @@ escolha, escolhi assim:
 **Tela e uso.**
 - **Ímã**: a peça encosta nas bordas e no meio das outras peças, da foto e do
   papel, com a mesma força das guias (alguns pixels de tela). Uma linha magenta
-  mostra onde encostou. Não há jeito de desligar esse ímã; se ele atrapalhar um
-  ajuste fino, as setas do teclado andam sem ímã.
+  mostra onde encostou. *(Depois:)* ele desliga em "ímã entre peças", na aba
+  peças — gravado no aparelho, e as guias ligadas continuam puxando —, e
+  segurar Alt durante o arraste solta tudo, guias inclusive.
 - **Tamanho real**: calibra com um cartão de banco (85,6 mm), uma vez por
   aparelho. Um toque no 1:1 vai para o tamanho real; toque longo (ou Shift)
   recalibra.
@@ -311,9 +312,11 @@ escolha, escolhi assim:
   grandes, alguns MB.
 - **O laço** duplica 5 mm para o lado e para baixo, e o laço passa para as
   cópias. **Centralizar** leva o bloco inteiro (com a foto, se ela estiver
-  laçada) para o meio do papel. Girar e espelhar o bloco ficaram de fora: girar
-  um bloco é girar cada peça em volta de um centro comum, e isso muda as
-  molduras de um jeito que eu não quis inventar.
+  laçada) para o meio do papel. *(Depois:)* girar e espelhar também. Girar é
+  de 15° por toque, em volta do meio do bloco, com cada peça inclinando junto
+  até os 45° do campo de inclinação. A moldura não gira nem se espelha: ela
+  segue a foto ou a peça em volta da qual está. Com a foto no laço o bloco não
+  gira (a foto só deita), mas espelha — a foto troca de lado.
 - **As guias continuam fora do desfazer.** São coisa de tela, como o zoom; o
   desfazer devolve o molde. Tirar uma guia sem querer se conserta puxando outra.
 - **O espaço entre letras**, num navegador que não sabe espaçar letras no canvas,
@@ -328,8 +331,11 @@ escolha, escolhi assim:
   quatro estados, mas aí tirar uma linha da caixa pediria três toques. "Acabou"
   tira a linha das suas (o gráfico feito só com as minhas não a usa mais) e a
   põe na lista de compras; "tenho pouco" continua valendo como tenho.
-- **Ordem da estante**: por uso — o molde que você abre sobe. Não fiz arrastar
-  para reordenar à mão: com a ordem de uso, o de todo dia já fica no topo.
+- **Ordem da estante**: por uso — o molde que você abre sobe. *(Depois:)* o
+  alfinete fixa um molde no topo; os fixados ficam sempre acima dos outros, e
+  entre eles também vale a ordem de uso. Escolhi o alfinete em vez de arrastar
+  para reordenar porque arrastar numa lista dentro de um painel que rola é
+  frágil no celular, e o que se quer é só "este fica em cima".
 - **O mesmo arquivo duas vezes**: se um molde da estante tem exatamente o mesmo
   desenho, ele abre e o aviso diz isso. Se você mexeu no molde depois de salvar
   o arquivo, o arquivo entra como molde novo (é outra versão, e pode ser a que
@@ -366,9 +372,11 @@ escolha, escolhi assim:
   principal continua sendo a referência de tudo (onde as peças novas nascem,
   em volta de quem a moldura nasce, o que o PDF manda colar onde). A foto a
   mais ganha de graça o que as peças já têm: ímã, laço, alinhar, duplicar,
-  desfazer e moldura em volta. O que ela não tem: girar a imagem dentro do
-  retângulo, a janela do Instax (só a principal desenha) e a frase "cole a
-  foto a X mm" no PDF. A imagem dela é guardada com até 1000 px no lado maior.
+  desfazer e moldura em volta. *(Depois:)* ela também tem a janela do Instax
+  e uma linha no PDF dizendo onde colar ("Outra foto: … a X da esquerda e Y de
+  cima", pelo canto da caixa, e a inclinação se houver). Girar a imagem dentro
+  do retângulo continua de fora: o navegador já endireita a foto do celular
+  pela orientação gravada nela, e "deitar" troca a largura pela altura. A imagem dela é guardada com até 1000 px no lado maior.
 - **A borda de cima do Instax** começa em 6 mm. É um chute com base na conta
   (sobram 24 mm entre cima e embaixo, e a de baixo é a grossa); por isso virou
   campo, e não número fixo. Deitada, a borda de cima fica à esquerda.

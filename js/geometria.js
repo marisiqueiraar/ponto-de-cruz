@@ -349,14 +349,27 @@ var papelCor = "#FFFFFF";
 var INSTAX = { "54x86": [46, 62], "72x86": [62, 62], "108x86": [99, 62] };
 var instaxTopo = 6;
 
+// a janela de um cartão Instax de tamanho `tam` ("54x86") que está no
+// retângulo x, y, w, h — deitado quando w e h vêm trocados
+function janelaDe(tam, x, y, w, h){
+  var j = INSTAX[tam];
+  if (!j) return null;
+  var q = tam.split("x"), W0 = +q[0], H0 = +q[1];
+  var lado = (W0 - j[0]) / 2, topo = Math.max(0, Math.min(H0 - j[1], instaxTopo));
+  if (W0 !== H0 && Math.abs(w - H0) < 0.01 && Math.abs(h - W0) < 0.01)
+    return { x: x + topo, y: y + lado, w: j[1], h: j[0] };
+  return { x: x + lado, y: y + topo, w: j[0], h: j[1] };
+}
+
 function janelaInstax(){
   if (photo.off) return null;
-  var v = ($("photoSize") || {}).value, j = INSTAX[v];
-  if (!j) return null;
-  var q = v.split("x"), W0 = +q[0], H0 = +q[1];
-  var lado = (W0 - j[0]) / 2, topo = Math.max(0, Math.min(H0 - j[1], instaxTopo));
-  if ($("photoOr").value === "l") return { x: photo.x + topo, y: photo.y + lado, w: j[1], h: j[0] };
-  return { x: photo.x + lado, y: photo.y + topo, w: j[0], h: j[1] };
+  var v = ($("photoSize") || {}).value;
+  return INSTAX[v] ? janelaDe(v, photo.x, photo.y, photo.w, photo.h) : null;
+}
+
+// a da foto a mais, em coordenadas da própria peça (antes de girar)
+function janelaDaFoto(el){
+  return el.kind === "foto" && el.tam ? janelaDe(el.tam, 0, 0, el.w, el.h) : null;
 }
 
 var numerarPontos = 0;   // a ordem dos pontos de ponto reto, numerada no PDF
