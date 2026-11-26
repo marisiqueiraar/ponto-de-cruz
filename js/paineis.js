@@ -502,3 +502,10 @@ setTimeout(function(){
     draw(); resetHist();
   }
 }, 1400);
+
+/* Instalar o app (app-sw.js): só existe servido por http(s) — aberto do
+   disco, como nos testes, o navegador não aceita service worker, e o app
+   funciona igual sem ele. */
+if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)){
+  navigator.serviceWorker.register("app-sw.js").catch(function(){});
+}
