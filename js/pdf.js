@@ -178,8 +178,8 @@ function mapaFolhas(pdf, plano, idx, dir, y){
    o traço sai na cor, mas cor de tela não é código de meada, e quem volta ao
    trabalho uma semana depois não tem como saber o que comprar de novo.
    Vai em toda folha, porque cada folha é recortada e usada sozinha. */
-function legenda(pdf, plano){
-  var usadas = linhasUsadas();
+function legenda(pdf, plano, lista){
+  var usadas = lista || linhasUsadas();
   if (!usadas.length) return;
   var comLetra = temGrafico();
   var util = plano.pageW - PDF_SIDE * 2;
@@ -404,6 +404,24 @@ function moldeNaFolha(pdf, vw, ox, oy){
       }
     });
   });
+  /* A ordem, quando pedida: 1, 2, 3… ao lado de cada furo, linha por linha,
+     em cinza, pequeno e deslocado do furo para não cobrir o que se fura. Laço
+     fechado volta ao 1, que é onde ele começa e termina. */
+  if (numerarPontos){
+    pdf.setFontSize(4.2);
+    pdf.setTextColor(110);
+    els.forEach(function(el){
+      if (el.kind !== "reto" || !cabe(el)) return;
+      (el.pontos || []).forEach(function(pt){
+        pt.furos.forEach(function(f, i){
+          var h = localToPaper(el, f[0], f[1]);
+          if (fora(h, 1)) return;
+          pdf.text(String(i + 1), ox + (h.x - vw.x) + 0.7, oy + (h.y - vw.y) - 0.6);
+        });
+      });
+    });
+    pdf.setTextColor(60);
+  }
   pdf.setLineWidth(0.22);
   els.forEach(function(el){
     if (!cabe(el) || el.kind === "reto") return;
@@ -455,7 +473,16 @@ function moldeNaFolha(pdf, vw, ox, oy){
   pdf.setDrawColor(150);
   pdf.setLineWidth(0.2);
   pdf.setLineDashPattern([2, 2], 0);
-  pdf.rect(ox, oy, vw.w, vw.h);
+  // a moldura que é o papel inteiro leva o recorte dele: cantos e furo da fita
+  var papelTodo = vw.x <= 0.01 && vw.y <= 0.01 && Math.abs(vw.w - pa.w) < 0.05 && Math.abs(vw.h - pa.h) < 0.05;
+  if (papelTodo && papelCantos > 0){
+    var rc = Math.min(papelCantos, vw.w / 2, vw.h / 2);
+    pdf.roundedRect(ox, oy, vw.w, vw.h, rc, rc);
+  } else pdf.rect(ox, oy, vw.w, vw.h);
+  if (papelTodo && papelFita){
+    var ff = furoFita();
+    pdf.circle(ox + ff.x, oy + ff.y, ff.r, "S");
+  }
   pdf.setLineDashPattern([], 0);
 }
 
@@ -661,9 +688,119 @@ $("pdf").addEventListener("click", function(){
   }, 30);
 });
 
+/* ---- outro molde, só para desenhar ---------------------------------------
+
+   Para pôr na mesma folha um molde que não é o aberto, ele precisa estar na
+   memória do app enquanto é desenhado: as peças, a foto, o papel e o
+   espaçamento de furos dele. Esta função troca tudo isso, desenha, e devolve
+   o molde aberto como estava — num `finally`, para um erro no meio não
+   deixar a tela com o molde de outro. */
+var CAMPOS_MOLDE = ["paperSize", "paperOr", "paperW", "paperH", "photoSize", "photoOr", "photoWmm", "photoHmm", "mm"];
+
+function comMolde(dados, fn){
+  var guardado = { els: els, sel: sel, foco: foco, marcaFoto: marcaFoto,
+                   photo: { x: photo.x, y: photo.y, w: photo.w, h: photo.h, off: photo.off },
+                   propria: JSON.parse(JSON.stringify(propria)), campos: {} };
+  CAMPOS_MOLDE.forEach(function(id){ guardado.campos[id] = $(id).value; });
+  try {
+    var p = dados.paper || {}, f = dados.photoBox || {};
+    if (p.size) $("paperSize").value = p.size;
+    if (p.or) $("paperOr").value = p.or;
+    if (p.w) { $("paperW").value = p.w; propria.paperW = +p.w; }
+    if (p.h) { $("paperH").value = p.h; propria.paperH = +p.h; }
+    if (f.size) $("photoSize").value = f.size;
+    if (f.or) $("photoOr").value = f.or;
+    if (f.w) { $("photoWmm").value = f.w; propria.photoWmm = +f.w; }
+    if (f.h) { $("photoHmm").value = f.h; propria.photoHmm = +f.h; }
+    if (dados.mm) $("mm").value = dados.mm;
+    els = (dados.els || []).map(unpackEl).filter(Boolean);
+    syncPhotoSize();
+    photo.x = +f.x || 0; photo.y = +f.y || 0;
+    return fn();
+  } finally {
+    CAMPOS_MOLDE.forEach(function(id){ $(id).value = guardado.campos[id]; });
+    propria = guardado.propria;
+    els = guardado.els; sel = guardado.sel; foco = guardado.foco; marcaFoto = guardado.marcaFoto;
+    photo.x = guardado.photo.x; photo.y = guardado.photo.y; photo.w = guardado.photo.w;
+    photo.h = guardado.photo.h; photo.off = guardado.photo.off;
+  }
+}
+
+// os moldes da estante que vão junto na folha, com o que está gravado deles
+function moldesJunto(){
+  var ids = papelJunto || [], out = [];
+  ids.forEach(function(id){
+    var it = estante.itens.filter(function(i){ return i.id === id; })[0];
+    if (!it) return;
+    try { var d = JSON.parse(localStorage.getItem(it.dados)); if (d && d.els) out.push({ it: it, d: d }); } catch (e){}
+  });
+  return out;
+}
+
+// a legenda de vários moldes: as linhas de todos, cada uma uma vez
+function linhasDeTodos(outros){
+  var lista = linhasUsadas().slice(), visto = {};
+  lista.forEach(function(l){ visto[l.hex] = l; });
+  outros.forEach(function(o){
+    comMolde(o.d, function(){
+      linhasUsadas().forEach(function(l){
+        if (visto[l.hex]){ visto[l.hex].metros += l.metros; return; }
+        visto[l.hex] = l; lista.push(l);
+      });
+    });
+  });
+  lista.forEach(function(l, i){
+    l.letra = LETRAS[i % LETRAS.length];
+    l.rotulo = l.nome + "  ·  " + fmt(l.metros) + " m";
+  });
+  return lista;
+}
+
+/* Várias peças de papel na mesma folha: as cópias deste molde e os moldes da
+   estante que foram juntados, em grade, cada um com a sua moldura de recorte.
+   O cabeçalho é o do molde aberto. Só vale quando o molde cabe inteiro numa
+   folha com o cabeçalho — molde repartido ou de folha nua já é a folha toda. */
+function montaPDFVarios(R, plano){
+  var outros = moldesJunto(), pedidas = Math.max(1, papelCopias | 0);
+  var g = copiasCabem(R);
+  var lugares = [];
+  for (var c = 0; c < pedidas; c++) lugares.push(null);
+  outros.forEach(function(o){ lugares.push(o); });
+  lugares = lugares.slice(0, g.n);
+  if (lugares.length < 2) return null;
+  var pl = { tiled: false, capa: false, land: g.land, pageW: g.pageW, top: PDF_TOP,
+             cols: 1, rows: 1, folhaCheia: plano.folhaCheia };
+  var pdf = new window.jspdf.jsPDF({
+    unit: "mm", format: folhaAtual.jspdf, orientation: g.land ? "landscape" : "portrait",
+    compress: true, floatPrecision: 2
+  });
+  cabecalho(pdf, pl, 0);
+  var gap = COPIA_GAP;
+  var cols = Math.min(g.cols, lugares.length), rows = Math.ceil(lugares.length / cols);
+  var x0 = (g.pageW - (cols * R.w + (cols - 1) * gap)) / 2, y0 = PDF_TOP;
+  lugares.forEach(function(lg, i){
+    var ox = x0 + (i % cols) * (R.w + gap), oy = y0 + Math.floor(i / cols) * (R.h + gap);
+    if (!lg) moldeNaFolha(pdf, { x: R.x, y: R.y, w: R.w, h: R.h }, ox, oy);
+    else comMolde(lg.d, function(){ moldeNaFolha(pdf, { x: 0, y: 0, w: R.w, h: R.h }, ox, oy); });
+  });
+  legenda(pdf, pl, outros.length ? linhasDeTodos(outros) : null);
+  return { pdf: pdf, n: lugares.length };
+}
+
 function montaPDF(){
   var R = cropArea();
   var plano = pdfPlan(R, contentArea());
+  plano.folhaCheia = folhaCheia(R);
+  if (!plano.tiled && !plano.capa && plano.folhaCheia && (papelCopias > 1 || (papelJunto || []).length)){
+    var v = montaPDFVarios(R, plano);
+    if (v){
+      var pa0 = paperMM(), blob0 = v.pdf.output("blob"), nome0 = saveName("pdf");
+      histSave(blob0, nome0, "papel " + fmt(pa0.w) + " × " + fmt(pa0.h) + " mm · " + v.n +
+               " na mesma folha", histThumb(R));
+      deliver(blob0, nome0, null);
+      return;
+    }
+  }
   // o cabeçalho precisa saber se a moldura é a borda do papel ou a caixa do
   // desenho: o que ele manda recortar muda de um caso para o outro
   plano.folhaCheia = folhaCheia(R);

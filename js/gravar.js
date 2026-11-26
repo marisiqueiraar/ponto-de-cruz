@@ -238,11 +238,12 @@ function saveState(){
     localStorage.setItem(it.dados, JSON.stringify({
       v: 1,
       paper: { size: $("paperSize").value, or: $("paperOr").value,
-               w: $("paperW").value, h: $("paperH").value, folha: folhaAtual.id },
+               w: $("paperW").value, h: $("paperH").value, folha: folhaAtual.id,
+               copias: papelCopias, junto: papelJunto, cantos: papelCantos, fita: papelFita ? 1 : 0 },
       photoBox: { size: $("photoSize").value, or: $("photoOr").value,
                   w: $("photoWmm").value, h: $("photoHmm").value,
                   x: Math.round(photo.x * 10) / 10, y: Math.round(photo.y * 10) / 10 },
-      mm: $("mm").value, thread: thread, sel: sel,
+      mm: $("mm").value, thread: thread, sel: sel, numerar: numerarPontos ? 1 : 0,
       guias: { on: guias.on ? 1 : 0, v: guias.v, h: guias.h },
       els: els.map(packEl)
     }));
@@ -297,6 +298,12 @@ function restoreState(chave){
     // molde gravado antes da escolha da folha saía sempre em A4
     folhaAtual = FOLHAS[s.paper.folha] || FOLHAS.a4;
     $("folha").value = folhaAtual.id;
+    papelCopias = Math.max(1, Math.min(40, +s.paper.copias || 1));
+    papelJunto = Array.isArray(s.paper.junto) ? s.paper.junto.filter(function(x){ return typeof x === "string"; }) : [];
+    papelCantos = Math.max(0, Math.min(30, +s.paper.cantos || 0));
+    papelFita = s.paper.fita ? 1 : 0;
+    numerarPontos = s.numerar ? 1 : 0;
+    $("numerar").checked = !!numerarPontos;
     if (s.paper.size) $("paperSize").value = s.paper.size;
     if (s.paper.or) $("paperOr").value = s.paper.or;
     if (s.paper.w) $("paperW").value = s.paper.w;

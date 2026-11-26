@@ -132,6 +132,7 @@
       <span class="t" id="tPatMargem" title="Folga entre a foto e o lado de dentro da moldura, em milímetros. A moldura ganha ou perde blocos para a foto caber com essa folga."><span>margem</span><input id="patMargem" type="number" min="0" max="60" step="1" value="6"></span>
       <span class="t hide" id="tPatRep" title="Quantas vezes o motivo se repete na faixa."><span>repetir</span><input id="patRep" type="number" min="1" max="40" step="1" value="6"></span>
       <span class="t" title="Quantas linhas a peça usa. Com tantas quantos os papéis do bloco (3 nos blocos de retalho, 1 nos motivos), todos saem iguais; com mais, os blocos se alternam entre as linhas. A aba linha troca cada uma pela sua meada."><span>cores</span><input id="patCores" type="number" min="1" max="8" step="1" value="6"></span>
+      <button type="button" id="patCabe" class="tbtn hide" title="Diminui a margem, depois o espaço entre os blocos, até a moldura caber no papel.">caber no papel</button>
       <button type="button" id="patDeit" class="tbtn hide" title="Deita a faixa: os motivos passam a se repetir na horizontal.">deitada</button>
     </fieldset>
 
@@ -148,6 +149,7 @@
       <span class="t hide" id="tRetoRep" title="Quantas vezes o desenho se repete na faixa."><span>repetir</span><input id="retoRep" type="number" min="1" max="40" step="1"></span>
       <span class="t hide" id="tRetoGap" title="Espaço entre um desenho e o próximo, em milímetros."><span>espaço</span><input id="retoGap" type="number" min="0" max="30" step="1"><b class="cm">mm</b></span>
       <span class="t hide" id="tRetoMarg" title="Folga entre a foto e a moldura, em milímetros."><span>margem</span><input id="retoMarg" type="number" min="0" max="60" step="1"><b class="cm">mm</b></span>
+      <button type="button" id="retoCabe" class="tbtn hide" title="Diminui a margem, o espaço entre os desenhos e, se preciso, o tamanho deles, até a moldura caber no papel.">caber no papel</button>
       <button type="button" id="retoDeit" class="tbtn hide" title="Deita a faixa: os desenhos passam a se repetir na horizontal.">deitada</button>
       <button type="button" id="retoInv" class="tbtn hide" title="Troca o claro pelo escuro — para desenho claro sobre fundo escuro.">inverter</button>
     </fieldset>
@@ -240,6 +242,26 @@
     </div>
     <p class="note">O molde sai sempre em tamanho real. O que não cabe na folha é repartido em
     várias, que se emendam sobrepondo os furos — nunca reduzido.</p>
+    <div id="variosCampo" class="hide">
+      <div class="field">
+        <label for="copias">Cópias deste molde na mesma folha</label>
+        <select id="copias"></select>
+      </div>
+      <div id="juntoCampo" class="hide">
+        <label>Junto com outros moldes do mesmo tamanho</label>
+        <div id="juntoLista" class="junto"></div>
+      </div>
+      <p class="note" id="variosNota"></p>
+    </div>
+    <div class="rule"></div>
+    <h3 class="subtit">recorte</h3>
+    <div class="field">
+      <label for="cantos">Cantos arredondados, raio em mm</label>
+      <input id="cantos" type="number" min="0" max="30" step="1" value="0">
+    </div>
+    <label class="check"><input type="checkbox" id="fita"> furo para a fita, no meio do lado de cima</label>
+    <p class="note">É o recorte de um marca-página: a moldura tracejada do PDF sai com os cantos
+    redondos e o furo da fita marcado, para recortar e furar por ela. Zero é canto reto.</p>
   </section>
 
   <section class="pane" data-pane="foto">
@@ -440,6 +462,11 @@
       entre dois furos rasga.</p>
       <p class="note" id="mmEfeito"></p>
     </div>
+    <div class="rule"></div>
+    <label class="check"><input type="checkbox" id="numerar"> numerar a ordem dos pontos no PDF (ponto reto)</label>
+    <p class="note">Cada linha de ponto reto ganha os números 1, 2, 3… ao lado dos furos, na
+    ordem em que a agulha passa. É para quem quer seguir o caminho em vez de escolher na hora;
+    sem isso o PDF sai mais limpo.</p>
     <div class="rule"></div>
     <div class="num"><span>Pontos</span><strong id="count" aria-live="polite">—</strong></div>
     <div class="num"><span>Furos</span><strong id="holes" aria-live="polite">—</strong></div>

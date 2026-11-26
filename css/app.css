@@ -336,6 +336,9 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
 .cat.tem::before{content:"";position:absolute;right:3px;top:3px;width:6px;height:6px;border-radius:50%;
   background:currentColor;opacity:.9}
 .abas.modo{margin-bottom:12px}
+.junto{display:flex;flex-direction:column;gap:4px;margin:6px 0 10px}
+.junto label,.check{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);cursor:pointer}
+.check{margin:4px 0 8px}
 #soPeca .note{margin-bottom:12px}
 .lote{display:grid;grid-template-columns:1fr;gap:8px}
 .lote textarea{width:100%;font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;resize:vertical}

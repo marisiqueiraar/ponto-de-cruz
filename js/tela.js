@@ -306,6 +306,30 @@ function drawColados(ctx, k, region){
   ctx.restore();
 }
 
+// o recorte do papel na mesa: os cantos redondos somem do papel, e o furo da
+// fita aparece tracejado, onde a tesoura e o furador vão passar
+function recorteNaMesa(ctx, k, pa){
+  if (papelCantos > 0){
+    var r = Math.min(papelCantos, pa.w / 2, pa.h / 2) * k, W = pa.w * k, H = pa.h * k;
+    ctx.save();
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.beginPath();
+    ctx.rect(0, 0, W, H);
+    ctx.moveTo(r, 0); ctx.arcTo(0, 0, 0, r, r); ctx.lineTo(0, H - r); ctx.arcTo(0, H, r, H, r);
+    ctx.lineTo(W - r, H); ctx.arcTo(W, H, W, H - r, r); ctx.lineTo(W, r); ctx.arcTo(W, 0, W - r, 0, r);
+    ctx.closePath();
+    ctx.fill("evenodd");
+    ctx.restore();
+  }
+  if (papelFita){
+    var f = furoFita();
+    ctx.save();
+    ctx.strokeStyle = "#6B7C8C"; ctx.lineWidth = 1.2; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.arc(f.x * k, f.y * k, f.r * k, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+}
+
 function draw(){
   var cv = $("grid"), ctx = cv.getContext("2d");
   var pa = paperMM();
@@ -337,9 +361,11 @@ function draw(){
       : "—";
   } else { $("size").textContent = "—"; $("letraMM").textContent = "—"; }
 
+  recorteNaMesa(ctx, k, pa);
   showFit(cropArea());
   renderFios();
   mostraMedidas();
+  variosPainel();
   rulers(k);
   agendaColados();
 

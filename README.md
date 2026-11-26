@@ -321,6 +321,21 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   vizinhas repetem pelo menos 10 mm do desenho: é sobrepondo essa faixa até os furos coincidirem
   que se emenda, porque encostar folha com folha exige uma precisão de tesoura que ninguém tem.
   O app escolhe entre folha em pé e deitada pela que gastar menos papel.
+- **Várias na mesma folha**: quando o papel da peça cabe mais de uma vez na folha da
+  impressora — o marca-página de 5 × 18 cm cabe três vezes numa A4 —, a aba papel oferece
+  **cópias** deste molde e os **outros moldes da estante do mesmo tamanho**. O PDF sai com
+  todos lado a lado, cada um com a sua moldura de recorte, o cabeçalho do molde aberto e a
+  legenda com as linhas de todos. Para desenhar um molde que não é o aberto, o app o põe na
+  memória só durante o desenho e devolve o aberto como estava.
+- **Recorte do marca-página**: cantos arredondados (o raio, em mm) e o **furo da fita**, no
+  meio do lado de cima, aparecem na mesa e saem na moldura tracejada do PDF.
+- **Caber no papel**: a moldura que passou da borda ganha o botão **caber no papel**. Se o
+  tamanho dela cabe, o arranjo inteiro — foto e peças juntas — anda para dentro; se não, ela
+  encolhe pelo que menos se nota: a margem, depois o espaço entre os blocos e, no ponto reto,
+  o tamanho do desenho. O tamanho do bloco de ponto cruz não muda, porque um quadradinho a
+  menos já é outro desenho; se nada bastar, a moldura volta como estava e o aviso diz por quê.
+- **A ordem dos pontos numerada**: na aba molde, para o ponto reto, os furos de cada linha
+  ganham 1, 2, 3… no PDF, na ordem em que a agulha passa.
 - **PNG** da prévia, para conferir o arranjo.
 - **Zoom e deslocamento**: o papel cresce dentro da mesa, que rola. Botões no canto, Ctrl (ou ⌘)
   com a roda do mouse aproximando no ponto sob o cursor, e uma mãozinha que troca o arraste de

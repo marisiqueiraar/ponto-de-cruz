@@ -170,6 +170,7 @@ function mostraMedidas(){
     var lado = Math.max.apply(null, g.map(function(x){ return Math.max(x.length, x[0].length); }));
     $("patCm").textContent = "bloco " + cm(lado * p);
   } else $("patCm").textContent = "";
+  botaoCabe(el);
   $("retoCm").textContent = el && el.kind === "reto"
     ? "mm · peça " + cm(dim.w).replace(" cm", "") + " × " + cm(dim.h) : "";
   $("mmFoot").textContent = "furos a " + fmt(p) + " mm";
@@ -560,6 +561,71 @@ $("retoInv").addEventListener("click", function(){
 });
 
 // as duas casas de opção da barra, com o nome e os limites do desenho de agora
+/* Caber no papel: a moldura que passou da borda vai encolhendo pelo que
+   menos se nota — primeiro a margem até a foto, depois o espaço entre os
+   blocos, e, no ponto reto, o tamanho do desenho, até o mínimo dele — e, a
+   cada passo, se o tamanho já cabe, o arranjo anda para dentro. O
+   tamanho do bloco de ponto cruz não muda: ele é de quadradinho, e um a menos
+   já é outro desenho. Se nada disso bastar, a moldura volta como estava e o
+   aviso diz por quê. */
+function molduraCabe(el){
+  var pa = paperMM();
+  /* Do tamanho do papel, mas fora dele — a foto colada numa borda —, a saída é
+     andar: a foto e todas as peças vão juntas o que falta para a moldura
+     entrar, sem desmanchar o arranjo. Só depois disso a moldura encolhe. */
+  var dentro = function(){
+    var c = elPaperBox(el);
+    if (c.w > pa.w + 0.05 || c.h > pa.h + 0.05) return false;
+    var dx = c.x < 0 ? -c.x : (c.x + c.w > pa.w ? pa.w - c.x - c.w : 0);
+    var dy = c.y < 0 ? -c.y : (c.y + c.h > pa.h ? pa.h - c.y - c.h : 0);
+    if (dx || dy){
+      photo.x += dx; photo.y += dy;
+      els.forEach(function(o){ o.x = dec1(o.x + dx); o.y = dec1(o.y + dy); });
+    }
+    return true;
+  };
+  var refaz = function(){ rebuild(el); centraNaMira(el); };
+  var antes = { margem: el.margem, gap: el.gap, medida: el.medida };
+  refaz();
+  if (dentro()) return true;
+  var passos = [];
+  for (var m = Math.floor(el.margem) - 1; m >= 0; m--) passos.push(["margem", m]);
+  var g0 = el.kind === "pat" ? (el.gap | 0) : Math.floor(+el.gap || 0);
+  for (var g = g0 - 1; g >= 0; g--) passos.push(["gap", g]);
+  if (el.kind === "reto"){
+    var d = DESENHOS_RETO[el.desenho];
+    for (var md = Math.floor(el.medida) - 1; md >= d.min; md--) passos.push(["medida", md]);
+  }
+  for (var i = 0; i < passos.length; i++){
+    el[passos[i][0]] = passos[i][1];
+    refaz();
+    if (dentro()) return true;
+  }
+  el.margem = antes.margem; el.gap = antes.gap; el.medida = antes.medida;
+  refaz();
+  return false;
+}
+function botaoCabe(el){
+  var moldura = el && el.arranjo === "moldura", fora = false;
+  if (moldura){
+    var pa = paperMM(), c = elPaperBox(el);
+    fora = c.x < -0.05 || c.y < -0.05 || c.x + c.w > pa.w + 0.05 || c.y + c.h > pa.h + 0.05;
+  }
+  $("patCabe").classList.toggle("hide", !(fora && el.kind === "pat"));
+  $("retoCabe").classList.toggle("hide", !(fora && el.kind === "reto"));
+}
+[["patCabe"], ["retoCabe"]].forEach(function(b){
+  $(b[0]).addEventListener("click", function(){
+    var el = els[sel];
+    if (!el) return;
+    var ok = molduraCabe(el);
+    $("modeHint").textContent = ok
+      ? "A moldura coube: margem " + fmt(el.margem) + " mm, espaço " + fmt(el.gap) + (el.kind === "reto" ? " mm, tamanho " + fmt(el.medida) + " mm." : ".")
+      : "Nem com margem e espaço em zero a moldura cabe neste papel. Escolha um papel maior, uma foto menor ou, no ponto cruz, um espaçamento de furos menor.";
+    syncControls(); renderChips(); draw(); pushHist();
+  });
+});
+
 function opcoesNaBarra(el){
   var d = DESENHOS_RETO[el.desenho], o = opcoesReto(el);
   ["A", "B"].forEach(function(letra, i){
@@ -1041,6 +1107,8 @@ $("mmFoot").addEventListener("click", function(){
 });
 
 function papelPainel(){
+  $("cantos").value = papelCantos;
+  $("fita").checked = !!papelFita;
   var prop = $("paperSize").value === "custom";
   $("paperCustom").classList.toggle("hide", !prop);
   $("paperOrCampo").classList.toggle("dim", prop);
@@ -1107,6 +1175,79 @@ function onPaperChange(){
 // a folha só muda o PDF: nada no papel da peça sai do lugar
 $("folha").addEventListener("change", function(){
   folhaAtual = FOLHAS[this.value] || FOLHAS.a4;
+  draw(); pushLater();
+});
+
+/* Várias na mesma folha. O painel aparece quando o papel da peça cabe mais de
+   uma vez na folha da impressora, e oferece até onde cabe. A lista de outros
+   moldes mostra só os de papel do mesmo tamanho: a grade é uma só, e um
+   marca-página de 5 × 15 ao lado de um de 6 × 20 desmancharia a conta. */
+var variosChave = "";
+function papelDeGravado(d){
+  var p = d && d.paper || {}, w, h;
+  if (p.size === "custom"){ w = +p.w; h = +p.h; }
+  else { var q = String(p.size || "210x297").split("x"); w = +q[0]; h = +q[1]; if (p.or === "l"){ var t = w; w = h; h = t; } }
+  return { w: w, h: h };
+}
+function variosPainel(){
+  var pa = paperMM(), R = { x: 0, y: 0, w: pa.w, h: pa.h };
+  var g = copiasCabem(R), atual = itemAtual();
+  var mesmos = estante.itens.filter(function(it){
+    if (atual && it.id === atual.id) return false;
+    try {
+      var p = papelDeGravado(JSON.parse(localStorage.getItem(it.dados)));
+      return Math.abs(p.w - pa.w) < 0.05 && Math.abs(p.h - pa.h) < 0.05;
+    } catch (e){ return false; }
+  });
+  papelJunto = papelJunto.filter(function(id){ return mesmos.some(function(it){ return it.id === id; }); });
+  var chave = g.n + "|" + folhaAtual.id + "|" + mesmos.map(function(it){ return it.id + ":" + it.nome; }).join(",") +
+              "|" + papelCopias + "|" + papelJunto.join(",");
+  if (chave === variosChave) return;
+  variosChave = chave;
+  $("variosCampo").classList.toggle("hide", g.n < 2);
+  if (g.n < 2) return;
+  var s = $("copias");
+  s.innerHTML = "";
+  for (var i = 1; i <= g.n; i++){
+    var o = document.createElement("option");
+    o.value = i; o.textContent = i === 1 ? "1 — só este" : i + " cópias";
+    s.appendChild(o);
+  }
+  papelCopias = Math.min(papelCopias, g.n);
+  s.value = papelCopias;
+  $("juntoCampo").classList.toggle("hide", !mesmos.length);
+  var lista = $("juntoLista");
+  lista.innerHTML = "";
+  mesmos.forEach(function(it){
+    var l = document.createElement("label"), c = document.createElement("input");
+    c.type = "checkbox"; c.checked = papelJunto.indexOf(it.id) >= 0;
+    c.addEventListener("change", function(){
+      papelJunto = papelJunto.filter(function(x){ return x !== it.id; });
+      if (c.checked) papelJunto.push(it.id);
+      variosChave = ""; draw(); pushLater();
+    });
+    l.appendChild(c); l.appendChild(document.createTextNode(it.nome || "sem nome"));
+    lista.appendChild(l);
+  });
+  var total = papelCopias + papelJunto.length;
+  $("variosNota").textContent = "Cabem " + g.n + " na folha " + folhaAtual.nome + (g.land ? " deitada" : "") +
+    ". " + (total > 1 ? "O PDF sai com " + Math.min(total, g.n) + " lado a lado, cada um com a sua moldura de recorte." : "");
+}
+$("copias").addEventListener("change", function(){
+  papelCopias = Math.max(1, parseInt(this.value, 10) || 1);
+  variosChave = ""; draw(); pushLater();
+});
+$("cantos").addEventListener("input", function(){
+  var v = parseInt(this.value, 10);
+  papelCantos = isNaN(v) ? 0 : Math.max(0, Math.min(30, v));
+  draw(); pushLater();
+});
+$("numerar").addEventListener("change", function(){
+  numerarPontos = this.checked ? 1 : 0;
+  draw(); pushLater();
+});
+$("fita").addEventListener("change", function(){
+  papelFita = this.checked ? 1 : 0;
   draw(); pushLater();
 });
 ["paperW","paperH"].forEach(function(id){

@@ -323,6 +323,39 @@ function legendaCoube(pdf, plano, usadas){
   return true;
 }
 
+/* ---- várias na mesma folha --------------------------------------------
+
+   Um marca-página de 5 × 18 cm sai numa A4 sozinho, e sobra folha para mais
+   três. Quantos cabem é uma grade simples: a área útil da folha (embaixo do
+   cabeçalho, em cima do rodapé) dividida pelo papel da peça mais 6 mm de
+   folga para a tesoura. A folha deita quando deitada couberem mais. */
+var COPIA_GAP = 6;
+
+/* O que o papel da peça pede além da medida: quantas cópias saem na mesma
+   folha e que outros moldes vão junto, o raio dos cantos e se leva o furo da
+   fita — o recorte de um marca-página. Moram com o molde, como o papel. */
+var papelCopias = 1, papelJunto = [], papelCantos = 0, papelFita = 0;
+var numerarPontos = 0;   // a ordem dos pontos de ponto reto, numerada no PDF
+var FITA_DIAM = 5, FITA_DIST = 12;   // mm: o furo da fita e a distância dele à borda
+
+// o furo da fita, no meio do lado curto de cima (ou da esquerda, deitado)
+function furoFita(){
+  var pa = paperMM();
+  return pa.w <= pa.h ? { x: pa.w / 2, y: FITA_DIST, r: FITA_DIAM / 2 }
+                      : { x: FITA_DIST, y: pa.h / 2, r: FITA_DIAM / 2 };
+}
+
+function gradeCopias(R, land){
+  var W = folhaW(land), H = folhaH(land), g = COPIA_GAP;
+  var uw = W - PDF_SIDE * 2, uh = H - PDF_TOP - footMM();
+  var cols = Math.max(0, Math.floor((uw + g) / (R.w + g))), rows = Math.max(0, Math.floor((uh + g) / (R.h + g)));
+  return { land: land, cols: cols, rows: rows, n: cols * rows, pageW: W, pageH: H };
+}
+function copiasCabem(R){
+  var a = gradeCopias(R, false), b = gradeCopias(R, true);
+  return b.n > a.n ? b : a;
+}
+
 function pdfFit(R){
   var land = R.w > R.h;
   var pageW = folhaW(land), pageH = folhaH(land);
