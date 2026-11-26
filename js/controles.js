@@ -229,6 +229,11 @@ function mostraSel(){
   if (algo && chave !== ultimaSel) app.classList.remove("painelAberto", "fechado");
   ultimaSel = chave;
   $("selVazio").classList.toggle("hide", !!algo);
+  if (!algo){
+    var pa = paperMM();
+    $("selResumo").textContent = "Papel " + fmt(pa.w / 10) + " × " + fmt(pa.h / 10) + " cm" +
+      (photo.off ? " · sem foto" : " · foto " + fmt(photo.w / 10) + " × " + fmt(photo.h / 10) + " cm");
+  }
   $("selCab").classList.toggle("hide", bloco || !(piece || foto));
   if (piece && !bloco){
     $("selNome").textContent = el.kind === "text" ? (el.text || "texto") : nomePeca(el);
