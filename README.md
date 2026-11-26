@@ -6,18 +6,40 @@ Você define o papel de fundo, encaixa a foto no tamanho em que ela será impres
 posiciona as peças bordadas por cima, e baixa um PDF com o molde de furos na escala exata do
 material.
 
-A aplicação é o arquivo `index.html`: HTML, CSS e JavaScript em um único arquivo, sem build e
-sem backend. Ao lado dele há um único arquivo de dados, `catalogos.js`, com os catálogos de cor
-das marcas de linha — dado puro, sem lógica nenhuma. A tela é um editor: trilho de ícones à esquerda que abre um painel, barra de cima
-que muda conforme o que está selecionado, e o papel no centro sobre uma mesa com réguas em
-centímetros. O `layout.html` na raiz é a maquete dessa arrumação, com os controles inertes —
-serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `cartela.html`
-é a outra página irmã: a ferramenta que lê as cores de uma cartela de linha e alimenta o
-`catalogos.js`.
+A aplicação não tem build nem backend. O `index.html` traz só a página; o estilo mora em
+`css/app.css` e o código em `js/`, um arquivo por área, carregados em ordem pelo próprio
+`index.html` como scripts comuns — o que um arquivo usa ao carregar tem de estar num arquivo
+anterior. Por serem scripts comuns, e não módulos, o app continua abrindo com dois cliques no
+`index.html`, sem servidor:
+
+| arquivo | o que tem |
+|---|---|
+| `js/base.js` | utilidades, os desenhos prontos, o estado do molde e as linhas que você tem |
+| `js/estante.js` | onde o molde é guardado no navegador, e a estante de moldes |
+| `js/cor.js` | cor em Lab, k-médias e o casamento de cor com meada de cartela |
+| `js/linhas.js` | fio por linha, a linha de cada peça e o catálogo das marcas |
+| `js/medidas.js` | espaçamento, medidas próprias, papel e foto |
+| `js/desenho.js` | como cada peça vira quadradinhos: símbolo, imagem, palavra, padrão |
+| `js/geometria.js` | caixas, furos, contagem, e o molde repartido em folhas |
+| `js/tela.js` | o desenho na tela: papel, foto, pontos, réguas |
+| `js/gravar.js` | gravar e restaurar o molde, e o desfazer |
+| `js/controles.js` | painéis e barra de cima: criar peças e mexer nelas |
+| `js/toque.js` | arrastar, pinçar, laçar e acender ponto a ponto |
+| `js/pdf.js` | entregar arquivos e montar o PDF do molde |
+| `js/fontes.js` | a lista de fontes com amostra |
+| `js/vista.js` | zoom, mover a vista e as guias |
+| `js/paineis.js` | painel da linha, alinhar, estante na tela, arquivo do molde e o começo |
+
+Ao lado há um arquivo de dados, `catalogos.js`, com os catálogos de cor das marcas de linha —
+dado puro, sem lógica nenhuma. A tela é um editor: trilho de ícones à esquerda que abre um
+painel, barra de cima que muda conforme o que está selecionado, e o papel no centro sobre uma
+mesa com réguas em centímetros. O `cartela.html` é a página irmã: a ferramenta que lê as cores
+de uma cartela de linha e alimenta o `catalogos.js`.
 
 ## O que ele faz
 
-- **Papel**: A4, A5, A3, quadrado, 20×30, 15×20 ou medidas próprias, em retrato ou paisagem.
+- **Papel**: A4, A5, A3, quadrado, 20×30, 15×20, marca-página (5×15, 5×18, 6×20) ou medidas
+  próprias, em retrato ou paisagem.
 - **Foto**: tamanhos de revelação comuns (10×15, 9×13, 13×18, 15×21, quadrado, polaroid) ou
   medida própria, arrastável sobre o papel, com imagem opcional só para visualizar.
 - **Peças bordadas**: quantas quiser, cada uma sendo uma palavra, um símbolo, uma imagem em
@@ -82,6 +104,27 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   são só os dois controles que ficam desligados. O **trocar** põe outro arquivo na mesma peça
   sem ela sair do lugar nem mudar de linha; como a imagem nova é outro desenho, o ajuste ponto a
   ponto dela não sobrevive, e o botão pergunta antes.
+- **Moldura de blocos**: blocos de colcha de retalhos bordados em volta da foto — estrela,
+  estrela de 8 pontas, cata-vento, losango, moinho, cruz, trilha, flor, aliança ou todos
+  **sortidos**. É uma peça só, e não um bloco por peça: vinte blocos soltos seriam vinte
+  peças para alinhar, e a primeira esbarrada desmancharia o espaçamento. Ela conta sozinha
+  quantos blocos vão em cada lado para a foto caber na abertura com a **margem** pedida, e
+  se refaz quando a foto muda de tamanho ou gira, sempre centrada nela.
+
+  Cada bloco é desenhado em três papéis — fundo, pontas e miolo —, e não em três cores. A
+  peça tem uma paleta como a do gráfico colorido, e o bloco de número i usa as linhas
+  i·3 + 1, + 2 e + 3, dando a volta nela: com **3 cores** todos os blocos saem iguais; com
+  **6**, eles se alternam em dois esquemas, e junto com os blocos sortidos se alternando em
+  outro ritmo a moldura sai variada como uma colcha, sem ninguém pintar bloco por bloco. As
+  cores de fábrica são casadas com a meada mais próxima da cartela, e a aba **linha** troca
+  cada uma pela sua. Legenda por letra, conta de fio e ajuste ponto a ponto valem como no
+  gráfico — e o ajuste agora acende com a linha escolhida na lista, como ela promete.
+- **Faixa (marca-página)**: um motivo repetido em fileira — medalhão, cruzes, losangos,
+  flocos, ziguezague, qualquer bloco de retalho ou qualquer símbolo. Nasce de pé no meio do
+  papel, com motivos bastantes para correr o comprimento dele com 1 cm de folga em cada
+  ponta: num papel de marca-página, é o marca-página pronto. **Repetir**, **espaço**,
+  **tamanho** e **deitada** ajustam a fileira, que cresce a partir do meio para não sair do
+  eixo. Com mais de uma cor, os motivos se alternam entre as linhas.
 - **Altura**: é a altura da **letra maiúscula**, contada em quadradinhos e medida na fonte, não
   na palavra escrita. Era a caixa de tinta da palavra — e essa caixa sobe com o "l" e desce com
   o "g", então "amor" e "alegria" na mesma altura saíam com letras de tamanhos bem diferentes,
@@ -94,29 +137,77 @@ serve para experimentar mudanças de layout sem tocar no desenho nem no PDF. O `
   letra por letra é o jeito comum e rompe as ligaduras da cursiva, e ligadura é o que faz a
   palavra parecer escrita à mão. Há também **espaçamento entre letras**, contado em
   quadradinhos, que é o que resolve cursiva fechando em letra pequena.
-- **Fontes**: 40 famílias do Google Fonts agrupadas por caráter — caligrafia fina, cursiva
+- **Fontes**: 35 famílias do Google Fonts agrupadas por caráter — caligrafia fina, cursiva
   encorpada, letra de mão, serifada itálica, gótica, pixel e bloco. A escolha é por amostra,
-  não por nome: cada linha mostra a sua palavra escrita naquela fonte e, ao lado, a mesma
-  palavra já em quadradinhos, que é o que vira furo. Com busca e filtro por grupo. Os cartões
-  pedem a fonte só quando chegam à vista, então abrir a lista não baixa as 40 famílias.
+  não por nome: cada cartão mostra a sua palavra escrita naquela fonte e, embaixo, a mesma
+  palavra já em quadradinhos **na altura da peça**, que é exatamente o que vira furo. Com busca
+  e filtro por grupo. Os cartões pedem a fonte só quando chegam à vista, então abrir a lista
+  não baixa as 35 famílias.
+
+  Cada fonte tem a **altura a partir da qual fica legível** em quadradinho, medida escrevendo a
+  mesma palavra em todas elas: 12 para a maioria, 20 ou 24 para as caligrafias finas, em que a
+  minúscula tem um terço da maiúscula. O cartão diz esse número, e fica laranja quando a peça
+  está abaixo dele; na barra de cima, o campo de altura fica marcado e explica por quê. A palavra
+  continua saindo na altura pedida — o aviso é para a letra borrada não parecer defeito do app.
+  A fonte de fábrica é a **Dancing Script**, legível desde 12. Cinco fontes saíram por não
+  ficarem legíveis em altura nenhuma (League Script, Mrs Saint Delafield, Herr Von Muellerhoff,
+  Monsieur La Doulaise e Rouge Script); molde gravado com uma delas abre igual e, refeito, passa
+  para a parecida.
+
+  Para virar quadradinho, a palavra é lida em até nove encaixes da grade — deslocada zero, um
+  terço e dois terços de quadradinho em cada eixo — e fica a leitura mais limpa: a de menor
+  erro somado, com multa para cada pedaço solto de traço. Um traço da largura de um quadradinho
+  que caía metade em cada coluna sumia ou engordava; deslocado um terço, vira linha.
 - **Linhas**: o painel é o catálogo das marcas — 391 cores da Anchor e 455 da DMC — numa
   fileira de marcas e uma grade. Cada quadradinho traz o **código impresso dentro**, que é o
-  que se pede na loja. **Cada peça tem a sua linha**: tocar num quadradinho diz que você tem
-  aquela linha e já pinta a peça selecionada com ela, e a lista de peças mostra um ponto da cor
-  de cada uma, para ver o arranjo inteiro de uma vez. É comparando duas linhas lado a lado no
-  arranjo que a escolha se decide. Tocar de novo desmarca. A busca aceita código ou nome.
+  que se pede na loja. A aba tem **dois lugares**, porque são duas coisas diferentes:
+
+  - **aplicar na peça**: tocar numa cor pinta a peça selecionada, e só. **Cada peça tem a sua
+    linha**, e a lista de peças mostra um ponto da cor de cada uma, para ver o arranjo inteiro
+    de uma vez — é comparando duas linhas lado a lado que a escolha se decide. As cores que
+    estão na sua caixa têm um ponto no canto.
+  - **minha caixa**: tocar numa cor diz que você tem aquela linha, ou que não tem mais — a
+    peça não muda. Aqui também se cadastram **várias de uma vez**, colando os códigos (00268
+    acha a 268 da Anchor; código que não existe é dito pelo nome), e a linha fora de cartela.
+
+  Antes um toque fazia as duas coisas: experimentar uma cor na peça enchia a caixa de linhas
+  que você não tem. A linha de fábrica, que era uma cor de tela sem código, agora é a meada
+  mais próxima da cartela. A busca aceita código ou nome.
 
   As cores saem **por tom**, não por número: a família vem do matiz, em faixas de 15°, e
   dentro dela a escala vai do claro ao escuro, com os neutros no fim — é o que faz a grade
   ler como cartela e deixa os tons vizinhos lado a lado. O botão **por código** troca para a
   ordem numérica quando você já sabe o número que procura.
 
-  O que você marcou vira a marca **minhas**, a primeira da fileira; ali tocar numa cor só a
-  põe na peça, sem tirar da caixa — tirar se faz na marca de onde ela veio. Fica guardado no
-  navegador à parte do molde, e não some quando você recomeça um desenho. Para a meada que não
-  está em cartela nenhuma, o cadastro de **linha avulsa** no pé do painel: marca, código e cor.
+  O que está na caixa vira a marca **minhas**, a primeira da fileira, nos dois lugares. Fica
+  guardado no navegador à parte do molde, e não some quando você recomeça um desenho. Para a
+  meada que não está em cartela nenhuma, o cadastro de **linha avulsa** em minha caixa: marca,
+  código e cor.
   Ela nasce marcada, entra em **minhas** junto com as outras e aparece também na marca
   **avulsas** — onde desmarcar apaga de vez, porque ela só existe por você ter cadastrado.
+- **O que cada número vale**: os campos da barra contam quadradinhos, que é como o desenho é
+  feito, e ao lado de cada um aparece o que ele vale no papel — a altura da letra em
+  centímetros, o tamanho do símbolo, a largura da imagem, o lado do bloco da moldura. Traço e
+  sensibilidade, que não são medida, dizem o efeito numa palavra (*médio*, *grosso*;
+  *engorda*, *afina*). O espaçamento entre furos, que decide o tamanho de tudo, ganhou três
+  atalhos com nome — delicado 2 mm, padrão 2,5 mm, firme 3 mm —, aparece o tempo todo no
+  rodapé, e a aba molde mostra o efeito dele com os números de agora. No computador a barra de
+  cima quebra em duas linhas em vez de esconder campos para lá da borda.
+- **Onde as peças ficam**: o molde novo nasce vazio, e cada peça nova nasce reta, num lugar
+  livre — embaixo da foto, que é onde vai o nome; se ali não couber, em cima e depois dos
+  lados —, sem encostar na foto nem nas outras peças. Mexer na altura, na fonte, no texto ou
+  na largura faz a peça crescer em volta do próprio centro, e não a partir do canto: o que foi
+  alinhado continua alinhado. A foto que muda de tamanho ou gira cresce em volta do centro dela
+  e leva as peças junto, cada uma à mesma distância da borda mais perto. O papel que muda leva
+  o arranjo inteiro para o lugar equivalente da folha nova e, quando ele cabe, para dentro
+  dela. O nome do molde acompanha a primeira palavra até você escrever um.
+- **Furos colados**: dentro de uma peça os furos guardam o espaçamento, mas entre duas peças
+  ninguém garantia nada — um nome encostado na moldura e dois furos caíam a um milímetro um do
+  outro, e no papel essa tira rasga. Quando um furo fica a menos de 2 mm de um furo de outra
+  peça (ou a menos de 80% do espaçamento, num molde mais fino que isso), a barra de cima avisa
+  em vermelho e a região aparece tracejada na tela. Furo exatamente no mesmo lugar não avisa:
+  é um furo só, usado pelas duas peças. A busca roda quando a peça para de andar, e não a
+  cada movimento do arraste.
 - **Posicionar com precisão**: as setas do teclado movem a peça selecionada de meio milímetro, ou
   de cinco com Shift — com a foto selecionada, movem a foto. Na aba peças, três botões alinham a
   peça: centralizar na foto, centralizar no papel, alinhar pela base da foto — e, quando há uma
@@ -278,11 +369,11 @@ do app e o app não depende dela.
 
 Nenhuma. Tudo que o app precisa está no repositório, e ele funciona sem rede:
 
-- **As 40 fontes** ficam em `fonts/`, uma por família, no subconjunto latino e no peso que o
-  app usa (0,94 MB somadas). O navegador só baixa a fonte que for realmente usada. Isso não é
+- **As 35 fontes** ficam em `fonts/`, uma por família, no subconjunto latino e no peso que o
+  app usa (0,89 MB somadas). O navegador só baixa a fonte que for realmente usada. Isso não é
   só conforto offline: a grade é amostrada a partir do traço da fonte, então uma fonte que não
   chega faz o canvas desenhar numa cursiva genérica e o molde sair errado **sem avisar**.
-  Créditos e licenças em [`fonts/LICENCAS.txt`](fonts/LICENCAS.txt) — 37 sob SIL Open Font
+  Créditos e licenças em [`fonts/LICENCAS.txt`](fonts/LICENCAS.txt) — 32 sob SIL Open Font
   License 1.1 e 3 sob Apache 2.0.
 - **jsPDF 2.5.1** está em `vendor/jspdf.umd.min.js` (MIT, cabeçalho de licença no próprio
   arquivo). Antes vinha do cdnjs, o que deixava a entrega final do app — o molde em PDF —
@@ -297,7 +388,7 @@ Nenhuma. Tudo que o app precisa está no repositório, e ele funciona sem rede:
   a mesma cor do `Blanc`. Mandando a cartela da DMC em PDF, essas cores podem ser refeitas do
   mesmo jeito que as da Anchor. Em qualquer caso é referência de tela: monitor, luz e lote
   mudam a cor do fio na mão.
-- **Os três ícones** dos botões de ação são SVG embutidos no `index.html`, vindos do projeto
+- **Os três ícones** dos botões de ação são SVG embutidos no `index.html` e em `js/`, vindos do projeto
   [material-design-icons](https://github.com/google/material-design-icons) do Google, sob
   Apache License 2.0. São três caminhos de ~300 bytes: não há fonte de ícones nem biblioteca.
 

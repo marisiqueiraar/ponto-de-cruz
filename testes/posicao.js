@@ -13,6 +13,7 @@ catch (e){
 }
 const alvo = "file://" + require("path").resolve(__dirname, "..", "index.html");
 
+const comecaComPalavra = require("./comeco.js");
 let falhas = 0;
 const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falhas++; };
 const perto = (a, b, t) => Math.abs(a - b) <= (t === undefined ? 0.051 : t);
@@ -36,6 +37,7 @@ function caixa(el, mm){
   const pg = await nav.newPage({ viewport: { width: 1280, height: 820 } });
   await pg.goto(alvo);
   await pg.waitForTimeout(2300);
+  await comecaComPalavra(pg);
 
   const estado = async () => {
     await pg.waitForTimeout(600);          // a gravação é adiada em 400 ms
@@ -59,6 +61,12 @@ function caixa(el, mm){
   await pg.waitForTimeout(300);
   await pg.click(".chip");
   await pg.waitForTimeout(300);
+  // inclinada de propósito: a palavra nasce reta, e o caso difícil dos botões
+  // de alinhar é a peça girada — a caixa sem girar deslocaria o centro
+  await pg.fill("#rot", "-4");
+  await pg.dispatchEvent("#rot", "input");
+  await pg.waitForTimeout(300);
+  await pg.evaluate(() => document.activeElement.blur());   // as setas são da peça, não do campo
 
   // ---- o passo da seta é exatamente meio milímetro -----------------------
   let a = await estado();
@@ -123,8 +131,8 @@ function caixa(el, mm){
      "centralizar na foto: centro da peça em " + (cx.x + cx.w/2).toFixed(2) +
      " mm, centro da foto em " + (s.foto.x + s.foto.w/2).toFixed(2));
 
-  // a peça do app nasce inclinada em -4°: se a conta usasse a caixa sem girar,
-  // o centro sairia deslocado. É esse o erro que este caso pega.
+  // a peça foi inclinada em -4° lá no começo: se a conta usasse a caixa sem
+  // girar, o centro sairia deslocado. É esse o erro que este caso pega.
   ok(s.els[0].rot !== 0, "e a peça está inclinada (" + s.els[0].rot + "°), que é o caso difícil");
 
   // ---- centralizar no papel ----------------------------------------------

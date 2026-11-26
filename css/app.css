@@ -1,0 +1,562 @@
+/* As 40 famílias moram aqui: sem rede, o canvas desenharia numa cursiva
+   genérica do sistema e o molde sairia errado sem avisar, porque a grade é
+   amostrada a partir do traço da fonte. O navegador só baixa a que for usada.
+   Licenças e créditos em fonts/LICENCAS.txt */
+@font-face{font-family:"Alex Brush";src:url("../fonts/alex-brush.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Allura";src:url("../fonts/allura.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Bad Script";src:url("../fonts/bad-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Berkshire Swash";src:url("../fonts/berkshire-swash.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Caveat";src:url("../fonts/caveat.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Cedarville Cursive";src:url("../fonts/cedarville-cursive.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Cormorant Garamond";font-style:italic;src:url("../fonts/cormorant-garamond.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Courgette";src:url("../fonts/courgette.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Dancing Script";src:url("../fonts/dancing-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"EB Garamond";font-style:italic;src:url("../fonts/eb-garamond.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Grand Hotel";src:url("../fonts/grand-hotel.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Great Vibes";src:url("../fonts/great-vibes.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Homemade Apple";src:url("../fonts/homemade-apple.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Indie Flower";src:url("../fonts/indie-flower.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Italianno";src:url("../fonts/italianno.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Kaushan Script";src:url("../fonts/kaushan-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Lobster";src:url("../fonts/lobster.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Marck Script";src:url("../fonts/marck-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Norican";src:url("../fonts/norican.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Pacifico";src:url("../fonts/pacifico.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Parisienne";src:url("../fonts/parisienne.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Petit Formal Script";src:url("../fonts/petit-formal-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Pinyon Script";src:url("../fonts/pinyon-script.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Pirata One";src:url("../fonts/pirata-one.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Pixelify Sans";src:url("../fonts/pixelify-sans.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Playfair Display";font-style:italic;src:url("../fonts/playfair-display.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Press Start 2P";src:url("../fonts/press-start-2p.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Sacramento";src:url("../fonts/sacramento.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Satisfy";src:url("../fonts/satisfy.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Shadows Into Light";src:url("../fonts/shadows-into-light.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Silkscreen";src:url("../fonts/silkscreen.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Tangerine";src:url("../fonts/tangerine.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"UnifrakturMaguntia";src:url("../fonts/unifrakturmaguntia.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"VT323";src:url("../fonts/vt323.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Yellowtail";src:url("../fonts/yellowtail.woff2") format("woff2");font-display:swap}
+/* Casca no modelo de editor: trilho de ícones, um painel, barra de cima que
+   muda com a seleção, e a mesa com o papel no centro. Os controles são os
+   mesmos de antes — só mudaram de lugar. */
+:root{
+  --display:"Silkscreen","Courier New",monospace;
+  --paper:#EDF4FB;
+  --ink:#384959;
+  --ink-soft:#6A89A7;
+  --mat:#384959;
+  --accent:#88BDF2;
+  --lemon:#FFE566;
+  --lemon-deep:#B3B347;
+  --danger:#BE5103;
+  --line:#C9DCEF;
+  --mesa:#DCE9F6;
+  --rail:72px;
+  --panel:300px;
+  --top:56px;
+  --foot:36px;
+  /* espessura das réguas: o tique grande (9px), 2px de respiro e o rótulo de
+     dois dígitos (~14px na Silkscreen de 9px) — abaixo disso o número da
+     régua da esquerda sai cortado */
+  --rule:26px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+html,body{height:100%}
+/* O app ocupa a tela inteira, então é o body que precisa recuar do entalhe e
+   da barra de gestos: com box-sizing:border-box o height:100% já desconta o
+   padding, e num aparelho sem recorte os quatro env() valem zero. */
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  padding:env(safe-area-inset-top) env(safe-area-inset-right)
+          env(safe-area-inset-bottom) env(safe-area-inset-left);
+  font-family:"Segoe UI",Roboto,-apple-system,system-ui,sans-serif;
+  font-size:15px;line-height:1.5;overflow:hidden;
+}
+button{font-family:inherit;color:inherit;cursor:pointer}
+/* :focus-visible e não :focus — o anel é para quem anda de Tab, não para quem
+   acabou de clicar. Vem depois das regras de cada botão para vencer no empate. */
+button:focus-visible,.chip:focus-visible,.cat:focus-visible,.rail button:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px}
+.hide{display:none!important}
+
+.app{
+  height:100%;display:grid;
+  grid-template-columns:var(--rail) var(--panel) minmax(0,1fr);
+  grid-template-rows:var(--top) minmax(0,1fr) var(--foot);
+  grid-template-areas:"top top top" "rail panel mesa" "foot foot foot";
+}
+
+/* ---- barra de cima ------------------------------------------------- */
+.top{grid-area:top;display:flex;align-items:center;background:#fff;
+  border-bottom:1px solid var(--line);padding-right:12px;min-width:0}
+.brand{width:var(--rail);flex:0 0 auto;height:100%;border-right:1px solid var(--line);
+  display:flex;flex-direction:column;align-items:center;justify-content:center}
+.brand b{font-family:var(--display);font-weight:400;font-size:14px;letter-spacing:.02em}
+.brand i{display:block;width:26px;height:4px;background:var(--lemon);margin-top:3px}
+
+.tools{display:flex;align-items:center;gap:6px;flex:1 1 auto;min-width:0;
+  overflow-x:auto;overflow-y:hidden;padding:0 10px;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 18px),transparent 100%);
+  mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 18px),transparent 100%)}
+.tools::-webkit-scrollbar{height:0}
+.tools fieldset,.tools .grp{display:flex;align-items:center;gap:8px;border:0;margin:0;padding:0;flex:0 0 auto}
+.paleta .sl{display:flex;align-items:center;gap:8px;width:100%;padding:5px 7px;margin:2px 0;
+  border:1px solid var(--line);border-radius:6px;background:#fff;text-align:left;cursor:pointer}
+.paleta .sl:hover{border-color:var(--ink-soft)}
+.paleta .sl.on{border-color:var(--lemon-deep);background:var(--lemon)}
+.paleta .sl.off{opacity:.45}
+.paleta .sl i{width:16px;height:16px;border-radius:3px;border:1px solid rgba(56,73,89,.25);flex:0 0 auto}
+.paleta .sl .lt{font-family:var(--display);font-size:12px;width:13px;flex:0 0 auto;color:var(--ink)}
+.paleta .sl .nm{flex:1 1 auto;font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.paleta .sl .qt{font-family:var(--display);font-size:11px;color:var(--ink-soft);flex:0 0 auto}
+.paleta .sl .olho{flex:0 0 auto;border:0;background:transparent;padding:2px 4px;cursor:pointer;
+  color:var(--ink-soft);line-height:1}
+.paleta .sl .olho svg{width:16px;height:16px;fill:currentColor;display:block}
+
+.tools .sep{width:1px;height:26px;background:var(--line);flex:0 0 auto}
+.tools .none{font-family:var(--display);font-size:12px;color:var(--ink-soft);white-space:nowrap}
+
+/* Os campos da barra de cima. O seletor mora preso a .tools porque a régua
+   também chama os seus tiques de .t: solto, o padding, a borda e o raio daqui
+   caíam em cima deles e cada tique virava uma pastilha de 16px. */
+.tools .t{display:inline-flex;align-items:center;gap:5px;height:36px;padding:0 7px;flex:0 0 auto;
+  background:#fff;border:1px solid var(--line);border-radius:6px;white-space:nowrap}
+.tools .t > span{font-family:var(--display);font-size:10px;color:var(--ink-soft);letter-spacing:0}
+.tools .t input[type=number]{width:44px;height:26px;padding:0 4px;border:0;background:transparent;
+  font-family:var(--display);font-size:13px;color:var(--ink);text-align:right}
+.tools .t input[type=number]:focus{outline:2px solid var(--accent);border-radius:3px}
+.tools .t select{height:26px;border:0;background:transparent;font-size:14px;color:var(--ink);max-width:150px}
+.tools .t.txt input[type=text]{width:96px;height:26px;border:0;background:transparent;font-size:15px;color:var(--ink)}
+.tools .t.fnt{padding:0 9px}
+/* o que o número vale: centímetros, ou uma palavra para os que não são medida */
+.tools .t .cm{font-family:var(--display);font-weight:400;font-size:10px;color:var(--ink-soft);
+  letter-spacing:0;padding-right:2px}
+.tools .t .cm:empty{display:none}
+.tools .t.fnt select{font-size:16px;max-width:118px}
+#fontBtn{height:26px;max-width:130px;border:0;background:transparent;padding:0;
+  font-size:17px;line-height:1;color:var(--ink);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;text-align:left}
+
+/* ---- escolha de fonte com amostra ----------------------------------- */
+.pop{position:fixed;z-index:60;width:410px;max-height:min(560px,calc(100vh - 90px));
+  background:#fff;border:1px solid var(--line);border-radius:8px;
+  box-shadow:0 12px 40px rgba(56,73,89,.28);display:flex;flex-direction:column;overflow:hidden}
+.pop .busca{padding:10px;border-bottom:1px solid var(--line);flex:0 0 auto}
+.pop .busca input{height:36px;font-size:14px}
+.pop .grupos{display:flex;gap:5px;overflow-x:auto;padding:8px 10px;border-bottom:1px solid var(--line);
+  scrollbar-width:none;flex:0 0 auto}
+.pop .grupos::-webkit-scrollbar{height:0}
+.pop .grupos button{flex:0 0 auto;height:28px;padding:0 10px;border:1px solid var(--line);
+  border-radius:15px;background:#fff;font-family:var(--display);font-size:9px;
+  letter-spacing:.02em;color:var(--ink-soft);white-space:nowrap}
+.pop .grupos button.on{background:var(--mat);border-color:var(--mat);color:#fff}
+.pop .lista{overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:5px;flex:1 1 auto;min-height:0}
+.pop .vazio{padding:18px 10px;font-size:13.5px;color:var(--ink-soft)}
+
+.fcard{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;width:100%;padding:8px 10px;text-align:left;
+  border:1px solid transparent;border-radius:7px;background:#fff;min-height:52px}
+.fcard:hover{background:var(--paper)}
+.fcard.on{border-color:var(--mat);box-shadow:inset 4px 0 0 var(--lemon)}
+.fcard .amostra{flex:1 1 auto;min-width:0;font-size:23px;line-height:1.15;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fcard canvas{flex:0 0 auto;order:4;image-rendering:pixelated;max-width:100%;height:auto;margin-top:2px}
+.fcard .nome{flex:0 0 96px;font-family:var(--display);font-size:8.5px;color:var(--ink-soft);
+  line-height:1.35;text-align:right;overflow-wrap:anywhere}
+/* a altura mínima ocupa uma linha só dela, embaixo do nome, e fica laranja
+   quando a peça está abaixo dela */
+.fcard .min{flex:1 1 100%;order:3;font-size:11px;color:var(--ink-soft)}
+.fcard.baixa .min{color:var(--danger);font-weight:600}
+.tools .t.alerta{border-color:var(--danger);box-shadow:inset 0 -3px 0 var(--danger)}
+
+.tbtn{height:36px;padding:0 12px;flex:0 0 auto;border:1px solid var(--line);border-radius:6px;
+  background:#fff;font-family:var(--display);font-size:11px;letter-spacing:.02em;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:7px}
+.tbtn:hover{border-color:var(--ink-soft)}
+.tbtn svg{width:16px;height:16px;fill:currentColor;flex:0 0 auto}
+.tbtn.on{background:var(--lemon);border-color:var(--lemon-deep)}
+.tbtn.danger{color:var(--danger);border-color:var(--line);padding:0 10px}
+.tbtn.icon{padding:0 10px}
+.tbtn[disabled]{opacity:.35;cursor:default}
+.tbtn[disabled]:hover{border-color:var(--line)}
+
+/* ---- diálogo ------------------------------------------------------- */
+.modal{position:fixed;inset:0;z-index:50;background:rgba(56,73,89,.45);
+  display:flex;align-items:center;justify-content:center;padding:16px}
+.modal .card{background:#fff;border-radius:8px;max-width:420px;width:100%;
+  padding:22px 22px 18px;box-shadow:0 10px 40px rgba(56,73,89,.35)}
+.modal h3{font-family:var(--display);font-size:15px;font-weight:400;letter-spacing:.02em;
+  margin:0 0 12px;color:var(--ink)}
+.modal p{margin:0 0 10px;font-size:14.5px;line-height:1.5}
+.modal p.warn{color:var(--danger)}
+.modal .acts{display:flex;gap:10px;margin-top:18px}
+.modal .acts button{flex:1 1 0;height:44px;border-radius:6px;font-family:var(--display);
+  font-size:11px;letter-spacing:.02em;border:1px solid var(--line);background:#fff;color:var(--ink)}
+.modal .acts button.perigo{background:var(--danger);border-color:var(--danger);color:#fff}
+.modal .so{display:block;width:100%;margin-top:14px;border:0;background:none;padding:0;
+  text-align:left;font-size:13.5px;color:var(--ink-soft);text-decoration:underline}
+.tbtn.danger:hover{border-color:var(--danger)}
+
+.right{margin-left:auto;display:flex;align-items:center;gap:10px;flex:0 0 auto;padding-left:8px}
+.fit{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;max-width:220px;
+  border:1px solid var(--line);border-radius:6px;background:#fff;
+  font-size:13px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fit .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:0 0 auto}
+.fit.tight{border-color:var(--lemon-deep);border-left-width:4px}
+.fit.tight .dot{background:var(--lemon-deep)}
+.fit.multi{border-color:var(--accent);border-left-width:4px}   /* mais de uma folha não é erro */
+.fit.over{background:var(--danger);border-color:var(--danger);color:#fff;max-width:none;
+  flex:0 0 auto}   /* o aviso que decide a impressão nunca é truncado */
+.fit.over .dot{background:#fff}
+#pdf{height:36px;padding:0 16px;border:1px solid var(--lemon-deep);border-radius:6px;
+  background:var(--lemon);color:var(--ink);font-family:var(--display);font-size:11px;
+  letter-spacing:.02em;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+#pdf svg{width:17px;height:17px;fill:currentColor}
+
+/* ---- trilho -------------------------------------------------------- */
+.rail{grid-area:rail;background:#fff;border-right:1px solid var(--line);
+  padding:8px 6px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.rail button{width:100%;padding:9px 0 7px;border:0;border-radius:7px;background:transparent;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  font-family:var(--display);font-size:9px;letter-spacing:.02em;color:var(--ink-soft)}
+.rail button svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.6}
+.rail button:hover{background:var(--paper)}
+.rail button.on{background:var(--lemon);color:var(--ink)}
+
+/* ---- painel -------------------------------------------------------- */
+.panel{grid-area:panel;background:#fff;border-right:1px solid var(--line);
+  overflow-y:auto;padding:16px 14px 28px}
+.pane{display:none}
+.pane.on{display:block}
+.panel h2{font-family:var(--display);font-size:13px;font-weight:400;letter-spacing:.03em;
+  margin:0 0 14px;color:var(--ink)}
+.field{margin-bottom:14px}
+label{display:block;font-size:13px;color:var(--ink-soft);margin-bottom:5px}
+label b{font-family:var(--display);font-weight:400;color:var(--ink)}
+input[type=text],input[type=number],select{width:100%;height:40px;padding:0 10px;
+  border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);
+  font-size:15px;font-family:inherit}
+input[type=file]{width:100%;font-size:13px;color:var(--ink-soft)}
+input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--mat);height:28px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rule{height:1px;background:var(--line);margin:16px 0}
+.note{font-size:12.5px;color:var(--ink-soft);margin:6px 0 0;line-height:1.45}
+.note.mal{color:var(--danger)}
+.dim{opacity:.45;pointer-events:none}
+.wide{width:100%;height:40px;border:1px solid var(--mat);border-radius:6px;background:#fff;
+  color:var(--mat);font-family:var(--display);font-size:11px;letter-spacing:.02em;margin-bottom:10px;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.wide svg{width:16px;height:16px;fill:currentColor}
+.wide.danger{border-color:var(--danger);color:var(--danger)}
+.num{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0}
+.num span{font-size:13px;color:var(--ink-soft)}
+.num strong{font-family:var(--display);font-weight:400;font-size:14px}
+
+/* fio por linha */
+.fios{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.fio{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink)}
+.fio .pt{width:11px;height:11px;border-radius:50%;flex:0 0 auto;border:1px solid rgba(0,0,0,.2)}
+.fio .nm{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fio b{font-family:var(--display);font-weight:400;font-size:13px;flex:0 0 auto}
+.fio .vazio{color:var(--ink-soft)}
+
+/* alinhar a peça */
+.alinha{margin:0 0 12px}
+.alinha button{width:100%;min-height:38px;margin-bottom:6px;padding:0 10px;
+  border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);
+  font-size:13.5px;text-align:left}
+.alinha button:hover{border-color:var(--mat);background:var(--paper)}
+
+/* estante de moldes */
+.moldes{display:flex;flex-direction:column;gap:6px;margin-bottom:4px}
+.mold{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:6px;
+  overflow:hidden;background:#fff}
+.mold.on{border-color:var(--mat);box-shadow:inset 4px 0 0 var(--lemon)}
+.mold .abre{flex:1 1 auto;min-width:0;text-align:left;border:0;background:transparent;
+  padding:8px 11px;min-height:44px;color:var(--ink)}
+.mold .nm{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mold .qd{display:block;font-size:12px;color:var(--ink-soft);margin-top:2px}
+.mold .apaga{flex:0 0 auto;width:38px;border:0;border-left:1px solid var(--line);
+  background:transparent;color:var(--ink-soft);font-size:17px;line-height:1}
+.mold .apaga:hover{background:var(--danger);color:#fff}
+/* o PDF já gerado usa a mesma fileira: a miniatura na frente é o que deixa
+   reconhecer um molde sem abrir, que é a única coisa que o nome não diz */
+.mold .thumb{width:40px;flex:0 0 auto;align-self:stretch;object-fit:contain;
+  background:#fff;border-right:1px solid var(--line);padding:3px}
+.mold .baixa{flex:0 0 auto;width:34px;border:0;border-left:1px solid var(--line);
+  background:transparent;color:var(--ink-soft);line-height:0}
+.mold .baixa svg{width:16px;height:16px;fill:currentColor}
+.mold .baixa:hover{background:var(--paper);color:var(--ink)}
+
+/* lista de peças */
+.chips{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.chip{display:block;width:100%;text-align:left;border:1px solid var(--line);background:#fff;
+  border-radius:6px;padding:9px 11px;font-size:14px;color:var(--ink);min-height:40px}
+.chip.on{border-color:var(--mat);box-shadow:inset 4px 0 0 var(--lemon)}
+.chip .pt{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;
+  vertical-align:-1px;border:1px solid rgba(0,0,0,.2)}
+
+/* a cor que está na peça agora, no alto do painel */
+.atual{display:flex;align-items:center;gap:9px;margin:0 0 14px;font-size:13px;
+  color:var(--ink-soft);flex-wrap:wrap}
+.atual i{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1px solid var(--line)}
+.atual b{font-family:var(--display);font-weight:400;font-size:11px;color:var(--ink);
+  overflow-wrap:anywhere}
+
+/* abas dentro do painel: a linha passou a ter duas telas — a cor que está no
+   molde agora e o catálogo inteiro das marcas, que tem centenas de cores e
+   não pode ficar aberto o tempo todo por cima do resto. */
+.abas{display:flex;gap:5px;margin-bottom:14px}
+.abas button{flex:1 1 0;min-height:30px;padding:0 8px;border:1px solid var(--line);
+  border-radius:15px;background:#fff;font-family:var(--display);font-size:9px;
+  letter-spacing:.02em;color:var(--ink-soft)}
+.abas button.on{background:var(--mat);border-color:var(--mat);color:#fff}
+
+/* catálogo das marcas: num painel de 300 px uma bolinha de 34 px não cabe 400
+   vezes, então aqui a cor vira quadradinho em grade, com o código impresso
+   dentro. O visto fica numa tarja branca, que é o único fundo que se enxerga
+   sobre qualquer cor. */
+.ordem{margin:-4px 0 12px}
+.ordem button{flex:0 0 auto;padding:0 13px}
+.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:6px}
+.cat{position:relative;height:36px;padding:0;border-radius:5px;
+  border:1px solid rgba(56,73,89,.22);
+  font-family:var(--display);font-size:9px;letter-spacing:.02em;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  text-shadow:0 1px 2px rgba(0,0,0,.28)}
+.cat.on{border-color:var(--mat);box-shadow:0 0 0 2px var(--mat)}
+.cat.on::after{content:"\2713";position:absolute;right:1px;top:0;padding:0 1px;
+  font-size:9px;line-height:1.3;color:var(--mat);background:#fff;border-radius:3px;
+  text-shadow:none}
+.grade .vazio{grid-column:1/-1;font-size:12.5px;color:var(--ink-soft);margin:6px 0}
+/* na aplicação, o ponto no canto diz "está na sua caixa" sem prender o
+   olho como o tique da caixa */
+.cat.tem::before{content:"";position:absolute;right:3px;top:3px;width:6px;height:6px;border-radius:50%;
+  background:currentColor;opacity:.9}
+.abas.modo{margin-bottom:12px}
+#soPeca .note{margin-bottom:12px}
+.lote{display:grid;grid-template-columns:1fr;gap:8px}
+.lote textarea{width:100%;font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;resize:vertical}
+.lote select{height:36px}
+.lote button{height:40px;border:1px solid var(--mat);border-radius:6px;background:#fff;
+  font-family:var(--display);font-size:11px}
+.catfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin-top:14px;font-size:12.5px;color:var(--ink-soft)}
+.catfoot button{flex:0 0 auto;height:30px;padding:0 12px;border:1px solid var(--line);
+  border-radius:6px;background:#fff;font-family:var(--display);font-size:9px;color:var(--ink-soft)}
+.catfoot button.perigo{border-color:var(--danger);color:var(--danger)}
+
+/* cadastro de uma linha fora de cartela */
+.subtit{font-family:var(--display);font-weight:400;font-size:10px;letter-spacing:.03em;
+  color:var(--ink-soft);margin:0 0 9px}
+.avulsa{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.avulsa input[type=color]{width:100%;height:40px;padding:2px;border:1px solid var(--line);
+  border-radius:6px;background:#fff}
+.avulsa button{height:40px;border:1px solid var(--mat);border-radius:6px;background:#fff;
+  color:var(--mat);font-family:var(--display);font-size:10px;letter-spacing:.02em}
+.avulsa button:hover{background:var(--lemon);border-color:var(--lemon-deep)}
+
+.notes{font-size:14px;color:var(--ink-soft)}
+.notes ul{padding-left:18px;margin:0}
+.notes li{margin-bottom:9px}
+
+/* ---- mesa ---------------------------------------------------------- */
+.mesa{grid-area:mesa;position:relative;background:var(--mesa);overflow:hidden;min-width:0}
+.ruler{position:absolute;background:#fff;color:var(--ink-soft);font-size:9px;z-index:2;overflow:hidden}
+.ruler.h{top:0;left:var(--rule);right:0;height:var(--rule);border-bottom:1px solid var(--line)}
+.ruler.v{top:var(--rule);left:0;bottom:0;width:var(--rule);border-right:1px solid var(--line)}
+/* Os dois eixos seguem a mesma regra, senão o número de um deles descola do
+   seu tique: centrado no tique ao longo da régua, e a 11px da borda onde os
+   tiques nascem — 9px do tique grande mais 2px de respiro. */
+.ruler .t{position:absolute;display:block;padding:0;border:0;border-radius:0;
+  background:var(--line)}
+.ruler .l{position:absolute;font-family:var(--display);line-height:1;white-space:nowrap}
+.ruler.h .t{bottom:0;width:1px;height:5px}
+.ruler.h .t.big{height:9px}
+.ruler.h .l{bottom:11px;transform:translateX(-50%)}
+.ruler.v .t{right:0;height:1px;width:5px}
+.ruler.v .t.big{width:9px}
+.ruler.v .l{right:11px;transform:translateY(-50%)}
+.corner{position:absolute;top:0;left:0;width:var(--rule);height:var(--rule);background:#fff;
+  border-right:1px solid var(--line);border-bottom:1px solid var(--line);z-index:3}
+/* ---- guias ---------------------------------------------------------
+   A linha pontilhada atravessa a mesa inteira, e não só o papel: é assim que
+   ela serve de régua para o olho até na peça que ainda está fora da folha.
+   A faixa que se pega é mais larga que o risco, senão pegar uma guia de 1px
+   com o dedo seria sorte; o risco fica no meio dela. */
+.guias{position:absolute;top:var(--rule);left:var(--rule);right:0;bottom:0;
+  z-index:3;pointer-events:none;overflow:hidden}
+.guias .g{position:absolute;pointer-events:auto;touch-action:none}
+.guias .g.v{top:0;bottom:0;width:9px;margin-left:-4px;cursor:ew-resize}
+.guias .g.h{left:0;right:0;height:9px;margin-top:-4px;cursor:ns-resize}
+/* O pontilhado é desenhado, e não feito de borda tracejada: borda tracejada
+   muda de fase conforme o tamanho do elemento, e as guias ficariam com
+   tracinhos diferentes entre si. O risco é da cor da régua, e não da cor de
+   destaque do app, porque linha de bordar também é amarela — dois riscos
+   amarelos na tela seriam a peça e a guia disputando o mesmo significado. */
+.guias .g::before{content:"";position:absolute;background-repeat:repeat}
+.guias .g.v::before{left:4px;top:0;bottom:0;width:1px;
+  background-image:repeating-linear-gradient(180deg,var(--ink-soft) 0 3px,transparent 3px 7px)}
+.guias .g.h::before{top:4px;left:0;right:0;height:1px;
+  background-image:repeating-linear-gradient(90deg,var(--ink-soft) 0 3px,transparent 3px 7px)}
+/* o número é metade da guia: guia sem medida volta a ser chute */
+.guias .g i{position:absolute;font-family:var(--display);font-style:normal;font-size:9px;
+  line-height:1;padding:2px 3px;border-radius:3px;white-space:nowrap;
+  background:var(--lemon);color:var(--ink);box-shadow:0 1px 3px rgba(56,73,89,.25)}
+.guias .g.v i{top:3px;left:7px}
+.guias .g.h i{left:3px;top:7px}
+/* na mão o pontilhado vira risco cheio: é como a guia diz qual delas se mexeu */
+.guias .g.pega::before{background-image:none;background-color:var(--ink)}
+
+/* com as guias ligadas a régua deixa de ser enfeite: arrastar de dentro dela
+   solta uma guia na mesa */
+.mesa.guiando .ruler.h{cursor:ns-resize}
+.mesa.guiando .ruler.v{cursor:ew-resize}
+.mesa.guiando .ruler{touch-action:none}
+
+/* a mesa rola quando o papel cresce; margin:auto no filho centraliza sem
+   cortar as bordas, que é o defeito conhecido de centralizar com flex e
+   overflow ao mesmo tempo */
+.stage{position:absolute;top:var(--rule);left:var(--rule);right:0;bottom:0;
+  display:flex;overflow:auto;padding:20px;overscroll-behavior:contain}
+canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56,73,89,.25)}
+.stage.mao canvas{cursor:grab}
+.stage.mao.pegando canvas{cursor:grabbing}
+
+.zoom{position:absolute;right:14px;bottom:14px;z-index:4;display:flex;align-items:center;gap:2px;
+  background:#fff;border:1px solid var(--line);border-radius:7px;padding:3px}
+.zoom button{width:30px;height:28px;border:0;background:transparent;border-radius:5px;
+  font-family:var(--display);font-size:14px;color:var(--ink);display:inline-flex;
+  align-items:center;justify-content:center}
+.zoom button:hover{background:var(--paper)}
+.zoom button.on{background:var(--lemon)}
+.zoom button svg{width:16px;height:16px;fill:currentColor}
+.zoom #zVal{width:auto;padding:0 9px;font-size:11px;color:var(--ink-soft)}
+
+/* ---- rodapé -------------------------------------------------------- */
+.foot{grid-area:foot;background:#fff;border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:14px;padding:0 14px;
+  font-size:12.5px;color:var(--ink-soft);overflow:hidden;white-space:nowrap}
+.foot #modeHint{margin:0;overflow:hidden;text-overflow:ellipsis}
+.foot .saved{flex:0 0 auto;font-family:var(--display);font-size:10px}
+.foot .saved.cheia{background:var(--danger);color:#fff;padding:0 8px;border-radius:4px;
+  height:18px;display:inline-flex;align-items:center}
+.foot #areaOut{margin-left:auto}
+.foot .furos{border:1px solid var(--line);border-radius:4px;background:#fff;padding:0 7px;height:20px;
+  cursor:pointer;color:var(--ink-soft)}
+#out:not(:empty){padding-top:12px}
+#out img{max-width:100%;border:1px solid var(--line);border-radius:6px}
+#out a{color:var(--mat)}
+
+/* ---- modo ponto a ponto -------------------------------------------
+   Enquanto se acende e apaga quadradinho, os campos da peça saem da barra: no
+   celular eles roubam a altura de que a grade precisa, e a mão fica livre para
+   a grade, que é a única coisa que se está fazendo ali. Mexer na altura ou na
+   sensibilidade não custa mais o ajuste — ele é levado para o desenho novo —,
+   mas mudar a grade embaixo do dedo que a está acertando continua sendo o
+   caminho mais curto para se perder. */
+.app.editando .top{background:var(--lemon);border-bottom-color:var(--lemon-deep)}
+.app.editando .tools .t,
+.app.editando #ctlText,
+.app.editando #ctlSym,
+.app.editando #ctlImg,
+.app.editando #ctlPat,
+.app.editando #ctlPiece,
+.app.editando #ctlNone{display:none!important}
+.app.editando #ctlEdit{display:flex!important}
+.app.editando #ctlEditTxt{color:var(--ink)}
+/* a mira diz que dá para arrastar; com a mãozinha ligada quem manda é ela */
+.app.editando .stage:not(.mao) canvas{cursor:crosshair}
+.app.editando .tbtn,
+.app.editando #pdf{background:#fff}
+.app.editando .fit{background:#fff}
+.app.editando .fit.over{background:var(--danger)}
+
+/* No computador a barra de cima quebra em duas linhas quando os campos não
+   cabem numa só. Antes ela rolava escondida: numa palavra selecionada, espaço,
+   arco e inclinação ficavam para lá da borda, sem nada dizendo que estavam ali. */
+@media (min-width:861px){
+  .app{grid-template-rows:auto minmax(0,1fr) var(--foot)}
+  /* os botões da direita descem para a linha de baixo quando os campos
+     precisam da largura: campos em três linhas espremidas são piores que
+     campos numa linha e botões noutra */
+  .top{min-height:var(--top);padding-top:6px;padding-bottom:6px;flex-wrap:wrap;row-gap:6px}
+  .brand{align-self:stretch;height:auto}
+  .tools{flex:1 1 880px;flex-wrap:wrap;row-gap:6px;overflow:visible;-webkit-mask-image:none;mask-image:none}
+  .right{margin-left:auto}
+  /* fieldset tem largura mínima do conteúdo por padrão: sem o min-width:0 ele
+     não quebra, passa da barra e fica embaixo dos botões da direita */
+  .tools fieldset,.tools .grp{flex-wrap:wrap;row-gap:6px;flex:0 1 auto;min-width:0}
+}
+
+/* No celular a arrumação vira: mesa em cima, painel no meio, trilho como abas
+   no pé. A barra de cima quebra em duas linhas para o botão de baixar nunca
+   sair da tela, e o painel fecha ao tocar de novo na aba já aberta. */
+@media (max-width:860px){
+  .app{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:auto minmax(120px,1fr) 34vh 54px 28px;
+    grid-template-areas:"top" "mesa" "panel" "rail" "foot";
+  }
+  .app.fechado{grid-template-rows:auto minmax(120px,1fr) 0 54px 28px}
+  .app.fechado .panel{padding:0;overflow:hidden;border-top:0}
+
+  /* display:contents dissolve o agrupamento da direita, para cada peça da barra
+     poder ser ordenada sozinha: linha 1 traz o aviso de escala e o botão de
+     baixar, linha 2 traz as ações da peça e os campos que rolam. */
+  .top{flex-wrap:wrap;height:auto;padding:6px 8px;row-gap:6px;column-gap:6px}
+  .top::after{content:"";width:100%;height:0;order:3}
+  .brand{order:0;width:auto;height:32px;flex-direction:row;align-items:center;gap:7px;
+    border-right:0;padding:0 6px 0 2px}
+  .brand i{width:16px;height:4px;margin:0}
+  .right{display:contents}
+  .fit{order:1;flex:1 1 60px;min-width:0;max-width:none}
+  #pdf{order:2;padding:0 12px}
+  #hist{order:4;flex:0 0 auto}
+  #ctlActs{order:5;flex:0 0 auto}
+  /* No celular a barra rola, e o que rola para fora da máscara é o que estiver
+     por último. Entre dizer o que está laçado e poder apagar, fica o botão:
+     ele já traz a conta no rótulo, e os contornos na grade mostram o resto. */
+  #ctlGrupoTxt{display:none}
+  .tools{order:6;flex:1 1 90px;min-width:0;padding:0}
+
+  .rail{flex-direction:row;gap:0;padding:4px;border-right:0;
+    border-top:1px solid var(--line);overflow-x:auto;overflow-y:hidden}
+  .rail button{width:auto;flex:1 0 auto;min-width:50px;padding:5px 5px 4px}
+  .rail button svg{width:18px;height:18px}
+
+  .panel{border-right:0;border-top:1px solid var(--line);padding:14px 14px 20px}
+  /* ajustando ponto a ponto: a grade fica com a tela inteira — as abas e o
+     painel não servem para nada enquanto se acende quadradinho */
+  .app.editando{grid-template-rows:auto minmax(120px,1fr) 0 0 28px}
+  .app.editando .panel,
+  .app.editando .rail{padding:0;overflow:hidden;border:0}
+  .app.editando #hist button,
+  .app.editando #ctlActs button{height:44px;padding:0 14px}
+  .app.editando .zoom button{width:38px;height:36px}
+  .app.editando .zoom #zVal{font-size:11px}
+
+  /* a lista de fontes vira folha subindo de baixo */
+  .pop{left:0!important;right:0!important;top:auto!important;bottom:0!important;
+    width:100%!important;max-height:72vh;border-radius:14px 14px 0 0;
+    border-left:0;border-right:0;border-bottom:0;padding-top:8px}
+  .pop::before{content:"";display:block;width:38px;height:4px;border-radius:2px;
+    background:var(--line);margin:0 auto 6px;flex:0 0 auto}
+
+  .zoom{right:8px;bottom:8px;padding:2px;box-shadow:0 1px 6px rgba(56,73,89,.18)}
+  .zoom button{width:26px;height:26px;font-size:13px}
+  .zoom #zVal{padding:0 6px;font-size:10px}
+
+  .foot{gap:8px;font-size:11.5px}
+  .foot #areaOut,.foot .saved{display:none}
+  /* o aviso de memória cheia é a exceção: é no celular que a cota estoura
+     primeiro, e o rodapé escondido é o mesmo silêncio de antes */
+  .foot #gravado.cheia{display:inline-flex}
+}
+@media (max-width:420px){
+  .brand{display:none}
+  .foot #modeHint{font-size:11px}
+}
+

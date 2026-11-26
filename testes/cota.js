@@ -10,6 +10,7 @@ catch (e){
   catch (e2){ console.log("pulado: precisa do playwright e de um Chromium."); process.exit(0); }
 }
 const alvo = "file://" + require("path").resolve(__dirname, "..", "index.html");
+const comecaComPalavra = require("./comeco.js");
 let falhas = 0;
 const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falhas++; };
 
@@ -20,6 +21,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   pg.on("pageerror", e => erros.push(e.message));
   await pg.goto(alvo);
   await pg.waitForTimeout(2300);
+  await comecaComPalavra(pg);
 
   const rodape = () => pg.evaluate(() => {
     const g = document.getElementById("gravado");
@@ -72,6 +74,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   const cel = await nav.newPage({ viewport: { width: 360, height: 740 } });
   await cel.goto(alvo);
   await cel.waitForTimeout(2300);
+  await comecaComPalavra(cel);
   const antes = await cel.evaluate(() => getComputedStyle(document.getElementById("gravado")).display);
   ok(antes === "none", "no celular o \"salvo neste navegador\" fica escondido, como sempre foi");
   await cel.evaluate(() => {

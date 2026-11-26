@@ -13,6 +13,7 @@ const path = "file://" + require("path").resolve(__dirname, "..", "index.html");
 
 (async () => {
   const nav = await chromium.launch();
+  const comecaComPalavra = require("./comeco.js");
   let falhas = 0;
   const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falhas++; };
 
@@ -24,6 +25,7 @@ const path = "file://" + require("path").resolve(__dirname, "..", "index.html");
     pg.on("requestfailed", r => faltou.push(r.url().split("/").pop()));
     await pg.goto(path);
     await pg.waitForTimeout(2200);   // depois do redesenho cego das fontes
+    await comecaComPalavra(pg);
 
     // Arquivo faltando aqui quer dizer fonte que não chega, e fonte que não
     // chega faz o canvas desenhar numa cursiva genérica: o molde sai errado

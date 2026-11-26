@@ -16,6 +16,7 @@ catch (e){
   catch (e2){ console.log("pulado: precisa do playwright e de um Chromium."); process.exit(0); }
 }
 const alvo = "file://" + require("path").resolve(__dirname, "..", "index.html");
+const comecaComPalavra = require("./comeco.js");
 let falhas = 0;
 const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falhas++; };
 
@@ -37,6 +38,7 @@ const FAIXAS = png(120, 160, (x, y) => {
   pg.on("pageerror", e => erros.push(e.message));
   await pg.goto(alvo);
   await pg.waitForTimeout(2300);
+  await comecaComPalavra(pg);
 
   const peca = async (i) => {
     await pg.waitForTimeout(650);

@@ -13,6 +13,7 @@ catch (e){
   catch (e2){ console.log("pulado: precisa do playwright e de um Chromium."); process.exit(0); }
 }
 const alvo = "file://" + require("path").resolve(__dirname, "..", "index.html");
+const comecaComPalavra = require("./comeco.js");
 let falhas = 0;
 const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falhas++; };
 
@@ -23,6 +24,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   pg.on("pageerror", e => erros.push(e.message));
   await pg.goto(alvo);
   await pg.waitForTimeout(2300);
+  await comecaComPalavra(pg);
 
   // o molde gravado no navegador é a única janela para dentro do app: ele
   // guarda as células como elas estão, com a lista dos ajustes à mão junto

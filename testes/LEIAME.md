@@ -17,7 +17,7 @@ mudou". O `guias.js` confere as duas medidas ao
 mesmo tempo — os milímetros gravados e os pixels do risco na tela —, porque
 guia no lugar certo com o número errado engana mais do que guia nenhuma.
 
-`extrai.py` puxa do `index.html` os trechos que cada teste exercita e grava
+`extrai.py` emenda os arquivos de `js/` na ordem em que o `index.html` os carrega, puxa dali os trechos que cada teste exercita e grava
 `geo.js`, `pdfcode.js`, `estante.js` e `app.js` aqui ao lado (todos ignorados
 pelo git). Ela roda **sempre** antes dos testes, e não por capricho: a extração
 já ficou defasada uma vez, e os testes de PDF passaram uma rodada inteira
@@ -41,6 +41,12 @@ em todas as folhas.
 | `letra.js` | o espaçamento alarga a palavra sem mudar a altura, o arco levanta o meio acima das pontas (e o arco negativo inverte), e espelhar inverte as colunas sem mudar a grade e sobrevive ao Recalcular |
 | `ajuste.js` | o quadradinho aceso à mão sobrevive a mexer na altura, no traço e na fonte (e só o Recalcular o descarta), a mesma altura dá a mesma letra com e sem descendente, palavra nova nasce com o que está na barra de cima, e molde gravado antes tem o número da altura convertido sem mudar de tamanho |
 | `imagem.js` | a imagem vira quadradinho com a largura pedida e a proporção dela, o limiar corta na meia tinta, o inverter troca o claro pelo escuro, o desenho e a imagem sobrevivem a reabrir o navegador, trocar a imagem de uma peça guarda o lugar e a linha dela, e foto entra em várias cores enquanto logo entra em uma |
+| `lugar.js` | o molde novo nasce vazio; a peça nova nasce reta, num lugar livre embaixo da foto, sem encostar em nada; altura e texto mudam em volta do centro; a foto que muda leva as peças junto; o papel que muda leva o arranjo e o põe para dentro; o nome do molde acompanha a palavra até ser escrito à mão |
+| `colados.js` | furos de peças diferentes a 1 mm acendem o aviso e marcam a região na tela; furos no mesmo lugar e peças afastadas não avisam; o aviso some quando a peça se afasta |
+| `fontes.js` | são 35 fontes e nenhum arquivo das cinco que saíram é pedido; a palavra nasce na Dancing Script; o campo de altura avisa abaixo da altura mínima da fonte e para de avisar ao chegar nela; o cartão da lista diz a altura mínima e a amostra sai na altura da peça; molde com fonte que saiu abre igual e passa para a parecida |
+| `medidas.js` | a altura mostra o que vale em centímetros e acompanha o espaçamento; traço e sensibilidade dizem o efeito numa palavra; os atalhos de espaçamento e o rodapé; no computador, a 1280 e a 1440 px, nenhum campo da barra fica escondido nem embaixo dos botões |
+| `caixa.js` | em aplicar na peça o toque só pinta; em minha caixa o toque só marca e desmarca; várias de uma vez entram pelos códigos colados, com aviso do que já estava e do que não existe; a cor da caixa tem o ponto no canto na aplicação; a linha de fábrica é uma meada com código |
+| `padrao.js` | a moldura dá a volta na foto com a margem pedida e centrada nela, refaz-se quando a foto muda de tamanho, usa as linhas da paleta e reabre como foi deixada; a faixa nasce do comprimento do marca-página sem passar da borda, e repetir, espaço, deitada e cores mudam a fileira do jeito que dizem |
 | `grafico.js` | a imagem vira paleta de meadas de verdade da cartela pedida, o corte tira o fundo e o olho tira uma linha, mexer na largura NÃO sorteia meadas novas, tocar no catálogo troca só a linha escolhida, e o gráfico sobrevive a reabrir o navegador |
 | `grafico.test.js` | cada quadradinho do gráfico sai na cor da sua linha e com a letra dela dentro do quadradinho, molde sem gráfico não ganha letra nenhuma, e a legenda que não cabe no rodapé vira folha inteira |
 | `fio.js` | os metros na tela batem com a conta que a própria tela diz fazer, a conta responde ao espaçamento entre furos, e a soma por cor fecha com o total de pontos |
