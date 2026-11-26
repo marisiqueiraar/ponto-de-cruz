@@ -372,3 +372,9 @@ escolha, escolhi assim:
 - **A borda de cima do Instax** começa em 6 mm. É um chute com base na conta
   (sobram 24 mm entre cima e embaixo, e a de baixo é a grossa); por isso virou
   campo, e não número fixo. Deitada, a borda de cima fica à esquerda.
+
+**Testes.** O `textMatrix` é testado pelas promessas dos controles, e não por
+uma grade fixa: a forma exata das letras depende de como cada navegador
+desenha a fonte, e um teste que quebra sozinho a cada versão do Chromium
+acaba ignorado. A pinça usa dedos de verdade, pelo protocolo do Chromium,
+porque o evento de ponteiro sintético não deixa o app capturar o dedo.

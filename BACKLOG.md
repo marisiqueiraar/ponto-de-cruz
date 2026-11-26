@@ -3,6 +3,11 @@
 O que falta, em 18/09/2026. O que precisa de decisão sua está em
 [REVISAR.md](REVISAR.md).
 
+**Em 26/11/2026, todos os itens abertos foram feitos ou decididos** (riscados,
+com a data). As escolhas que fiz sozinho estão no [REVISAR.md](REVISAR.md),
+item 7. Ficaram abertos só dois limites dos testes, explicados na seção 7:
+comparar o PDF por imagem e rodar num celular de verdade.
+
 Ordem: quanto mais alto, mais muda a vida de quem borda.
 
 ---
@@ -165,7 +170,7 @@ Nada falta deste item.
   bloco laçado a barra esconde esses campos em vez de mexer em uma só das
   laçadas. É decisão de escopo, não limitação: está em
   [REVISAR.md](REVISAR.md), item 6.
-- **`sw.js` continua na raiz.** Ele existe só para desregistrar o service
+- ~~**`sw.js` continua na raiz.**~~ — decidido em 26/11/2026: fica, e o app instalável usa outro arquivo (`app-sw.js`). Ele existe só para desregistrar o service
   worker que o app React deixou para trás. Em algum momento todo mundo que
   abriu aquela versão já passou por aqui e ele pode sair — mas não há como
   saber quando, e o custo de mantê-lo é um arquivo de 1,5 KB.
@@ -213,7 +218,7 @@ para depois:
   desenhados.
 - ~~**A aba ajuda não fala da moldura nem da faixa.**~~ — feito em 26/11/2026. A explicação está só na
   aba peças e no README.
-- **O ajuste ponto a ponto com a linha escolhida não tem teste.** A mudança
+- ~~**O ajuste ponto a ponto com a linha escolhida não tem teste.**~~ — feito em 26/11/2026. A mudança
   (acender com a linha selecionada na aba linha, e não sempre com a primeira)
   foi conferida lendo o código, não dirigindo o navegador: o teste precisaria
   converter um quadradinho da peça em pixel de tela.
@@ -266,23 +271,28 @@ mudança de aplicativo:
 
 ## 7. Sobre os testes
 
-`testes/` cobre o repartir em folhas, a posição em cada folha, a emenda, a cor
-por peça, a estante, a montagem da tela no Chromium, as setas e botões de
-alinhar, as guias e o ímã delas, o arco e o espaçamento das letras, a conta de
-fio, o ajuste à mão que sobrevive à altura, o arraste que acende quadradinho, e
-o laço que move e apaga o bloco. São dezesseis conjuntos; `testes/roda.sh` roda
-todos. O que **não** existe:
+`testes/roda.sh` roda 41 conjuntos: o repartir em folhas, a posição em cada
+folha, a emenda, a cor por peça, a estante, a tela no Chromium, alinhar, as
+guias e o ímã, as letras, a conta de fio, o ajuste à mão, o laço, o ponto reto,
+a impressão, as peças, a caixa de linhas, o acompanhamento, a cor do papel, o
+app instalável, o OXS e as fotos. A lista de cada um está em
+[testes/LEIAME.md](testes/LEIAME.md).
 
-- Nada que exercite o desenho no canvas — `textMatrix()`, que transforma o
-  traço da fonte em quadradinhos, é o coração do app e não tem teste nenhum.
-  Um teste dele não é óbvio: o resultado depende de como o navegador rasteriza
-  a fonte, então comparar com uma matriz fixa quebraria sozinho.
-- Quase nada que exercite arrastar. `guias.js` arrasta com o mouse — puxa a
-  guia da régua e leva a peça até encostar nela —, e é o único. A pinça de dois
-  dedos e o modo ponto a ponto seguem sem teste, e `posicao.js` mexe na página
-  só pelo teclado e pelos botões.
+Em 26/11/2026 entraram os que faltavam:
+
+- ~~**`textMatrix()` sem teste.**~~ — feito em 26/11/2026: `gestos.js` confere
+  as promessas dos controles (altura da maiúscula, largura, espaço, arco,
+  traço, grade sem borda vazia) em vez de uma grade fixa, que mudaria com o
+  navegador.
+- ~~**Quase nada que exercite arrastar.**~~ — feito em 26/11/2026: `gestos.js`
+  arrasta a palavra com o mouse e faz a pinça com dois dedos de verdade (pelo
+  protocolo do Chromium), e `acompanha.js` arrasta marcando pontos.
+
+O que continua sem teste, e por quê:
+
 - Nada compara o PDF com uma imagem de referência. Os testes leem coordenadas
   de dentro do arquivo, o que pega o molde no lugar errado, mas não pega feio.
-- Nada roda num navegador de celular de verdade. `tela.js` usa um Chromium de
-  mesa numa janela de 360 px, que confere o layout mas não os limites do
-  aparelho — e é exatamente um desses limites que o item 1 desta lista teme.
+  Uma comparação por imagem quebraria a cada versão do jsPDF ou do Chromium.
+- Nada roda num navegador de celular de verdade. Os testes usam um Chromium de
+  mesa com tela de celular e toque emulado, que confere o layout e os gestos,
+  mas não os limites do aparelho. Isso só dá para ver no seu celular.
