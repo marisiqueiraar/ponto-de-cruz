@@ -53,6 +53,7 @@ em todas as folhas.
 | `impressao.js` | num marca-página a aba papel oferece até 3 na A4 e o outro molde do mesmo tamanho; o PDF sai numa folha só com três molduras de recorte; cantos e furo da fita ficam gravados e saem curvos no PDF; a moldura que passa do A5 cabe depois do botão; com a ordem pedida, os furos ganham número |
 | `pecas2.js` | os cinco desenhos novos de ponto reto viram peça sem furo colado; a palavra em ponto reto tem arco (fica mais alta) e espaço (fica mais larga); a moldura vai em volta da palavra, anda com ela e continua presa depois de recarregar; cores por bloco troca o esquema de um bloco só |
 | `tela2.js` | a peça encosta na borda de outra sem guia e a linha do ímã aparece; o 1:1 calibra com o cartão, grava a medida da tela e põe o zoom no tamanho real; o laço duplica (cópias com identidade nova, laçadas, 5 mm ao lado) e centraliza no papel; o desenho da peça fica guardado e se refaz quando ela muda; o espaço entre letras fica ligado no Chromium; no celular a barra de cima tem menos de 110 px |
+| `moldes2.js` | a caixa marca tenho pouco e acabou, a que acabou sai das minhas e as duas vão para a lista de compras, e a lista de fio avisa; o nome do molde só grava quando a digitação para; a estante fica por ordem de uso e abrir sem mexer não muda a hora; duplicar abre uma cópia com as mesmas peças; o mesmo arquivo aberto de novo não cria outro molde, a menos que o molde tenha mudado |
 | `padrao.js` | a moldura dá a volta na foto com a margem pedida e centrada nela, refaz-se quando a foto muda de tamanho, usa as linhas da paleta e reabre como foi deixada; a faixa nasce do comprimento do marca-página sem passar da borda, e repetir, espaço, deitada e cores mudam a fileira do jeito que dizem |
 | `grafico.js` | a imagem vira paleta de meadas de verdade da cartela pedida, o corte tira o fundo e o olho tira uma linha, mexer na largura NÃO sorteia meadas novas, tocar no catálogo troca só a linha escolhida, e o gráfico sobrevive a reabrir o navegador |
 | `grafico.test.js` | cada quadradinho do gráfico sai na cor da sua linha e com a letra dela dentro do quadradinho, molde sem gráfico não ganha letra nenhuma, e a legenda que não cabe no rodapé vira folha inteira |
@@ -65,7 +66,7 @@ em todas as folhas.
 | `papel.js` | digitar uma medida própria não passa por um papel de 1 mm: a guia e a foto ficam onde estavam, a medida fora do limite avisa em vermelho e é acertada ao sair do campo, e o molde volta com o que foi digitado; no Personalizado a orientação não troca largura por altura; foto maior que a folha não encolhe nada e avisa em vermelho nas duas abas e na barra de cima, com as duas medidas, enquanto não couber |
 | `guias.js` | a opção abre a cruz no meio do papel, a guia puxada da régua para em milímetro inteiro e some quando volta para a régua, o ímã encosta a peça na guia (e não encosta com a opção desligada), e papel menor não deixa guia medindo mentira |
 
-`amostra.js` não testa nada: gera um PDF de várias folhas, com quatro linhas
+`amostra.js` não testa nada (e lê os símbolos de `js/base.js`, para não mentir quando eles mudarem): gera um PDF de várias folhas, com quatro linhas
 diferentes, para olhar.
 
 ## O que não tem teste

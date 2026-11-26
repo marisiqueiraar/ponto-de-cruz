@@ -21,18 +21,16 @@ let thread = "#BE5103";
 function threadLabel(hex){ return ({"#BE5103":"Terracota","#384959":"Azul noite","#069494":"Verde agua"})[hex] || ""; }
 let sel = 0, totalCount = 0, totalHoles = 0;
 
-const SYMS = {
-  heart: [".XX...XX.","XXXX.XXXX","XXXXXXXXX","XXXXXXXXX",".XXXXXXX.","..XXXXX..","...XXX...","....X...."],
-  star: ["....X....","...XXX...","...XXX...","XXXXXXXXX",".XXXXXXX.","..XXXXX..","..XX.XX..",".XX...XX.","XX.....XX"]
+// os desenhos dos símbolos e a conta que os vira em grade vêm do próprio app,
+// e não de uma cópia: se os símbolos mudarem, a amostra muda junto
+const trecho = (arq, de, ate) => {
+  const t = fs.readFileSync(__dirname + "/../js/" + arq, "utf8");
+  const i = t.indexOf(de), j = t.indexOf(ate, i);
+  if (i < 0 || j < 0) throw new Error("não achei " + de + " em js/" + arq);
+  return t.slice(i, j + ate.length);
 };
-function matrixFromStrings(rows, scale){
-  const out = [];
-  rows.forEach(r => { for (let i = 0; i < scale; i++){
-    const linha = []; for (const ch of r) for (let j = 0; j < scale; j++) linha.push(ch === "X" ? 1 : 0);
-    out.push(linha);
-  }});
-  return out;
-}
+const SYMS = eval("(" + trecho("base.js", "var SYMS = {", "\n}").replace("var SYMS = ", "") + ")");
+const matrixFromStrings = eval("(" + trecho("desenho.js", "function matrixFromStrings(", "\n}") + ")");
 const els = [
   { kind:"sym", sym:"heart", scale:4, rot:0,  x: 60,  y: 275, cells: matrixFromStrings(SYMS.heart, 4),
     color: "#BE5103", colorName: "Terracota" },

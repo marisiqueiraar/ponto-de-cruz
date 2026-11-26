@@ -19,7 +19,7 @@ function celChar(v){ return (v | 0).toString(36); }
    com as células: é o desenho final, que abre igual mesmo que a conta de
    furos mude numa versão futura. */
 function packReto(el){
-  return { kind: "reto", uid: el.uid, alvo: el.alvo || "", x: el.x, y: el.y, rot: el.rot, flip: el.flip || 0,
+  return { kind: "reto", uid: uidDe(el), alvo: el.alvo || "", x: el.x, y: el.y, rot: el.rot, flip: el.flip || 0,
            color: el.color || "", colorName: el.colorName || "",
            desenho: el.desenho, medida: el.medida, passo: el.passo, opts: el.opts || {},
            texto: el.texto, font: el.font, img: el.img, nome: el.nome, inv: el.inv ? 1 : 0, modo: el.modo,
@@ -78,7 +78,7 @@ function unpackReto(r){
 
 function packEl(el){
   if (el.kind === "reto") return packReto(el);
-  var r = { kind: el.kind, uid: el.uid, alvo: el.alvo || "", x: el.x, y: el.y, rot: el.rot, manual: el.manual || 0,
+  var r = { kind: el.kind, uid: uidDe(el), alvo: el.alvo || "", x: el.x, y: el.y, rot: el.rot, manual: el.manual || 0,
             color: el.color || "", colorName: el.colorName || "",
             // a lista dos ajustes à mão vai junto com as células, e não no
             // lugar delas: as células são o desenho final, a lista é o que
@@ -247,8 +247,10 @@ function marcaMemoria(cheia, oQue){
 
 function saveState(){
   var it = itemAtual() || criaMolde(nomeSugerido());
+  var antes = null, corpo;
+  try { antes = localStorage.getItem(it.dados); } catch (e0){}
   try {
-    localStorage.setItem(it.dados, JSON.stringify({
+    localStorage.setItem(it.dados, corpo = JSON.stringify({
       v: 1,
       paper: { size: $("paperSize").value, or: $("paperOr").value,
                w: $("paperW").value, h: $("paperH").value, folha: folhaAtual.id,
@@ -263,7 +265,9 @@ function saveState(){
   } catch (e){ marcaMemoria(true, "o molde"); return; }
   marcaMemoria(false);
   salvaOrigens();
-  it.em = Date.now();
+  // a hora na estante é a da última mudança de verdade: gravar de novo o
+  // mesmo molde (ao trocar de molde, por exemplo) não conta como mexer nele
+  if (corpo !== antes || !it.em) it.em = Date.now();
   it.pecas = els.length;
   /* O nome que o app sugeriu acompanha as peças até você escrever um: antes
      ele era tirado uma vez só, da primeira palavra, e ficava — o molde

@@ -16,14 +16,24 @@ function renderFios(){
     $("fiosConta").textContent = "";
     return;
   }
+  // o estado na caixa, pelo nome que a lista mostra ("Anchor 268")
+  var est = {};
+  minhas.concat(acabadas()).forEach(function(k){ est[nomeLinha(k)] = estadoLinha(k); });
   lista.forEach(function(l){
     var d = document.createElement("div");
     d.className = "fio";
+    var e = est[l.nome];
     d.title = l.pontos.toLocaleString("pt-BR") + " pontos";
     var pt = document.createElement("span");
     pt.className = "pt"; pt.style.background = l.hex;
     var nm = document.createElement("span");
     nm.className = "nm"; nm.textContent = l.nome;
+    if (e === "pouco" || e === "acabou"){
+      var av = document.createElement("span");
+      av.className = "estoque " + e;
+      av.textContent = e === "pouco" ? "tenho pouco" : "acabou";
+      nm.appendChild(document.createTextNode(" ")); nm.appendChild(av);
+    }
     var qt = document.createElement("b");
     qt.textContent = fmt(l.metros) + " m";
     d.appendChild(pt); d.appendChild(nm); d.appendChild(qt);

@@ -232,7 +232,10 @@ de uma cartela de linha e alimenta o `catalogos.js`.
     de uma vez — é comparando duas linhas lado a lado que a escolha se decide. As cores que
     estão na sua caixa têm um ponto no canto.
   - **minha caixa**: tocar numa cor diz que você tem aquela linha, ou que não tem mais — a
-    peça não muda. Aqui também se cadastram **várias de uma vez**, colando os códigos (00268
+    peça não muda. Três botões escolhem o que o toque marca: **tenho**, **tenho pouco** ou
+    **acabou**. A que acabou sai das suas linhas (não dá para bordar com ela), mas fica riscada na
+    caixa e entra, com as que estão no fim, numa **lista de compras** logo abaixo da grade; a lista
+    de fio da aba molde avisa quando o molde usa uma linha que está no fim ou acabou. Aqui também se cadastram **várias de uma vez**, colando os códigos (00268
     acha a 268 da Anchor; código que não existe é dito pelo nome), e a linha fora de cartela.
 
   Antes um toque fazia as duas coisas: experimentar uma cor na peça enchia a caixa de linhas
@@ -391,9 +394,12 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   Ctrl+Shift+Z. Um arraste de controle deslizante vira um passo só, não dezenas.
 - **Vários moldes**: a aba **moldes** guarda quantos você quiser, cada um com nome e data, e
   troca entre eles. Antes havia um molde só: começar um desenho novo apagava o anterior sem
-  volta. O molde que já estava gravado entra na lista como está, sem nada ser copiado.
+  volta. O molde que já estava gravado entra na lista como está, sem nada ser copiado. A lista
+  fica por **ordem de uso** (o molde aberto sobe para o topo), a data é a da última mudança de
+  verdade, e **duplicar este molde** faz uma cópia com foto e tudo, que já abre.
 - **Arquivo do molde**: salvar e abrir um `.json` com tudo dentro — papel, foto, peças, linhas e
-  os ajustes feitos ponto a ponto. É o único jeito de o trabalho ir para outro aparelho ou voltar
+  os ajustes feitos ponto a ponto. Abrir o arquivo de um molde que já está na estante, igual,
+  abre o que está lá em vez de criar outro. É o único jeito de o trabalho ir para outro aparelho ou voltar
   depois de você limpar os dados do site; o navegador, sozinho, não leva nada para lugar nenhum.
 - **Memória local**: papel, foto, peças, posições, inclinações, linha de cada peça e os ajustes
   feitos ponto a ponto ficam guardados no navegador e voltam ao reabrir. As células são gravadas como estão,
@@ -500,7 +506,7 @@ o arranjo, `…/molde/foto/v1/<id>` para a foto de fundo e `…/molde/imagens/v1
 imagens das peças, uma por id de peça e só as que alguma peça ainda usa. O molde gravado antes de existir estante
 continua nas chaves sem `<id>`, e entra no índice apontando para elas: numa cota quase cheia,
 copiar a foto para migrar é a diferença entre migrar e perdê-la. `ponto-e-letra/linhas/v1` guarda
-as linhas que você marcou como suas — inclusive as avulsas, que moram só aí, já que não vêm de
+as linhas que você marcou como suas, com o que está no fim ou acabou — inclusive as avulsas, que moram só aí, já que não vêm de
 catálogo nenhum. Não há servidor nem conta — o trabalho não acompanha você
 para outro aparelho ou outro navegador, e some se você limpar os dados do site, a menos que você
 salve o arquivo do molde. A foto é guardada reduzida (1600 px no maior lado, JPEG), porque é só guia de

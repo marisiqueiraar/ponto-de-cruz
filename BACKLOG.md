@@ -127,17 +127,17 @@ Nada falta deste item.
 
 ## 5. Coisas que apareceram no caminho
 
-- **Importar o mesmo arquivo duas vezes cria dois moldes.** Não há detecção de
+- ~~**Importar o mesmo arquivo duas vezes cria dois moldes.**~~ — feito em 26/11/2026: se um molde da estante tem exatamente o mesmo desenho, ele é que abre; para ter cópia, há o duplicar. Não há detecção de
   repetido nem opção de substituir. Pode ser o certo (é uma cópia mesmo), mas
   ninguém decidiu.
-- **Não dá para duplicar um molde** dentro do app. Dá para salvar o arquivo e
+- ~~**Não dá para duplicar um molde**~~ — feito em 26/11/2026. dentro do app. Dá para salvar o arquivo e
   abrir de volta, que é o caminho torto para a mesma coisa.
-- **Não dá para reordenar a estante.** A lista é por ordem de criação, com o
+- ~~**Não dá para reordenar a estante.**~~ — feito em 26/11/2026: agora é por ordem de uso, e a hora mostrada é a da última mudança de verdade. A lista é por ordem de criação, com o
   mais novo no topo, e não por uso.
 - ~~**A legenda do PDF corta em três linhas.**~~ — já resolvido: a legenda que não cabe no rodapé vira folha à parte. Passando disso, ela escreve
   "+ N linhas". Precisaria de uns vinte tons distintos para acontecer, então é
   rede de segurança, não limitação sentida.
-- **O nome do molde grava a cada tecla digitada.** Sem espera. É uma escrita
+- ~~**O nome do molde grava a cada tecla digitada.**~~ — feito em 26/11/2026. Sem espera. É uma escrita
   pequena no índice, mas é uma escrita por tecla.
 - ~~**Arrastar num molde grande anda a 20 quadros por segundo.**~~ — feito em 26/11/2026: o desenho de cada peça fica guardado numa imagem e só se refaz quando ela muda; com 13 mil pontos, desenhar caiu de 12 ms para 2 ms. Medido: 50 ms por
   movimento com 16 375 pontos em cinco peças, contra 17 ms num molde leve. Fui
@@ -157,7 +157,7 @@ Nada falta deste item.
 - ~~**As guias ficam de fora do desfazer.**~~ — decidido em 26/11/2026: continuam de fora (o porquê está no [REVISAR.md](REVISAR.md), item 7). Elas são móvel de tela, como o zoom,
   e não entram na pilha — tirar uma guia sem querer se resolve puxando outra.
   Ficam gravadas com o molde, isso sim.
-- **`testes/amostra.js` tem uma cópia dos desenhos dos símbolos.** Ele desenha
+- ~~**`testes/amostra.js` tem uma cópia dos desenhos dos símbolos.**~~ — feito em 26/11/2026. Ele desenha
   sem abrir o app, então repete a tabela de `js/base.js`. Se os símbolos mudarem,
   a amostra fica mentindo sem ninguém notar.
 - ~~**O laço move e apaga, e só.**~~ — feito em 26/11/2026: agora também duplica o bloco e o leva para o meio do papel. Girar e espelhar o bloco continuam de fora. Girar, espelhar, duplicar e os botões de
@@ -231,7 +231,7 @@ Da [REVISAO.md](REVISAO.md), o que não entrou na reforma de 25/11/2026:
   padrões prontos de linha (colmeia, folha com nervuras, sashiko), palavra em
   ponto atrás seguindo o traço da fonte, imagem virando contorno, furos livres,
   moldura e marca-página em ponto reto. Plano na seção 5½.
-- **"Tenho pouco" e "acabou" na caixa de linhas** (C5): hoje é só tenho / não
+- ~~**"Tenho pouco" e "acabou" na caixa de linhas**~~ — feito em 26/11/2026. (C5): hoje é só tenho / não
   tenho.
 - ~~**Tamanho real na tela**~~ — feito em 26/11/2026. (D5): a tela não sabe quantos pixels tem um
   milímetro. Dá para calibrar encostando um cartão de crédito (85,6 mm) na tela

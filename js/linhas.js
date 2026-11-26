@@ -90,7 +90,10 @@ function corCel(el, v){
 // A caixa de linhas é uma marca como as outras na fileira, e a primeira
 // quando tem algo dentro: é a lista de onde se escolhe cor para o molde.
 function chavesDaVista(){
-  if (marcaAtiva === "minhas") return minhas.slice();
+  // na caixa, as que acabaram continuam à vista em "minhas", para poderem
+  // voltar; na aplicação, não, porque não há com o que bordar
+  if (marcaAtiva === "minhas")
+    return minhas.concat(linhaModo === "caixa" ? acabadas() : []);
   var m = CAT.filter(function(x){ return x.id === marcaAtiva; })[0];
   return m ? m.cores.map(function(c){ return m.id + ":" + c[0]; }) : null;
 }
@@ -262,20 +265,22 @@ function listaCatalogo(){
   var frag = document.createDocumentFragment();
   vistas.forEach(function(k){
     var reg = catIdx[k];
-    var tem = minhas.indexOf(k) >= 0;
-    var rot = rotulo(reg) + (reg.nome ? " — " + reg.nome : "");
+    var tem = minhas.indexOf(k) >= 0, est = estadoLinha(k);
+    var rot = rotulo(reg) + (reg.nome ? " — " + reg.nome : "") +
+              (est === "pouco" ? " (tenho pouco)" : est === "acabou" ? " (acabou)" : "");
     var b = document.createElement("button");
     b.type = "button";
     // na caixa, o tique diz "tenho"; na aplicação, um ponto discreto diz o
     // mesmo sem parecer que a cor está escolhida — e em "minhas" todas são
-    b.className = "cat" + (tem ? (caixa ? " on" : (soMinhas ? "" : " tem")) : "");
+    b.className = "cat" + (tem ? (caixa ? " on" : (soMinhas ? "" : " tem")) : "") +
+                  (est === "pouco" ? " pouco" : est === "acabou" && caixa ? " acabou" : "");
     b.style.background = reg.hex;
     b.style.color = tinta(reg.hex);
     b.dataset.k = k;
     b.textContent = reg.code || "—";
     b.title = rot + " " + reg.hex;
     b.setAttribute("aria-label", rot);
-    if (caixa) b.setAttribute("aria-pressed", tem ? "true" : "false");
+    if (caixa) b.setAttribute("aria-pressed", est ? "true" : "false");
     frag.appendChild(b);
   });
   grade.appendChild(frag);
@@ -292,35 +297,44 @@ function aplicaNaPeca(k){
   if (c) usaCor(c.hex, rotulo(c));
 }
 
+/* O que o toque na caixa marca: "tenho", "pouco" ou "acabou". Tocar numa
+   linha que já está no estado escolhido tira ela da caixa — é o mesmo gesto
+   de antes, só que agora com três estados em vez de um. */
+var toqueCaixa = "tenho";
+
+function acabadas(){
+  return Object.keys(estoque).filter(function(k){ return estoque[k] === "acabou" && catIdx[k]; });
+}
+
+function poeEstado(k, novo){
+  var i = minhas.indexOf(k);
+  if (novo === "tenho" || novo === "pouco"){
+    if (i < 0) minhas.push(k);
+  } else if (i >= 0) minhas.splice(i, 1);
+  if (novo === "pouco" || novo === "acabou") estoque[k] = novo;
+  else delete estoque[k];
+}
+
 // pôr na caixa ou tirar dela, e mais nada: a peça não muda
 function alternaNaCaixa(k, botao){
   var c = catIdx[k];
   if (!c) return;
-  var i = minhas.indexOf(k);
-  if (i >= 0){
-    minhas.splice(i, 1);
-    // uma avulsa só existe porque você a cadastrou: desmarcar é apagar, senão
-    // ela ficaria parada na grade sem ser de ninguém
-    if (avulsas[k]){
-      delete avulsas[k];
-      montaIndice();
-      salvaLinhas();
-      montaMarcas(); montaFonteLinhas(); listaCatalogo(); contaLinhas();
-      return;
-    }
-  } else {
-    minhas.push(k);
-  }
-  var tem = i < 0;
-  if (botao){
-    botao.classList.toggle("on", tem);
-    botao.setAttribute("aria-pressed", tem ? "true" : "false");
+  var novo = estadoLinha(k) === toqueCaixa ? "" : toqueCaixa;
+  poeEstado(k, novo);
+  // uma avulsa só existe porque você a cadastrou: tirar da caixa é apagar,
+  // senão ela ficaria parada na grade sem ser de ninguém
+  if (!novo && avulsas[k]){
+    delete avulsas[k];
+    montaIndice();
+    salvaLinhas();
+    montaMarcas(); montaFonteLinhas(); listaCatalogo(); contaLinhas(); renderFios();
+    return;
   }
   salvaLinhas();
   montaMarcas();
-  // em "minhas", a que saiu da caixa sai da grade também
-  if (marcaAtiva === "minhas" || !minhas.length) listaCatalogo();
+  listaCatalogo();
   contaLinhas();
+  renderFios();
 }
 
 /* Várias de uma vez: a lista de códigos que se tem anotada, colada num campo
@@ -340,7 +354,7 @@ function poeLote(marca, texto){
       if (catIdx[marca + ":" + tentativas[i]]) k = marca + ":" + tentativas[i];
     if (!k){ faltou.push(cod); return; }
     if (minhas.indexOf(k) >= 0){ ja++; return; }
-    minhas.push(k); novas++;
+    poeEstado(k, "tenho"); novas++;      // a que tinha acabado volta para a caixa
   });
   salvaLinhas(); montaMarcas(); montaFonteLinhas(); listaCatalogo(); contaLinhas();
   return { novas: novas, ja: ja, faltou: faltou };
@@ -399,10 +413,17 @@ function guardaAvulsa(){
 
 function contaLinhas(){
   var n = minhas.length;
-  $("catConta").textContent = n === 0 ? "nenhuma linha marcada"
+  var pouco = minhas.filter(function(k){ return estoque[k] === "pouco"; }), fim = acabadas();
+  $("catConta").textContent = (n === 0 ? "nenhuma linha marcada"
                             : n === 1 ? "1 linha marcada"
-                            : n + " linhas marcadas";
-  $("catLimpar").classList.toggle("hide", n === 0);
+                            : n + " linhas marcadas") +
+    (pouco.length ? " · " + pouco.length + " com pouco" : "") +
+    (fim.length ? " · " + fim.length + (fim.length === 1 ? " acabou" : " acabaram") : "");
+  // a lista de compras: o que acabou primeiro, depois o que está no fim
+  var compra = fim.concat(pouco).map(nomeLinha);
+  $("catCompra").classList.toggle("hide", !compra.length);
+  $("catCompra").textContent = compra.length ? "Para comprar: " + compra.join(", ") + "." : "";
+  $("catLimpar").classList.toggle("hide", n === 0 && !fim.length);
   $("catLimpar").textContent = "limpar";
   $("catLimpar").classList.remove("perigo");
 }

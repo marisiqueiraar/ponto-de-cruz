@@ -388,9 +388,14 @@
     </div>
 
     <div id="soCaixa" class="hide">
-      <p class="note">Aqui você diz que linhas tem. Toque numa cor para pôr na caixa ou tirar
-      dela — a peça não muda. O que estiver na caixa aparece na marca <b>minhas</b>, e o gráfico
+      <p class="note">Aqui você diz que linhas tem. Toque numa cor para marcar, e de novo para
+      tirar — a peça não muda. O que estiver na caixa aparece na marca <b>minhas</b>, e o gráfico
       colorido pode ser feito só com elas.</p>
+      <div class="abas toque" id="toqueCaixa" aria-label="o que o toque marca">
+        <button type="button" class="on" data-est="tenho" aria-pressed="true">tenho</button>
+        <button type="button" data-est="pouco" aria-pressed="false">tenho pouco</button>
+        <button type="button" data-est="acabou" aria-pressed="false">acabou</button>
+      </div>
       <h3 class="subtit">várias de uma vez</h3>
       <div class="lote">
         <select id="loteMarca" aria-label="Marca das linhas"></select>
@@ -418,6 +423,7 @@
         <span id="catConta">nenhuma linha marcada</span>
         <button type="button" id="catLimpar" class="hide">limpar</button>
       </div>
+      <p class="note compra hide" id="catCompra"></p>
       <div id="soCaixa2" class="hide">
       <div class="rule"></div>
       <h3 class="subtit">uma linha fora de cartela</h3>
@@ -505,6 +511,7 @@
       <input id="moldeNome" type="text" autocomplete="off" spellcheck="false" placeholder="sem nome">
     </div>
     <button id="moldeNovo" class="wide">começar um molde novo</button>
+    <button id="moldeDup" class="wide">duplicar este molde</button>
     <div class="moldes" id="moldeLista"></div>
 
     <div class="rule"></div>

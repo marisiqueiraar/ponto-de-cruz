@@ -321,3 +321,19 @@ escolha, escolhi assim:
   funciona.
 - **No celular**, desfazer/refazer e os botões da peça descem para a barra das
   ferramentas: a barra de cima caiu de 185 px para 95 px num iPhone 13.
+
+**Moldes e linhas.**
+- **Tenho pouco e acabou**: o toque na caixa marca o estado escolhido em três
+  botões, e tocar de novo tira a linha. Pensei num toque que gira entre os
+  quatro estados, mas aí tirar uma linha da caixa pediria três toques. "Acabou"
+  tira a linha das suas (o gráfico feito só com as minhas não a usa mais) e a
+  põe na lista de compras; "tenho pouco" continua valendo como tenho.
+- **Ordem da estante**: por uso — o molde que você abre sobe. Não fiz arrastar
+  para reordenar à mão: com a ordem de uso, o de todo dia já fica no topo.
+- **O mesmo arquivo duas vezes**: se um molde da estante tem exatamente o mesmo
+  desenho, ele abre e o aviso diz isso. Se você mexeu no molde depois de salvar
+  o arquivo, o arquivo entra como molde novo (é outra versão, e pode ser a que
+  você quer de volta).
+- **Duplicar** dá o nome "… (cópia)" e abre a cópia, para que a próxima mudança
+  não caia no original sem querer.
+- **O nome** grava meio segundo depois da última tecla, ou ao sair do campo.

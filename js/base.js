@@ -213,6 +213,10 @@ var CAT = [];
 var catIdx = {};
 var minhas = [];                                   /* chaves, na ordem em que foram marcadas */
 var avulsas = {};        /* "avulsa:3" -> {marca, code, hex} — linha que você cadastrou */
+/* O estoque de cada linha além do "tenho": "pouco" (está em `minhas`, dá para
+   usar, mas convém comprar) ou "acabou" (saiu de `minhas`, porque não dá mais
+   para bordar com ela, mas não foi esquecida: entra na lista de compras). */
+var estoque = {};
 var proxAvulsa = 1;
 var marcaAtiva = "";
 
@@ -260,7 +264,7 @@ function nomeLinha(k){ return rotulo(catIdx[k]); }
 function salvaLinhas(){
   try {
     localStorage.setItem(LINHAS_STORE,
-      JSON.stringify({ v: 1, tenho: minhas, avulsas: avulsas }));
+      JSON.stringify({ v: 1, tenho: minhas, avulsas: avulsas, estoque: estoque }));
   } catch (e){ /* janela anônima ou cota cheia: seguir sem memória */ }
 }
 
@@ -284,4 +288,17 @@ function carregaLinhas(){
   // um código que saiu do catálogo entre uma versão e outra é descartado na
   // volta: sem cor no índice não há o que mostrar nem o que pintar
   if (s.tenho) minhas = s.tenho.filter(function(k){ return !!catIdx[k]; });
+  if (s.estoque) Object.keys(s.estoque).forEach(function(k){
+    var v = s.estoque[k];
+    if (!catIdx[k]) return;
+    if (v === "pouco" && minhas.indexOf(k) >= 0) estoque[k] = "pouco";
+    if (v === "acabou" && minhas.indexOf(k) < 0) estoque[k] = "acabou";
+  });
+}
+
+// "" (não tenho), "tenho", "pouco" ou "acabou"
+function estadoLinha(k){
+  if (estoque[k] === "acabou") return "acabou";
+  if (minhas.indexOf(k) < 0) return "";
+  return estoque[k] === "pouco" ? "pouco" : "tenho";
 }
