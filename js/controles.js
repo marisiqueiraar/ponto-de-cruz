@@ -9,6 +9,7 @@
 function renderFios(){
   var box = $("fios");
   if (!box) return;
+  papelCoresPainel();           // a sugestão de papel depende das mesmas linhas
   box.innerHTML = "";
   var lista = linhasUsadas();
   if (!lista.length){
@@ -1193,7 +1194,82 @@ $("mmFoot").addEventListener("click", function(){
   if (b && !b.classList.contains("on")) b.click();
 });
 
+/* A cor do papel. Os papéis 300g que se acham em papelaria, mais um campo
+   de cor livre. A sugestão olha as linhas que o molde usa e põe na frente os
+   papéis em que a linha MENOS visível ainda aparece bem: o problema real é
+   uma cor que some no papel, e uma média esconderia exatamente essa. */
+var PAPEIS_COR = [
+  { hex: "#FFFFFF", nome: "branco" }, { hex: "#F3ECDC", nome: "marfim" },
+  { hex: "#C7A47A", nome: "kraft" },  { hex: "#B9BCBF", nome: "cinza" },
+  { hex: "#2B2B2E", nome: "preto" },  { hex: "#F2D4D7", nome: "rosa" },
+  { hex: "#CFE0EC", nome: "azul" },   { hex: "#B9C7AE", nome: "sálvia" },
+  { hex: "#2F3E57", nome: "marinho" }
+];
+var POUCO_CONTRASTE = 22;     // distância em Lab abaixo da qual a linha quase some
+
+function nomePapel(hex){
+  var p = PAPEIS_COR.filter(function(x){ return x.hex === hex; })[0];
+  return p ? p.nome : hex;
+}
+
+// a linha que menos aparece num papel: { d, nome }
+function piorLinha(hex, linhas){
+  var lp = labHex(hex), pior = { d: 1e9, nome: "" };
+  linhas.forEach(function(l){
+    var d = Math.sqrt(dLab(lp, labHex(l.hex)));
+    if (d < pior.d) pior = { d: d, nome: l.nome };
+  });
+  return pior;
+}
+
+function sugerePapel(){
+  var linhas = linhasUsadas();
+  if (!linhas.length) return [];
+  return PAPEIS_COR.map(function(p){ return { hex: p.hex, nome: p.nome, pior: piorLinha(p.hex, linhas) }; })
+    .sort(function(a, b){ return b.pior.d - a.pior.d; });
+}
+
+function poeCorPapel(hex){
+  papelCor = hex.toUpperCase();
+  papelCoresPainel(); draw(); pushLater();
+}
+
+function papelCoresPainel(){
+  var box = $("papelCores");
+  if (!box) return;
+  box.innerHTML = "";
+  var boas = sugerePapel().slice(0, 3).map(function(s){ return s.hex; });
+  PAPEIS_COR.forEach(function(p){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "papel" + (p.hex === papelCor ? " on" : "") + (boas.indexOf(p.hex) >= 0 ? " boa" : "");
+    b.style.background = p.hex;
+    b.title = p.nome + (boas.indexOf(p.hex) >= 0 ? " — combina com as linhas deste molde" : "");
+    b.setAttribute("aria-label", b.title);
+    b.addEventListener("click", function(){ poeCorPapel(p.hex); });
+    box.appendChild(b);
+  });
+  var livre = document.createElement("input");
+  livre.type = "color"; livre.value = papelCor.toLowerCase();
+  livre.title = "outra cor"; livre.setAttribute("aria-label", "outra cor de papel");
+  livre.className = "papel livre" + (PAPEIS_COR.some(function(p){ return p.hex === papelCor; }) ? "" : " on");
+  livre.addEventListener("change", function(){ poeCorPapel(this.value); });
+  box.appendChild(livre);
+
+  var linhas = linhasUsadas(), aviso = "";
+  if (linhas.length){
+    var pior = piorLinha(papelCor, linhas);
+    var sug = sugerePapel().slice(0, 3).map(function(s){ return s.nome; }).join(", ");
+    aviso = (pior.d < POUCO_CONTRASTE
+      ? "No papel " + nomePapel(papelCor) + ", a linha " + pior.nome + " quase some. "
+      : "") + "Para as linhas deste molde, os papéis que dão mais contraste são: " + sug +
+      " (marcados com um ponto).";
+  }
+  $("papelSugere").textContent = aviso;
+}
+
 function papelPainel(){
+  papelCoresPainel();
   $("cantos").value = papelCantos;
   $("fita").checked = !!papelFita;
   var prop = $("paperSize").value === "custom";

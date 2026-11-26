@@ -160,7 +160,7 @@ function drawStitchesGuardado(ctx, el, k, region, cor, lw){
 }
 
 function paint(ctx, k, region, opts){
-  ctx.fillStyle = "#fff";
+  ctx.fillStyle = opts.papel || papelCor;    // a miniatura do PDF pede branco: vai para a impressora
   ctx.fillRect(0, 0, region.w * k, region.h * k);
   drawPhoto(ctx, k, region, opts.photoAlpha);
   totalCount = 0; totalHoles = 0;

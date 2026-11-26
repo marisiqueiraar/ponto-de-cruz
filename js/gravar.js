@@ -272,7 +272,8 @@ function saveState(){
       v: 1,
       paper: { size: $("paperSize").value, or: $("paperOr").value,
                w: $("paperW").value, h: $("paperH").value, folha: folhaAtual.id,
-               copias: papelCopias, junto: papelJunto, cantos: papelCantos, fita: papelFita ? 1 : 0 },
+               copias: papelCopias, junto: papelJunto, cantos: papelCantos, fita: papelFita ? 1 : 0,
+               cor: papelCor },
       photoBox: { size: $("photoSize").value, or: $("photoOr").value,
                   w: $("photoWmm").value, h: $("photoHmm").value,
                   x: Math.round(photo.x * 10) / 10, y: Math.round(photo.y * 10) / 10 },
@@ -337,6 +338,7 @@ function restoreState(chave){
     papelJunto = Array.isArray(s.paper.junto) ? s.paper.junto.filter(function(x){ return typeof x === "string"; }) : [];
     papelCantos = Math.max(0, Math.min(30, +s.paper.cantos || 0));
     papelFita = s.paper.fita ? 1 : 0;
+    papelCor = /^#[0-9A-Fa-f]{6}$/.test(s.paper.cor || "") ? s.paper.cor.toUpperCase() : "#FFFFFF";
     numerarPontos = s.numerar ? 1 : 0;
     $("numerar").checked = !!numerarPontos;
     if (s.paper.size) $("paperSize").value = s.paper.size;

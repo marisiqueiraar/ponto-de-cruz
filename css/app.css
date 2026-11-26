@@ -342,6 +342,12 @@ input[type=range]{width:100%;accent-color:var(--mat);height:28px}
   background:currentColor;opacity:.9}
 .abas.modo{margin-bottom:12px}
 .abas.toque{margin:2px 0 12px}
+.papeis{display:flex;flex-wrap:wrap;gap:6px}
+.papel{position:relative;width:32px;height:32px;padding:0;border-radius:6px;border:1px solid rgba(56,73,89,.3);cursor:pointer}
+.papel.on{box-shadow:0 0 0 2px var(--mat)}
+.papel.boa::after{content:"";position:absolute;right:3px;top:3px;width:6px;height:6px;border-radius:50%;
+  background:var(--mat);border:1px solid #fff}
+input.papel.livre{background:none;padding:2px}
 /* "tenho pouco": o tique vira meia-lua; "acabou": a cor fica riscada */
 .cat.pouco.on::after{content:"\00BD"}
 .cat.pouco.tem::before{background:transparent;border:1.5px solid currentColor;width:5px;height:5px}

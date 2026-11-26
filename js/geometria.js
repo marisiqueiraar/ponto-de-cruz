@@ -335,6 +335,9 @@ var COPIA_GAP = 6;
    folha e que outros moldes vão junto, o raio dos cantos e se leva o furo da
    fita — o recorte de um marca-página. Moram com o molde, como o papel. */
 var papelCopias = 1, papelJunto = [], papelCantos = 0, papelFita = 0;
+// a cor do papel 300g em que a peça vai ser bordada: só a mesa e o PNG a
+// mostram — o molde do PDF sai na folha comum da impressora, que é branca
+var papelCor = "#FFFFFF";
 var numerarPontos = 0;   // a ordem dos pontos de ponto reto, numerada no PDF
 var FITA_DIAM = 5, FITA_DIST = 12;   // mm: o furo da fita e a distância dele à borda
 

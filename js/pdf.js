@@ -552,7 +552,7 @@ function histThumb(R){
     var c = document.createElement("canvas");
     c.width = Math.max(1, Math.round(R.w * k));
     c.height = Math.max(1, Math.round(R.h * k));
-    paint(c.getContext("2d"), k, R, { photoAlpha: 1, outline: false });
+    paint(c.getContext("2d"), k, R, { photoAlpha: 1, outline: false, papel: "#FFFFFF" });
     return c.toDataURL("image/jpeg", 0.6);
   } catch(e){ return ""; }
 }
