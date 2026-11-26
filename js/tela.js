@@ -30,7 +30,36 @@ function drawPhoto(ctx, k, region, alpha){
   ctx.strokeRect(X + .5, Y + .5, W - 1, H - 1);
 }
 
+/* Na mesa, o ponto reto é o risco do fio de furo a furo, na cor da linha, e
+   o furo um pontinho escuro: é o furo que se fura, e na colmeia e na palavra
+   ele é a única coisa que diz onde o ponto acaba. */
+function drawReto(ctx, el, k, region, color, lw){
+  var b = bboxMM(el);
+  ctx.save();
+  ctx.translate((b.x - region.x + b.w / 2) * k, (b.y - region.y + b.h / 2) * k);
+  ctx.rotate(el.rot * Math.PI / 180);
+  ctx.translate(-b.w / 2 * k, -b.h / 2 * k);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = Math.max(1.2, lw * 0.9);
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+  (el.pontos || []).forEach(function(pt){
+    var f = pt.furos;
+    ctx.beginPath();
+    ctx.moveTo(f[0][0] * k, f[0][1] * k);
+    for (var i = 1; i < f.length; i++) ctx.lineTo(f[i][0] * k, f[i][1] * k);
+    if (pt.fechada) ctx.closePath();
+    ctx.stroke();
+  });
+  ctx.fillStyle = "#26323D";
+  var r = Math.max(1, Math.min(2.2, 0.32 * k));
+  (el.pontos || []).forEach(function(pt){ pt.furos.forEach(function(f){
+    ctx.beginPath(); ctx.arc(f[0] * k, f[1] * k, r, 0, Math.PI * 2); ctx.fill();
+  }); });
+  ctx.restore();
+}
+
 function drawStitches(ctx, el, k, region, color, lw){
+  if (el.kind === "reto") return drawReto(ctx, el, k, region, color, lw);
   var p = P() * k;
   var b = bboxMM(el);
   ctx.save();
@@ -167,12 +196,17 @@ function showFit(cr){
   } else if (colados && colados.n){
     // furo colado rasga o papel: vem logo depois do que está fora dele
     state = "over";
-    var np = colados.pares.length;
-    txt.textContent = "furos colados entre " + (np === 1 ? "2 peças" : np + " pares de peças");
+    // dentro de uma peça só, é palavra (ou desenho) pequena demais para o ponto
+    var dentro = colados.pares.filter(function(c){ return c.i === c.j; }).length;
+    var np = colados.pares.length - dentro;
+    txt.textContent = np ? "furos colados entre " + (np === 1 ? "2 peças" : np + " pares de peças")
+                         : "furos colados dentro de " + (dentro === 1 ? "1 peça" : dentro + " peças");
     box.title = colados.n + (colados.n === 1 ? " furo fica" : " furos ficam") +
       " a menos de " + fmt(colados.d) + " mm de um furo de outra peça. No papel a tira " +
       "entre eles rasga. A região tracejada em vermelho mostra onde: afaste as peças, ou " +
-      "encoste-as até os furos coincidirem — furo no mesmo lugar vira um furo só.";
+      "encoste-as até os furos coincidirem — furo no mesmo lugar vira um furo só." +
+      (dentro ? " Dentro de uma peça de ponto reto, é o desenho pequeno para o ponto: " +
+                "aumente a peça ou encurte o ponto." : "");
   } else if (plano.tiled){
     var n = plano.cols * plano.rows;
     state = "multi";

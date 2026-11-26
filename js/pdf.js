@@ -389,8 +389,24 @@ function moldeNaFolha(pdf, vw, ox, oy){
     pdf.setFontSize(Math.max(3.2, p * 2.834 * 0.58));
     pdf.setFont("helvetica", "bold");
   }
+  /* O ponto reto no molde é o risco de furo a furo em cinza claro: é ele que
+     diz de que furo vai a qual, sem disputar com o furo, que é o que se fura. */
   els.forEach(function(el){
-    if (!cabe(el)) return;
+    if (el.kind !== "reto" || !cabe(el)) return;
+    pdf.setDrawColor(190, 190, 190);
+    pdf.setLineWidth(0.25);
+    (el.pontos || []).forEach(function(pt){
+      var f = pt.furos, k = pt.fechada ? f.length : f.length - 1;
+      for (var i = 0; i < k; i++){
+        var a = localToPaper(el, f[i][0], f[i][1]), b = localToPaper(el, f[(i + 1) % f.length][0], f[(i + 1) % f.length][1]);
+        if (fora(a, 2) && fora(b, 2)) continue;
+        pdf.line(ox + (a.x - vw.x), oy + (a.y - vw.y), ox + (b.x - vw.x), oy + (b.y - vw.y));
+      }
+    });
+  });
+  pdf.setLineWidth(0.22);
+  els.forEach(function(el){
+    if (!cabe(el) || el.kind === "reto") return;
     var corEl = corDe(el).hex, atual = "";
     for (var r = 0; r < el.cells.length; r++){
       for (var q = 0; q < el.cells[r].length; q++){

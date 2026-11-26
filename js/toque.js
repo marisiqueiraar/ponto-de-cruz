@@ -39,6 +39,7 @@ function spread(){
 function tamanhoDe(el){
   if (el.kind === "text") return el.rowsTarget;
   if (el.kind === "img") return el.larg;
+  if (el.kind === "reto") return el.medida;
   return el.scale;   // símbolo e padrão: o tamanho de cada motivo
 }
 
@@ -61,6 +62,12 @@ function resizeSelected(steps){
     el.larg = lg;
     $("imgLarg").value = lg;
     $("imgLargOut").textContent = lg;
+  } else if (el.kind === "reto"){
+    var dr = DESENHOS_RETO[el.desenho];
+    var md = Math.max(dr.min, Math.min(dr.max, Math.round(steps)));
+    if (md === el.medida) return;
+    el.medida = md;
+    $("retoMed").value = md;
   } else if (el.kind === "pat"){
     var zp = Math.max(1, Math.min(4, steps));
     if (zp === el.scale) return;

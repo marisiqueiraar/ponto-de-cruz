@@ -52,6 +52,55 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   tamanho da primeira. Duplicar copia a peça com as
   células como estão, então a cópia nasce com os ajustes manuais da original e segue a vida
   dela própria a partir dali.
+- **Ponto reto**: além do ponto cruz, uma peça pode ser de **ponto reto** — o fio indo de um
+  furo a outro em linha, sem formar xis. Os furos não caem numa grade: ficam no canto do
+  hexágono, ao longo da nervura da folha, na curva da onda. Os dois tipos se misturam no mesmo
+  molde, peça por peça. Nove desenhos prontos: colmeia, folha com nervuras, losangos,
+  ziguezague, ondas, estrela, coração, flor e cruzes de sashiko, cada um com o tamanho e as
+  opções dele (colunas e fileiras, nervuras, pétalas) na barra de cima.
+
+  O desenho é feito de caminhos. Num caminho de retas todo vértice é furo — o canto do hexágono
+  tem de ser furo, senão o hexágono vira círculo — e cada trecho é repartido em pontos iguais
+  de até o **comprimento de ponto** da peça (de fábrica 2,5 mm). Numa curva os furos ficam a
+  distâncias iguais ao longo dela. A aresta que dois hexágonos dividem é bordada uma vez só.
+  Furos a menos de 1 mm viram um furo só, o do encontro das linhas; e na ponta fina — a da
+  estrela, a base do coração — o furo do meio de linha que fique a menos de 2 mm de outro sai,
+  e o ponto vizinho fica um pouco mais comprido: canto e ponta nunca saem, então a forma fica.
+  Na folha, cada nervura termina exatamente num furo da borda.
+
+  Na mesa o ponto reto aparece como o risco do fio na cor da linha, com os furos marcados; no
+  PDF, o risco sai em cinza claro e os furos em preto, para saber de que furo vai a qual. O fio
+  é o do **ponto atrás**: o comprimento na frente e o dobro no avesso, o triplo do desenho mais
+  15%. O ajuste ponto a ponto é de quadradinho e não aparece nessa peça. O aviso de furos
+  colados vale também dentro dela.
+
+  **Faixa e moldura em ponto reto.** Os desenhos prontos têm um **arranjo**: solto, **faixa**
+  (o desenho repetido em fileira, em pé ou deitada, com o espaço pedido — o marca-página de
+  corações, de folhas, de estrelas) ou **moldura** (o desenho repetido em volta da foto, por
+  fora da margem, um em cada canto e os lados repartidos por igual — cada lado no passo do
+  motivo naquela direção, então folha alta e estreita cabe mais vezes em cima que dos lados).
+  No ziguezague e nas ondas a moldura é uma linha só, contínua e fechada, com os dentes e as
+  ondas repartidos por igual em cada lado. A moldura de ponto reto acompanha a foto como a de
+  blocos: foto que muda, moldura refeita e centrada.
+
+  **Palavra e imagem trocam de ponto.** Com uma palavra ou uma imagem selecionada, o botão
+  **ponto reto**, junto de ajustar e espelhar, passa a peça para ponto reto no mesmo lugar e do
+  mesmo tamanho de verdade — a maiúscula de 16 quadradinhos de 2,5 mm vira 40 mm —, guardando
+  texto, fonte, imagem e linha; na peça de ponto reto o mesmo botão diz **ponto cruz** e volta.
+  A palavra em ponto reto é a linha que a caneta faria: o traço da fonte escrito grande num
+  canvas, afinado até o meio (Zhang-Suen), percorrido e cortado nos cruzamentos, com as
+  pontinhas que o afinamento deixa nas quinas podadas e o pingo do "i" mantido como um ponto
+  curto. A cursiva fina, que em quadradinho vira pontilhado, sai limpa assim. Abaixo de
+  **1,8 cm de maiúscula** o campo de tamanho avisa: as voltas das letras ficam mais estreitas
+  que a distância segura entre furos. A imagem vira **contorno** (a borda das manchas escuras:
+  perfil, silhueta, logo cheio) ou **traço** (o meio dos riscos: desenho a nanquim), com a
+  sensibilidade e o inverter de sempre; ela fica guardada com o molde, então continua se
+  refazendo depois de fechar o navegador.
+
+  Para o papel não rasgar, a limpeza dos furos roda em voltas: pontas de linha a menos de 2 mm
+  viram um furo (o cruzamento do traço deixa várias pontas vizinhas), o furo do meio de linha a
+  menos de 2 mm de outro sai — inclusive do vizinho, porque ponto mais curto que 2 mm é a mesma
+  tira estreita —, e o trecho repetido entre os mesmos dois furos fica uma vez só.
 - **Imagem**: um arquivo do aparelho vira quadradinho na hora, e o que sai é uma peça como as
   outras: arrastável, girável, espelhável e ajustável ponto a ponto. Quem decide o caminho é o
   **cores**, na barra de cima. A **largura** em quadradinhos decide quanto detalhe cabe, e vale
