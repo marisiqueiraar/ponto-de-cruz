@@ -68,9 +68,9 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   ok(s.e.w > s.foto.w + 2 * 6 && s.e.h > s.foto.h + 2 * 6, "e dá a volta nela, com a margem por fora");
   ok(!(await colados()), "sem furo colado");
   const largAntes = s.e.w;
-  await pg.click('#rail button[data-pane="foto"]');
+  await pg.evaluate(() => abreAba("foto"));
   await pg.selectOption("#photoSize", "127x178");
-  await pg.click('#rail button[data-pane="pecas"]');
+  await pg.evaluate(() => abreAba("pecas"));
   s = await estado();
   ok(s.e.w > largAntes + 20, "foto maior, moldura maior (" + largAntes.toFixed(0) + " → " + s.e.w.toFixed(0) + " mm)");
 

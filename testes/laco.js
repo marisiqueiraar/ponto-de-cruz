@@ -88,7 +88,7 @@ const perto = (a, b, t) => Math.abs(a - b) <= (t === undefined ? 0.051 : t);
   const mesmoArranjo = (a, b) => a.length === b.length &&
     a.every((p, i) => perto(p[0], b[i][0]) && perto(p[1], b[i][1]));
 
-  await pg.click('.rail button[data-pane="pecas"]');
+  await pg.evaluate(() => abreAba("pecas"));
   await pg.waitForTimeout(300);
   await pg.click("#addSym");                // duas peças e a foto na mesa
   await pg.waitForTimeout(300);

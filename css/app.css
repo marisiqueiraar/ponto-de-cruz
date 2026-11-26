@@ -44,7 +44,7 @@
   --display:"Silkscreen","Courier New",monospace;
   --paper:#EDF4FB;
   --ink:#384959;
-  --ink-soft:#6A89A7;
+  --ink-soft:#4F6B86;   /* mais escuro que antes: texto de apoio legível no branco */
   --mat:#384959;
   --accent:#88BDF2;
   --lemon:#FFE566;
@@ -54,6 +54,7 @@
   --mesa:#DCE9F6;
   --rail:72px;
   --panel:300px;
+  --sel:340px;
   --top:56px;
   --foot:36px;
   /* espessura das réguas: o tique grande (9px), 2px de respiro e o rótulo de
@@ -83,18 +84,24 @@ button:focus-visible,.chip:focus-visible,.cat:focus-visible,.rail button:focus-v
 
 .app{
   height:100%;display:grid;
-  grid-template-columns:var(--rail) var(--panel) minmax(0,1fr);
+  grid-template-columns:var(--panel) minmax(0,1fr) var(--sel);
   grid-template-rows:var(--top) minmax(0,1fr) var(--foot);
-  grid-template-areas:"top top top" "rail panel mesa" "foot foot foot";
+  grid-template-areas:"top top top" "panel mesa sel" "foot foot foot";
 }
 
 /* ---- barra de cima ------------------------------------------------- */
-.top{grid-area:top;display:flex;align-items:center;background:#fff;
-  border-bottom:1px solid var(--line);padding-right:12px;min-width:0}
-.brand{width:var(--rail);flex:0 0 auto;height:100%;border-right:1px solid var(--line);
-  display:flex;flex-direction:column;align-items:center;justify-content:center}
-.brand b{font-family:var(--display);font-weight:400;font-size:14px;letter-spacing:.02em}
-.brand i{display:block;width:26px;height:4px;background:var(--lemon);margin-top:3px}
+.top{grid-area:top;display:flex;align-items:center;gap:16px;background:#fff;
+  border-bottom:1px solid var(--line);padding:0 12px;min-width:0}
+.brand{flex:0 0 auto;display:flex;align-items:center;gap:6px;height:40px;padding:0 8px;
+  border:0;border-radius:8px;background:transparent;color:var(--ink)}
+.brand:hover,.brand[aria-expanded=true]{background:var(--paper)}
+.brand b{font-family:var(--display);font-weight:400;font-size:15px;letter-spacing:.02em;
+  border-bottom:4px solid var(--lemon);line-height:1.15}
+.brand .chev{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4}
+.titulo{display:flex;flex-direction:column;line-height:1.2;min-width:0;max-width:200px}
+.titulo #moldeTit{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.titulo .saved{font-size:11px;color:var(--ink-soft)}
+.titulo .saved.cheia{color:#fff;background:var(--danger);border-radius:4px;padding:0 6px;align-self:flex-start}
 
 .tools{display:flex;align-items:center;gap:6px;flex:1 1 auto;min-width:0;
   overflow-x:auto;overflow-y:hidden;padding:0 10px;scrollbar-width:none;
@@ -218,16 +225,6 @@ button:focus-visible,.chip:focus-visible,.cat:focus-visible,.rail button:focus-v
   background:var(--lemon);color:var(--ink);font-family:var(--display);font-size:11px;
   letter-spacing:.02em;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
 #pdf svg{width:17px;height:17px;fill:currentColor}
-
-/* ---- trilho -------------------------------------------------------- */
-.rail{grid-area:rail;background:#fff;border-right:1px solid var(--line);
-  padding:8px 6px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
-.rail button{width:100%;padding:9px 0 7px;border:0;border-radius:7px;background:transparent;
-  display:flex;flex-direction:column;align-items:center;gap:4px;
-  font-family:var(--display);font-size:9px;letter-spacing:.02em;color:var(--ink-soft)}
-.rail button svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.6}
-.rail button:hover{background:var(--paper)}
-.rail button.on{background:var(--lemon);color:var(--ink)}
 
 /* ---- painel -------------------------------------------------------- */
 .panel{grid-area:panel;background:#fff;border-right:1px solid var(--line);
@@ -505,98 +502,6 @@ canvas{display:block;margin:auto;touch-action:none;box-shadow:0 2px 10px rgba(56
 .app.editando .fit{background:#fff}
 .app.editando .fit.over{background:var(--danger)}
 
-/* No computador a barra de cima quebra em duas linhas quando os campos não
-   cabem numa só. Antes ela rolava escondida: numa palavra selecionada, espaço,
-   arco e inclinação ficavam para lá da borda, sem nada dizendo que estavam ali. */
-@media (min-width:861px){
-  .app{grid-template-rows:auto minmax(0,1fr) var(--foot)}
-  /* os botões da direita descem para a linha de baixo quando os campos
-     precisam da largura: campos em três linhas espremidas são piores que
-     campos numa linha e botões noutra */
-  .top{min-height:var(--top);padding-top:6px;padding-bottom:6px;flex-wrap:wrap;row-gap:6px}
-  .brand{align-self:stretch;height:auto}
-  .tools{flex:1 1 880px;flex-wrap:wrap;row-gap:6px;overflow:visible;-webkit-mask-image:none;mask-image:none}
-  .right{margin-left:auto}
-  /* fieldset tem largura mínima do conteúdo por padrão: sem o min-width:0 ele
-     não quebra, passa da barra e fica embaixo dos botões da direita */
-  .tools fieldset,.tools .grp{flex-wrap:wrap;row-gap:6px;flex:0 1 auto;min-width:0}
-}
-
-/* No celular a arrumação vira: mesa em cima, painel no meio, trilho como abas
-   no pé. A barra de cima quebra em duas linhas para o botão de baixar nunca
-   sair da tela, e o painel fecha ao tocar de novo na aba já aberta. */
-@media (max-width:860px){
-  .app{
-    grid-template-columns:minmax(0,1fr);
-    grid-template-rows:auto minmax(120px,1fr) 34vh 54px 28px;
-    grid-template-areas:"top" "mesa" "panel" "rail" "foot";
-  }
-  .app.fechado{grid-template-rows:auto minmax(120px,1fr) 0 54px 28px}
-  .app.fechado .panel{padding:0;overflow:hidden;border-top:0}
-
-  /* display:contents dissolve o agrupamento da direita, para cada peça da barra
-     poder ser ordenada sozinha: linha 1 traz o aviso de escala e o botão de
-     baixar, linha 2 traz as ações da peça e os campos que rolam. */
-  .top{flex-wrap:wrap;height:auto;padding:6px 8px;row-gap:6px;column-gap:6px}
-  .top::after{content:"";width:100%;height:0;order:3}
-  .brand{order:0;width:auto;height:32px;flex-direction:row;align-items:center;gap:7px;
-    border-right:0;padding:0 6px 0 2px}
-  .brand i{width:16px;height:4px;margin:0}
-  .right{display:contents}
-  .fit{order:1;flex:1 1 60px;min-width:0;max-width:none}
-  #pdf{order:2;padding:0 12px}
-  #hist{order:4;flex:0 0 auto}
-  #ctlActs{order:5;flex:0 0 auto}
-  /* dentro da fileira de campos (arrumaBarra): só o tamanho delas */
-  .tools #hist,.tools #ctlActs{order:0}
-  .top{row-gap:4px}
-  #pdf{height:38px}
-  .fit{height:38px}
-  /* No celular a barra rola, e o que rola para fora da máscara é o que estiver
-     por último. Entre dizer o que está laçado e poder apagar, fica o botão:
-     ele já traz a conta no rótulo, e os contornos na grade mostram o resto. */
-  #ctlGrupoTxt{display:none}
-  .tools{order:6;flex:1 1 90px;min-width:0;padding:0}
-
-  .rail{flex-direction:row;gap:0;padding:4px;border-right:0;
-    border-top:1px solid var(--line);overflow-x:auto;overflow-y:hidden}
-  .rail button{width:auto;flex:1 0 auto;min-width:50px;padding:5px 5px 4px}
-  .rail button svg{width:18px;height:18px}
-
-  .panel{border-right:0;border-top:1px solid var(--line);padding:14px 14px 20px}
-  /* ajustando ponto a ponto: a grade fica com a tela inteira — as abas e o
-     painel não servem para nada enquanto se acende quadradinho */
-  .app.editando{grid-template-rows:auto minmax(120px,1fr) 0 0 28px}
-  .app.editando .panel,
-  .app.editando .rail{padding:0;overflow:hidden;border:0}
-  .app.editando #hist button,
-  .app.editando #ctlActs button{height:44px;padding:0 14px}
-  .app.editando .zoom button{width:38px;height:36px}
-  .app.editando .zoom #zVal{font-size:11px}
-
-  /* a lista de fontes vira folha subindo de baixo */
-  .pop{left:0!important;right:0!important;top:auto!important;bottom:0!important;
-    width:100%!important;max-height:72vh;border-radius:14px 14px 0 0;
-    border-left:0;border-right:0;border-bottom:0;padding-top:8px}
-  .pop::before{content:"";display:block;width:38px;height:4px;border-radius:2px;
-    background:var(--line);margin:0 auto 6px;flex:0 0 auto}
-
-  .zoom{right:8px;bottom:8px;padding:2px;box-shadow:0 1px 6px rgba(56,73,89,.18)}
-  .zoom button{width:26px;height:26px;font-size:13px}
-  .zoom #zVal{padding:0 6px;font-size:10px}
-
-  .foot{gap:8px;font-size:11.5px}
-  .foot #areaOut,.foot .saved{display:none}
-  /* o aviso de memória cheia é a exceção: é no celular que a cota estoura
-     primeiro, e o rodapé escondido é o mesmo silêncio de antes */
-  .foot #gravado.cheia{display:inline-flex}
-}
-@media (max-width:420px){
-  .brand{display:none}
-  .foot #modeHint{font-size:11px}
-}
-
-
 /* os botões de criar em duas colunas, e as explicações recolhidas: a aba peças
    abre com o que se faz, e o como funciona fica a um toque */
 .novos{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}
@@ -608,3 +513,199 @@ details.como summary::-webkit-details-marker{display:none}
 details.como summary::before{content:"+ ";}
 details.como[open] summary::before{content:"– ";}
 details.como ul{margin:6px 0 0;padding-left:18px}
+
+
+/* ===================================================================
+   Casca nova: quatro etapas na barra de cima, a etapa à esquerda, a mesa
+   no meio e o que está selecionado à direita. O menu do logo guarda o que
+   não é passo do molde — os moldes, a caixa de linhas e a ajuda.
+   =================================================================== */
+.rail{display:flex;gap:4px;margin:0 auto;padding:0}
+.rail button{display:flex;align-items:center;gap:8px;height:38px;padding:0 14px 0 8px;border:0;
+  border-radius:999px;background:transparent;font-size:14px;font-weight:500;color:var(--ink-soft);white-space:nowrap}
+.rail button i{width:22px;height:22px;border-radius:50%;border:1.5px solid #9DB7D1;display:inline-flex;
+  align-items:center;justify-content:center;font-style:normal;font-size:12px;font-weight:600}
+.rail button:hover{background:var(--paper)}
+.rail button.on{background:var(--mat);color:#fff}
+.rail button.on i{background:var(--lemon);border-color:var(--lemon);color:var(--ink)}
+.right{margin-left:0}
+
+/* menu do logo */
+.menu{position:fixed;z-index:70;left:10px;top:52px;width:340px;max-height:calc(100vh - 70px);overflow:auto;
+  background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(30,42,56,.22)}
+.menu .ms{padding:8px;border-bottom:1px solid #E3EDF7}
+.menu .ms:last-child{border-bottom:0}
+.menu .mt{margin:4px 8px 6px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft)}
+.menu .mi,.menu .mm{display:flex;align-items:center;gap:12px;width:100%;padding:9px 10px;border:0;border-radius:8px;
+  background:transparent;font-size:14px;color:var(--ink);text-align:left}
+.menu .mi:hover,.menu .mm:hover{background:var(--paper)}
+.menu .mi svg{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8}
+.menu small{display:block;font-size:12px;color:var(--ink-soft)}
+.menu .mm.on{background:var(--paper);box-shadow:inset 3px 0 0 var(--lemon)}
+.menu .mm span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.menu .trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:6px 2px 2px}
+.menu .trio button{height:34px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px;color:var(--ink)}
+.menu .trio button:hover{border-color:var(--ink-soft)}
+
+/* painel da etapa */
+.panel{padding:16px 18px 28px}
+.pane > h2{display:flex;align-items:center;gap:8px}
+.pane > h2 .qq{margin-left:auto}
+.qq,.q{width:22px;height:22px;border-radius:50%;border:1px solid #9DB7D1;background:#fff;color:var(--ink-soft);
+  font-size:12px;font-weight:600;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;padding:0;flex:0 0 auto}
+.qq[aria-expanded=true]{background:var(--mat);border-color:var(--mat);color:#fff}
+/* as explicações ficam atrás do "?" do título da etapa */
+.pane .expl{display:none}
+.pane.explica .expl{display:block}
+.pane.explica .expl{background:var(--paper);border-radius:8px;padding:8px 10px;color:var(--ink)}
+.wide.next{background:var(--mat);color:#fff;border-color:var(--mat);margin-top:14px}
+.wide.next svg{width:16px;height:16px}
+.wide.pdfGrande{height:46px;background:var(--lemon);border-color:var(--lemon-deep);color:var(--ink);font-size:15px;font-weight:600}
+.wide.pdfGrande svg{width:18px;height:18px}
+.voltar{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;padding:4px 0;margin:0 0 10px;
+  font-size:13px;color:var(--ink-soft)}
+.voltar:hover{color:var(--ink)}
+.checa{display:flex;flex-direction:column;gap:8px}
+.checa div{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.4;color:var(--ink)}
+.checa b{width:20px;height:20px;border-radius:50%;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+  font-size:12px;color:#fff;background:#3E8E47}
+.checa .mal b{background:var(--danger)}
+.checa .meio b{background:var(--lemon-deep)}
+.checa a{color:var(--mat);cursor:pointer}
+
+/* painel da seleção */
+.sel{grid-area:sel;background:#fff;border-left:1px solid var(--line);overflow-y:auto;overflow-x:hidden;
+  display:block;padding:0;-webkit-mask-image:none;mask-image:none}
+.sel > *{border-bottom:1px solid #E3EDF7}
+.sel > .hide{display:none!important}
+.selVazio{padding:22px 18px;color:var(--ink-soft);font-size:14px}
+.selVazio p{margin:0 0 8px}
+.selCab{display:flex;align-items:flex-start;gap:8px;padding:14px 16px;flex-wrap:wrap}
+.selTit{flex:1 1 120px;min-width:0}
+.selTit h2{margin:0;font-size:18px;font-weight:600;font-family:inherit;letter-spacing:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.selTit span{font-size:12px;color:var(--ink-soft)}
+.sel .acts{display:flex;flex-wrap:wrap;gap:6px}
+.sel fieldset,.sel .grp{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0;padding:14px 16px;border:0;
+  border-bottom:1px solid #E3EDF7;min-width:0}
+.sel .selCab .grp{padding:0;border:0}
+.sel .t{flex:1 1 100%;display:grid;grid-template-columns:minmax(0,1fr) 76px 74px;align-items:center;column-gap:8px;
+  height:auto;min-height:40px;padding:0;border:0;background:transparent;white-space:normal}
+.sel .t > span:first-child{grid-column:1;display:flex;align-items:center;gap:6px}
+.sel .t input[type=number]{grid-column:2}
+.sel .t .cm{grid-column:3}
+.sel .t select,.sel .t.txt input[type=text]{grid-column:2/4;width:100%;max-width:none;min-width:0}
+.sel .t.fnt{display:flex}
+.sel .sep{display:none}
+.sel .acts{flex:1 1 100%}
+.sel .acts .tbtn{padding:0 10px;height:36px}
+.sel .acts .tbtn.icon{width:38px;padding:0;justify-content:center}
+/* a lista de linhas do molde escolhe a linha a trocar em todas as peças */
+button.fio{width:100%;padding:6px 8px;border:1px solid transparent;border-radius:8px;background:transparent;text-align:left}
+button.fio:hover{border-color:var(--line)}
+button.fio.on{border-color:var(--mat);background:var(--lemon)}
+.trocaTodo{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:8px 10px;border-radius:8px;
+  background:var(--lemon);font-size:13px;color:var(--ink)}
+.trocaTodo .tbtn{height:30px;margin-left:auto}
+.sel .dica{flex:1 1 100%;margin:-2px 0 4px;padding:8px 10px;border-radius:8px;background:var(--mat);color:#fff;font-size:12.5px;line-height:1.45}
+.sel .t > span{font-size:13px;color:var(--ink);font-family:inherit;display:inline-block}
+.sel .t input[type=number]{width:100%;height:36px;border:1px solid var(--line);border-radius:8px;text-align:center;font-size:14px;font-family:inherit}
+.sel .t select{height:36px;border:1px solid var(--line);border-radius:8px;font-size:14px}
+.sel .t.txt input[type=text]{height:38px;border:1px solid var(--line);border-radius:8px;padding:0 10px}
+.sel .t.fnt{justify-content:stretch}
+.sel #fontBtn{flex:1;height:38px;max-width:none;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-size:19px}
+.sel .t .cm{font-size:12px;min-width:44px;color:var(--ink-soft);font-family:inherit}
+.sel .t b.cm{font-weight:400}
+.sel .gtit{flex:1 1 100%;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft)}
+.sel .none{font-family:inherit}
+.sel .alinha{flex:1 1 100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:4px 0 0}
+.sel .alinha .gtit{grid-column:1/-1}
+.sel .alinha button{margin:0;min-height:36px;padding:0 4px;text-align:center;font-size:12.5px}
+.sel .alinha #alAcima{grid-column:1/-1}
+.selLinha .cor{flex:1 1 100%;display:flex;align-items:center;gap:10px}
+.selLinha i{width:28px;height:28px;border-radius:6px;border:1px solid rgba(0,0,0,.15);flex:0 0 auto}
+.selLinha .cor span{flex:1;min-width:0;font-size:14px}
+.selLinha b{font-weight:500;display:block}
+.selLinha small{font-size:12px;color:var(--ink-soft)}
+#ctlGrupo .tbtn{flex:1 1 auto}
+#ctlGrupoTxt{flex:1 1 100%;font-size:14px;color:var(--ink)}
+
+/* o ímã é uma chave na barrinha da mesa */
+.zoom .zsep{width:1px;height:20px;background:var(--line);margin:0 3px}
+.imaBtn{appearance:none;-webkit-appearance:none;width:30px;height:28px;margin:0;border-radius:5px;cursor:pointer;
+  background:center/17px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23384959' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 4v8a6 6 0 0012 0V4'/%3E%3Cpath d='M6 8h3M15 8h3'/%3E%3C/svg%3E")}
+.imaBtn:checked{background-color:var(--lemon)}
+.imaBtn:focus-visible{outline:2px solid var(--accent)}
+
+/* tipografia: a fonte quadriculada fica no logo e nos títulos; botões,
+   campos e números na fonte do sistema, que lê melhor em tamanho pequeno */
+.tbtn,.wide,#pdf,.abas button,.modal .acts button,.pop .grupos button,.tools .t > span,
+.tools .t input[type=number],.tools .t .cm,.tools .none,.num strong,.fio b,.atual b,.foot .saved,
+.fcard .nome,label b,.paleta .sl .qt,details.como summary,.zoom button{font-family:inherit;letter-spacing:0}
+.tbtn{font-size:13px;font-weight:500;border-radius:8px}
+.wide{font-size:14px;font-weight:500;border-radius:8px}
+#pdf{font-size:14px;font-weight:600;border-radius:8px;height:38px}
+.abas button{font-size:12.5px;font-weight:500}
+.modal .acts button{font-size:14px;font-weight:500}
+.num strong{font-size:14px;font-weight:600}
+.fio b{font-size:13px;font-weight:600}
+.atual b{font-size:13px;font-weight:600}
+.fcard .nome{font-size:11px}
+details.como summary{font-size:13px;color:var(--ink)}
+.subtit{font-family:inherit;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft)}
+.zoom button{font-size:15px}
+.zoom #zVal{font-size:12px}
+.foot .saved{font-size:12px}
+.panel h2{font-size:13px;letter-spacing:.05em}
+
+/* modo ponto a ponto: a barra de cima fica amarela e o painel da seleção só
+   diz o que está acontecendo */
+.app.editando .top{background:var(--lemon);border-bottom-color:var(--lemon-deep)}
+.app.editando .sel fieldset,.app.editando #ctlPiece,.app.editando #selLinha{display:none!important}
+.app.editando #ctlEdit{display:flex!important}
+.app.editando .stage:not(.mao) canvas{cursor:crosshair}
+
+/* ---- celular -------------------------------------------------------
+   Mesa em cima, uma gaveta com a etapa (ou com o que está selecionado), e
+   as quatro etapas no pé. Tocar de novo na etapa aberta fecha a gaveta. */
+@media (max-width:860px){
+  .app{grid-template-columns:minmax(0,1fr);
+    grid-template-rows:auto minmax(140px,1fr) 42vh 58px;
+    grid-template-areas:"top" "mesa" "panel" "nav"}
+  /* a gaveta mostra o que está selecionado; tocar numa etapa mostra a etapa */
+  .app.comSel:not(.painelAberto){grid-template-areas:"top" "mesa" "sel" "nav"}
+  .app.comSel:not(.painelAberto) .panel{display:none}
+  .app:not(.comSel) .sel,.app.painelAberto .sel{display:none}
+  .app.fechado{grid-template-rows:auto minmax(140px,1fr) 0 58px}
+  .app.fechado .panel,.app.fechado .sel{display:none}
+  .foot{display:none}
+  .top{gap:8px;padding:6px 8px;height:auto;min-height:52px}
+  .titulo{flex:1 1 auto;max-width:none}
+  .titulo .saved{display:none}
+  .titulo .saved.cheia{display:inline-block}
+  .right{gap:6px}
+  .fit{display:none}
+  #pdf{height:40px;padding:0 12px}
+  #hist .tbtn{height:40px}
+  .panel,.sel{border:0;border-top:1px solid var(--line);border-radius:14px 14px 0 0;
+    box-shadow:0 -6px 18px rgba(56,73,89,.10)}
+  .sel{grid-area:sel}
+  .rail{grid-area:nav;margin:0;gap:0;background:#fff;border-top:1px solid var(--line);padding:4px}
+  .rail button{flex:1 1 0;flex-direction:column;justify-content:center;gap:2px;height:50px;padding:0 2px;
+    border-radius:10px;font-size:11px;background:transparent;color:var(--ink-soft)}
+  .rail button.on{background:var(--paper);color:var(--ink)}
+  .menu{left:6px;right:6px;width:auto;top:56px}
+  .app.editando{grid-template-rows:auto minmax(140px,1fr) auto 58px}
+  .pop{left:0!important;right:0!important;top:auto!important;bottom:0!important;
+    width:100%!important;max-height:72vh;border-radius:14px 14px 0 0;
+    border-left:0;border-right:0;border-bottom:0;padding-top:8px}
+  .pop::before{content:"";display:block;width:38px;height:4px;border-radius:2px;
+    background:var(--line);margin:0 auto 6px;flex:0 0 auto}
+  .zoom{right:8px;bottom:8px;padding:2px;box-shadow:0 1px 6px rgba(56,73,89,.18)}
+  .zoom button,.imaBtn{width:28px;height:28px;font-size:14px}
+  .zoom #zVal{padding:0 6px;font-size:11px}
+  .sel .t{min-height:44px}
+}
+@media (max-width:420px){
+  .titulo{display:none}
+}
+#retoANome,#retoBNome{display:inline-block}#retoANome::first-letter,#retoBNome::first-letter{text-transform:uppercase}

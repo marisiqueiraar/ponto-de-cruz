@@ -106,7 +106,7 @@ function evPos(e){
    encostar em si mesmo. Quando encosta em algo que não é guia, a linha em que
    encostou aparece na mesa enquanto se arrasta (`imaVisto`). */
 var imaVisto = null;
-/* Dá para desligar o ímã de duas maneiras: na aba peças, "ímã entre peças"
+/* Dá para desligar o ímã de duas maneiras: o botão do ímã, na barrinha da mesa,
    (fica gravado neste aparelho) desliga o encostar nas peças, na foto e no
    meio do papel — as guias ligadas continuam puxando, porque guia existe
    para isso; e segurar Alt durante o arraste solta tudo, guias inclusive,

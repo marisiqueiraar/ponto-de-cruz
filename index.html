@@ -21,9 +21,515 @@
 
 <!-- ===================== barra de cima ===================== -->
 <header class="top">
-  <div class="brand" title="ponto &amp; letra"><b>p&amp;l</b><i></i></div>
+  <button type="button" class="brand" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menu" title="menu: meus moldes, minha caixa de linhas, ajuda"><b>p&amp;l</b><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+  <div class="titulo"><span id="moldeTit">sem nome</span><span class="saved" id="gravado">salvo neste navegador</span></div>
 
-  <div class="tools">
+  <!-- as quatro etapas do molde, na ordem em que se trabalha -->
+  <nav class="rail" id="rail" aria-label="etapas do molde">
+    <button type="button" data-pane="papel"><i>1</i>papel e foto</button>
+    <button type="button" data-pane="pecas" class="on"><i>2</i>peças</button>
+    <button type="button" data-pane="linha"><i>3</i>linhas</button>
+    <button type="button" data-pane="imprimir"><i>4</i>imprimir</button>
+  </nav>
+
+  <div class="right">
+    <span class="grp" id="hist">
+      <button id="undo" class="tbtn icon" title="desfazer (Ctrl+Z)" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg></button>
+      <button id="redo" class="tbtn icon" title="refazer (Ctrl+Shift+Z)" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.06-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"/></svg></button>
+    </span>
+    <span class="fit" id="fitHint"><span class="dot"></span><span id="fitTxt" aria-live="polite">&nbsp;</span></span>
+    <button id="pdf"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg>baixar PDF</button>
+  </div>
+</header>
+
+<!-- ===================== menu do logo ===================== -->
+<div class="menu hide" id="menu" role="menu" aria-label="menu">
+  <div class="ms">
+    <p class="mt">moldes</p>
+    <div id="menuMoldes"></div>
+    <div class="trio">
+      <button type="button" role="menuitem" data-faz="moldeNovo">novo</button>
+      <button type="button" role="menuitem" data-faz="moldeDup">duplicar</button>
+      <button type="button" role="menuitem" data-pane="moldes">ver todos</button>
+    </div>
+  </div>
+  <div class="ms">
+    <button type="button" class="mi" role="menuitem" data-pane="caixa"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5h8v2"/><circle cx="9" cy="13" r="2"/><circle cx="15" cy="13" r="2"/></svg><span>Minha caixa de linhas<small id="menuCaixa"></small></span></button>
+  </div>
+  <div class="ms">
+    <p class="mt">arquivo</p>
+    <button type="button" class="mi" role="menuitem" data-faz="moldeSalvar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>Salvar arquivo do molde</span></button>
+    <button type="button" class="mi" role="menuitem" data-faz="moldeAbrir"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V9M7 14l5-5 5 5M5 4h14"/></svg><span>Abrir arquivo do molde</span></button>
+    <button type="button" class="mi" role="menuitem" data-pane="moldes" data-ancora="oxsTit"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 10h16M10 4v16"/></svg><span>Outros programas (OXS)<small>exportar ou trazer um gráfico</small></span></button>
+  </div>
+  <div class="ms">
+    <button type="button" class="mi" role="menuitem" data-pane="ajuda"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.9.6-1.5 1.1-1.5 2.5M12 17h.01"/></svg><span>Ajuda</span></button>
+    <button type="button" class="mi" role="menuitem" data-faz="calibrar"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 6v3M11 6v4M15 6v3M19 6v4"/></svg><span>Calibrar o tamanho real (1:1)</span></button>
+    <button type="button" class="mi hide" role="menuitem" data-faz="instalar" id="menuInstalar"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M12 8v6M9 11l3 3 3-3"/></svg><span>Instalar como aplicativo</span></button>
+  </div>
+</div>
+
+
+
+<!-- ===================== painel ===================== -->
+<div class="panel">
+
+  <section class="pane" data-pane="papel">
+    <h2>papel e foto</h2>
+    <p class="note">São duas coisas diferentes: o <b>papel da peça</b> é onde você borda — o
+    300g, o cartão, o marca-página — e a <b>folha da impressora</b> é onde o molde sai, para ir
+    por cima dele.</p>
+    <h3 class="subtit">papel 300g</h3>
+    <div class="field">
+      <label for="paperSize">Tamanho</label>
+      <select id="paperSize">
+        <option value="210x297" selected>A4 — 21 × 29,7 cm</option>
+        <option value="148x210">A5 — 14,8 × 21 cm</option>
+        <option value="297x420">A3 — 29,7 × 42 cm</option>
+        <option value="200x200">Quadrado — 20 × 20 cm</option>
+        <option value="200x300">20 × 30 cm</option>
+        <option value="150x200">15 × 20 cm</option>
+        <option value="50x150">Marca-página — 5 × 15 cm</option>
+        <option value="50x180">Marca-página — 5 × 18 cm</option>
+        <option value="60x200">Marca-página — 6 × 20 cm</option>
+        <option value="custom">Personalizado</option>
+      </select>
+    </div>
+    <div class="field" id="paperOrCampo">
+      <label for="paperOr">Orientação</label>
+      <select id="paperOr"><option value="p" selected>Retrato</option><option value="l">Paisagem</option></select>
+    </div>
+    <div class="rule"></div>
+    <div class="row hide" id="paperCustom">
+      <div class="field"><label for="paperW">Largura em mm</label><input id="paperW" type="number" min="50" max="600" value="210"></div>
+      <div class="field"><label for="paperH">Altura em mm</label><input id="paperH" type="number" min="50" max="600" value="297"></div>
+    </div>
+    <p class="note" id="paperAviso"></p>
+    <p class="note" id="paperCabe"></p>
+    <p class="note" id="paperNota"></p>
+    <div class="field">
+      <label>Cor do papel 300g</label>
+      <div class="papeis" id="papelCores"></div>
+    </div>
+    <p class="note" id="papelSugere"></p>
+    <div class="rule"></div>
+    <h3 class="subtit" id="fotoTit">foto</h3>
+    <div class="field">
+      <label for="photoSize">Tamanho impresso</label>
+      <select id="photoSize">
+        <option value="100x150" selected>10 × 15 cm</option>
+        <option value="89x127">9 × 13 cm</option>
+        <option value="127x178">13 × 18 cm</option>
+        <option value="150x210">15 × 21 cm</option>
+        <option value="100x100">Quadrado — 10 × 10 cm</option>
+        <option value="88x107">Polaroid — 8,8 × 10,7 cm</option>
+        <option value="54x86">Instax mini — 5,4 × 8,6 cm (imagem 4,6 × 6,2)</option>
+        <option value="72x86">Instax square — 7,2 × 8,6 cm (imagem 6,2 × 6,2)</option>
+        <option value="108x86">Instax wide — 10,8 × 8,6 cm (imagem 9,9 × 6,2)</option>
+        <option value="custom">Personalizado</option>
+        <option value="none">Sem foto — só o molde</option>
+      </select>
+    </div>
+    <p class="note hide" id="semFotoNota">Sem foto, o papel é só o molde: nada de retângulo na
+    tela nem no PDF, e as peças novas nascem no meio do papel. Para voltar a mirar numa foto,
+    escolha um tamanho acima.</p>
+    <div id="photoCampos">
+    <div class="field" id="photoOrCampo">
+      <label for="photoOr">Orientação</label>
+      <select id="photoOr"><option value="p" selected>Retrato</option><option value="l">Paisagem</option></select>
+    </div>
+    <div class="row hide" id="photoCustom">
+      <div class="field"><label for="photoWmm">Largura em mm</label><input id="photoWmm" type="number" min="20" max="500" value="100"></div>
+      <div class="field"><label for="photoHmm">Altura em mm</label><input id="photoHmm" type="number" min="20" max="500" value="150"></div>
+    </div>
+    <div class="field hide" id="instaxCampo">
+      <label for="instaxTopo">Borda de cima do Instax, em mm</label>
+      <input id="instaxTopo" type="number" min="0" max="24" step="0.5" value="6">
+    </div>
+    <p class="note hide" id="instaxNota">A janela tracejada é onde a imagem sai no cartão. A
+      Fujifilm não publica a borda de cima: meça uma vez com a régua numa foto sua e corrija aqui.</p>
+    <p class="note" id="photoAviso"></p>
+    <p class="note" id="photoNota"></p>
+    <p class="note" id="photoCabe"></p>
+    <div class="rule"></div>
+    <div class="field">
+      <label for="photo">Imagem</label>
+      <input id="photo" type="file" accept="image/*">
+    </div>
+    <p class="note">A imagem é só para você visualizar o encaixe: aparece a 22% de opacidade na
+    tela e no PDF, e não vira furo. Para mover, girar ou centralizar, toque na foto no papel —
+    os botões aparecem na barra de cima.</p>
+    </div>
+    <div class="rule"></div>
+    <button id="addFoto" class="wide">+ mais uma foto</button>
+    <p class="note">Para o cartão com duas fotos, ou a foto pequena no marca-página. A foto a mais
+    é uma peça: anda, encosta, entra no laço e pode ter uma moldura em volta (escolha ela em
+    <b>em volta de</b>, na barra da moldura). Ela sai no PDF como um retângulo, como a principal.</p>
+    <button type="button" class="wide next" data-vai="pecas">próximo: peças <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+  </section>
+
+
+  <section class="pane on" data-pane="pecas">
+    <h2>peças</h2>
+    <div class="novos">
+      <button id="addText" class="wide">nova palavra</button>
+      <button id="addSym" class="wide">novo símbolo</button>
+      <button id="addImg" class="wide">nova imagem</button>
+      <button id="addReto" class="wide">ponto reto</button>
+      <button id="addMoldura" class="wide">nova moldura</button>
+      <button id="addFaixa" class="wide">nova faixa</button>
+    </div>
+    <input id="imgArq" type="file" accept="image/*" class="hide">
+    <p class="note" id="imgAviso"></p>
+
+
+
+    <div class="rule"></div>
+    <div class="chips" id="chips"></div>
+
+    <details class="como">
+      <summary>como funciona</summary>
+      <p class="note">Toque numa peça para selecioná-la: os ajustes dela aparecem na barra de cima.
+      As setas do teclado movem a peça selecionada de meio milímetro; com Shift, de cinco.</p>
+      <p class="note" id="setasDica">O botão <b>ajustar</b> abre o modo ponto a ponto: cada toque
+      acende ou apaga um quadradinho, e arrastar sem soltar acende ou apaga a fileira inteira por
+      onde passa. No ponto reto, ele liga dois furos com um ponto ou corta um ponto.</p>
+      <p class="note">A <b>imagem</b> vira quadradinho na hora. Em <b>1 cor</b> é silhueta — logo,
+      monograma, desenho de traço; de <b>2 cores para cima</b> vira gráfico, com cada tom casado
+      com a meada mais próxima da cartela. A etapa <b>linhas</b> troca uma meada por outra.</p>
+      <p class="note">A <b>moldura</b> dá a volta na foto (ou numa peça) com blocos de retalho, e
+      a <b>faixa</b> repete um motivo em fileira, que é o marca-página.</p>
+      <p class="note">O <b>ponto reto</b> é o fio de um furo a outro, em linha: colmeia, folha,
+      ondas, sashiko. Mistura com o ponto cruz no mesmo molde, e palavra e imagem trocam de um
+      para o outro pelo botão ao lado do ajustar.</p>
+    </details>
+    <button id="reset" class="wide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>recalcular</button>
+    <p class="note">Mexer na altura, no traço, na sensibilidade ou na fonte <b>não</b> descarta o que
+    você acendeu ou apagou à mão: o desenho é refeito e os ajustes vão junto, acompanhando a
+    grade nova. Recalcular é o contrário — refaz as peças a partir dos controles e joga os
+    ajustes fora, para começar aquela palavra limpa.</p>
+    <button type="button" class="wide next" data-vai="linha">próximo: linhas <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+  </section>
+
+  <section class="pane" data-pane="linha">
+    <h2>linhas</h2>
+    <h3 class="subtit">linhas do molde</h3>
+    <div class="fios" id="fios"></div>
+    <p class="note expl" id="fiosConta"></p>
+    <p class="note">A frente é geometria e não tem dúvida. O avesso supõe que você borda um
+    ponto cheio de cada vez — em fileiras gasta menos, pulando de um canto a outro gasta mais.
+    A perda é margem. O comprimento é do fio como ele passa no furo: bordando com 2 fios, são
+    metros de fio de 2 fios. Uma meada de 6 fios desfiada em pares rende três vezes o
+    comprimento dela.</p>
+
+    <div class="rule"></div>
+    <div id="soPeca">
+    <p class="atual"><i id="threadDot"></i><span id="threadAlvo">Linha da próxima peça</span>
+      <b id="threadName">—</b></p>
+
+    <div class="paleta hide" id="paleta">
+      <h3 class="subtit">as linhas desta peça</h3>
+      <div id="paletaLista"></div>
+      <p class="note">Toque numa linha da lista para escolhê-la; depois, uma cor do catálogo
+      abaixo entra no lugar dela. O <b>olho</b> esconde a linha do desenho sem tirá-la da
+      lista — é assim que se apaga um fundo que o corte não pegou. A linha escolhida é também
+      a que o <b>ajustar</b> pinta, ponto a ponto.</p>
+      <div class="rule"></div>
+    </div>
+    <p class="note">Toque numa cor para pô-la na peça selecionada — só isso: experimentar uma
+    cor não a coloca na sua caixa. As que têm um <b>ponto no canto</b> estão na caixa, e a
+    marca <b>minhas</b>, a primeira da fileira, mostra só elas.</p>
+    </div>
+
+    <p class="trocaTodo hide" id="trocaTodo">Trocando <b id="trocaTodoNome"></b> em todo o molde: toque na cor nova.
+      <button type="button" class="tbtn" id="trocaTodoNao">pronto</button></p>
+    <div id="linhaCat">
+    <div id="catalogo">
+      <div class="abas" id="marcas"></div>
+      <div class="field">
+        <label for="catBusca">Buscar</label>
+        <input id="catBusca" type="text" placeholder="código ou nome da cor" autocomplete="off"
+               spellcheck="false">
+      </div>
+      <div class="abas ordem" id="catOrdem" role="group" aria-label="ordem das cores">
+        <button type="button" class="on" data-ordem="tom">por tom</button>
+        <button type="button" data-ordem="codigo">por código</button>
+      </div>
+      <div class="grade" id="catGrade"></div>
+      <div class="catfoot" id="catFoot">
+        <span id="catConta">nenhuma linha marcada</span>
+        <button type="button" id="catLimpar" class="hide">limpar</button>
+      </div>
+      <p class="note compra hide" id="catCompra"></p>
+    </div>
+    </div>
+    <p class="note">As cores são referência de tela. A da Anchor sai da cartela da própria
+      marca; a da DMC vem de tabela pública e é mais aproximada. Monitor, luz e lote mudam o
+      que você vê na mão — por isso o que se compra é o código, e não a cor impressa.</p>
+
+    <p class="note">No PDF o ponto sai na cor da linha e os furos em preto. Quando o molde tem
+      um gráfico colorido, cada quadradinho leva também a <b>letra</b> da linha, e a legenda diz
+      que letra é qual: impresso em preto e branco — que é como sai da impressora de casa quase
+      sempre — a cor some e a letra fica.</p>
+    <button type="button" class="wide next" data-vai="imprimir">próximo: imprimir <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+  </section>
+
+  <section class="pane menuPane" data-pane="caixa">
+    <h2>minha caixa de linhas</h2>
+    <div id="soCaixa" class="hide">
+      <p class="note">Aqui você diz que linhas tem. Toque numa cor para marcar, e de novo para
+      tirar — a peça não muda. O que estiver na caixa aparece na marca <b>minhas</b>, e o gráfico
+      colorido pode ser feito só com elas.</p>
+      <div class="abas toque" id="toqueCaixa" aria-label="o que o toque marca">
+        <button type="button" class="on" data-est="tenho" aria-pressed="true">tenho</button>
+        <button type="button" data-est="pouco" aria-pressed="false">tenho pouco</button>
+        <button type="button" data-est="acabou" aria-pressed="false">acabou</button>
+      </div>
+      <h3 class="subtit">várias de uma vez</h3>
+      <div class="lote">
+        <select id="loteMarca" aria-label="Marca das linhas"></select>
+        <textarea id="loteCodigos" rows="2" placeholder="códigos separados por vírgula ou espaço: 310, 321, 666"
+                  aria-label="Códigos das linhas"></textarea>
+        <button type="button" id="loteAdd">pôr na caixa</button>
+      </div>
+      <p class="note" id="loteAviso"></p>
+      <div class="rule"></div>
+    </div>
+
+    <div id="caixaCat"></div>
+    <div id="soCaixa2" class="hide">
+      <div class="rule"></div>
+      <h3 class="subtit">uma linha fora de cartela</h3>
+      <div class="avulsa">
+        <input id="avMarca" type="text" placeholder="marca" autocomplete="off" maxlength="24"
+               aria-label="Marca da linha">
+        <input id="avCode" type="text" placeholder="código" autocomplete="off" maxlength="12"
+               aria-label="Código da linha">
+        <input id="avCor" type="color" value="#B3B347" aria-label="Cor da linha">
+        <button type="button" id="avAdd">guardar</button>
+      </div>
+      <p class="note" id="avAviso"></p>
+      <p class="note">Para a meada que você tem e não está em cartela nenhuma. Ela nasce
+      marcada, entra na marca <b>minhas</b> junto com as outras e aparece também na marca
+      <b>avulsas</b> — onde desmarcar apaga de vez, porque ela só existe porque você a
+      cadastrou.</p>
+      </div>
+
+  </section>
+
+  <section class="pane" data-pane="imprimir">
+    <h2>imprimir</h2>
+    <h3 class="subtit">antes de baixar</h3>
+    <div class="checa" id="checa"></div>
+    <div class="rule"></div>
+    <div class="field">
+      <label for="mm">Espaçamento entre furos <b id="mmOut">2,5</b> mm</label>
+      <div class="abas" id="mmAtalhos" role="group" aria-label="espaçamentos mais usados">
+        <button type="button" data-mm="2">delicado · 2 mm</button>
+        <button type="button" data-mm="2.5">padrão · 2,5 mm</button>
+        <button type="button" data-mm="3">firme · 3 mm</button>
+      </div>
+      <input id="mm" type="range" min="1" max="6" step="0.5" value="2.5">
+      <p class="note">É o lado de cada quadradinho, e vale para o molde inteiro. Ele decide o
+      tamanho de tudo: as peças são contadas em quadradinhos, então mudar o espaçamento aumenta
+      ou diminui todas juntas. Entre 2,5 e 3 mm é o mais seguro no papel; abaixo de 2 mm a tira
+      entre dois furos rasga.</p>
+      <p class="note" id="mmEfeito"></p>
+    </div>
+    <div class="rule"></div>
+    <h3 class="subtit">folha da impressora</h3>
+    <div class="field">
+      <label for="folha">Folha em que o molde sai</label>
+      <select id="folha">
+        <option value="a4" selected>A4 — 21 × 29,7 cm</option>
+        <option value="a3">A3 — 29,7 × 42 cm</option>
+        <option value="carta">Carta — 21,6 × 27,9 cm</option>
+      </select>
+    </div>
+    <p class="note">O molde sai sempre em tamanho real. O que não cabe na folha é repartido em
+    várias, que se emendam sobrepondo os furos — nunca reduzido.</p>
+    <div id="variosCampo" class="hide">
+      <div class="field">
+        <label for="copias">Cópias deste molde na mesma folha</label>
+        <select id="copias"></select>
+      </div>
+      <div id="juntoCampo" class="hide">
+        <label>Junto com outros moldes do mesmo tamanho</label>
+        <div id="juntoLista" class="junto"></div>
+      </div>
+      <p class="note" id="variosNota"></p>
+    </div>
+    <div class="rule"></div>
+    <h3 class="subtit">recorte</h3>
+    <div class="field">
+      <label for="cantos">Cantos arredondados, raio em mm</label>
+      <input id="cantos" type="number" min="0" max="30" step="1" value="0">
+    </div>
+    <label class="check"><input type="checkbox" id="fita"> furo para a fita, no meio do lado de cima</label>
+    <p class="note">É o recorte de um marca-página: a moldura tracejada do PDF sai com os cantos
+    redondos e o furo da fita marcado, para recortar e furar por ela. Zero é canto reto.</p>
+    <div class="rule"></div>
+    <label class="check"><input type="checkbox" id="numerar"> numerar a ordem dos pontos no PDF (ponto reto)</label>
+    <p class="note">Cada linha de ponto reto ganha os números 1, 2, 3… ao lado dos furos, na
+    ordem em que a agulha passa. É para quem quer seguir o caminho em vez de escolher na hora;
+    sem isso o PDF sai mais limpo.</p>
+    <div class="rule"></div>
+    <h3 class="subtit">resumo</h3>
+    <div class="num"><span>Pontos</span><strong id="count" aria-live="polite">—</strong></div>
+    <div class="num"><span>Furos</span><strong id="holes" aria-live="polite">—</strong></div>
+    <div class="num"><span>Peça selecionada</span><strong id="size" aria-live="polite">—</strong></div>
+    <div class="num"><span>Altura da letra</span><strong id="letraMM" aria-live="polite">—</strong></div>
+    <p class="note" id="alturaDica">A <b>altura</b> no painel da peça é a altura da maiúscula, contada em
+    quadradinhos e medida na fonte — não na palavra. A mesma altura dá sempre a mesma letra: “amor” e
+    “alegria” na mesma altura saem com letras do mesmo tamanho, e o que ascende e desce passa disso.
+    Palavra nova nasce com o que estiver na barra.</p>
+
+    <div class="rule"></div>
+    <button type="button" class="wide pdfGrande" id="pdf2"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2"/></svg>baixar molde em PDF</button>
+    <button id="dl" class="wide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>baixar prévia png</button>
+    <p class="note expl">Imprima em 100%, sem ajustar à página, e confira a régua antes de furar.</p>
+    <div id="out"></div>
+  </section>
+
+  <section class="pane menuPane" data-pane="moldes">
+    <h2>meus moldes</h2>
+    <div class="field">
+      <label for="moldeNome">Nome deste molde</label>
+      <input id="moldeNome" type="text" autocomplete="off" spellcheck="false" placeholder="sem nome">
+    </div>
+    <button id="moldeNovo" class="wide">começar um molde novo</button>
+    <button id="moldeDup" class="wide">duplicar este molde</button>
+    <div class="moldes" id="moldeLista"></div>
+
+    <div class="rule"></div>
+    <h2>levar para outro lugar</h2>
+    <button id="moldeSalvar" class="wide">salvar arquivo do molde</button>
+    <button id="moldeAbrir" class="wide">abrir arquivo do molde</button>
+    <input id="moldeArq" type="file" accept="application/json,.json" class="hide">
+    <p class="note" id="moldeAviso"></p>
+    <h3 class="subtit" id="oxsTit">outros programas de ponto cruz</h3>
+    <button id="oxsSalvar" class="wide">exportar OXS</button>
+    <button id="oxsAbrir" class="wide">trazer um gráfico OXS para este molde</button>
+    <input id="oxsArq" type="file" accept=".oxs,.xml,application/xml,text/xml" class="hide">
+    <p class="note">OXS é o formato aberto que o WinStitch, o MacStitch e o KG-Chart leem e
+      escrevem. O ponto reto vai como ponto atrás; meio ponto, nós e contas do arquivo não têm
+      equivalente aqui e ficam de fora.</p>
+
+    <p class="note">O arquivo leva tudo: papel, foto, peças, linhas e os ajustes feitos ponto a
+      ponto. É por ele que o trabalho vai para outro aparelho, ou volta depois de você limpar os
+      dados do site — o navegador, sozinho, não leva nada para lugar nenhum.</p>
+
+    <div class="rule"></div>
+    <h2>pdf já gerados</h2>
+    <div class="moldes" id="pdfLista"></div>
+    <p class="note" id="pdfDica"></p>
+    <button id="pdfLimpar" class="wide hide">apagar os pdf guardados</button>
+  </section>
+
+  <section class="pane notes menuPane" data-pane="ajuda">
+    <h2>do arquivo ao material</h2>
+    <details class="como" open>
+      <summary>imprimir, recortar e furar</summary>
+      <ul>
+        <li>Cole a foto no papel usando a medida que aparece no cabeçalho do PDF: distância da borda esquerda e da borda de cima. É essa posição que faz o molde bater.</li>
+        <li>Antes de furar, meça a régua impressa no cabeçalho: se os 50 mm dela não derem 50 mm na sua régua, a impressora reduziu a página e nenhum furo vai bater. Imprima de novo em 100%, sem "ajustar à página".</li>
+        <li>Recorte o molde impresso pela moldura tracejada: ela é a borda do papel da peça, então a folha recortada sai do tamanho exato dele. Se o papel da peça for A4 e você imprimir em A4, a moldura cai na borda da própria folha impressa e não há o que recortar — a folha já é o molde. Prenda sobre o conjunto encostando borda com borda, que o retângulo impresso cai em cima da foto de verdade, fita crepe nos quatro cantos. (Só quando há furo perto demais da borda do papel a moldura encolhe para a caixa do desenho, e aí a mira volta a ser o retângulo da foto.)</li>
+        <li>O cabeçalho do PDF ocupa 46 mm da página, e uma moldura do tamanho da folha não cabe embaixo dele — nem um molde que use quase toda a folha. Quando isso acontece o PDF sai em duas páginas: a primeira só com as instruções, a régua e a legenda, e a segunda com o molde sozinho na folha, inteiro e em tamanho real. É só a segunda que você imprime e recorta.</li>
+        <li>Molde maior que a folha inteira sai em várias folhas, todas em tamanho real. Cada uma diz qual é no cabeçalho, e as vizinhas repetem uma faixa do desenho: sobreponha uma na outra até os furos da faixa coincidirem, e só então prenda. As margens dizem qual folha continua de cada lado.</li>
+        <li>Fure ponto a ponto com agulha grossa, apoiado em EVA ou cortiça. Cada quadradinho usa quatro furos, compartilhados com os vizinhos — por isso o número de furos é menor que o dobro de pontos.</li>
+        <li>Borde com 2 ou 3 fios de meada. Em furo que atravessa foto e papel, puxe devagar: papel fotográfico não fecha depois de rasgar.</li>
+        <li>Espaçamento entre 2,5 e 3 mm é o mais seguro nesse material. Abaixo de 2 mm a tira de papel entre dois furos vira pó.</li>
+      </ul>
+    </details>
+    <details class="como">
+      <summary>moldura, marca-página e ponto reto</summary>
+      <ul>
+        <li>A <b>moldura</b> de retalhos dá a volta na foto, ou numa peça escolhida em <b>em volta de</b>, e se refaz quando ela muda. Se passar da borda do papel, o botão <b>caber no papel</b> põe o arranjo para dentro ou diminui margem e espaço. Com 6 cores, <b>cores por bloco</b> troca o esquema de um bloco com um toque.</li>
+        <li>Para <b>marca-página</b>, escolha um papel de marca-página na etapa papel e foto e crie uma <b>faixa</b>: ela já nasce do comprimento dele. Na aba papel dá para pôr <b>cantos arredondados</b> e o <b>furo da fita</b>, e — quando o papel cabe mais de uma vez na folha — <b>cópias</b> e outros moldes do mesmo tamanho na mesma impressão.</li>
+        <li>O <b>ponto reto</b> é o fio de furo a furo, em linha. Os desenhos prontos têm um <b>arranjo</b> — solto, faixa ou moldura —, e a palavra e a imagem passam de ponto cruz para ponto reto pelo botão ao lado do ajustar. Palavra em ponto reto pede pelo menos 1,8 cm de maiúscula. No PDF, o risco do ponto sai em cinza claro; na etapa imprimir dá para numerar a ordem dos pontos.</li>
+        <li>Furos de peças diferentes a menos de 2 mm acendem o aviso <b>furos colados</b> e a região aparece tracejada em vermelho: no papel essa tira rasga. Afaste as peças, ou encoste até os furos coincidirem.</li>
+      </ul>
+    </details>
+    <details class="como">
+      <summary>letras</summary>
+      <ul>
+        <li>A <b>altura</b> na barra de cima é a altura da letra maiúscula, em quadradinhos, medida na fonte e não na palavra. Por isso duas palavras na mesma altura saem com letras do mesmo tamanho, mesmo que uma tenha “g” e “l” e a outra não — o que ascende e desce passa da altura pedida. A etapa <b>imprimir</b> diz quanto isso dá em milímetros, e palavra nova nasce com o que estiver na barra.</li>
+        <li>Ajuste ponto a ponto <b>sobrevive</b> a mexer na altura, no traço, na sensibilidade e na fonte: o desenho é refeito e os quadradinhos que você acendeu ou apagou vão junto, acompanhando a grade nova. Quem descarta é só o botão <b>recalcular</b>, e ele pergunta antes.</li>
+        <li>Para o nome curvado por cima da foto, use o campo <b>arco</b> no painel da peça. Se a cursiva fechar demais em letra pequena, abra o <b>espaço</b> entre as letras — ele é contado em quadradinhos, os mesmos que viram furo.</li>
+      </ul>
+    </details>
+    <details class="como">
+      <summary>imagem e gráfico colorido</summary>
+      <ul>
+        <li>A peça de <b>imagem</b> lê um arquivo do aparelho e o transforma em quadradinhos na hora. Em <b>1 cor</b> ela é silhueta: o escuro acende, o claro apaga, e vale uma linha só — logo, monograma, brasão, desenho de traço. A <b>sensibilidade</b> decide o que conta como escuro e o <b>inverter</b> serve para desenho claro sobre fundo escuro.</li>
+        <li>De <b>2 cores para cima</b> a mesma peça vira <b>gráfico colorido</b>: as cores da imagem são agrupadas nesse número de tons, e cada tom vira a meada mais próxima da cartela escolhida em <b>linhas</b> — inclusive <b>minhas</b>, que usa só o que você já marcou como seu. O <b>fundo</b> tira o que é claro demais para ganhar linha, que é o que apaga o branco em volta de um logo ou o quadriculado de um gráfico pronto. Mais cores é mais fiel e mais meada para comprar; comece em 6 ou 8 e suba se faltar tom.</li>
+        <li>Foto de verdade — gente, bicho, paisagem — e imagem de muitas cores já entram em <b>8 cores</b>, porque em uma cor só a foto vira mancha picotada e o colorido se perde. Logo de uma cor e desenho de traço continuam entrando em 1. Nos dois casos o campo <b>cores</b> muda depois.</li>
+        <li>Na aba <b>linha</b>, com um gráfico selecionado, aparece a lista das meadas dele com quantos pontos cada uma tem. Toque numa para escolhê-la e, em seguida, numa cor do catálogo para pôr outra meada no lugar — é assim que se troca o palpite do casamento automático pela linha que você tem na gaveta. O <b>olho</b> esconde uma linha do desenho sem tirá-la da lista, e a linha escolhida é a que o <b>ajustar</b> pinta ponto a ponto.</li>
+        <li>Mexer na <b>largura</b> não sorteia meadas novas: as linhas do gráfico ficam como estão, inclusive as que você trocou à mão. Quem pede paleta nova é mudar o número de <b>cores</b>, mudar a cartela em <b>linhas</b>, trocar a imagem ou apertar o <b>recalcular</b>.</li>
+      </ul>
+    </details>
+    <details class="como">
+      <summary>linhas e fio</summary>
+      <ul>
+        <li>A aba <b>molde</b> diz quantos metros cada linha pede, e mostra a conta que usou. A frente é exata; o avesso e os 15% de perda são estimativa, então compre com folga.</li>
+        <li>Cada peça pode ter a sua linha: selecione a peça e toque na cor. O rodapé do PDF lista as linhas usadas com o código da marca — a cor impressa é referência de tela, o código é o que se compra.</li>
+      </ul>
+    </details>
+    <details class="como">
+      <summary>posicionar</summary>
+      <ul>
+        <li>Se o bordado não vai numa foto, escolha <b>Sem foto</b> no tamanho, na etapa <b>papel e foto</b> — ou toque no retângulo da foto e use o <b>tirar foto</b> no painel da direita. Ele some da tela e do PDF, e as peças novas nascem no meio do papel.</li>
+        <li>Para posicionar fino, use as setas do teclado: meio milímetro por toque, cinco com Shift. Os botões de <b>alinhar</b>, no painel da peça, centralizam ela na foto ou no papel, e encostam ela na base da foto.</li>
+        <li>O botão da cruz pontilhada, no canto da mesa, liga as <b>guias</b>: linhas pontilhadas que atravessam a mesa inteira. Puxe uma de dentro da régua para soltar outra, e leve-a de volta para a régua para tirá-la. Arrastando, a peça encosta sozinha na guia — é o jeito de alinhar no olho sem sair torto. Um bloco laçado encosta inteiro, pela caixa de tudo o que está nele. Elas ficam na tela e não saem no PDF.</li>
+      </ul>
+    </details>
+    <details class="como">
+      <summary>guardar o trabalho</summary>
+      <ul>
+        <li>Se o rodapé ficar vermelho dizendo <b>não coube na memória</b>, salve o arquivo do molde (menu do logo) e apague um molde antigo. A partir desse momento o trabalho parou de ser guardado.</li>
+        <li>Guarde o arquivo do molde, pelo menu do logo, antes de mudar de aparelho ou limpar o navegador. O que fica só no navegador não vai a lugar nenhum e some com os dados do site.</li>
+      </ul>
+    </details>
+  </section>
+
+</div>
+
+<!-- ===================== mesa ===================== -->
+<div class="mesa" id="mesa">
+  <div class="corner"></div>
+  <div class="ruler h" id="rulerH"></div>
+  <div class="ruler v" id="rulerV"></div>
+  <div class="stage" id="stage"><canvas id="grid" width="10" height="10"></canvas></div>
+  <div class="guias" id="guias" aria-hidden="true"></div>
+  <div class="zoom">
+    <button id="zGuias" title="guias pontilhadas" aria-label="guias pontilhadas" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3"/></svg></button>
+    <input type="checkbox" id="imaPecas" class="imaBtn" checked title="ímã entre peças: arrastando, a peça encosta nas outras, na foto e no meio do papel. Segurar Alt solta o ímã de passagem." aria-label="ímã entre peças">
+    <span class="zsep"></span>
+    <button id="zOut" title="afastar" aria-label="afastar">−</button>
+    <button id="zVal" title="encaixar o papel na tela">100%</button>
+    <button id="zIn" title="aproximar" aria-label="aproximar">+</button>
+    <button id="z11" title="tamanho real na tela (calibre uma vez com um cartão)">1:1</button>
+    <button id="zFeito" title="marcar o que já bordei" aria-label="marcar o que já bordei" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button id="zPan" title="mover a vista" aria-label="mover a vista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5.5a1.5 1.5 0 013 0v5h.5V7a1.5 1.5 0 013 0v8.5a5.5 5.5 0 01-5.5 5.5h-1.8a5 5 0 01-3.7-1.63L4.6 15.6a1.5 1.5 0 012.1-2.13L8.5 15V4.5a1.5 1.5 0 013 0V10H13V5.5z"/></svg></button>
+  </div>
+</div>
+
+<!-- ===================== seleção ===================== -->
+<aside class="tools sel" id="sel" aria-label="o que está selecionado">
+  <div class="selVazio" id="selVazio">
+    <p>Toque numa peça ou na foto, na mesa, para ajustar aqui.</p>
+    <p class="note">Arrastando no vazio da mesa você laça várias peças para mexer juntas.</p>
+  </div>
+  <div class="selCab hide" id="selCab">
+    <div class="selTit"><h2 id="selNome">—</h2><span id="selTipo"></span></div>
+    <span class="grp hide acts" id="ctlActs">
+      <button id="edit" class="tbtn" title="ajustar ponto a ponto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18V3H3zm8 16H5v-6h6v6zm0-8H5V5h6v6zm8 8h-6v-6h6v6zm0-8h-6V5h6v6z"/></svg><span id="editLabel">ajustar</span></button>
+      <button id="trocaPonto" class="tbtn hide" title="Passa esta peça para o outro ponto, no mesmo lugar e do mesmo tamanho.">ponto reto</button>
+      <button id="flipEl" class="tbtn icon" title="espelhar a peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18"/><path d="M9 7L4 12l5 5z" fill="currentColor"/><path d="M15 7l5 5-5 5z"/></svg></button>
+      <button id="dupEl" class="tbtn icon" title="duplicar peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 1H4a2 2 0 00-2 2v12h2V3h11V1zm4 4H8a2 2 0 00-2 2v14a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2zm0 16H8V7h11v14z"/></svg></button>
+      <button id="delEl" class="tbtn danger" title="excluir a peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg><span class="hide">excluir</span></button>
+    </span>
+  </div>
     <span class="none" id="ctlNone">&nbsp;</span>
     <span class="grp hide" id="ctlEdit"><span class="none" id="ctlEditTxt">ajustando ponto a ponto</span></span>
     <span class="grp hide" id="ctlGrupo"><span class="none" id="ctlGrupoTxt"></span>
@@ -36,7 +542,7 @@
     </span>
 
     <fieldset id="ctlText" class="hide">
-      <span class="t txt"><span>texto</span><input id="txt" type="text" value="champ" autocomplete="off" spellcheck="false"></span>
+      <span class="t txt"><span>Texto</span><input id="txt" type="text" value="champ" autocomplete="off" spellcheck="false"></span>
       <span class="t fnt"><label class="hide" for="font">Fonte</label><button type="button" id="fontBtn" title="escolher a fonte"></button><select id="font" class="hide">
         <optgroup label="Caligrafia fina">
           <option value="Great Vibes">Great Vibes</option>
@@ -87,15 +593,15 @@
         </optgroup>
       </select></span>
       <span class="sep"></span>
-      <span class="t" title="Altura da letra maiúscula, em quadradinhos. É medida na fonte, não na palavra: a mesma altura dá sempre a mesma letra, tenha a palavra “g” e “l” ou não. O que ascende e desce passa disso. A aba molde mostra quanto dá em milímetros."><span>altura</span><input id="rows" type="number" min="8" max="60" step="1" value="16" aria-describedby="alturaDica"><b id="rowsOut" class="hide">16</b><b class="cm" id="rowsCm"></b></span>
-      <span class="t" title="Engrossa o traço da fonte antes de virar quadradinho, em passos. Letra fina some em quadradinho pequeno; 0 deixa o traço como a fonte desenhou."><span>traço</span><input id="thick" type="number" min="0" max="12" step="1" value="2"><b id="thickOut" class="hide">2</b><b class="cm" id="thickRef"></b></span>
-      <span class="t" title="Quanto de tinta um quadradinho precisa ter para acender, em por cento. Menos acende mais quadradinhos e engorda a letra; mais deixa só o miolo do traço."><span>sens.</span><input id="thr" type="number" min="10" max="80" step="5" value="35"><b id="thrOut" class="hide">35</b><b class="cm" id="thrRef"></b></span>
-      <span class="t" title="Quadradinhos a mais entre uma letra e outra — o que resolve cursiva fechando em letra pequena."><span>espaço</span><input id="esp" type="number" min="0" max="8" step="1" value="0"><b id="espOut" class="hide">0</b></span>
-      <span class="t" title="Curva a palavra inteira, em graus: positivo arqueia para cima, negativo vira vale."><span>arco</span><input id="arc" type="number" min="-120" max="120" step="5" value="0"><b id="arcOut" class="hide">0</b></span>
+      <span class="t" title="Altura da letra maiúscula, em quadradinhos. É medida na fonte, não na palavra: a mesma altura dá sempre a mesma letra, tenha a palavra “g” e “l” ou não. O que ascende e desce passa disso. A etapa imprimir mostra quanto dá em milímetros."><span>Altura</span><input id="rows" type="number" min="8" max="60" step="1" value="16" aria-describedby="alturaDica"><b id="rowsOut" class="hide">16</b><b class="cm" id="rowsCm"></b></span>
+      <span class="t" title="Engrossa o traço da fonte antes de virar quadradinho, em passos. Letra fina some em quadradinho pequeno; 0 deixa o traço como a fonte desenhou."><span>Traço</span><input id="thick" type="number" min="0" max="12" step="1" value="2"><b id="thickOut" class="hide">2</b><b class="cm" id="thickRef"></b></span>
+      <span class="t" title="Quanto de tinta um quadradinho precisa ter para acender, em por cento. Menos acende mais quadradinhos e engorda a letra; mais deixa só o miolo do traço."><span>Sensibilidade</span><input id="thr" type="number" min="10" max="80" step="5" value="35"><b id="thrOut" class="hide">35</b><b class="cm" id="thrRef"></b></span>
+      <span class="t" title="Quadradinhos a mais entre uma letra e outra — o que resolve cursiva fechando em letra pequena."><span>Espaço</span><input id="esp" type="number" min="0" max="8" step="1" value="0"><b id="espOut" class="hide">0</b></span>
+      <span class="t" title="Curva a palavra inteira, em graus: positivo arqueia para cima, negativo vira vale."><span>Arco</span><input id="arc" type="number" min="-120" max="120" step="5" value="0"><b id="arcOut" class="hide">0</b></span>
     </fieldset>
 
     <fieldset id="ctlSym" class="hide">
-      <span class="t"><span>desenho</span><select id="sym">
+      <span class="t"><span>Desenho</span><select id="sym">
         <option value="heart">Coração cheio</option>
         <option value="heartOutline">Coração vazado</option>
         <option value="star">Estrela</option>
@@ -114,545 +620,86 @@
         <option value="aviao">Avião</option>
         <option value="mala">Mala de viagem</option>
       </select></span>
-      <span class="t"><span>tamanho</span><input id="symScale" type="number" min="1" max="6" step="1" value="1"><b id="symScaleOut" class="hide">1</b><b class="cm" id="symCm"></b></span>
+      <span class="t"><span>Tamanho</span><input id="symScale" type="number" min="1" max="6" step="1" value="1"><b id="symScaleOut" class="hide">1</b><b class="cm" id="symCm"></b></span>
     </fieldset>
 
     <fieldset id="ctlImg" class="hide">
-      <span class="t" title="Largura da peça em quadradinhos. A altura vem sozinha, na proporção da imagem. É este número que decide quanto detalhe cabe: imagem estreita perde o traço fino, imagem larga custa ponto."><span>largura</span><input id="imgLarg" type="number" min="10" max="120" step="1" value="40"><b id="imgLargOut" class="hide">40</b><b class="cm" id="imgCm"></b></span>
-      <span class="t" title="Quantas linhas diferentes a peça usa. Em 1 ela é silhueta, numa linha só, e valem a sensibilidade e o inverter. De 2 para cima a imagem vira gráfico colorido: as cores dela são agrupadas nesse número de tons e cada tom vira a meada mais próxima da marca escolhida."><span>cores</span><input id="imgCores" type="number" min="1" max="20" step="1" value="1"><b id="imgCoresOut" class="hide">1</b></span>
-      <span class="t" id="tImgThr" title="Quanto de escuro um quadradinho precisa ter para acender, em por cento. Menos acende mais e engorda o desenho; mais deixa só o que é bem escuro."><span>sens.</span><input id="imgThr" type="number" min="0" max="90" step="5" value="50"><b id="imgThrOut" class="hide">50</b><b class="cm" id="imgThrRef"></b></span>
-      <span class="t hide" id="tImgCorte" title="Quadradinho com menos escuro que isto fica vazio, sem linha nenhuma — é o que tira o fundo branco de um logo ou o quadriculado de um gráfico. Em 0 nada é descartado e o fundo também ganha meada."><span>fundo</span><input id="imgCorte" type="number" min="0" max="80" step="5" value="10"><b id="imgCorteOut" class="hide">10</b></span>
-      <span class="t hide" id="tImgFonte" title="De que cartela as linhas do gráfico são escolhidas. “minhas” usa só o que você já marcou como seu — e aí o gráfico sai com as meadas que você tem em casa."><span>linhas</span><select id="imgFonte"></select></span>
+      <span class="t" title="Largura da peça em quadradinhos. A altura vem sozinha, na proporção da imagem. É este número que decide quanto detalhe cabe: imagem estreita perde o traço fino, imagem larga custa ponto."><span>Largura</span><input id="imgLarg" type="number" min="10" max="120" step="1" value="40"><b id="imgLargOut" class="hide">40</b><b class="cm" id="imgCm"></b></span>
+      <span class="t" title="Quantas linhas diferentes a peça usa. Em 1 ela é silhueta, numa linha só, e valem a sensibilidade e o inverter. De 2 para cima a imagem vira gráfico colorido: as cores dela são agrupadas nesse número de tons e cada tom vira a meada mais próxima da marca escolhida."><span>Cores</span><input id="imgCores" type="number" min="1" max="20" step="1" value="1"><b id="imgCoresOut" class="hide">1</b></span>
+      <span class="t" id="tImgThr" title="Quanto de escuro um quadradinho precisa ter para acender, em por cento. Menos acende mais e engorda o desenho; mais deixa só o que é bem escuro."><span>Sensibilidade</span><input id="imgThr" type="number" min="0" max="90" step="5" value="50"><b id="imgThrOut" class="hide">50</b><b class="cm" id="imgThrRef"></b></span>
+      <span class="t hide" id="tImgCorte" title="Quadradinho com menos escuro que isto fica vazio, sem linha nenhuma — é o que tira o fundo branco de um logo ou o quadriculado de um gráfico. Em 0 nada é descartado e o fundo também ganha meada."><span>Fundo</span><input id="imgCorte" type="number" min="0" max="80" step="5" value="10"><b id="imgCorteOut" class="hide">10</b></span>
+      <span class="t hide" id="tImgFonte" title="De que cartela as linhas do gráfico são escolhidas. “minhas” usa só o que você já marcou como seu — e aí o gráfico sai com as meadas que você tem em casa."><span>Linhas</span><select id="imgFonte"></select></span>
       <button type="button" id="imgInv" class="tbtn" title="Troca o claro pelo escuro — é o que resolve desenho branco sobre fundo escuro.">inverter</button>
       <button type="button" id="imgTroca" class="tbtn" title="Põe outra imagem nesta mesma peça, sem perder o lugar nem a linha dela.">trocar</button>
     </fieldset>
 
     <fieldset id="ctlPat" class="hide">
-      <span class="t" title="Moldura dá a volta na foto; faixa é o motivo repetido em fileira, que é o marca-página."><span>arranjo</span><select id="patArr">
+      <span class="t" title="Moldura dá a volta na foto; faixa é o motivo repetido em fileira, que é o marca-página."><span>Arranjo</span><select id="patArr">
         <option value="moldura">moldura</option>
         <option value="faixa">faixa</option>
       </select></span>
-      <span class="t"><span>desenho</span><select id="patMot"></select></span>
-      <span class="t" title="Quantas vezes cada quadradinho do desenho é repetido: 2 deixa o bloco com o dobro do lado."><span>tamanho</span><input id="patScale" type="number" min="1" max="4" step="1" value="1"><b class="cm" id="patCm"></b></span>
-      <span class="t" title="Quadradinhos vazios entre um bloco e outro."><span>espaço</span><input id="patGap" type="number" min="0" max="10" step="1" value="1"></span>
-      <span class="t hide" id="tPatAlvo" title="A moldura dá a volta na foto ou numa peça — um nome, uma imagem — e acompanha a peça quando ela anda."><span>em volta de</span><select id="patAlvo"></select></span>
-      <span class="t" id="tPatMargem" title="Folga entre a foto e o lado de dentro da moldura, em milímetros. A moldura ganha ou perde blocos para a foto caber com essa folga."><span>margem</span><input id="patMargem" type="number" min="0" max="60" step="1" value="6"></span>
-      <span class="t hide" id="tPatRep" title="Quantas vezes o motivo se repete na faixa."><span>repetir</span><input id="patRep" type="number" min="1" max="40" step="1" value="6"></span>
-      <span class="t" title="Quantas linhas a peça usa. Com tantas quantos os papéis do bloco (3 nos blocos de retalho, 1 nos motivos), todos saem iguais; com mais, os blocos se alternam entre as linhas. A aba linha troca cada uma pela sua meada."><span>cores</span><input id="patCores" type="number" min="1" max="8" step="1" value="6"></span>
+      <span class="t"><span>Desenho</span><select id="patMot"></select></span>
+      <span class="t" title="Quantas vezes cada quadradinho do desenho é repetido: 2 deixa o bloco com o dobro do lado."><span>Tamanho</span><input id="patScale" type="number" min="1" max="4" step="1" value="1"><b class="cm" id="patCm"></b></span>
+      <span class="t" title="Quadradinhos vazios entre um bloco e outro."><span>Espaço</span><input id="patGap" type="number" min="0" max="10" step="1" value="1"></span>
+      <span class="t hide" id="tPatAlvo" title="A moldura dá a volta na foto ou numa peça — um nome, uma imagem — e acompanha a peça quando ela anda."><span>Em volta de</span><select id="patAlvo"></select></span>
+      <span class="t" id="tPatMargem" title="Folga entre a foto e o lado de dentro da moldura, em milímetros. A moldura ganha ou perde blocos para a foto caber com essa folga."><span>Margem</span><input id="patMargem" type="number" min="0" max="60" step="1" value="6"></span>
+      <span class="t hide" id="tPatRep" title="Quantas vezes o motivo se repete na faixa."><span>Repetir</span><input id="patRep" type="number" min="1" max="40" step="1" value="6"></span>
+      <span class="t" title="Quantas linhas a peça usa. Com tantas quantos os papéis do bloco (3 nos blocos de retalho, 1 nos motivos), todos saem iguais; com mais, os blocos se alternam entre as linhas. A etapa linhas troca cada uma pela sua meada."><span>Cores</span><input id="patCores" type="number" min="1" max="8" step="1" value="6"></span>
       <button type="button" id="patBlocos" class="tbtn hide" title="Liga um modo em que cada toque num bloco da moldura passa ele para o próximo esquema de cores da paleta.">cores por bloco</button>
       <button type="button" id="patCabe" class="tbtn hide" title="Diminui a margem, depois o espaço entre os blocos, até a moldura caber no papel.">caber no papel</button>
       <button type="button" id="patDeit" class="tbtn hide" title="Deita a faixa: os motivos passam a se repetir na horizontal.">deitada</button>
     </fieldset>
 
     <fieldset id="ctlReto" class="hide">
-      <span class="t" id="tRetoDes"><span>desenho</span><select id="retoDes"></select></span>
-      <span class="t" id="tRetoArr" title="Solto é o desenho sozinho; faixa repete em fileira, que é o marca-página; moldura repete em volta da foto."><span>arranjo</span><select id="retoArr"><option value="solta">solto</option><option value="faixa">faixa</option><option value="moldura">moldura</option></select></span>
-      <span class="t txt hide" id="tRetoTxt"><span>texto</span><input id="retoTxt" type="text" autocomplete="off" spellcheck="false"></span>
-      <span class="t hide" id="tRetoFont"><span>fonte</span><select id="retoFont"></select></span>
-      <span class="t hide" id="tRetoModo" title="Contorno desenha a borda das manchas escuras — perfil, silhueta, logo cheio. Traço desenha o meio dos riscos — desenho a nanquim, letra feita à mão."><span>linha</span><select id="retoModo"><option value="contorno">contorno</option><option value="traco">traço</option></select></span>
-      <span class="t" id="tRetoMed"><span>tamanho</span><input id="retoMed" type="number" min="3" max="300" step="1"><b class="cm" id="retoCm"></b></span>
-      <span class="t" title="Comprimento de cada ponto, de um furo ao outro, em milímetros. Mais curto acompanha melhor a curva e faz mais furos; abaixo de 2 mm a tira de papel entre os furos rasga."><span>ponto</span><input id="retoPasso" type="number" min="2" max="8" step="0.5"><b class="cm">mm</b></span>
+      <span class="t" id="tRetoDes"><span>Desenho</span><select id="retoDes"></select></span>
+      <span class="t" id="tRetoArr" title="Solto é o desenho sozinho; faixa repete em fileira, que é o marca-página; moldura repete em volta da foto."><span>Arranjo</span><select id="retoArr"><option value="solta">solto</option><option value="faixa">faixa</option><option value="moldura">moldura</option></select></span>
+      <span class="t txt hide" id="tRetoTxt"><span>Texto</span><input id="retoTxt" type="text" autocomplete="off" spellcheck="false"></span>
+      <span class="t hide" id="tRetoFont"><span>Fonte</span><select id="retoFont"></select></span>
+      <span class="t hide" id="tRetoModo" title="Contorno desenha a borda das manchas escuras — perfil, silhueta, logo cheio. Traço desenha o meio dos riscos — desenho a nanquim, letra feita à mão."><span>Linha</span><select id="retoModo"><option value="contorno">contorno</option><option value="traco">traço</option></select></span>
+      <span class="t" id="tRetoMed"><span>Tamanho</span><input id="retoMed" type="number" min="3" max="300" step="1"><b class="cm" id="retoCm"></b></span>
+      <span class="t" title="Comprimento de cada ponto, de um furo ao outro, em milímetros. Mais curto acompanha melhor a curva e faz mais furos; abaixo de 2 mm a tira de papel entre os furos rasga."><span>Ponto</span><input id="retoPasso" type="number" min="2" max="8" step="0.5"><b class="cm">mm</b></span>
       <span class="t hide" id="tRetoA"><span id="retoANome"></span><input id="retoA" type="number" step="1"></span>
       <span class="t hide" id="tRetoB"><span id="retoBNome"></span><input id="retoB" type="number" step="1"></span>
-      <span class="t hide" id="tRetoRep" title="Quantas vezes o desenho se repete na faixa."><span>repetir</span><input id="retoRep" type="number" min="1" max="40" step="1"></span>
-      <span class="t hide" id="tRetoGap" title="Espaço entre um desenho e o próximo, em milímetros."><span>espaço</span><input id="retoGap" type="number" min="0" max="30" step="1"><b class="cm">mm</b></span>
-      <span class="t hide" id="tRetoAlvo" title="A moldura dá a volta na foto ou numa peça — um nome, uma imagem — e acompanha a peça quando ela anda."><span>em volta de</span><select id="retoAlvo"></select></span>
-      <span class="t hide" id="tRetoMarg" title="Folga entre a foto e a moldura, em milímetros."><span>margem</span><input id="retoMarg" type="number" min="0" max="60" step="1"><b class="cm">mm</b></span>
+      <span class="t hide" id="tRetoRep" title="Quantas vezes o desenho se repete na faixa."><span>Repetir</span><input id="retoRep" type="number" min="1" max="40" step="1"></span>
+      <span class="t hide" id="tRetoGap" title="Espaço entre um desenho e o próximo, em milímetros."><span>Espaço</span><input id="retoGap" type="number" min="0" max="30" step="1"><b class="cm">mm</b></span>
+      <span class="t hide" id="tRetoAlvo" title="A moldura dá a volta na foto ou numa peça — um nome, uma imagem — e acompanha a peça quando ela anda."><span>Em volta de</span><select id="retoAlvo"></select></span>
+      <span class="t hide" id="tRetoMarg" title="Folga entre a foto e a moldura, em milímetros."><span>Margem</span><input id="retoMarg" type="number" min="0" max="60" step="1"><b class="cm">mm</b></span>
       <button type="button" id="retoCabe" class="tbtn hide" title="Diminui a margem, o espaço entre os desenhos e, se preciso, o tamanho deles, até a moldura caber no papel.">caber no papel</button>
       <button type="button" id="retoDeit" class="tbtn hide" title="Deita a faixa: os desenhos passam a se repetir na horizontal.">deitada</button>
       <button type="button" id="retoInv" class="tbtn hide" title="Troca o claro pelo escuro — para desenho claro sobre fundo escuro.">inverter</button>
     </fieldset>
 
     <fieldset id="ctlFoto" class="hide">
-      <span class="t"><span>tamanho</span><select id="fotoTam"></select></span>
+      <span class="t"><span>Tamanho</span><select id="fotoTam"></select></span>
       <button type="button" id="fotoGira" class="tbtn" title="Troca a largura pela altura.">deitar</button>
       <button type="button" id="fotoImg" class="tbtn">escolher imagem</button>
       <input id="fotoArq" type="file" accept="image/*" class="hide">
     </fieldset>
 
-    <span class="grp hide" id="ctlPiece">
-      <span class="t"><span>inclinação</span><input id="rot" type="number" min="-45" max="45" step="1" value="0"><b id="rotOut" class="hide">0</b></span>
-    </span>
 
+  <div class="grp hide selLinha" id="selLinha">
+    <span class="gtit">linha</span>
+    <div class="cor"><i id="selCor"></i><span><b id="selCorNome">—</b><small id="selFio"></small></span>
+      <button type="button" class="tbtn" id="selTroca">trocar</button></div>
+  </div>
+    <div class="grp hide" id="ctlPiece">
+      <span class="gtit">posição</span>
+      <span class="t"><span>Inclinação</span><input id="rot" type="number" min="-45" max="45" step="1" value="0"><b id="rotOut" class="hide">0</b></span>
+      <div class="alinha hide" id="alinha">
+      <span class="gtit">alinhar</span>
+      <button type="button" id="alFoto">meio da foto</button>
+      <button type="button" id="alPapel">meio do papel</button>
+      <button type="button" id="alBase">base da foto</button>
+      <button type="button" id="alAcima" class="hide">com a peça de cima</button>
+    </div>
+    </div>
     <span class="grp hide" id="ctlPhoto">
       <button id="rotPhoto" class="tbtn">girar foto</button>
       <button id="centerPhoto" class="tbtn">centralizar foto</button>
       <button id="centerTop" class="tbtn">centralizar em cima</button>
-      <button id="semFoto" class="tbtn danger" title="Tira a foto do molde. Ela volta pela aba foto, escolhendo um tamanho.">tirar foto</button>
+      <button id="semFoto" class="tbtn danger" title="Tira a foto do molde. Ela volta pela etapa papel e foto, escolhendo um tamanho.">tirar foto</button>
     </span>
-  </div>
-
-  <div class="right">
-    <span class="grp" id="hist">
-      <button id="undo" class="tbtn icon" title="desfazer (Ctrl+Z)" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg></button>
-      <button id="redo" class="tbtn icon" title="refazer (Ctrl+Shift+Z)" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.06-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"/></svg></button>
-    </span>
-    <span class="grp hide" id="ctlActs">
-      <button id="edit" class="tbtn" title="ajustar ponto a ponto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18V3H3zm8 16H5v-6h6v6zm0-8H5V5h6v6zm8 8h-6v-6h6v6zm0-8h-6V5h6v6z"/></svg><span id="editLabel">ajustar</span></button>
-      <button id="trocaPonto" class="tbtn hide" title="Passa esta peça para o outro ponto, no mesmo lugar e do mesmo tamanho.">ponto reto</button>
-      <button id="flipEl" class="tbtn icon" title="espelhar a peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18"/><path d="M9 7L4 12l5 5z" fill="currentColor"/><path d="M15 7l5 5-5 5z"/></svg></button>
-      <button id="dupEl" class="tbtn icon" title="duplicar peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 1H4a2 2 0 00-2 2v12h2V3h11V1zm4 4H8a2 2 0 00-2 2v14a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2zm0 16H8V7h11v14z"/></svg></button>
-      <button id="delEl" class="tbtn danger" title="excluir a peça"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg><span class="hide">excluir</span></button>
-    </span>
-    <span class="fit" id="fitHint"><span class="dot"></span><span id="fitTxt" aria-live="polite">&nbsp;</span></span>
-    <button id="pdf"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg>baixar molde pdf</button>
-  </div>
-</header>
-
-<!-- ===================== trilho ===================== -->
-<nav class="rail" id="rail">
-  <button data-pane="papel"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="1"/></svg>papel</button>
-  <button data-pane="foto"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><circle cx="9" cy="10" r="1.6"/><path d="M3 17l5-5 4 4 3-3 6 6"/></svg>foto</button>
-  <button data-pane="pecas" class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></svg>peças</button>
-  <button data-pane="linha"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3.4"/><circle cx="16" cy="16" r="3.4"/></svg>linha</button>
-  <button data-pane="molde"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1"/><circle cx="9" cy="9" r=".9" fill="currentColor"/><circle cx="15" cy="9" r=".9" fill="currentColor"/><circle cx="9" cy="15" r=".9" fill="currentColor"/><circle cx="15" cy="15" r=".9" fill="currentColor"/></svg>molde</button>
-  <button data-pane="moldes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h6l2 2h10v10H3z"/><path d="M3 7V5h6l2 2"/></svg>moldes</button>
-  <button data-pane="ajuda"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 113 2.5v1.5M12 17h.01"/></svg>ajuda</button>
-</nav>
-
-<!-- ===================== painel ===================== -->
-<div class="panel">
-
-  <section class="pane" data-pane="papel">
-    <h2>papel</h2>
-    <p class="note">São duas coisas diferentes: o <b>papel da peça</b> é onde você borda — o
-    300g, o cartão, o marca-página — e a <b>folha da impressora</b> é onde o molde sai, para ir
-    por cima dele.</p>
-    <h3 class="subtit">papel da peça</h3>
-    <div class="field">
-      <label for="paperSize">Tamanho</label>
-      <select id="paperSize">
-        <option value="210x297" selected>A4 — 21 × 29,7 cm</option>
-        <option value="148x210">A5 — 14,8 × 21 cm</option>
-        <option value="297x420">A3 — 29,7 × 42 cm</option>
-        <option value="200x200">Quadrado — 20 × 20 cm</option>
-        <option value="200x300">20 × 30 cm</option>
-        <option value="150x200">15 × 20 cm</option>
-        <option value="50x150">Marca-página — 5 × 15 cm</option>
-        <option value="50x180">Marca-página — 5 × 18 cm</option>
-        <option value="60x200">Marca-página — 6 × 20 cm</option>
-        <option value="custom">Personalizado</option>
-      </select>
-    </div>
-    <div class="field" id="paperOrCampo">
-      <label for="paperOr">Orientação</label>
-      <select id="paperOr"><option value="p" selected>Retrato</option><option value="l">Paisagem</option></select>
-    </div>
-    <div class="rule"></div>
-    <div class="row hide" id="paperCustom">
-      <div class="field"><label for="paperW">Largura em mm</label><input id="paperW" type="number" min="50" max="600" value="210"></div>
-      <div class="field"><label for="paperH">Altura em mm</label><input id="paperH" type="number" min="50" max="600" value="297"></div>
-    </div>
-    <p class="note" id="paperAviso"></p>
-    <p class="note" id="paperCabe"></p>
-    <p class="note" id="paperNota">As medidas próprias aparecem quando o tamanho é <b>Personalizado</b>.</p>
-    <div class="field">
-      <label>Cor do papel 300g</label>
-      <div class="papeis" id="papelCores"></div>
-    </div>
-    <p class="note" id="papelSugere"></p>
-    <div class="rule"></div>
-    <h3 class="subtit">folha da impressora</h3>
-    <div class="field">
-      <label for="folha">Folha em que o molde sai</label>
-      <select id="folha">
-        <option value="a4" selected>A4 — 21 × 29,7 cm</option>
-        <option value="a3">A3 — 29,7 × 42 cm</option>
-        <option value="carta">Carta — 21,6 × 27,9 cm</option>
-      </select>
-    </div>
-    <p class="note">O molde sai sempre em tamanho real. O que não cabe na folha é repartido em
-    várias, que se emendam sobrepondo os furos — nunca reduzido.</p>
-    <div id="variosCampo" class="hide">
-      <div class="field">
-        <label for="copias">Cópias deste molde na mesma folha</label>
-        <select id="copias"></select>
-      </div>
-      <div id="juntoCampo" class="hide">
-        <label>Junto com outros moldes do mesmo tamanho</label>
-        <div id="juntoLista" class="junto"></div>
-      </div>
-      <p class="note" id="variosNota"></p>
-    </div>
-    <div class="rule"></div>
-    <h3 class="subtit">recorte</h3>
-    <div class="field">
-      <label for="cantos">Cantos arredondados, raio em mm</label>
-      <input id="cantos" type="number" min="0" max="30" step="1" value="0">
-    </div>
-    <label class="check"><input type="checkbox" id="fita"> furo para a fita, no meio do lado de cima</label>
-    <p class="note">É o recorte de um marca-página: a moldura tracejada do PDF sai com os cantos
-    redondos e o furo da fita marcado, para recortar e furar por ela. Zero é canto reto.</p>
-  </section>
-
-  <section class="pane" data-pane="foto">
-    <h2>foto</h2>
-    <div class="field">
-      <label for="photoSize">Tamanho impresso</label>
-      <select id="photoSize">
-        <option value="100x150" selected>10 × 15 cm</option>
-        <option value="89x127">9 × 13 cm</option>
-        <option value="127x178">13 × 18 cm</option>
-        <option value="150x210">15 × 21 cm</option>
-        <option value="100x100">Quadrado — 10 × 10 cm</option>
-        <option value="88x107">Polaroid — 8,8 × 10,7 cm</option>
-        <option value="54x86">Instax mini — 5,4 × 8,6 cm (imagem 4,6 × 6,2)</option>
-        <option value="72x86">Instax square — 7,2 × 8,6 cm (imagem 6,2 × 6,2)</option>
-        <option value="108x86">Instax wide — 10,8 × 8,6 cm (imagem 9,9 × 6,2)</option>
-        <option value="custom">Personalizado</option>
-        <option value="none">Sem foto — só o molde</option>
-      </select>
-    </div>
-    <p class="note hide" id="semFotoNota">Sem foto, o papel é só o molde: nada de retângulo na
-    tela nem no PDF, e as peças novas nascem no meio do papel. Para voltar a mirar numa foto,
-    escolha um tamanho acima.</p>
-    <div id="photoCampos">
-    <div class="field" id="photoOrCampo">
-      <label for="photoOr">Orientação</label>
-      <select id="photoOr"><option value="p" selected>Retrato</option><option value="l">Paisagem</option></select>
-    </div>
-    <div class="row hide" id="photoCustom">
-      <div class="field"><label for="photoWmm">Largura em mm</label><input id="photoWmm" type="number" min="20" max="500" value="100"></div>
-      <div class="field"><label for="photoHmm">Altura em mm</label><input id="photoHmm" type="number" min="20" max="500" value="150"></div>
-    </div>
-    <div class="field hide" id="instaxCampo">
-      <label for="instaxTopo">Borda de cima do Instax, em mm</label>
-      <input id="instaxTopo" type="number" min="0" max="24" step="0.5" value="6">
-    </div>
-    <p class="note hide" id="instaxNota">A janela tracejada é onde a imagem sai no cartão. A
-      Fujifilm não publica a borda de cima: meça uma vez com a régua numa foto sua e corrija aqui.</p>
-    <p class="note" id="photoAviso"></p>
-    <p class="note" id="photoNota"></p>
-    <p class="note" id="photoCabe"></p>
-    <div class="rule"></div>
-    <div class="field">
-      <label for="photo">Imagem</label>
-      <input id="photo" type="file" accept="image/*">
-    </div>
-    <p class="note">A imagem é só para você visualizar o encaixe: aparece a 22% de opacidade na
-    tela e no PDF, e não vira furo. Para mover, girar ou centralizar, toque na foto no papel —
-    os botões aparecem na barra de cima.</p>
-    </div>
-    <div class="rule"></div>
-    <button id="addFoto" class="wide">pôr mais uma foto</button>
-    <p class="note">Para o cartão com duas fotos, ou a foto pequena no marca-página. A foto a mais
-    é uma peça: anda, encosta, entra no laço e pode ter uma moldura em volta (escolha ela em
-    <b>em volta de</b>, na barra da moldura). Ela sai no PDF como um retângulo, como a principal.</p>
-  </section>
-
-  <section class="pane on" data-pane="pecas">
-    <h2>peças</h2>
-    <div class="novos">
-      <button id="addText" class="wide">nova palavra</button>
-      <button id="addSym" class="wide">novo símbolo</button>
-      <button id="addImg" class="wide">nova imagem</button>
-      <button id="addReto" class="wide">ponto reto</button>
-      <button id="addMoldura" class="wide">nova moldura</button>
-      <button id="addFaixa" class="wide">nova faixa</button>
-    </div>
-    <input id="imgArq" type="file" accept="image/*" class="hide">
-    <p class="note" id="imgAviso"></p>
-
-    <!-- o alinhar vem logo depois de criar: é o segundo gesto com qualquer peça,
-         e antes ficava embaixo de cinco parágrafos -->
-    <div class="alinha hide" id="alinha">
-      <label>Alinhar a peça selecionada</label>
-      <button type="button" id="alFoto">centralizar na foto</button>
-      <button type="button" id="alPapel">centralizar no papel</button>
-      <button type="button" id="alBase">pela base da foto</button>
-      <button type="button" id="alAcima" class="hide">alinhar com a peça de cima</button>
-    </div>
-
-    <label class="check" title="Arrastando, a peça encosta nas bordas e no meio das outras peças, da foto e do papel. Segurar Alt durante o arraste solta o ímã de passagem."><input type="checkbox" id="imaPecas" checked> ímã entre peças (Alt solta)</label>
-
-    <div class="rule"></div>
-    <div class="chips" id="chips"></div>
-
-    <details class="como">
-      <summary>como funciona</summary>
-      <p class="note">Toque numa peça para selecioná-la: os ajustes dela aparecem na barra de cima.
-      As setas do teclado movem a peça selecionada de meio milímetro; com Shift, de cinco.</p>
-      <p class="note" id="setasDica">O botão <b>ajustar</b> abre o modo ponto a ponto: cada toque
-      acende ou apaga um quadradinho, e arrastar sem soltar acende ou apaga a fileira inteira por
-      onde passa. No ponto reto, ele liga dois furos com um ponto ou corta um ponto.</p>
-      <p class="note">A <b>imagem</b> vira quadradinho na hora. Em <b>1 cor</b> é silhueta — logo,
-      monograma, desenho de traço; de <b>2 cores para cima</b> vira gráfico, com cada tom casado
-      com a meada mais próxima da cartela. A aba <b>linha</b> troca uma meada por outra.</p>
-      <p class="note">A <b>moldura</b> dá a volta na foto (ou numa peça) com blocos de retalho, e
-      a <b>faixa</b> repete um motivo em fileira, que é o marca-página.</p>
-      <p class="note">O <b>ponto reto</b> é o fio de um furo a outro, em linha: colmeia, folha,
-      ondas, sashiko. Mistura com o ponto cruz no mesmo molde, e palavra e imagem trocam de um
-      para o outro pelo botão ao lado do ajustar.</p>
-    </details>
-  </section>
-
-  <section class="pane" data-pane="linha">
-    <h2>linha</h2>
-
-    <!-- Dois lugares para duas coisas diferentes: pôr uma cor na peça é
-         experimentar; dizer que tem a meada é inventário. Antes um toque só
-         fazia as duas, e testar uma cor enchia a caixa de linhas que você
-         não tem. -->
-    <div class="abas modo" id="linhaModo" role="tablist" aria-label="o que o toque numa cor faz">
-      <button type="button" class="on" data-modo="peca" role="tab" aria-selected="true">aplicar na peça</button>
-      <button type="button" data-modo="caixa" role="tab" aria-selected="false">minha caixa</button>
-    </div>
-
-    <div id="soPeca">
-    <p class="atual"><i id="threadDot"></i><span id="threadAlvo">Linha da próxima peça</span>
-      <b id="threadName">—</b></p>
-
-    <div class="paleta hide" id="paleta">
-      <h3 class="subtit">as linhas desta peça</h3>
-      <div id="paletaLista"></div>
-      <p class="note">Toque numa linha da lista para escolhê-la; depois, uma cor do catálogo
-      abaixo entra no lugar dela. O <b>olho</b> esconde a linha do desenho sem tirá-la da
-      lista — é assim que se apaga um fundo que o corte não pegou. A linha escolhida é também
-      a que o <b>ajustar</b> pinta, ponto a ponto.</p>
-      <div class="rule"></div>
-    </div>
-    <p class="note">Toque numa cor para pô-la na peça selecionada — só isso: experimentar uma
-    cor não a coloca na sua caixa. As que têm um <b>ponto no canto</b> estão na caixa, e a
-    marca <b>minhas</b>, a primeira da fileira, mostra só elas.</p>
-    </div>
-
-    <div id="soCaixa" class="hide">
-      <p class="note">Aqui você diz que linhas tem. Toque numa cor para marcar, e de novo para
-      tirar — a peça não muda. O que estiver na caixa aparece na marca <b>minhas</b>, e o gráfico
-      colorido pode ser feito só com elas.</p>
-      <div class="abas toque" id="toqueCaixa" aria-label="o que o toque marca">
-        <button type="button" class="on" data-est="tenho" aria-pressed="true">tenho</button>
-        <button type="button" data-est="pouco" aria-pressed="false">tenho pouco</button>
-        <button type="button" data-est="acabou" aria-pressed="false">acabou</button>
-      </div>
-      <h3 class="subtit">várias de uma vez</h3>
-      <div class="lote">
-        <select id="loteMarca" aria-label="Marca das linhas"></select>
-        <textarea id="loteCodigos" rows="2" placeholder="códigos separados por vírgula ou espaço: 310, 321, 666"
-                  aria-label="Códigos das linhas"></textarea>
-        <button type="button" id="loteAdd">pôr na caixa</button>
-      </div>
-      <p class="note" id="loteAviso"></p>
-      <div class="rule"></div>
-    </div>
-
-    <div>
-      <div class="abas" id="marcas"></div>
-      <div class="field">
-        <label for="catBusca">Buscar</label>
-        <input id="catBusca" type="text" placeholder="código ou nome da cor" autocomplete="off"
-               spellcheck="false">
-      </div>
-      <div class="abas ordem" id="catOrdem" role="group" aria-label="ordem das cores">
-        <button type="button" class="on" data-ordem="tom">por tom</button>
-        <button type="button" data-ordem="codigo">por código</button>
-      </div>
-      <div class="grade" id="catGrade"></div>
-      <div class="catfoot" id="catFoot">
-        <span id="catConta">nenhuma linha marcada</span>
-        <button type="button" id="catLimpar" class="hide">limpar</button>
-      </div>
-      <p class="note compra hide" id="catCompra"></p>
-      <div id="soCaixa2" class="hide">
-      <div class="rule"></div>
-      <h3 class="subtit">uma linha fora de cartela</h3>
-      <div class="avulsa">
-        <input id="avMarca" type="text" placeholder="marca" autocomplete="off" maxlength="24"
-               aria-label="Marca da linha">
-        <input id="avCode" type="text" placeholder="código" autocomplete="off" maxlength="12"
-               aria-label="Código da linha">
-        <input id="avCor" type="color" value="#B3B347" aria-label="Cor da linha">
-        <button type="button" id="avAdd">guardar</button>
-      </div>
-      <p class="note" id="avAviso"></p>
-      <p class="note">Para a meada que você tem e não está em cartela nenhuma. Ela nasce
-      marcada, entra na marca <b>minhas</b> junto com as outras e aparece também na marca
-      <b>avulsas</b> — onde desmarcar apaga de vez, porque ela só existe porque você a
-      cadastrou.</p>
-      </div>
-
-      <p class="note">As cores são referência de tela. A da Anchor sai da cartela da própria
-      marca; a da DMC vem de tabela pública e é mais aproximada. Monitor, luz e lote mudam o
-      que você vê na mão — por isso o que se compra é o código, e não a cor impressa.</p>
-
-      <p class="note">No PDF o ponto sai na cor da linha e os furos em preto. Quando o molde tem
-      um gráfico colorido, cada quadradinho leva também a <b>letra</b> da linha, e a legenda diz
-      que letra é qual: impresso em preto e branco — que é como sai da impressora de casa quase
-      sempre — a cor some e a letra fica.</p>
-    </div>
-  </section>
-
-  <section class="pane" data-pane="molde">
-    <h2>molde</h2>
-    <div class="field">
-      <label for="mm">Espaçamento entre furos <b id="mmOut">2,5</b> mm</label>
-      <div class="abas" id="mmAtalhos" role="group" aria-label="espaçamentos mais usados">
-        <button type="button" data-mm="2">delicado · 2 mm</button>
-        <button type="button" data-mm="2.5">padrão · 2,5 mm</button>
-        <button type="button" data-mm="3">firme · 3 mm</button>
-      </div>
-      <input id="mm" type="range" min="1" max="6" step="0.5" value="2.5">
-      <p class="note">É o lado de cada quadradinho, e vale para o molde inteiro. Ele decide o
-      tamanho de tudo: as peças são contadas em quadradinhos, então mudar o espaçamento aumenta
-      ou diminui todas juntas. Entre 2,5 e 3 mm é o mais seguro no papel; abaixo de 2 mm a tira
-      entre dois furos rasga.</p>
-      <p class="note" id="mmEfeito"></p>
-    </div>
-    <div class="rule"></div>
-    <label class="check"><input type="checkbox" id="numerar"> numerar a ordem dos pontos no PDF (ponto reto)</label>
-    <p class="note">Cada linha de ponto reto ganha os números 1, 2, 3… ao lado dos furos, na
-    ordem em que a agulha passa. É para quem quer seguir o caminho em vez de escolher na hora;
-    sem isso o PDF sai mais limpo.</p>
-    <div class="rule"></div>
-    <div class="num"><span>Pontos</span><strong id="count" aria-live="polite">—</strong></div>
-    <div class="num"><span>Furos</span><strong id="holes" aria-live="polite">—</strong></div>
-    <div class="num"><span>Peça selecionada</span><strong id="size" aria-live="polite">—</strong></div>
-    <div class="num"><span>Altura da letra</span><strong id="letraMM" aria-live="polite">—</strong></div>
-    <p class="note" id="alturaDica">A <b>altura</b> da barra de cima é a altura da maiúscula, contada em
-    quadradinhos e medida na fonte — não na palavra. A mesma altura dá sempre a mesma letra: “amor” e
-    “alegria” na mesma altura saem com letras do mesmo tamanho, e o que ascende e desce passa disso.
-    Palavra nova nasce com o que estiver na barra.</p>
-
-    <div class="rule"></div>
-    <h2>fio por linha</h2>
-    <div class="fios" id="fios"></div>
-    <p class="note" id="fiosConta"></p>
-    <p class="note">A frente é geometria e não tem dúvida. O avesso supõe que você borda um
-    ponto cheio de cada vez — em fileiras gasta menos, pulando de um canto a outro gasta mais.
-    A perda é margem. O comprimento é do fio como ele passa no furo: bordando com 2 fios, são
-    metros de fio de 2 fios. Uma meada de 6 fios desfiada em pares rende três vezes o
-    comprimento dela.</p>
-
-    <div class="rule"></div>
-    <button id="dl" class="wide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>baixar prévia png</button>
-    <button id="reset" class="wide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>recalcular</button>
-    <p class="note">Mexer na altura, no traço, na sensibilidade ou na fonte <b>não</b> descarta o que
-    você acendeu ou apagou à mão: o desenho é refeito e os ajustes vão junto, acompanhando a
-    grade nova. Recalcular é o contrário — refaz as peças a partir dos controles e joga os
-    ajustes fora, para começar aquela palavra limpa.</p>
-    <div id="out"></div>
-  </section>
-
-  <section class="pane" data-pane="moldes">
-    <h2>meus moldes</h2>
-    <div class="field">
-      <label for="moldeNome">Nome deste molde</label>
-      <input id="moldeNome" type="text" autocomplete="off" spellcheck="false" placeholder="sem nome">
-    </div>
-    <button id="moldeNovo" class="wide">começar um molde novo</button>
-    <button id="moldeDup" class="wide">duplicar este molde</button>
-    <div class="moldes" id="moldeLista"></div>
-
-    <div class="rule"></div>
-    <h2>levar para outro lugar</h2>
-    <button id="moldeSalvar" class="wide">salvar arquivo do molde</button>
-    <button id="moldeAbrir" class="wide">abrir arquivo do molde</button>
-    <input id="moldeArq" type="file" accept="application/json,.json" class="hide">
-    <p class="note" id="moldeAviso"></p>
-    <h3 class="subtit">outros programas de ponto cruz</h3>
-    <button id="oxsSalvar" class="wide">exportar OXS</button>
-    <button id="oxsAbrir" class="wide">trazer um gráfico OXS para este molde</button>
-    <input id="oxsArq" type="file" accept=".oxs,.xml,application/xml,text/xml" class="hide">
-    <p class="note">OXS é o formato aberto que o WinStitch, o MacStitch e o KG-Chart leem e
-      escrevem. O ponto reto vai como ponto atrás; meio ponto, nós e contas do arquivo não têm
-      equivalente aqui e ficam de fora.</p>
-
-    <p class="note">O arquivo leva tudo: papel, foto, peças, linhas e os ajustes feitos ponto a
-      ponto. É por ele que o trabalho vai para outro aparelho, ou volta depois de você limpar os
-      dados do site — o navegador, sozinho, não leva nada para lugar nenhum.</p>
-
-    <div class="rule"></div>
-    <h2>pdf já gerados</h2>
-    <div class="moldes" id="pdfLista"></div>
-    <p class="note" id="pdfDica"></p>
-    <button id="pdfLimpar" class="wide hide">apagar os pdf guardados</button>
-  </section>
-
-  <section class="pane notes" data-pane="ajuda">
-    <h2>do arquivo ao material</h2>
-    <details class="como" open>
-      <summary>imprimir, recortar e furar</summary>
-      <ul>
-        <li>Cole a foto no papel usando a medida que aparece no cabeçalho do PDF: distância da borda esquerda e da borda de cima. É essa posição que faz o molde bater.</li>
-        <li>Antes de furar, meça a régua impressa no cabeçalho: se os 50 mm dela não derem 50 mm na sua régua, a impressora reduziu a página e nenhum furo vai bater. Imprima de novo em 100%, sem "ajustar à página".</li>
-        <li>Recorte o molde impresso pela moldura tracejada: ela é a borda do papel da peça, então a folha recortada sai do tamanho exato dele. Se o papel da peça for A4 e você imprimir em A4, a moldura cai na borda da própria folha impressa e não há o que recortar — a folha já é o molde. Prenda sobre o conjunto encostando borda com borda, que o retângulo impresso cai em cima da foto de verdade, fita crepe nos quatro cantos. (Só quando há furo perto demais da borda do papel a moldura encolhe para a caixa do desenho, e aí a mira volta a ser o retângulo da foto.)</li>
-        <li>O cabeçalho do PDF ocupa 46 mm da página, e uma moldura do tamanho da folha não cabe embaixo dele — nem um molde que use quase toda a folha. Quando isso acontece o PDF sai em duas páginas: a primeira só com as instruções, a régua e a legenda, e a segunda com o molde sozinho na folha, inteiro e em tamanho real. É só a segunda que você imprime e recorta.</li>
-        <li>Molde maior que a folha inteira sai em várias folhas, todas em tamanho real. Cada uma diz qual é no cabeçalho, e as vizinhas repetem uma faixa do desenho: sobreponha uma na outra até os furos da faixa coincidirem, e só então prenda. As margens dizem qual folha continua de cada lado.</li>
-        <li>Fure ponto a ponto com agulha grossa, apoiado em EVA ou cortiça. Cada quadradinho usa quatro furos, compartilhados com os vizinhos — por isso o número de furos é menor que o dobro de pontos.</li>
-        <li>Borde com 2 ou 3 fios de meada. Em furo que atravessa foto e papel, puxe devagar: papel fotográfico não fecha depois de rasgar.</li>
-        <li>Espaçamento entre 2,5 e 3 mm é o mais seguro nesse material. Abaixo de 2 mm a tira de papel entre dois furos vira pó.</li>
-      </ul>
-    </details>
-    <details class="como">
-      <summary>moldura, marca-página e ponto reto</summary>
-      <ul>
-        <li>A <b>moldura</b> de retalhos dá a volta na foto, ou numa peça escolhida em <b>em volta de</b>, e se refaz quando ela muda. Se passar da borda do papel, o botão <b>caber no papel</b> põe o arranjo para dentro ou diminui margem e espaço. Com 6 cores, <b>cores por bloco</b> troca o esquema de um bloco com um toque.</li>
-        <li>Para <b>marca-página</b>, escolha um papel de marca-página na aba papel e crie uma <b>faixa</b>: ela já nasce do comprimento dele. Na aba papel dá para pôr <b>cantos arredondados</b> e o <b>furo da fita</b>, e — quando o papel cabe mais de uma vez na folha — <b>cópias</b> e outros moldes do mesmo tamanho na mesma impressão.</li>
-        <li>O <b>ponto reto</b> é o fio de furo a furo, em linha. Os desenhos prontos têm um <b>arranjo</b> — solto, faixa ou moldura —, e a palavra e a imagem passam de ponto cruz para ponto reto pelo botão ao lado do ajustar. Palavra em ponto reto pede pelo menos 1,8 cm de maiúscula. No PDF, o risco do ponto sai em cinza claro; na aba molde dá para numerar a ordem dos pontos.</li>
-        <li>Furos de peças diferentes a menos de 2 mm acendem o aviso <b>furos colados</b> e a região aparece tracejada em vermelho: no papel essa tira rasga. Afaste as peças, ou encoste até os furos coincidirem.</li>
-      </ul>
-    </details>
-    <details class="como">
-      <summary>letras</summary>
-      <ul>
-        <li>A <b>altura</b> na barra de cima é a altura da letra maiúscula, em quadradinhos, medida na fonte e não na palavra. Por isso duas palavras na mesma altura saem com letras do mesmo tamanho, mesmo que uma tenha “g” e “l” e a outra não — o que ascende e desce passa da altura pedida. A aba <b>molde</b> diz quanto isso dá em milímetros, e palavra nova nasce com o que estiver na barra.</li>
-        <li>Ajuste ponto a ponto <b>sobrevive</b> a mexer na altura, no traço, na sensibilidade e na fonte: o desenho é refeito e os quadradinhos que você acendeu ou apagou vão junto, acompanhando a grade nova. Quem descarta é só o botão <b>recalcular</b>, e ele pergunta antes.</li>
-        <li>Para o nome curvado por cima da foto, use o campo <b>arco</b> na barra de cima. Se a cursiva fechar demais em letra pequena, abra o <b>espaço</b> entre as letras — ele é contado em quadradinhos, os mesmos que viram furo.</li>
-      </ul>
-    </details>
-    <details class="como">
-      <summary>imagem e gráfico colorido</summary>
-      <ul>
-        <li>A peça de <b>imagem</b> lê um arquivo do aparelho e o transforma em quadradinhos na hora. Em <b>1 cor</b> ela é silhueta: o escuro acende, o claro apaga, e vale uma linha só — logo, monograma, brasão, desenho de traço. A <b>sensibilidade</b> decide o que conta como escuro e o <b>inverter</b> serve para desenho claro sobre fundo escuro.</li>
-        <li>De <b>2 cores para cima</b> a mesma peça vira <b>gráfico colorido</b>: as cores da imagem são agrupadas nesse número de tons, e cada tom vira a meada mais próxima da cartela escolhida em <b>linhas</b> — inclusive <b>minhas</b>, que usa só o que você já marcou como seu. O <b>fundo</b> tira o que é claro demais para ganhar linha, que é o que apaga o branco em volta de um logo ou o quadriculado de um gráfico pronto. Mais cores é mais fiel e mais meada para comprar; comece em 6 ou 8 e suba se faltar tom.</li>
-        <li>Foto de verdade — gente, bicho, paisagem — e imagem de muitas cores já entram em <b>8 cores</b>, porque em uma cor só a foto vira mancha picotada e o colorido se perde. Logo de uma cor e desenho de traço continuam entrando em 1. Nos dois casos o campo <b>cores</b> muda depois.</li>
-        <li>Na aba <b>linha</b>, com um gráfico selecionado, aparece a lista das meadas dele com quantos pontos cada uma tem. Toque numa para escolhê-la e, em seguida, numa cor do catálogo para pôr outra meada no lugar — é assim que se troca o palpite do casamento automático pela linha que você tem na gaveta. O <b>olho</b> esconde uma linha do desenho sem tirá-la da lista, e a linha escolhida é a que o <b>ajustar</b> pinta ponto a ponto.</li>
-        <li>Mexer na <b>largura</b> não sorteia meadas novas: as linhas do gráfico ficam como estão, inclusive as que você trocou à mão. Quem pede paleta nova é mudar o número de <b>cores</b>, mudar a cartela em <b>linhas</b>, trocar a imagem ou apertar o <b>recalcular</b>.</li>
-      </ul>
-    </details>
-    <details class="como">
-      <summary>linhas e fio</summary>
-      <ul>
-        <li>A aba <b>molde</b> diz quantos metros cada linha pede, e mostra a conta que usou. A frente é exata; o avesso e os 15% de perda são estimativa, então compre com folga.</li>
-        <li>Cada peça pode ter a sua linha: selecione a peça e toque na cor. O rodapé do PDF lista as linhas usadas com o código da marca — a cor impressa é referência de tela, o código é o que se compra.</li>
-      </ul>
-    </details>
-    <details class="como">
-      <summary>posicionar</summary>
-      <ul>
-        <li>Se o bordado não vai numa foto, escolha <b>Sem foto</b> no tamanho, na aba <b>foto</b> — ou toque no retângulo da foto e use o <b>tirar foto</b> na barra de cima. Ele some da tela e do PDF, e as peças novas nascem no meio do papel.</li>
-        <li>Para posicionar fino, use as setas do teclado: meio milímetro por toque, cinco com Shift. Os três botões na aba <b>peças</b> centralizam a peça na foto ou no papel, e encostam ela na base da foto.</li>
-        <li>O botão da cruz pontilhada, no canto da mesa, liga as <b>guias</b>: linhas pontilhadas que atravessam a mesa inteira. Puxe uma de dentro da régua para soltar outra, e leve-a de volta para a régua para tirá-la. Arrastando, a peça encosta sozinha na guia — é o jeito de alinhar no olho sem sair torto. Um bloco laçado encosta inteiro, pela caixa de tudo o que está nele. Elas ficam na tela e não saem no PDF.</li>
-      </ul>
-    </details>
-    <details class="como">
-      <summary>guardar o trabalho</summary>
-      <ul>
-        <li>Se o rodapé ficar vermelho dizendo <b>não coube na memória</b>, salve o arquivo do molde na aba <b>moldes</b> e apague um molde antigo. A partir desse momento o trabalho parou de ser guardado.</li>
-        <li>Guarde o arquivo do molde na aba <b>moldes</b> antes de mudar de aparelho ou limpar o navegador. O que fica só no navegador não vai a lugar nenhum e some com os dados do site.</li>
-      </ul>
-    </details>
-  </section>
-
-</div>
-
-<!-- ===================== mesa ===================== -->
-<div class="mesa" id="mesa">
-  <div class="corner"></div>
-  <div class="ruler h" id="rulerH"></div>
-  <div class="ruler v" id="rulerV"></div>
-  <div class="stage" id="stage"><canvas id="grid" width="10" height="10"></canvas></div>
-  <div class="guias" id="guias" aria-hidden="true"></div>
-  <div class="zoom">
-    <button id="zGuias" title="guias pontilhadas" aria-label="guias pontilhadas" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3"/></svg></button>
-    <button id="zOut" title="afastar" aria-label="afastar">−</button>
-    <button id="zVal" title="encaixar o papel na tela">100%</button>
-    <button id="zIn" title="aproximar" aria-label="aproximar">+</button>
-    <button id="z11" title="tamanho real na tela (calibre uma vez com um cartão)">1:1</button>
-    <button id="zFeito" title="marcar o que já bordei" aria-label="marcar o que já bordei" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    <button id="zPan" title="mover a vista" aria-label="mover a vista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5.5a1.5 1.5 0 013 0v5h.5V7a1.5 1.5 0 013 0v8.5a5.5 5.5 0 01-5.5 5.5h-1.8a5 5 0 01-3.7-1.63L4.6 15.6a1.5 1.5 0 012.1-2.13L8.5 15V4.5a1.5 1.5 0 013 0V10H13V5.5z"/></svg></button>
-  </div>
-</div>
+</aside>
 
 <!-- ===================== rodapé ===================== -->
 <div class="foot">
@@ -661,7 +708,6 @@
   <button type="button" class="saved furos" id="mmFoot" title="O espaçamento entre furos — muda na aba molde."></button>
   <span class="saved" id="manualOut"></span>
   <span class="saved" id="areaOut"></span>
-  <span class="saved" id="gravado">salvo neste navegador</span>
 </div>
 
 </div>

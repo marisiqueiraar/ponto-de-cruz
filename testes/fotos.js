@@ -28,7 +28,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   pg.on("pageerror", e => erros.push(e.message));
   await pg.goto(alvo);
   await pg.waitForTimeout(2300);
-  const aba = n => pg.click('#rail button[data-pane="' + n + '"]');
+  const aba = n => pg.evaluate(x => abreAba(x), n);
   const gravado = async () => {
     await pg.waitForTimeout(600);
     return pg.evaluate(() => {

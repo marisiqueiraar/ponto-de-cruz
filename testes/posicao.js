@@ -57,7 +57,7 @@ function caixa(el, mm){
   const classe = () => pg.locator("#fitHint").getAttribute("class");
   const seta = async (tecla, n) => { for (let i = 0; i < n; i++) await pg.locator("body").press(tecla); };
 
-  await pg.click('.rail button[data-pane="pecas"]');
+  await pg.evaluate(() => abreAba("pecas"));
   await pg.waitForTimeout(300);
   await pg.click(".chip");
   await pg.waitForTimeout(300);
@@ -93,7 +93,7 @@ function caixa(el, mm){
      "um Ctrl+Z desfaz a rajada inteira, não seta por seta");
 
   // ---- seta dentro de um campo não mexe na peça --------------------------
-  await pg.click('.rail button[data-pane="moldes"]');
+  await pg.evaluate(() => abreAba("moldes"));
   await pg.waitForTimeout(300);
   await pg.click("#moldeNome");
   const antesCampo = await estado();
@@ -103,7 +103,7 @@ function caixa(el, mm){
      "seta dentro de um campo não empurra a peça");
 
   // ---- centralizar na foto, medido -----------------------------------------
-  await pg.click('.rail button[data-pane="pecas"]');
+  await pg.evaluate(() => abreAba("pecas"));
   await pg.waitForTimeout(300);
   ok(await pg.locator("#alinha").isVisible(), "os botões de alinhar aparecem com peça selecionada");
 
@@ -166,7 +166,7 @@ function caixa(el, mm){
   ok(Math.abs((cima.x + cima.w/2) - (baixo.x + baixo.w/2)) > 5,
      "as duas estão desalinhadas antes (" + (cima.x+cima.w/2).toFixed(1) + " e " +
      (baixo.x+baixo.w/2).toFixed(1) + " mm)");
-  await pg.click('.rail button[data-pane="pecas"]');
+  await pg.evaluate(() => abreAba("pecas"));
   await pg.waitForTimeout(300);
   const antesY = par.els[1].y;
   await pg.click("#alAcima");

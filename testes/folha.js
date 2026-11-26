@@ -29,7 +29,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   pg.on("pageerror", e => erros.push(e.message));
   await pg.goto(alvo);
   await pg.waitForTimeout(2300);
-  const aba = n => pg.click('#rail button[data-pane="' + n + '"]');
+  const aba = n => pg.evaluate(x => abreAba(x), n);
   const estado = () => pg.evaluate(() => {
     const idx = JSON.parse(localStorage.getItem("ponto-e-letra/moldes/v1"));
     const it = idx.itens.find(x => x.id === idx.atual);
@@ -49,7 +49,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   let t = (await pg.textContent("#fitTxt")).trim();
   ok(/folhas/.test(t), "em A4 o molde sai repartido: \"" + t + "\"");
   const antes = await estado();
-  await aba("papel");
+  await aba("imprimir");
   await pg.selectOption("#folha", "a3");
   await pg.waitForTimeout(800);
   t = (await pg.textContent("#fitTxt")).trim();
@@ -70,6 +70,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   // ---- 2. o PDF no tamanho da folha ----------------------------------------------
   await aba("papel");
   await pg.selectOption("#paperSize", "148x210");
+  await aba("imprimir");
   await pg.selectOption("#folha", "carta");
   await aba("foto");
   await pg.selectOption("#photoSize", "100x150");

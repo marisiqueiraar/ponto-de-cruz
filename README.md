@@ -23,7 +23,7 @@ anterior. Por serem scripts comuns, e não módulos, o app continua abrindo com 
 | `js/geometria.js` | caixas, furos, contagem, e o molde repartido em folhas |
 | `js/tela.js` | o desenho na tela: papel, foto, pontos, réguas |
 | `js/gravar.js` | gravar e restaurar o molde, e o desfazer |
-| `js/controles.js` | painéis e barra de cima: criar peças e mexer nelas |
+| `js/controles.js` | os painéis e o painel da peça (à direita): criar peças e mexer nelas |
 | `js/toque.js` | arrastar, pinçar, laçar e acender ponto a ponto |
 | `js/pdf.js` | entregar arquivos e montar o PDF do molde |
 | `js/fontes.js` | a lista de fontes com amostra |
@@ -31,9 +31,15 @@ anterior. Por serem scripts comuns, e não módulos, o app continua abrindo com 
 | `js/paineis.js` | painel da linha, alinhar, estante na tela, arquivo do molde e o começo |
 
 Ao lado há um arquivo de dados, `catalogos.js`, com os catálogos de cor das marcas de linha —
-dado puro, sem lógica nenhuma. A tela é um editor: trilho de ícones à esquerda que abre um
-painel, barra de cima que muda conforme o que está selecionado, e o papel no centro sobre uma
-mesa com réguas em centímetros. O `cartela.html` é a página irmã: a ferramenta que lê as cores
+dado puro, sem lógica nenhuma. A tela é um editor em **quatro etapas**, na barra de cima e na
+ordem em que se trabalha: **papel e foto**, **peças**, **linhas** e **imprimir**. A etapa aberta
+fica num painel à esquerda; o papel fica no centro, sobre uma mesa com réguas em centímetros; e
+o que está selecionado — uma peça, a foto, um bloco laçado — fica num **painel à direita**, com
+o nome, as ações, os campos, a linha e a posição. O que não é passo do molde mora no **menu do
+logo**: os moldes guardados, a caixa de linhas, os arquivos, a ajuda e a calibração do 1:1. As
+explicações longas ficam atrás de um **?**: no título de cada etapa, e ao lado de cada campo da
+peça. No celular as etapas descem para o pé da tela, e uma gaveta mostra a etapa ou, ao tocar
+numa peça, a peça. O `cartela.html` é a página irmã: a ferramenta que lê as cores
 de uma cartela de linha e alimenta o `catalogos.js`.
 
 ## O que ele faz
@@ -47,7 +53,7 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   coração cheio, coração vazado, estrela, seta, flor, folha, coroa, lua, sol, infinito, casa,
   floco de neve, boneco de neve, palmeira, guarda-sol, avião e mala de viagem. Arraste para
   posicionar, incline de -45° a 45°, redimensione com dois dedos, espelhe, e ajuste ponto a
-  ponto no modo de edição. Palavra nova nasce com o que está na barra de cima — fonte, altura,
+  ponto no modo de edição. Palavra nova nasce com o que está no painel da peça — fonte, altura,
   traço, sensibilidade, espaço, arco e inclinação —, para a segunda linha de um nome sair do
   tamanho da primeira. Duplicar copia a peça com as
   células como estão, então a cópia nasce com os ajustes manuais da original e segue a vida
@@ -57,7 +63,7 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   hexágono, ao longo da nervura da folha, na curva da onda. Os dois tipos se misturam no mesmo
   molde, peça por peça. Nove desenhos prontos: colmeia, folha com nervuras, losangos,
   ziguezague, ondas, estrela, coração, flor e cruzes de sashiko, cada um com o tamanho e as
-  opções dele (colunas e fileiras, nervuras, pétalas) na barra de cima.
+  opções dele (colunas e fileiras, nervuras, pétalas) no painel da peça.
 
   O desenho é feito de caminhos. Num caminho de retas todo vértice é furo — o canto do hexágono
   tem de ser furo, senão o hexágono vira círculo — e cada trecho é repartido em pontos iguais
@@ -119,7 +125,7 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   tira estreita —, e o trecho repetido entre os mesmos dois furos fica uma vez só.
 - **Imagem**: um arquivo do aparelho vira quadradinho na hora, e o que sai é uma peça como as
   outras: arrastável, girável, espelhável e ajustável ponto a ponto. Quem decide o caminho é o
-  **cores**, na barra de cima. A **largura** em quadradinhos decide quanto detalhe cabe, e vale
+  **cores**, no painel da peça. A **largura** em quadradinhos decide quanto detalhe cabe, e vale
   nos dois.
 
   **Em 1 cor é silhueta**: um limiar sobre a tinta de cada quadradinho, a mesma conta que a
@@ -151,7 +157,7 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   cartela, trocar a imagem ou o **recalcular**. Sem isso, acertar um tom e depois mexer num
   milímetro de largura devolveria outras meadas.
 
-  Na aba **linha**, com um gráfico selecionado, aparece a lista das meadas dele com quantos
+  Na etapa **linhas**, com um gráfico selecionado, aparece a lista das meadas dele com quantos
   pontos cada uma tem. Tocar numa escolhe-a; tocar depois numa cor do catálogo põe outra meada
   no lugar — é o caminho do palpite automático para a linha que você tem de verdade. O **olho**
   esconde uma linha do desenho sem tirá-la da lista, que é como se apaga um fundo que o corte
@@ -181,7 +187,7 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   i·3 + 1, + 2 e + 3, dando a volta nela: com **3 cores** todos os blocos saem iguais; com
   **6**, eles se alternam em dois esquemas, e junto com os blocos sortidos se alternando em
   outro ritmo a moldura sai variada como uma colcha, sem ninguém pintar bloco por bloco. As
-  cores de fábrica são casadas com a meada mais próxima da cartela, e a aba **linha** troca
+  cores de fábrica são casadas com a meada mais próxima da cartela, e a etapa **linhas** troca
   cada uma pela sua. Legenda por letra, conta de fio e ajuste ponto a ponto valem como no
   gráfico — e o ajuste agora acende com a linha escolhida na lista, como ela promete.
 - **Faixa (marca-página)**: um motivo repetido em fileira — medalhão, cruzes, losangos,
@@ -194,7 +200,7 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   na palavra escrita. Era a caixa de tinta da palavra — e essa caixa sobe com o "l" e desce com
   o "g", então "amor" e "alegria" na mesma altura saíam com letras de tamanhos bem diferentes,
   o que não tem como não parecer erro. Pela maiúscula, a mesma altura dá sempre a mesma letra, e
-  o que ascende e desce passa disso. A aba **molde** mostra a altura em quadradinhos e em
+  o que ascende e desce passa disso. A etapa **imprimir** mostra a altura em quadradinhos e em
   milímetros, ao lado do tamanho da peça inteira. Molde gravado antes da mudança tem o número
   convertido uma vez, na volta: o número muda, o tamanho da peça não.
 - **Palavra em arco**: de -120° a 120°, que é o nome curvado por cima da foto. O arco dobra a
@@ -212,7 +218,7 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   Cada fonte tem a **altura a partir da qual fica legível** em quadradinho, medida escrevendo a
   mesma palavra em todas elas: 12 para a maioria, 20 ou 24 para as caligrafias finas, em que a
   minúscula tem um terço da maiúscula. O cartão diz esse número, e fica laranja quando a peça
-  está abaixo dele; na barra de cima, o campo de altura fica marcado e explica por quê. A palavra
+  está abaixo dele; no painel da peça, o campo de altura fica marcado e explica por quê. A palavra
   continua saindo na altura pedida — o aviso é para a letra borrada não parecer defeito do app.
   A fonte de fábrica é a **Dancing Script**, legível desde 12. Cinco fontes saíram por não
   ficarem legíveis em altura nenhuma (League Script, Mrs Saint Delafield, Herr Von Muellerhoff,
@@ -225,17 +231,19 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   que caía metade em cada coluna sumia ou engordava; deslocado um terço, vira linha.
 - **Linhas**: o painel é o catálogo das marcas — 391 cores da Anchor e 455 da DMC — numa
   fileira de marcas e uma grade. Cada quadradinho traz o **código impresso dentro**, que é o
-  que se pede na loja. A aba tem **dois lugares**, porque são duas coisas diferentes:
+  que se pede na loja. São **dois lugares**, porque são duas coisas diferentes:
 
-  - **aplicar na peça**: tocar numa cor pinta a peça selecionada, e só. **Cada peça tem a sua
+  - **a etapa linhas**: no alto, as **linhas do molde** com os metros de cada uma; escolher uma
+    delas e tocar numa cor troca aquela linha **em todas as peças** que a usam. Sem linha
+    escolhida, tocar numa cor pinta a peça selecionada, e só. **Cada peça tem a sua
     linha**, e a lista de peças mostra um ponto da cor de cada uma, para ver o arranjo inteiro
     de uma vez — é comparando duas linhas lado a lado que a escolha se decide. As cores que
     estão na sua caixa têm um ponto no canto.
-  - **minha caixa**: tocar numa cor diz que você tem aquela linha, ou que não tem mais — a
+  - **minha caixa**, no menu do logo: tocar numa cor diz que você tem aquela linha, ou que não tem mais — a
     peça não muda. Três botões escolhem o que o toque marca: **tenho**, **tenho pouco** ou
     **acabou**. A que acabou sai das suas linhas (não dá para bordar com ela), mas fica riscada na
     caixa e entra, com as que estão no fim, numa **lista de compras** logo abaixo da grade; a lista
-    de fio da aba molde avisa quando o molde usa uma linha que está no fim ou acabou. Aqui também se cadastram **várias de uma vez**, colando os códigos (00268
+    de fio da etapa linhas avisa quando o molde usa uma linha que está no fim ou acabou. Aqui também se cadastram **várias de uma vez**, colando os códigos (00268
     acha a 268 da Anchor; código que não existe é dito pelo nome), e a linha fora de cartela.
 
   Antes um toque fazia as duas coisas: experimentar uma cor na peça enchia a caixa de linhas
@@ -259,7 +267,7 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   sensibilidade, que não são medida, dizem o efeito numa palavra (*médio*, *grosso*;
   *engorda*, *afina*). O espaçamento entre furos, que decide o tamanho de tudo, ganhou três
   atalhos com nome — delicado 2 mm, padrão 2,5 mm, firme 3 mm —, aparece o tempo todo no
-  rodapé, e a aba molde mostra o efeito dele com os números de agora. No computador a barra de
+  rodapé, e a etapa imprimir mostra o efeito dele com os números de agora. No computador a barra de
   cima quebra em duas linhas em vez de esconder campos para lá da borda.
 - **Onde as peças ficam**: o molde novo nasce vazio, e cada peça nova nasce reta, num lugar
   livre — embaixo da foto, que é onde vai o nome; se ali não couber, em cima e depois dos
@@ -277,7 +285,7 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   é um furo só, usado pelas duas peças. A busca roda quando a peça para de andar, e não a
   cada movimento do arraste.
 - **Posicionar com precisão**: as setas do teclado movem a peça selecionada de meio milímetro, ou
-  de cinco com Shift — com a foto selecionada, movem a foto. Na aba peças, três botões alinham a
+  de cinco com Shift — com a foto selecionada, movem a foto. No painel da peça, três botões alinham a
   peça: centralizar na foto, centralizar no papel, alinhar pela base da foto — e, quando há uma
   peça acima na lista, alinhar com ela, que é o que resolve nome em duas linhas. Eles movem a
   caixa já girada, porque alinhar uma palavra inclinada pelo canto de cima dela a deixaria torta.
@@ -343,7 +351,7 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   que se emenda, porque encostar folha com folha exige uma precisão de tesoura que ninguém tem.
   O app escolhe entre folha em pé e deitada pela que gastar menos papel.
 - **Várias na mesma folha**: quando o papel da peça cabe mais de uma vez na folha da
-  impressora — o marca-página de 5 × 18 cm cabe três vezes numa A4 —, a aba papel oferece
+  impressora — o marca-página de 5 × 18 cm cabe três vezes numa A4 —, a etapa papel e foto oferece
   **cópias** deste molde e os **outros moldes da estante do mesmo tamanho**. O PDF sai com
   todos lado a lado, cada um com a sua moldura de recorte, o cabeçalho do molde aberto e a
   legenda com as linhas de todos. Para desenhar um molde que não é o aberto, o app o põe na
@@ -355,7 +363,7 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   encolhe pelo que menos se nota: a margem, depois o espaço entre os blocos e, no ponto reto,
   o tamanho do desenho. O tamanho do bloco de ponto cruz não muda, porque um quadradinho a
   menos já é outro desenho; se nada bastar, a moldura volta como estava e o aviso diz por quê.
-- **A ordem dos pontos numerada**: na aba molde, para o ponto reto, os furos de cada linha
+- **A ordem dos pontos numerada**: na etapa imprimir, para o ponto reto, os furos de cada linha
   ganham 1, 2, 3… no PDF, na ordem em que a agulha passa.
 - **PNG** da prévia, para conferir o arranjo.
 - **Zoom e deslocamento**: o papel cresce dentro da mesa, que rola. Botões no canto, Ctrl (ou ⌘)
@@ -369,9 +377,9 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   peças e a foto — passa a andar junto, no arraste e nas setas. É "couber inteiro" e não
   "encostar" por causa da foto: ela costuma estar embaixo de tudo, e pelo encostar um laço em
   volta de duas palavras a levaria junto sem ninguém pedir. Shift (ou Ctrl) no clique soma ou
-  tira uma peça do laço, na mesa ou nas fichas da aba peças. Quem segura o bloco é a foto: ela
+  tira uma peça do laço, na mesa ou nas fichas da etapa peças. Quem segura o bloco é a foto: ela
   não sai do papel, e o bloco inteiro para com ela em vez de se desmanchar na borda. Com um
-  bloco laçado, a barra de cima troca os campos da peça por quem está no laço e um botão que
+  bloco laçado, o painel da direita troca os campos da peça por quem está no laço e um botão que
   **apaga as peças laçadas de uma vez**, mais **duplicar** (as cópias saem 5 mm para o lado e
   ficam laçadas), **centralizar no papel**, **girar** 15° por toque em volta do meio do bloco
   (até 45° de inclinação) e **espelhar** — a moldura da foto não é peça e fica onde está, e um
@@ -383,7 +391,7 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   Enquanto se acende e apaga quadradinho, a barra fica amarela e os
   campos da peça saem dela — no celular eles roubam a altura de que a grade precisa, e em
   qualquer tela mudar a grade embaixo do dedo que a está acertando é o caminho mais curto para
-  se perder. No celular o painel e as abas recolhem: a grade passa de 164 × 232 para 328 × 464 px.
+  se perder. No celular a gaveta recolhe: a grade passa de 164 × 232 para 328 × 464 px.
 - **O ajuste à mão sobrevive aos controles**: o que você acende ou apaga não mora nas células,
   mora numa lista de quadradinhos por cima do que a fonte desenhou. Mexer na altura, no traço, na
   sensibilidade ou na fonte refaz o desenho **com a lista junto**: quando a grade muda de tamanho,
@@ -394,30 +402,35 @@ de uma cartela de linha e alimenta o `catalogos.js`.
 - **Desfazer e refazer**: cada passo guarda o arranjo inteiro, células incluídas, então voltar
   atrás devolve também o que foi aceso ou apagado à mão. Botões na barra de cima, Ctrl+Z e
   Ctrl+Shift+Z. Um arraste de controle deslizante vira um passo só, não dezenas.
-- **Vários moldes**: a aba **moldes** guarda quantos você quiser, cada um com nome e data, e
+- **Vários moldes**: a **meus moldes** (menu do logo) guarda quantos você quiser, cada um com nome e data, e
   troca entre eles. Antes havia um molde só: começar um desenho novo apagava o anterior sem
   volta. O molde que já estava gravado entra na lista como está, sem nada ser copiado. A lista
   fica por **ordem de uso** (o molde aberto sobe para o topo), a data é a da última mudança de
   verdade, e **duplicar este molde** faz uma cópia com foto e tudo, que já abre. O alfinete
   de cada molde o fixa no topo da lista.
-- **Mais de uma foto**: na aba foto, **pôr mais uma foto** cria uma peça de foto — o retângulo de
+- **Mais de uma foto**: na etapa papel e foto, **pôr mais uma foto** cria uma peça de foto — o retângulo de
   uma foto revelada, com a imagem para ver o encaixe e nenhum furo. Ela anda, encosta, entra no
-  laço, muda de tamanho e deita pela barra de cima, e uma moldura pode ir em volta dela (em
+  laço, muda de tamanho e deita pelo painel da peça, e uma moldura pode ir em volta dela (em
   **em volta de**). No PDF sai como retângulo, com uma linha dizendo onde colar; em tamanho
   Instax, ela também mostra a janela da imagem.
 - **Janela do Instax**: com um tamanho Instax, a mesa mostra o cartão branco e a imagem só na
   janela dela (46 × 62 mm no mini), tracejada também no PDF. Os lados são iguais; a borda de
-  cima, que a Fujifilm não publica, é um campo da aba foto (6 mm de partida) para medir uma vez
+  cima, que a Fujifilm não publica, é um campo da etapa papel e foto (6 mm de partida) para medir uma vez
   numa foto sua.
+- **Antes de baixar**: a etapa **imprimir** abre com o que conferir — se cabe na folha, se há
+  furos colados, se alguma linha do molde não está na sua caixa —, e cada aviso que pede gesto
+  leva à etapa em que ele se resolve. Embaixo ficam o espaçamento entre furos, a folha da
+  impressora, as cópias e o recorte do marca-página, a ordem numerada, o resumo e o botão de
+  baixar.
 - **Marcar o que já foi bordado**: o botão de tique na mesa liga o acompanhamento. Um toque num
   ponto (quadradinho ou ponto reto) marca que ele já foi bordado, outro desmarca, e arrastar
   marca o traço inteiro. O que foi bordado fica esmaecido e o rodapé diz quanto falta. Fica
   gravado com o molde, entra no desfazer e não sai no PDF.
-- **Cor do papel 300g**, na aba papel: a mesa e o PNG mostram o papel na cor escolhida (o PDF
+- **Cor do papel 300g**, na etapa papel e foto: a mesa e o PNG mostram o papel na cor escolhida (o PDF
   continua branco, porque vai para a folha da impressora). Os papéis que dão mais contraste para
   as linhas do molde vêm marcados com um ponto, e o app avisa quando uma linha quase some no
   papel escolhido.
-- **OXS**: na aba moldes, exportar o molde no formato aberto que o WinStitch, o MacStitch e o
+- **OXS**: na etapa imprimirs, exportar o molde no formato aberto que o WinStitch, o MacStitch e o
   KG-Chart leem, e trazer um gráfico OXS para dentro do molde — o ponto cheio vira gráfico
   colorido, o ponto atrás vira ponto reto. Meio ponto, nós e contas ficam de fora, com aviso.
 - **Instalar como app**: servido pela internet, o navegador oferece instalar o ponto & letra
@@ -516,7 +529,7 @@ raiz declara que não há build — sem ele, um projeto criado com o preset Vite
 `vite build` e falha com `vite: command not found`.
 
 - **Quando a memória do navegador enche**, o rodapé diz **não coube na memória** em vermelho e a
-  aba moldes escreve o caminho: salve o arquivo e apague um molde. Antes disso, gravar falhava em
+  etapa imprimirs escreve o caminho: salve o arquivo e apague um molde. Antes disso, gravar falhava em
   silêncio e o trabalho simplesmente parava de ser guardado. O aviso aparece também no celular,
   onde o resto do rodapé fica escondido — é lá que a cota estoura primeiro.
 

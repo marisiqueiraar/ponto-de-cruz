@@ -29,7 +29,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   pg.on("pageerror", e => erros.push(e.message));
   await pg.goto(alvo);
   await pg.waitForTimeout(2300);
-  const aba = n => pg.click('#rail button[data-pane="' + n + '"]');
+  const aba = n => pg.evaluate(x => abreAba(x), n);
   const baixa = async () => {
     const [d] = await Promise.all([pg.waitForEvent("download", { timeout: 20000 }), pg.click("#pdf")]);
     const buf = require("fs").readFileSync(await d.path());
@@ -53,7 +53,7 @@ const ok = (c, m) => { console.log((c ? "ok    " : "FALHA ") + m); if (!c) falha
   await aba("pecas");
   await pg.click("#addFaixa");
   await pg.waitForTimeout(500);
-  await aba("papel");
+  await aba("imprimir");
   await pg.waitForTimeout(300);
   const opcoes = await pg.evaluate(() => [...document.querySelectorAll("#copias option")].map(o => o.value));
   ok(await pg.isVisible("#variosCampo") && opcoes.length === 3, "num marca-página de 5 × 18, a A4 aceita até 3 (" + opcoes.join(",") + ")");

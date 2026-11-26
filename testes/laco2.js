@@ -30,7 +30,7 @@ const perto = (a, b, t) => Math.abs(a - b) <= (t || 0.15);
   pg.on("pageerror", e => erros.push(e.message));
   await pg.goto(alvo);
   await pg.waitForTimeout(2300);
-  const aba = n => pg.click('#rail button[data-pane="' + n + '"]');
+  const aba = n => pg.evaluate(x => abreAba(x), n);
 
   // duas peças, uma à esquerda e outra à direita
   await pg.click("#addText");

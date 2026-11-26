@@ -386,3 +386,36 @@ uma grade fixa: a forma exata das letras depende de como cada navegador
 desenha a fonte, e um teste que quebra sozinho a cada versão do Chromium
 acaba ignorado. A pinça usa dedos de verdade, pelo protocolo do Chromium,
 porque o evento de ponteiro sintético não deixa o app capturar o dedo.
+
+## 8. O layout novo — o que eu decidi sozinho
+
+Em 26/11/2026 o app passou para o layout aprovado no protótipo: quatro etapas,
+painel da etapa à esquerda, painel da peça à direita, menu no logo. Onde o
+protótipo não dizia, escolhi assim:
+
+- **O painel da direita fica sempre aberto no computador**, com um convite
+  quando nada está selecionado. Se ele aparecesse e sumisse com a seleção, o
+  papel mudaria de tamanho a cada toque numa peça.
+- **No celular, uma gaveta só**: ela mostra a peça quando você toca numa
+  peça, e a etapa quando você toca numa etapa. Tocar de novo na etapa aberta
+  recolhe a gaveta, como antes.
+- **"Trocar" a linha da peça** leva à etapa linhas, que é onde o catálogo
+  mora. A etapa linhas ganhou o que o protótipo mostrava: escolher uma linha
+  do molde e trocá-la **em todas as peças** de uma vez. Sem linha escolhida, a
+  cor tocada vai só para a peça selecionada, como sempre foi.
+- **A caixa de linhas** saiu da etapa linhas e foi para o menu: o catálogo é
+  o mesmo, e muda de lugar conforme se abre um ou outro.
+- **O recalcular** foi para o fim da etapa peças (antes estava na aba molde,
+  que virou imprimir): ele refaz peças, não impressão.
+- **A prévia da folha** do protótipo (a folha A4 desenhada com o molde dentro)
+  não entrou: a etapa imprimir mostra o que conferir, mas a mesa continua
+  mostrando o papel da peça. Desenhar a folha exigiria um segundo desenho do
+  molde; fica como próximo passo se você sentir falta.
+- **Textos**: as notas sem id (texto fixo) ficam atrás do "?" do título da
+  etapa; as que o app escreve na hora (avisos) continuam à vista. Nos campos
+  da peça, o texto que antes só aparecia passando o mouse virou um "?" ao lado
+  do nome, que funciona também no celular.
+- **Fonte**: a quadriculada (Silkscreen) ficou no logo e nos títulos das
+  etapas; botões, campos e números usam a fonte do sistema. O azul do texto
+  de apoio escureceu (#6A89A7 → #4F6B86) para passar no contraste.
+- **O ímã** virou um botão na barrinha da mesa, ao lado do zoom.

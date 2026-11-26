@@ -295,7 +295,37 @@ var linhaModo = "peca";   // "peca": o toque pinta; "caixa": o toque marca que t
 
 function aplicaNaPeca(k){
   var c = catIdx[k];
-  if (c) usaCor(c.hex, rotulo(c));
+  if (!c) return;
+  if (linhaAlvo) trocaEmTodo(linhaAlvo.hex, c.hex, rotulo(c));
+  else usaCor(c.hex, rotulo(c));
+}
+
+/* Trocar uma linha no molde inteiro: escolhida na lista "linhas do molde",
+   a cor tocada no catálogo entra no lugar dela em todas as peças — nas de uma
+   cor e nas casas das paletas. É o "quero esta moldura em outro rosa" sem
+   precisar achar cada peça. */
+var linhaAlvo = null;
+$("trocaTodoNao").addEventListener("click", function(){ linhaAlvo = null; renderFios(); });
+function escolheLinhaAlvo(l){
+  linhaAlvo = linhaAlvo && linhaAlvo.hex === l.hex ? null : { hex: l.hex, nome: l.nome };
+  renderFios();
+}
+function trocaEmTodo(velha, hex, nome){
+  var mudou = 0;
+  els.forEach(function(el){
+    if (el.kind === "foto") return;
+    if (el.paleta && el.paleta.length){
+      el.paleta.forEach(function(sl){
+        if (sl.hex === velha){ sl.hex = hex; sl.rotulo = nome; sl.chave = ""; mudou++; }
+      });
+      return;
+    }
+    if (corDe(el).hex === velha){ el.color = hex; el.colorName = nome; mudou++; }
+  });
+  if (thread === velha) thread = hex;
+  linhaAlvo = { hex: hex, nome: nome };    // segue escolhida: dá para provar outra
+  if (mudou){ renderPaleta(); mostraThread(); renderChips(); renderFios(); syncControls(); draw(); pushHist(); }
+  else renderFios();
 }
 
 /* O que o toque na caixa marca: "tenho", "pouco" ou "acabou". Tocar numa

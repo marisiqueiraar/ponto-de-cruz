@@ -60,7 +60,7 @@ const perto = (a, b, t) => Math.abs(a - b) <= (t === undefined ? 0.051 : t);
      "a cruz nasce no meio da A4 (" + s.guias.v[0] + ", " + s.guias.h[0] + " mm)");
 
   // ---- digitar 150 não passa por um papel de 1 mm -------------------------
-  await pg.click('.rail button[data-pane="papel"]');
+  await pg.evaluate(() => abreAba("papel"));
   await pg.waitForTimeout(250);
   await pg.selectOption("#paperSize", "custom");
   await digita("#paperW", "150");
@@ -99,7 +99,7 @@ const perto = (a, b, t) => Math.abs(a - b) <= (t === undefined ? 0.051 : t);
   await digita("#paperW", "210");
   await pg.click("#paperH");
   await pg.waitForTimeout(300);
-  await pg.click('.rail button[data-pane="foto"]');
+  await pg.evaluate(() => abreAba("foto"));
   await pg.waitForTimeout(250);
   await pg.selectOption("#photoSize", "custom");
   const antes = (await estado()).foto;
@@ -126,7 +126,7 @@ const perto = (a, b, t) => Math.abs(a - b) <= (t === undefined ? 0.051 : t);
   ok(perto(await proporcao(), 210 / 297, 0.01), "e o papel volta do tamanho que era");
 
   // ---- a orientação não vira as medidas próprias de lado ------------------
-  await pg.click('.rail button[data-pane="papel"]');
+  await pg.evaluate(() => abreAba("papel"));
   await pg.waitForTimeout(250);
   await pg.selectOption("#paperOr", "l");
   await pg.waitForTimeout(400);
@@ -160,13 +160,13 @@ const perto = (a, b, t) => Math.abs(a - b) <= (t === undefined ? 0.051 : t);
      "e o molde guarda a medida escolhida (" + g.caixa.w + " × " + g.caixa.h + ")");
 
   // o aviso é de estado, não de momento: continua lá depois de um redesenho
-  await pg.click('.rail button[data-pane="foto"]');
+  await pg.evaluate(() => abreAba("foto"));
   await pg.waitForTimeout(300);
   b = await barra();
   ok(/maior que o papel/.test(b.naFoto) && b.over,
      "o aviso não passa: segue na aba foto e na barra depois de trocar de aba");
 
-  await pg.click('.rail button[data-pane="papel"]');
+  await pg.evaluate(() => abreAba("papel"));
   await pg.waitForTimeout(250);
   await digita("#paperW", "210");
   await digita("#paperH", "297");

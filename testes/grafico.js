@@ -121,7 +121,7 @@ const FAIXAS = png(120, 160, (x, y) => {
   await pg.waitForTimeout(800);
 
   // ---- 4. o catálogo troca a linha escolhida, e não a peça --------------
-  await pg.click('.rail button[data-pane="linha"]');
+  await pg.evaluate(() => abreAba("linha"));
   await pg.waitForTimeout(400);
   const linhas = await pg.$$(".paleta .sl");
   ok(linhas.length === 4, "o painel lista as quatro linhas do gráfico (" + linhas.length + ")");
