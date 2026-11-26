@@ -580,6 +580,10 @@ details.como ul{margin:6px 0 0;padding-left:18px}
 .sel > .hide{display:none!important}
 .selVazio{padding:22px 18px;color:var(--ink-soft);font-size:14px}
 .selVazio p{margin:0 0 8px}
+.selVazio .selResumo{margin-top:14px;padding-top:12px;border-top:1px solid #E3EDF7;font-size:13px;color:var(--ink)}
+/* o tamanho do papel que a barra antiga mostrava sem nada selecionado agora
+   mora no convite, com nome */
+.sel #ctlNone{display:none!important}
 .selCab{display:flex;align-items:flex-start;gap:8px;padding:14px 16px;flex-wrap:wrap}
 .selTit{flex:1 1 120px;min-width:0}
 .selTit h2{margin:0;font-size:18px;font-weight:600;font-family:inherit;letter-spacing:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
