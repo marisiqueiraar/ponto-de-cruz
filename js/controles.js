@@ -32,7 +32,11 @@ function renderFios(){
   $("fiosConta").textContent =
     "Com furos de " + fmt(P()) + " mm, cada ponto cheio gasta " + fmt(fioFrente()) +
     " mm de frente (duas diagonais), " + fmt(fioAvesso()) + " mm de avesso (dois lados) e " +
-    Math.round((PERDA - 1) * 100) + "% de perda: " + fmt(fioPorPonto()) + " mm por ponto.";
+    Math.round((PERDA - 1) * 100) + "% de perda: " + fmt(fioPorPonto()) + " mm por ponto." +
+    (els.some(function(e){ return e.kind === "reto"; })
+      ? " No ponto reto, cada ponto gasta o comprimento dele na frente e o dobro no avesso — " +
+        "é o ponto atrás —, mais a mesma perda: o triplo do desenho, e um pouco."
+      : "");
 }
 
 /* A linha escolhida na paleta: é ela que o catálogo troca e que o ajustar
@@ -166,6 +170,8 @@ function mostraMedidas(){
     var lado = Math.max.apply(null, g.map(function(x){ return Math.max(x.length, x[0].length); }));
     $("patCm").textContent = "bloco " + cm(lado * p);
   } else $("patCm").textContent = "";
+  $("retoCm").textContent = el && el.kind === "reto"
+    ? "mm · peça " + cm(dim.w).replace(" cm", "") + " × " + cm(dim.h) : "";
   $("mmFoot").textContent = "furos a " + fmt(p) + " mm";
   /* o efeito do espaçamento, com os números de agora: é a resposta para
      "o que muda se eu passar de 2,5 para 3?" sem ter de experimentar */
@@ -202,7 +208,7 @@ function syncControls(){
     $("delLaco").title = (n === 1 ? "apagar a peça laçada" : "apagar as " + n + " peças laçadas") +
       (marcaFoto ? " — a moldura da foto não é peça e fica onde está" : "") +
       ". O desfazer devolve tudo num passo.";
-    ["alinha", "ctlPhoto", "ctlPiece", "ctlActs", "ctlNone", "ctlText", "ctlSym", "ctlImg", "ctlPat"]
+    ["alinha", "ctlPhoto", "ctlPiece", "ctlActs", "ctlNone", "ctlText", "ctlSym", "ctlImg", "ctlPat", "ctlReto"]
       .forEach(function(id){ $(id).classList.add("hide"); });
     return;
   }
@@ -212,17 +218,26 @@ function syncControls(){
   $("ctlPhoto").classList.toggle("hide", foco !== "photo");
   $("ctlPiece").classList.toggle("hide", !piece);
   $("ctlActs").classList.toggle("hide", !piece);
+  // acender quadradinho não quer dizer nada numa peça sem quadradinho
+  $("edit").classList.toggle("hide", !!(el && el.kind === "reto"));
+  /* Um botão só para trocar de ponto, junto de ajustar, espelhar e duplicar:
+     ele diz para onde a peça vai. A palavra e a imagem trocam; símbolo,
+     moldura e desenho pronto, não — cada um só existe num dos dois. */
+  var troca = el && (el.kind === "text" || el.kind === "img" ||
+              (el.kind === "reto" && (el.desenho === "palavra" || el.desenho === "imagem")));
+  $("trocaPonto").classList.toggle("hide", !troca);
+  if (troca) $("trocaPonto").textContent = el.kind === "reto" ? "ponto cruz" : "ponto reto";
   $("ctlNone").classList.toggle("hide", foco !== "none");
   if (foco === "none"){
     var pa = paperMM();
     $("ctlNone").textContent = fmt(pa.w / 10) + " × " + fmt(pa.h / 10) + " cm";
   }
   if (!piece){
-    ["ctlText", "ctlSym", "ctlImg", "ctlPat"].forEach(function(id){ $(id).classList.add("hide"); });
+    ["ctlText", "ctlSym", "ctlImg", "ctlPat", "ctlReto"].forEach(function(id){ $(id).classList.add("hide"); });
     return;
   }
   // uma barra por tipo de peça: mostrar a certa é esconder as outras duas
-  var barras = { text: "ctlText", sym: "ctlSym", img: "ctlImg", pat: "ctlPat" };
+  var barras = { text: "ctlText", sym: "ctlSym", img: "ctlImg", pat: "ctlPat", reto: "ctlReto" };
   Object.keys(barras).forEach(function(k){
     $(barras[k]).classList.toggle("hide", el.kind !== k);
   });
@@ -265,6 +280,42 @@ function syncControls(){
     $("imgInv").title = semImg
       ? "A imagem desta peça não está mais na memória do navegador. Use o trocar para pôr o arquivo de novo."
       : "Troca o claro pelo escuro — é o que resolve desenho branco sobre fundo escuro.";
+  } else if (el.kind === "reto"){
+    var pal = el.desenho === "palavra", ima = el.desenho === "imagem", arr = el.arranjo || "solta";
+    // palavra e imagem são sempre soltas; os desenhos prontos se repetem
+    $("tRetoArr").classList.toggle("hide", pal || ima);
+    $("retoArr").value = arr;
+    $("tRetoRep").classList.toggle("hide", pal || ima || arr !== "faixa");
+    $("retoDeit").classList.toggle("hide", pal || ima || arr !== "faixa");
+    $("tRetoGap").classList.toggle("hide", pal || ima || arr === "solta" ||
+      (arr === "moldura" && (el.desenho === "ziguezague" || el.desenho === "ondas")));
+    $("tRetoMarg").classList.toggle("hide", pal || ima || arr !== "moldura");
+    $("retoRep").value = el.rep || 6;
+    $("retoGap").value = el.gap == null ? 3 : el.gap;
+    $("retoMarg").value = el.margem == null ? 6 : el.margem;
+    $("retoDeit").classList.toggle("on", !!el.deitada);
+    $("tRetoDes").classList.toggle("hide", ima);
+    $("tRetoTxt").classList.toggle("hide", !pal);
+    $("tRetoFont").classList.toggle("hide", !pal);
+    $("tRetoModo").classList.toggle("hide", !ima);
+    $("retoInv").classList.toggle("hide", !ima);
+    if (pal){ $("retoTxt").value = el.texto || ""; $("retoFont").value = el.font || FONTE_PADRAO; }
+    if (ima){ $("retoModo").value = el.modo || "contorno"; $("retoInv").classList.toggle("on", !!el.inv); }
+    // palavra abaixo de 1,8 cm de maiúscula: o campo avisa, como na fonte em
+    // quadradinho — a peça sai na medida pedida, mas apertada
+    var tm = $("tRetoMed"), baixa = pal && el.medida < RETO_PALAVRA_MIN;
+    tm.classList.toggle("alerta", baixa);
+    $("retoDes").value = el.desenho;
+    $("retoMed").min = DESENHOS_RETO[el.desenho].min;
+    $("retoMed").max = DESENHOS_RETO[el.desenho].max;
+    $("retoMed").value = Math.round(el.medida);
+    $("retoPasso").value = el.passo;
+    $("tRetoMed").title = baixa
+      ? "Abaixo de " + fmt(RETO_PALAVRA_MIN / 10) + " cm de maiúscula as voltas das letras ficam mais " +
+        "estreitas que a distância segura entre furos: o app tira furos para o papel não rasgar, " +
+        "e a letra fica angulosa. Suba o tamanho para ela sair redonda."
+      : "O " + DESENHOS_RETO[el.desenho].medida + ", em milímetros.";
+    opcoesNaBarra(el);
   } else if (el.kind === "pat"){
     var faixa = el.arranjo === "faixa";
     $("patArr").value = el.arranjo;
@@ -418,6 +469,108 @@ function addText(){
   // e a primeira tecla o substitui
   var campo = $("txt");
   if (campo && campo.offsetParent){ campo.focus(); campo.select(); }
+}
+
+/* A peça de ponto reto nasce colmeia, no tamanho de fábrica do desenho, com o
+   ponto de 2,5 mm e a linha corrente — num lugar livre, como as outras. */
+function addReto(){
+  var d = DESENHOS_RETO.colmeia;
+  var el = { kind: "reto", desenho: "colmeia", medida: d.padrao, passo: RETO_PASSO, opts: {},
+             arranjo: "solta", rep: 6, gap: 3, margem: 6, deitada: 0,
+             rot: 0, flip: 0, edits: [], x: 0, y: 0,
+             color: thread, colorName: threadLabel(thread) || thread };
+  rebuild(el);
+  poeEmLugarLivre(el);
+  els.push(el); sel = els.length - 1; soUm(sel); foco = "el";
+  renderChips(); syncControls(); draw(); pushHist();
+}
+
+function montaDesenhosReto(){
+  var s = $("retoDes");
+  Object.keys(DESENHOS_RETO).forEach(function(k){
+    if (k === "imagem") return;   // a imagem entra pela peça de imagem, não daqui
+    var o = document.createElement("option");
+    o.value = k; o.textContent = DESENHOS_RETO[k].nome;
+    s.appendChild(o);
+  });
+}
+montaDesenhosReto();
+// as mesmas fontes da palavra em ponto cruz, sem as amostras: a fonte já foi
+// escolhida vendo o traço, e aqui ela só precisa poder ser trocada
+(function(){
+  var s = $("retoFont");
+  [].forEach.call($("font").querySelectorAll("option"), function(o){
+    var n = document.createElement("option");
+    n.value = o.value; n.textContent = o.textContent;
+    s.appendChild(n);
+  });
+})();
+
+/* Ponto cruz ou ponto reto, peça por peça. A palavra e a imagem passam de um
+   para o outro guardando o que dá para guardar: texto, fonte, imagem, cor,
+   inclinação, o lugar (pelo centro) e o tamanho de verdade — a maiúscula de
+   16 quadradinhos de 2,5 mm vira uma de 40 mm, e volta. */
+function trocaPonto(el){
+  var b = bboxMM(el), cx = b.x + b.w / 2, cy = b.y + b.h / 2, nova, p = P();
+  var comum = { rot: el.rot || 0, flip: el.flip || 0, edits: [], manual: 0, x: 0, y: 0,
+                color: el.color, colorName: el.colorName };
+  if (el.kind === "text"){
+    nova = Object.assign(comum, { kind: "reto", desenho: "palavra", texto: el.text, font: el.font,
+             medida: Math.round(el.rowsTarget * p), passo: RETO_PASSO, opts: {} });
+  } else if (el.kind === "img"){
+    nova = Object.assign(comum, { kind: "reto", desenho: "imagem", img: el.img, nome: el.nome,
+             medida: Math.round(el.larg * p), passo: RETO_PASSO, inv: el.inv || 0, modo: "contorno",
+             opts: { sens: Math.round((el.thr || 0.5) * 100) } });
+  } else if (el.kind === "reto" && el.desenho === "palavra"){
+    nova = Object.assign(comum, { kind: "text", text: el.texto, font: el.font,
+             rowsTarget: Math.max(8, Math.min(60, Math.round(el.medida / p))),
+             thick: 2, thr: 0.35, esp: 0, arc: 0, hv: 2, cells: [[0]] });
+  } else if (el.kind === "reto" && el.desenho === "imagem"){
+    nova = Object.assign(comum, { kind: "img", img: el.img, nome: el.nome || "imagem",
+             larg: Math.max(IMG_LARG_MIN, Math.min(IMG_LARG_MAX, Math.round(el.medida / p))),
+             thr: (opcoesReto(el).sens || 50) / 100, inv: el.inv || 0, cores: 1, cells: [[0]] });
+  } else return;
+  var fam = nova.font || (nova.kind === "text" ? nova.font : null);
+  loadFontThen(function(){
+    rebuild(nova);
+    var nb = bboxMM(nova);
+    nova.x = dec1(cx - nb.w / 2); nova.y = dec1(cy - nb.h / 2);
+    var i = els.indexOf(el);
+    if (i < 0) return;
+    els[i] = nova;
+    renderChips(); syncControls(); renderPaleta(); draw(); pushHist();
+  }, fam || FONTE_PADRAO);
+}
+$("trocaPonto").addEventListener("click", function(){ if (els[sel]) trocaPonto(els[sel]); });
+$("retoDeit").addEventListener("click", function(){
+  var el = els[sel];
+  if (!el || el.kind !== "reto") return;
+  el.deitada = el.deitada ? 0 : 1;
+  this.classList.toggle("on", !!el.deitada);
+  refazNoCentro(el);
+  draw(); pushHist();
+});
+$("retoInv").addEventListener("click", function(){
+  var el = els[sel];
+  if (!el || el.kind !== "reto" || el.desenho !== "imagem") return;
+  el.inv = el.inv ? 0 : 1;
+  this.classList.toggle("on", !!el.inv);
+  refazNoCentro(el);
+  draw(); pushHist();
+});
+
+// as duas casas de opção da barra, com o nome e os limites do desenho de agora
+function opcoesNaBarra(el){
+  var d = DESENHOS_RETO[el.desenho], o = opcoesReto(el);
+  ["A", "B"].forEach(function(letra, i){
+    var op = d.opcoes[i], t = $("tReto" + letra), inp = $("reto" + letra);
+    t.classList.toggle("hide", !op);
+    if (!op) return;
+    $("reto" + letra + "Nome").textContent = op[1];
+    inp.min = op[3]; inp.max = op[4];
+    inp.value = o[op[0]];
+    inp.dataset.chave = op[0];
+  });
 }
 
 function addSym(){
@@ -656,6 +809,7 @@ $("addText").addEventListener("click", function(){
 $("addSym").addEventListener("click", addSym);
 $("addMoldura").addEventListener("click", addMoldura);
 $("addFaixa").addEventListener("click", addFaixa);
+$("addReto").addEventListener("click", addReto);
 $("delEl").addEventListener("click", function(){
   if (!els.length) return;
   els.splice(sel, 1);
@@ -672,6 +826,12 @@ $("flipEl").addEventListener("click", function(){
   var el = els[sel];
   if (!el) return;
   el.flip = el.flip ? 0 : 1;
+  if (el.kind === "reto"){
+    refazNoCentro(el);
+    this.classList.toggle("on", !!el.flip);
+    renderChips(); draw(); pushHist();
+    return;
+  }
   el.cells = espelha(el.cells);
   // as colunas viraram, e com elas a lista: ajuste espelhado continua no
   // mesmo lugar do desenho em vez de aparecer do outro lado
@@ -742,6 +902,50 @@ function updateSelected(){
     renderChips(); draw(); pushLater();
     return;
   }
+  if (el.kind === "reto"){
+    var d0 = el.desenho, nv = function(id, min, max, alt){
+      var v = parseFloat($(id).value);
+      return isNaN(v) ? alt : Math.max(min, Math.min(max, v));
+    };
+    if (el.desenho !== "imagem")
+      el.desenho = DESENHOS_RETO[$("retoDes").value] ? $("retoDes").value : el.desenho;
+    if (el.desenho === "palavra"){
+      if (el.desenho !== d0){ el.texto = el.texto || "amor"; el.font = el.font || FONTE_PADRAO; }
+      else { el.texto = $("retoTxt").value; el.font = $("retoFont").value || el.font; }
+    }
+    if (el.desenho === "imagem") el.modo = $("retoModo").value === "traco" ? "traco" : "contorno";
+    var d = DESENHOS_RETO[el.desenho];
+    if (el.desenho !== d0){
+      // desenho novo começa do tamanho e das opções de fábrica dele: o lado
+      // de um hexágono não é uma boa largura de coração
+      el.medida = d.padrao; el.opts = {};
+    } else {
+      el.medida = nv("retoMed", d.min, d.max, el.medida);
+      el.opts = el.opts || {};
+      ["A", "B"].forEach(function(l){
+        var inp = $("reto" + l);
+        if (!inp.dataset.chave || $("tReto" + l).classList.contains("hide")) return;
+        var v = parseInt(inp.value, 10);
+        if (!isNaN(v)) el.opts[inp.dataset.chave] = v;
+      });
+    }
+    el.passo = nv("retoPasso", RETO_PASSO_MIN, RETO_PASSO_MAX, el.passo);
+    if (el.desenho !== "palavra" && el.desenho !== "imagem"){
+      el.arranjo = $("retoArr").value || "solta";
+      el.rep = nv("retoRep", 1, 40, el.rep || 6);
+      el.gap = nv("retoGap", 0, 30, el.gap == null ? 3 : el.gap);
+      el.margem = nv("retoMarg", 0, 60, el.margem == null ? 6 : el.margem);
+    }
+    var refaz = function(){
+      // a moldura volta para a foto; o resto cresce em volta do próprio centro
+      if (el.arranjo === "moldura"){ rebuild(el); centraNaMira(el); }
+      else refazNoCentro(el);
+      syncControls();
+      renderChips(); draw(); pushLater();
+    };
+    if (el.desenho === "palavra") loadFontThen(refaz, el.font); else refaz();
+    return;
+  }
   if (el.kind === "pat"){
     var num = function(id, min, max, alt){
       var v = parseInt($(id).value, 10);
@@ -772,7 +976,9 @@ function updateSelected(){
 
 ["txt","font","rows","thick","thr","esp","arc","sym","symScale",
  "imgLarg","imgThr","imgCorte","imgCores",
- "patArr","patMot","patScale","patGap","patMargem","patRep","patCores"]
+ "patArr","patMot","patScale","patGap","patMargem","patRep","patCores",
+ "retoDes","retoMed","retoPasso","retoA","retoB","retoTxt","retoFont","retoModo",
+ "retoArr","retoRep","retoGap","retoMarg"]
   .forEach(function(id){ $(id).addEventListener("input", updateSelected); });
 $("imgFonte").addEventListener("change", function(){
   var el = els[sel];
@@ -928,7 +1134,7 @@ function fotoMudou(antes){
   photo.y = antes.y + antes.h / 2 - photo.h / 2;
   clampPhoto();
   els.forEach(function(el){
-    if (el.kind === "pat" && el.arranjo === "moldura") return;   // refazMolduras cuida dela
+    if ((el.kind === "pat" || el.kind === "reto") && el.arranjo === "moldura") return;   // refazMolduras cuida dela
     var b = bboxMM(el), cx = b.x + b.w / 2, cy = b.y + b.h / 2;
     var nx = seguePosicao(cx, antes.x, antes.w, photo.x, photo.w);
     var ny = seguePosicao(cy, antes.y, antes.h, photo.y, photo.h);
@@ -951,7 +1157,7 @@ function onPhotoChange(){
 function refazMolduras(){
   var mudou = false;
   els.forEach(function(el){
-    if (el.kind !== "pat" || el.arranjo !== "moldura") return;
+    if ((el.kind !== "pat" && el.kind !== "reto") || el.arranjo !== "moldura") return;
     rebuild(el); centraNaMira(el); mudou = true;
   });
   if (mudou){ renderPaleta(); renderFios(); }

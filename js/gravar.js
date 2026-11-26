@@ -14,7 +14,63 @@
    1 em diante é o índice da linha na paleta da peça. Uma peça de uma cor só
    grava exatamente o que gravava antes, então molde antigo volta igual. */
 function celChar(v){ return (v | 0).toString(36); }
+/* A peça de ponto reto vai com os números que a fazem — desenho, medida,
+   ponto, opções — e com os furos como estão, do mesmo jeito que as outras vão
+   com as células: é o desenho final, que abre igual mesmo que a conta de
+   furos mude numa versão futura. */
+function packReto(el){
+  return { kind: "reto", x: el.x, y: el.y, rot: el.rot, flip: el.flip || 0,
+           color: el.color || "", colorName: el.colorName || "",
+           desenho: el.desenho, medida: el.medida, passo: el.passo, opts: el.opts || {},
+           texto: el.texto, font: el.font, img: el.img, nome: el.nome, inv: el.inv ? 1 : 0, modo: el.modo,
+           arranjo: el.arranjo || "solta", rep: el.rep, gap: el.gap, margem: el.margem, deitada: el.deitada ? 1 : 0,
+           w: Math.round(el.w * 100) / 100, h: Math.round(el.h * 100) / 100,
+           pontos: (el.pontos || []).map(function(pt){
+             return { f: pt.fechada ? 1 : 0,
+                      p: [].concat.apply([], pt.furos.map(function(q){ return [q[0], q[1]]; })) };
+           }) };
+}
+
+function unpackReto(r){
+  var el = { kind: "reto", x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0, flip: r.flip ? 1 : 0,
+             desenho: DESENHOS_RETO[r.desenho] ? r.desenho : "colmeia",
+             medida: +r.medida || 0, passo: Math.max(RETO_PASSO_MIN, Math.min(RETO_PASSO_MAX, +r.passo || RETO_PASSO)),
+             opts: r.opts && typeof r.opts === "object" ? r.opts : {},
+             edits: [], manual: 0 };
+  var d = DESENHOS_RETO[el.desenho];
+  el.medida = Math.max(d.min, Math.min(d.max, el.medida || d.padrao));
+  el.arranjo = r.arranjo === "faixa" || r.arranjo === "moldura" ? r.arranjo : "solta";
+  el.rep = Math.max(1, Math.min(40, +r.rep || 6));
+  el.gap = Math.max(0, Math.min(30, r.gap == null ? 3 : +r.gap));
+  el.margem = Math.max(0, Math.min(60, r.margem == null ? 6 : +r.margem));
+  el.deitada = r.deitada ? 1 : 0;
+  if (el.desenho === "palavra"){
+    el.texto = typeof r.texto === "string" ? r.texto : "";
+    el.font = fonteConhecida(r.font) ? r.font : (FONTE_TROCADA[r.font] || FONTE_PADRAO);
+  }
+  if (el.desenho === "imagem"){
+    el.img = typeof r.img === "string" ? r.img : "";
+    el.nome = typeof r.nome === "string" && r.nome ? r.nome : "imagem";
+    el.inv = r.inv ? 1 : 0;
+    el.modo = r.modo === "traco" ? "traco" : "contorno";
+  }
+  if (typeof r.color === "string" && /^#[0-9A-Fa-f]{6}$/.test(r.color)){
+    el.color = r.color;
+    el.colorName = typeof r.colorName === "string" ? r.colorName : "";
+  }
+  var pontos = (r.pontos || []).map(function(pt){
+    var furos = [];
+    for (var i = 0; i + 1 < (pt.p || []).length; i += 2) furos.push([+pt.p[i], +pt.p[i + 1]]);
+    return { fechada: !!pt.f, furos: furos };
+  }).filter(function(pt){ return pt.furos.length > 1; });
+  // sem furos gravados (arquivo mexido à mão), refaz a partir dos números
+  if (pontos.length && r.w > 0 && r.h > 0){ el.pontos = pontos; el.w = +r.w; el.h = +r.h; }
+  else rebuild(el);
+  return el;
+}
+
 function packEl(el){
+  if (el.kind === "reto") return packReto(el);
   var r = { kind: el.kind, x: el.x, y: el.y, rot: el.rot, manual: el.manual || 0,
             color: el.color || "", colorName: el.colorName || "",
             // a lista dos ajustes à mão vai junto com as células, e não no
@@ -63,6 +119,7 @@ function packEl(el){
 }
 
 function unpackEl(r){
+  if (r && r.kind === "reto") return unpackReto(r);
   if (!r || !r.cells || !r.cells.length) return null;
   var cells = r.cells.map(function(row){
     var line = [];
@@ -338,7 +395,7 @@ function salvaOrigens(){
   if (!it) return;
   var usadas = {}, tem = false;
   els.forEach(function(el){
-    if (el.kind !== "img" || !el.img) return;
+    if (!temOrigem(el)) return;
     var o = origens[el.img];
     if (!o || !o.url) return;
     usadas[el.img] = o.url;
