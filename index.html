@@ -526,6 +526,13 @@
     <button id="moldeAbrir" class="wide">abrir arquivo do molde</button>
     <input id="moldeArq" type="file" accept="application/json,.json" class="hide">
     <p class="note" id="moldeAviso"></p>
+    <h3 class="subtit">outros programas de ponto cruz</h3>
+    <button id="oxsSalvar" class="wide">exportar OXS</button>
+    <button id="oxsAbrir" class="wide">trazer um gráfico OXS para este molde</button>
+    <input id="oxsArq" type="file" accept=".oxs,.xml,application/xml,text/xml" class="hide">
+    <p class="note">OXS é o formato aberto que o WinStitch, o MacStitch e o KG-Chart leem e
+      escrevem. O ponto reto vai como ponto atrás; meio ponto, nós e contas do arquivo não têm
+      equivalente aqui e ficam de fora.</p>
 
     <p class="note">O arquivo leva tudo: papel, foto, peças, linhas e os ajustes feitos ponto a
       ponto. É por ele que o trabalho vai para outro aparelho, ou volta depois de você limpar os
@@ -691,5 +698,6 @@
 <script src="js/fontes.js"></script>
 <script src="js/vista.js"></script>
 <script src="js/paineis.js"></script>
+<script src="js/oxs.js"></script>
 </body>
 </html>

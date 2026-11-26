@@ -397,6 +397,21 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   volta. O molde que já estava gravado entra na lista como está, sem nada ser copiado. A lista
   fica por **ordem de uso** (o molde aberto sobe para o topo), a data é a da última mudança de
   verdade, e **duplicar este molde** faz uma cópia com foto e tudo, que já abre.
+- **Marcar o que já foi bordado**: o botão de tique na mesa liga o acompanhamento. Um toque num
+  ponto (quadradinho ou ponto reto) marca que ele já foi bordado, outro desmarca, e arrastar
+  marca o traço inteiro. O que foi bordado fica esmaecido e o rodapé diz quanto falta. Fica
+  gravado com o molde, entra no desfazer e não sai no PDF.
+- **Cor do papel 300g**, na aba papel: a mesa e o PNG mostram o papel na cor escolhida (o PDF
+  continua branco, porque vai para a folha da impressora). Os papéis que dão mais contraste para
+  as linhas do molde vêm marcados com um ponto, e o app avisa quando uma linha quase some no
+  papel escolhido.
+- **OXS**: na aba moldes, exportar o molde no formato aberto que o WinStitch, o MacStitch e o
+  KG-Chart leem, e trazer um gráfico OXS para dentro do molde — o ponto cheio vira gráfico
+  colorido, o ponto atrás vira ponto reto. Meio ponto, nós e contas ficam de fora, com aviso.
+- **Instalar como app**: servido pela internet, o navegador oferece instalar o ponto & letra
+  como aplicativo (manifesto e ícones), e ele abre sem internet com a última versão que
+  funcionou. Com internet, a página vem sempre da rede — o service worker (`app-sw.js`) nunca
+  serve do cache quando a rede responde.
 - **Arquivo do molde**: salvar e abrir um `.json` com tudo dentro — papel, foto, peças, linhas e
   os ajustes feitos ponto a ponto. Abrir o arquivo de um molde que já está na estante, igual,
   abre o que está lá em vez de criar outro. É o único jeito de o trabalho ir para outro aparelho ou voltar

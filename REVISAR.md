@@ -337,3 +337,26 @@ escolha, escolhi assim:
 - **Duplicar** dá o nome "… (cópia)" e abre a cópia, para que a próxima mudança
   não caia no original sem querer.
 - **O nome** grava meio segundo depois da última tecla, ou ao sair do campo.
+
+**Ideias antigas.**
+- **Acompanhamento** marca por ponto, não por linha de cor nem por região: é
+  o gesto de quem borda ("fiz até aqui"). A marca do ponto reto é pela posição
+  dos dois furos, então refazer a peça igual não perde nada; a do ponto cruz é
+  por linha e coluna, e recomeça se a grade da peça mudar de tamanho.
+- **Cor do papel**: escolhi nove cores de papel 300g comuns em papelaria e
+  uma livre. A sugestão olha a linha que **menos** aparece em cada papel, e
+  não a média — uma linha que some estraga a peça mesmo que as outras
+  apareçam. O PDF continua branco, porque sai na folha da impressora.
+- **App instalável**: o service worker novo se chama `app-sw.js`, e o `sw.js`
+  continua só desfazendo o antigo. Ele vai sempre à rede primeiro e só usa o
+  cache sem internet, então não pode prender versão velha como o do app React
+  prendia. Os ícones de 192 e 512 px foram gerados da marca do app.
+- **OXS**: exportar recorta a grade no que tem ponto e põe cada quadradinho
+  no quadradinho do papel em que o centro dele cai (peça girada sai
+  endireitada). O ponto reto vira ponto atrás com os furos no meio quadradinho
+  mais perto, que é a precisão do formato. Trazer um OXS **acrescenta** as
+  peças ao molde aberto, em vez de criar um molde novo: assim dá para juntar o
+  gráfico com a foto e as palavras. O gráfico que vem do arquivo não tem
+  imagem de origem, então largura e sensibilidade ficam paradas nele. Mais de
+  35 linhas (o limite de uma letra por quadradinho) junta as que sobram na mais
+  parecida, com aviso.

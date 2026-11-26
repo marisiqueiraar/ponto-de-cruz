@@ -254,14 +254,13 @@ Da [REVISAO.md](REVISAO.md), o que não entrou na reforma de 25/11/2026:
 Vieram do `BACKLOG.md` da versão React (preservado em `6ce5a7a`) e sobrevivem à
 mudança de aplicativo:
 
-- **Modo de acompanhamento:** marcar no molde o que já foi bordado.
-- **Sugestão de cor de fundo** que combine com as linhas escolhidas.
-- **PWA instalável de verdade.** O `sw.js` de hoje é o oposto disso: ele existe
-  para *desfazer* um service worker. Instalar de verdade exigiria um manifesto
-  com ícones e um service worker novo — e pensar duas vezes, porque cache de
-  service worker foi exatamente o que causou o problema que o `sw.js` conserta.
-- **Importar e exportar OXS**, o formato de intercâmbio de gráficos de ponto
-  cruz (MacStitch, WinStitch). O arquivo `.json` de hoje só o próprio app lê.
+- ~~**Modo de acompanhamento:**~~ — feito em 26/11/2026: o tique na mesa marca o que já foi bordado, e o rodapé conta.
+- ~~**Sugestão de cor de fundo**~~ — feito em 26/11/2026: a cor do papel 300g, na aba papel, com os papéis que dão mais contraste para as linhas do molde.
+- ~~**PWA instalável de verdade.**~~ — feito em 26/11/2026, com um service worker novo
+  (`app-sw.js`) que vai sempre à rede primeiro e só usa o cache sem internet — o
+  oposto do que causou o problema que o `sw.js` conserta.
+- ~~**Importar e exportar OXS**~~ — feito em 26/11/2026, na aba moldes: o formato de
+  intercâmbio de gráficos de ponto cruz (MacStitch, WinStitch, KG-Chart).
 
 ---
 
