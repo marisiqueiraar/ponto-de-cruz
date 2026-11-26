@@ -271,7 +271,7 @@ mudança de aplicativo:
 
 ## 7. Sobre os testes
 
-`testes/roda.sh` roda 43 conjuntos: o repartir em folhas, a posição em cada
+`testes/roda.sh` roda 44 conjuntos: o repartir em folhas, a posição em cada
 folha, a emenda, a cor por peça, a estante, a tela no Chromium, alinhar, as
 guias e o ímã, as letras, a conta de fio, o ajuste à mão, o laço, o ponto reto,
 a impressão, as peças, a caixa de linhas, o acompanhamento, a cor do papel, o

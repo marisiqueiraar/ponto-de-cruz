@@ -407,10 +407,13 @@ protótipo não dizia, escolhi assim:
   o mesmo, e muda de lugar conforme se abre um ou outro.
 - **O recalcular** foi para o fim da etapa peças (antes estava na aba molde,
   que virou imprimir): ele refaz peças, não impressão.
-- **A prévia da folha** do protótipo (a folha A4 desenhada com o molde dentro)
-  não entrou: a etapa imprimir mostra o que conferir, mas a mesa continua
-  mostrando o papel da peça. Desenhar a folha exigiria um segundo desenho do
-  molde; fica como próximo passo se você sentir falta.
+- **A prévia da folha** do protótipo entrou depois, sem segundo desenho do
+  molde: o mesmo código que monta o PDF roda sobre um "papel de mentira"
+  (`js/previa.js`) que desenha na tela em vez de gravar o arquivo. Por isso
+  ela mostra exatamente as folhas que vão sair, inclusive a folha só de
+  instruções quando o molde ocupa a folha inteira. Ela se refaz meio segundo
+  depois da última mudança, e o botão "ver o molde" devolve a mesa de sempre
+  (para arrastar peças sem sair da etapa).
 - **Textos**: as notas sem id (texto fixo) ficam atrás do "?" do título da
   etapa; as que o app escreve na hora (avisos) continuam à vista. Nos campos
   da peça, o texto que antes só aparecia passando o mouse virou um "?" ao lado

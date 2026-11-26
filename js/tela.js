@@ -466,6 +466,7 @@ function recorteNaMesa(ctx, k, pa){
 function draw(){
   acompanhaAlvos();
   if (typeof renderChecagem === "function") renderChecagem();
+  if (typeof agendaPrevia === "function") agendaPrevia();
   var cv = $("grid"), ctx = cv.getContext("2d");
   var pa = paperMM();
   var box = cv.parentNode;
