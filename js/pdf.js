@@ -791,6 +791,12 @@ function linhasDeTodos(outros){
    estante que foram juntados, em grade, cada um com a sua moldura de recorte.
    O cabeçalho é o do molde aberto. Só vale quando o molde cabe inteiro numa
    folha com o cabeçalho — molde repartido ou de folha nua já é a folha toda. */
+/* Quem cria o documento: o jsPDF de verdade, ou — na prévia da etapa
+   imprimir (previa.js) — um papel de mentira que desenha na tela. Com
+   `fazendoPrevia` ligado, o montaPDF monta tudo e para antes de entregar. */
+var fabricaDoc = function(o){ return new window.jspdf.jsPDF(o); };
+var fazendoPrevia = false;
+
 function montaPDFVarios(R, plano){
   var outros = moldesJunto(), pedidas = Math.max(1, papelCopias | 0);
   var g = copiasCabem(R);
@@ -801,7 +807,7 @@ function montaPDFVarios(R, plano){
   if (lugares.length < 2) return null;
   var pl = { tiled: false, capa: false, land: g.land, pageW: g.pageW, top: PDF_TOP,
              cols: 1, rows: 1, folhaCheia: plano.folhaCheia };
-  var pdf = new window.jspdf.jsPDF({
+  var pdf = fabricaDoc({
     unit: "mm", format: folhaAtual.jspdf, orientation: g.land ? "landscape" : "portrait",
     compress: true, floatPrecision: 2
   });
@@ -824,6 +830,7 @@ function montaPDF(){
   plano.folhaCheia = folhaCheia(R);
   if (!plano.tiled && !plano.capa && plano.folhaCheia && (papelCopias > 1 || (papelJunto || []).length)){
     var v = montaPDFVarios(R, plano);
+    if (v && fazendoPrevia) return;
     if (v){
       var pa0 = paperMM(), blob0 = v.pdf.output("blob"), nome0 = saveName("pdf");
       histSave(blob0, nome0, "papel " + fmt(pa0.w) + " × " + fmt(pa0.h) + " mm · " + v.n +
@@ -840,7 +847,7 @@ function montaPDF(){
      dezessete casas decimais — 700 bytes por furo, megabytes por folha, que
      o celular ainda precisa baixar. Duas casas em pt são 3,5 milésimos de
      milímetro: mais fino do que qualquer agulha alcança. */
-  var pdf = new window.jspdf.jsPDF({
+  var pdf = fabricaDoc({
     unit: "mm", format: folhaAtual.jspdf, orientation: plano.land ? "landscape" : "portrait",
     compress: true, floatPrecision: 2
   });
@@ -871,6 +878,7 @@ function montaPDF(){
   var legendaSolta = todas.length > 0 && legendaCoube(pdf, plano, todas) === false;
   if (legendaSolta) folhaLegenda(pdf, plano);
 
+  if (fazendoPrevia) return;
   var pa = paperMM();
   var folhas = plano.cols * plano.rows;
   var quantas = plano.capa

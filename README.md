@@ -421,7 +421,9 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   furos colados, se alguma linha do molde não está na sua caixa —, e cada aviso que pede gesto
   leva à etapa em que ele se resolve. Embaixo ficam o espaçamento entre furos, a folha da
   impressora, as cópias e o recorte do marca-página, a ordem numerada, o resumo e o botão de
-  baixar.
+  baixar. Enquanto a etapa está aberta, a mesa mostra a **prévia da folha**: o PDF montado pelo
+  mesmo código, desenhado na tela — cabeçalho, régua, moldura de recorte, cópias lado a lado e as
+  folhas repartidas, quando há mais de uma. O botão **ver o molde** volta para a mesa de sempre.
 - **Marcar o que já foi bordado**: o botão de tique na mesa liga o acompanhamento. Um toque num
   ponto (quadradinho ou ponto reto) marca que ele já foi bordado, outro desmarca, e arrastar
   marca o traço inteiro. O que foi bordado fica esmaecido e o rodapé diz quanto falta. Fica

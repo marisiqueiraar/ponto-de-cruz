@@ -501,6 +501,11 @@
   <div class="ruler v" id="rulerV"></div>
   <div class="stage" id="stage"><canvas id="grid" width="10" height="10"></canvas></div>
   <div class="guias" id="guias" aria-hidden="true"></div>
+  <div class="previa hide" id="previa" aria-label="prévia da folha impressa">
+    <p class="previaTit" id="previaTxt">Assim sai a folha</p>
+    <div class="previaFolhas" id="previaFolhas"></div>
+  </div>
+  <button type="button" class="tbtn previaBtn hide" id="previaBtn" aria-pressed="true">ver o molde</button>
   <div class="zoom">
     <button id="zGuias" title="guias pontilhadas" aria-label="guias pontilhadas" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3"/></svg></button>
     <input type="checkbox" id="imaPecas" class="imaBtn" checked title="ímã entre peças: arrastando, a peça encosta nas outras, na foto e no meio do papel. Segurar Alt solta o ímã de passagem." aria-label="ímã entre peças">
@@ -768,5 +773,6 @@
 <script src="js/vista.js"></script>
 <script src="js/paineis.js"></script>
 <script src="js/oxs.js"></script>
+<script src="js/previa.js"></script>
 </body>
 </html>
