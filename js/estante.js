@@ -37,7 +37,7 @@ function temPaleta(el){
 
 // a peça que tem imagem: a de quadradinho, e a de ponto reto feita de imagem
 function temOrigem(el){
-  return !!(el && el.img && (el.kind === "img" || (el.kind === "reto" && el.desenho === "imagem")));
+  return !!(el && el.img && (el.kind === "img" || el.kind === "foto" || (el.kind === "reto" && el.desenho === "imagem")));
 }
 
 function origemPronta(el){

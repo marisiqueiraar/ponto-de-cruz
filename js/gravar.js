@@ -18,12 +18,29 @@ function celChar(v){ return (v | 0).toString(36); }
    ponto, opções — e com os furos como estão, do mesmo jeito que as outras vão
    com as células: é o desenho final, que abre igual mesmo que a conta de
    furos mude numa versão futura. */
+/* O que já foi bordado (acompanha.js) vai com a peça, como lista de chaves.
+   Sem marca nenhuma, o campo nem aparece. */
+function packFeito(el){
+  var f = el.feito;
+  if (!f || !f.k) return undefined;
+  var ks = Object.keys(f.k);
+  return ks.length ? { d: f.d || "", k: ks } : undefined;
+}
+function unpackFeito(f){
+  if (!f || !f.k || !f.k.length) return null;
+  var k = {};
+  f.k.forEach(function(c){ if (typeof c === "string") k[c] = 1; });
+  return { d: typeof f.d === "string" ? f.d : "", k: k };
+}
+
 function packReto(el){
-  return { kind: "reto", x: el.x, y: el.y, rot: el.rot, flip: el.flip || 0,
+  return { kind: "reto", uid: uidDe(el), alvo: el.alvo || "", x: el.x, y: el.y, rot: el.rot, flip: el.flip || 0,
            color: el.color || "", colorName: el.colorName || "",
            desenho: el.desenho, medida: el.medida, passo: el.passo, opts: el.opts || {},
            texto: el.texto, font: el.font, img: el.img, nome: el.nome, inv: el.inv ? 1 : 0, modo: el.modo,
            arranjo: el.arranjo || "solta", rep: el.rep, gap: el.gap, margem: el.margem, deitada: el.deitada ? 1 : 0,
+           maos: (el.maos || []).map(function(m){ return { t: m.t, a: m.a, b: m.b }; }),
+           feito: packFeito(el),
            w: Math.round(el.w * 100) / 100, h: Math.round(el.h * 100) / 100,
            pontos: (el.pontos || []).map(function(pt){
              return { f: pt.fechada ? 1 : 0,
@@ -32,7 +49,9 @@ function packReto(el){
 }
 
 function unpackReto(r){
-  var el = { kind: "reto", x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0, flip: r.flip ? 1 : 0,
+  var el = { kind: "reto", uid: typeof r.uid === "string" && r.uid ? r.uid : novoId(),
+             alvo: typeof r.alvo === "string" ? r.alvo : "",
+             x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0, flip: r.flip ? 1 : 0,
              desenho: DESENHOS_RETO[r.desenho] ? r.desenho : "colmeia",
              medida: +r.medida || 0, passo: Math.max(RETO_PASSO_MIN, Math.min(RETO_PASSO_MAX, +r.passo || RETO_PASSO)),
              opts: r.opts && typeof r.opts === "object" ? r.opts : {},
@@ -40,6 +59,11 @@ function unpackReto(r){
   var d = DESENHOS_RETO[el.desenho];
   el.medida = Math.max(d.min, Math.min(d.max, el.medida || d.padrao));
   el.arranjo = r.arranjo === "faixa" || r.arranjo === "moldura" ? r.arranjo : "solta";
+  el.maos = (r.maos || []).filter(function(m){
+    return m && (m.t === "liga" || m.t === "corta") && m.a && m.b && m.a.length === 2 && m.b.length === 2;
+  }).map(function(m){ return { t: m.t, a: [+m.a[0], +m.a[1]], b: [+m.b[0], +m.b[1]] }; });
+  el.manual = el.maos.length;
+  el.feito = unpackFeito(r.feito);
   el.rep = Math.max(1, Math.min(40, +r.rep || 6));
   el.gap = Math.max(0, Math.min(30, r.gap == null ? 3 : +r.gap));
   el.margem = Math.max(0, Math.min(60, r.margem == null ? 6 : +r.margem));
@@ -71,12 +95,16 @@ function unpackReto(r){
 
 function packEl(el){
   if (el.kind === "reto") return packReto(el);
-  var r = { kind: el.kind, x: el.x, y: el.y, rot: el.rot, manual: el.manual || 0,
+  if (el.kind === "foto")
+    return { kind: "foto", uid: uidDe(el), alvo: "", x: el.x, y: el.y, rot: el.rot || 0,
+             w: el.w, h: el.h, tam: el.tam || "", img: el.img || "", nome: el.nome || "" };
+  var r = { kind: el.kind, uid: uidDe(el), alvo: el.alvo || "", x: el.x, y: el.y, rot: el.rot, manual: el.manual || 0,
             color: el.color || "", colorName: el.colorName || "",
             // a lista dos ajustes à mão vai junto com as células, e não no
             // lugar delas: as células são o desenho final, a lista é o que
             // permite refazer o desenho sem perder a correção
             edits: (el.edits || []).map(function(e){ return e.r + "," + e.q + "," + e.v; }),
+            feito: packFeito(el),
             cells: el.cells.map(function(row){ return row.map(celChar).join(""); }) };
   if (el.kind === "text"){
     r.text = el.text; r.font = el.font;
@@ -107,6 +135,7 @@ function packEl(el){
     r.arranjo = el.arranjo; r.motivo = el.motivo; r.scale = el.scale;
     r.gap = el.gap; r.margem = el.margem; r.rep = el.rep;
     r.deitada = el.deitada ? 1 : 0; r.cores = el.cores; r.flip = el.flip || 0;
+    r.esquemas = el.esquemas || {};
     r.paleta = (el.paleta || []).map(function(sl){
       return { lab: sl.lab.map(function(v){ return Math.round(v * 100) / 100; }),
                hex: sl.hex, chave: sl.chave || "",
@@ -120,6 +149,14 @@ function packEl(el){
 
 function unpackEl(r){
   if (r && r.kind === "reto") return unpackReto(r);
+  if (r && r.kind === "foto"){
+    if (!(+r.w > 0) || !(+r.h > 0)) return null;
+    return { kind: "foto", uid: typeof r.uid === "string" && r.uid ? r.uid : novoId(), alvo: "",
+             x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0, flip: 0, cells: [], edits: [], manual: 0,
+             w: Math.max(10, Math.min(500, +r.w)), h: Math.max(10, Math.min(500, +r.h)),
+             tam: typeof r.tam === "string" ? r.tam : "", img: typeof r.img === "string" ? r.img : "",
+             nome: typeof r.nome === "string" ? r.nome : "" };
+  }
   if (!r || !r.cells || !r.cells.length) return null;
   var cells = r.cells.map(function(row){
     var line = [];
@@ -130,9 +167,11 @@ function unpackEl(r){
     return line;
   });
   var kind = r.kind === "sym" || r.kind === "img" || r.kind === "pat" ? r.kind : "text";
-  var el = { kind: kind, cells: cells,
+  // a identidade da peça: é por ela que uma moldura sabe em volta de quem está
+  var el = { kind: kind, cells: cells, uid: typeof r.uid === "string" && r.uid ? r.uid : novoId(),
+             alvo: typeof r.alvo === "string" ? r.alvo : "",
              x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0, manual: +r.manual || 0,
-             edits: [] };
+             edits: [], feito: unpackFeito(r.feito) };
   var rowsEl = cells.length, colsEl = cells[0] ? cells[0].length : 0;
   if (r.edits && r.edits.length){
     r.edits.forEach(function(t){
@@ -190,6 +229,9 @@ function unpackEl(r){
     el.deitada = r.deitada ? 1 : 0;
     el.cores = Math.max(1, Math.min(PAT_CORES_MAX, +r.cores || 1));
     el.flip = r.flip ? 1 : 0;
+    el.esquemas = {};
+    if (r.esquemas && typeof r.esquemas === "object")
+      Object.keys(r.esquemas).forEach(function(k){ if (+r.esquemas[k]) el.esquemas[k] = +r.esquemas[k] | 0; });
     el.paleta = (r.paleta || []).map(function(sl){
       return { lab: (sl.lab || [0, 0, 0]).map(Number),
                hex: /^#[0-9A-Fa-f]{6}$/.test(sl.hex || "") ? sl.hex : "#888888",
@@ -234,22 +276,28 @@ function marcaMemoria(cheia, oQue){
 
 function saveState(){
   var it = itemAtual() || criaMolde(nomeSugerido());
+  var antes = null, corpo;
+  try { antes = localStorage.getItem(it.dados); } catch (e0){}
   try {
-    localStorage.setItem(it.dados, JSON.stringify({
+    localStorage.setItem(it.dados, corpo = JSON.stringify({
       v: 1,
       paper: { size: $("paperSize").value, or: $("paperOr").value,
-               w: $("paperW").value, h: $("paperH").value, folha: folhaAtual.id },
-      photoBox: { size: $("photoSize").value, or: $("photoOr").value,
+               w: $("paperW").value, h: $("paperH").value, folha: folhaAtual.id,
+               copias: papelCopias, junto: papelJunto, cantos: papelCantos, fita: papelFita ? 1 : 0,
+               cor: papelCor },
+      photoBox: { size: $("photoSize").value, or: $("photoOr").value, topo: instaxTopo,
                   w: $("photoWmm").value, h: $("photoHmm").value,
                   x: Math.round(photo.x * 10) / 10, y: Math.round(photo.y * 10) / 10 },
-      mm: $("mm").value, thread: thread, sel: sel,
+      mm: $("mm").value, thread: thread, sel: sel, numerar: numerarPontos ? 1 : 0,
       guias: { on: guias.on ? 1 : 0, v: guias.v, h: guias.h },
       els: els.map(packEl)
     }));
   } catch (e){ marcaMemoria(true, "o molde"); return; }
   marcaMemoria(false);
   salvaOrigens();
-  it.em = Date.now();
+  // a hora na estante é a da última mudança de verdade: gravar de novo o
+  // mesmo molde (ao trocar de molde, por exemplo) não conta como mexer nele
+  if (corpo !== antes || !it.em) it.em = Date.now();
   it.pecas = els.length;
   /* O nome que o app sugeriu acompanha as peças até você escrever um: antes
      ele era tirado uma vez só, da primeira palavra, e ficava — o molde
@@ -297,6 +345,13 @@ function restoreState(chave){
     // molde gravado antes da escolha da folha saía sempre em A4
     folhaAtual = FOLHAS[s.paper.folha] || FOLHAS.a4;
     $("folha").value = folhaAtual.id;
+    papelCopias = Math.max(1, Math.min(40, +s.paper.copias || 1));
+    papelJunto = Array.isArray(s.paper.junto) ? s.paper.junto.filter(function(x){ return typeof x === "string"; }) : [];
+    papelCantos = Math.max(0, Math.min(30, +s.paper.cantos || 0));
+    papelFita = s.paper.fita ? 1 : 0;
+    papelCor = /^#[0-9A-Fa-f]{6}$/.test(s.paper.cor || "") ? s.paper.cor.toUpperCase() : "#FFFFFF";
+    numerarPontos = s.numerar ? 1 : 0;
+    $("numerar").checked = !!numerarPontos;
     if (s.paper.size) $("paperSize").value = s.paper.size;
     if (s.paper.or) $("paperOr").value = s.paper.or;
     if (s.paper.w) $("paperW").value = s.paper.w;
@@ -315,6 +370,7 @@ function restoreState(chave){
   }
   if (s.photoBox){
     if (s.photoBox.size) $("photoSize").value = s.photoBox.size;
+    instaxTopo = s.photoBox.topo == null ? 6 : Math.max(0, Math.min(24, +s.photoBox.topo || 0));
     if (s.photoBox.or) $("photoOr").value = s.photoBox.or;
     if (s.photoBox.w) $("photoWmm").value = s.photoBox.w;
     if (s.photoBox.h) $("photoHmm").value = s.photoBox.h;
@@ -439,6 +495,7 @@ function restoreOrigens(){
          desenho, e desligou a largura e a sensibilidade. Agora há. */
       var el = els[sel];
       if (el && el.kind === "img" && el.img === id) syncControls();
+      if (els.some(function(e){ return e.kind === "foto" && e.img === id; })) draw();
     };
     img.src = url;
   });

@@ -178,11 +178,15 @@ function caixa(el, mm){
   await pg.mouse.move(p2x, p2y);
   await pg.mouse.down();
   await pg.mouse.move(p2x + 12 * pap.k, p2y, { steps: 10 });
-  await pg.mouse.move(p2x + 2 * pap.k, p2y, { steps: 10 });   // volta para perto da guia antiga
+  // volta para perto da guia antiga — 4 mm, e não 2: a 2 mm o centro da
+  // palavra caía no centro da foto, e o ímã entre peças (que é outro) puxava
+  await pg.mouse.move(p2x + 4 * pap.k, p2y, { steps: 10 });
   await pg.mouse.up();
   s = await estado();
   cx = caixa(s.els[0], s.mm);
-  ok(!perto(cx.x, partiu, 0.5) && perto(cx.x, partiu + 2, 0.6),
+  // o que importa é a guia desligada não puxar; o ímã entre peças, que vale
+  // sempre, pode ajustar a peça dentro da folga dele (6 px de tela)
+  ok(!perto(cx.x, partiu, 0.5) && Math.abs(cx.x - (partiu + 4)) <= 6 / pap.k + 0.1,
      "desligada, a peça para onde o dedo largou (" + cx.x.toFixed(2) +
      " mm, guia antiga em " + partiu.toFixed(2) + ")");
 

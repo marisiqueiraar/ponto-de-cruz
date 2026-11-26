@@ -262,7 +262,30 @@ function imagemEmLinhas(img, larguraMM, sens, inv, modo){
 /* A palavra em linhas. A altura é a da maiúscula, em milímetros — a mesma
    régua do ponto cruz, só que aqui medida direto em mm, porque não há
    quadradinho. Devolve os caminhos já encostados no zero. */
-function palavraEmLinhas(texto, fam, alturaMM, esp){
+/* O arco dobra a imagem da palavra fatia por fatia, como no ponto cruz
+   (textMatrix): letra por letra sobre a curva romperia a ligadura da cursiva.
+   `x0` e `W` são onde a palavra começa e quanto ela mede no canvas; `by`, a
+   linha de base. Devolve um canvas novo, maior, com a palavra curvada. */
+function dobraEmArco(src, x0, W, by, arco){
+  var ang = Math.abs(arco) * Math.PI / 180, R = W / ang, flecha = R * (1 - Math.cos(ang / 2));
+  var pad = 8, dst = document.createElement("canvas");
+  dst.width = Math.ceil(W + src.height + pad * 2);
+  dst.height = Math.ceil(src.height + flecha);
+  var ax = dst.getContext("2d"), dcx = dst.width / 2;
+  var dby = arco > 0 ? by : by + flecha, dcy = arco > 0 ? dby + R : dby - R, cx = x0 + W / 2;
+  for (var sx = 0; sx < W + 2; sx++){
+    var phi = ((x0 + sx) - cx) / R;
+    ax.save();
+    if (arco > 0){ ax.translate(dcx + R * Math.sin(phi), dcy - R * Math.cos(phi)); ax.rotate(phi); }
+    else { ax.translate(dcx + R * Math.sin(phi), dcy + R * Math.cos(phi)); ax.rotate(-phi); }
+    ax.drawImage(src, x0 + sx, 0, 2, src.height, -1, -by, 2, src.height);
+    ax.restore();
+  }
+  return dst;
+}
+
+// `esp` é o espaço entre as letras em mm; `arco`, em graus, como no ponto cruz
+function palavraEmLinhas(texto, fam, alturaMM, esp, arco){
   texto = texto || " ";
   var px = ESQ_PX_MM, c = document.createElement("canvas"), x = c.getContext("2d");
   x.font = fontStr(100, fam);
@@ -281,6 +304,10 @@ function palavraEmLinhas(texto, fam, alturaMM, esp){
   x.fillStyle = "#000";
   x.textBaseline = "alphabetic";
   x.fillText(texto, pad + esq, pad + asc);
+  if (arco){
+    c = dobraEmArco(c, pad, Math.ceil(esq + dir), pad + asc, arco);
+    W = c.width; H = c.height; x = c.getContext("2d");
+  }
   var d = x.getImageData(0, 0, W, H).data, bin = new Uint8Array(W * H);
   for (var i = 0; i < W * H; i++) bin[i] = d[i * 4 + 3] > 110 ? 1 : 0;
   var cams = caminhosDoTraco(bin, W, H, px, 1.5);

@@ -3,6 +3,11 @@
 O que falta, em 18/09/2026. O que precisa de decisão sua está em
 [REVISAR.md](REVISAR.md).
 
+**Em 26/11/2026, todos os itens abertos foram feitos ou decididos** (riscados,
+com a data). As escolhas que fiz sozinho estão no [REVISAR.md](REVISAR.md),
+item 7. Ficaram abertos só dois limites dos testes, explicados na seção 7:
+comparar o PDF por imagem e rodar num celular de verdade.
+
 Ordem: quanto mais alto, mais muda a vida de quem borda.
 
 ---
@@ -127,45 +132,45 @@ Nada falta deste item.
 
 ## 5. Coisas que apareceram no caminho
 
-- **Importar o mesmo arquivo duas vezes cria dois moldes.** Não há detecção de
+- ~~**Importar o mesmo arquivo duas vezes cria dois moldes.**~~ — feito em 26/11/2026: se um molde da estante tem exatamente o mesmo desenho, ele é que abre; para ter cópia, há o duplicar. Não há detecção de
   repetido nem opção de substituir. Pode ser o certo (é uma cópia mesmo), mas
   ninguém decidiu.
-- **Não dá para duplicar um molde** dentro do app. Dá para salvar o arquivo e
+- ~~**Não dá para duplicar um molde**~~ — feito em 26/11/2026. dentro do app. Dá para salvar o arquivo e
   abrir de volta, que é o caminho torto para a mesma coisa.
-- **Não dá para reordenar a estante.** A lista é por ordem de criação, com o
+- ~~**Não dá para reordenar a estante.**~~ — feito em 26/11/2026: agora é por ordem de uso, e a hora mostrada é a da última mudança de verdade. A lista é por ordem de criação, com o
   mais novo no topo, e não por uso.
-- **A legenda do PDF corta em três linhas.** Passando disso, ela escreve
+- ~~**A legenda do PDF corta em três linhas.**~~ — já resolvido: a legenda que não cabe no rodapé vira folha à parte. Passando disso, ela escreve
   "+ N linhas". Precisaria de uns vinte tons distintos para acontecer, então é
   rede de segurança, não limitação sentida.
-- **O nome do molde grava a cada tecla digitada.** Sem espera. É uma escrita
+- ~~**O nome do molde grava a cada tecla digitada.**~~ — feito em 26/11/2026. Sem espera. É uma escrita
   pequena no índice, mas é uma escrita por tecla.
-- **Arrastar num molde grande anda a 20 quadros por segundo.** Medido: 50 ms por
+- ~~**Arrastar num molde grande anda a 20 quadros por segundo.**~~ — feito em 26/11/2026: o desenho de cada peça fica guardado numa imagem e só se refaz quando ela muda; com 13 mil pontos, desenhar caiu de 12 ms para 2 ms. Medido: 50 ms por
   movimento com 16 375 pontos em cinco peças, contra 17 ms num molde leve. Fui
   conferir se tinha sido eu — as contas de fio e do rodapé do PDF passaram a
   varrer as células a cada desenho — e **não foi**: a mesma medida na versão
   anterior à sessão dá 50,4 ms. O custo é o canvas desenhando dezesseis mil
   cruzinhas, e quem quiser atacar isso ataca o desenho, não as varreduras.
-- **O espaçamento entre letras não avisa quando o navegador não o suporta.** O
+- ~~**O espaçamento entre letras não avisa quando o navegador não o suporta.**~~ — feito em 26/11/2026. O
   código confere `"letterSpacing" in ctx` e, se não houver, simplesmente não
   espaça — o controle fica na barra sem fazer nada. Em 2026 isso é raro, mas
   controle que não faz nada e não diz por quê é pior que controle ausente.
-- **A faixa de pegar a guia rouba o toque da peça que está debaixo dela.** São
+- ~~**A faixa de pegar a guia rouba o toque da peça que está debaixo dela.**~~ — feito em 26/11/2026. São
   9 px em volta do risco, com o risco no meio: pegar 1 px com o dedo seria
   sorte, mas a peça que cai exatamente sobre a guia precisa ser pega um pouco
   ao lado. Vale o mesmo para a mãozinha: arrastar a vista começando em cima de
   uma guia arrasta a guia.
-- **As guias ficam de fora do desfazer.** Elas são móvel de tela, como o zoom,
+- ~~**As guias ficam de fora do desfazer.**~~ — decidido em 26/11/2026: continuam de fora (o porquê está no [REVISAR.md](REVISAR.md), item 7). Elas são móvel de tela, como o zoom,
   e não entram na pilha — tirar uma guia sem querer se resolve puxando outra.
   Ficam gravadas com o molde, isso sim.
-- **`testes/amostra.js` tem uma cópia dos desenhos dos símbolos.** Ele desenha
+- ~~**`testes/amostra.js` tem uma cópia dos desenhos dos símbolos.**~~ — feito em 26/11/2026. Ele desenha
   sem abrir o app, então repete a tabela de `js/base.js`. Se os símbolos mudarem,
   a amostra fica mentindo sem ninguém notar.
-- **O laço move e apaga, e só.** Girar, espelhar, duplicar e os botões de
+- ~~**O laço move e apaga, e só.**~~ — feito em 26/11/2026: agora também duplica o bloco e o leva para o meio do papel. Girar e espelhar o bloco continuam de fora. Girar, espelhar, duplicar e os botões de
   alinhar continuam valendo para a peça selecionada, uma de cada vez — com um
   bloco laçado a barra esconde esses campos em vez de mexer em uma só das
   laçadas. É decisão de escopo, não limitação: está em
   [REVISAR.md](REVISAR.md), item 6.
-- **`sw.js` continua na raiz.** Ele existe só para desregistrar o service
+- ~~**`sw.js` continua na raiz.**~~ — decidido em 26/11/2026: fica, e o app instalável usa outro arquivo (`app-sw.js`). Ele existe só para desregistrar o service
   worker que o app React deixou para trás. Em algum momento todo mundo que
   abriu aquela versão já passou por aqui e ele pode sair — mas não há como
   saber quando, e o custo de mantê-lo é um arquivo de 1,5 KB.
@@ -179,15 +184,15 @@ nove desenhos prontos, palavra em ponto atrás, imagem em contorno e em traço,
 faixa e moldura, a troca de ponto peça por peça, o PDF com o risco cinza.
 Ficou para depois:
 
-- **Mais desenhos prontos**: seigaiha (ondas em escama), asanoha (folha de
+- ~~**Mais desenhos prontos**~~ (feito em 26/11/2026): seigaiha (ondas em escama), asanoha (folha de
   cânhamo), espiral, ramo de folhinhas, estrela de 8 pontas.
-- **A ordem dos pontos numerada no PDF**, para quem quer seguir um caminho.
-- **Mexer à mão nos furos** da peça de ponto reto: tocar num furo e noutro
+- ~~**A ordem dos pontos numerada no PDF**~~ (feito em 26/11/2026), para quem quer seguir um caminho.
+- ~~**Mexer à mão nos furos**~~ (feito em 26/11/2026) da peça de ponto reto: tocar num furo e noutro
   liga os dois; tocar num risco o apaga.
-- **Palavra em arco** em ponto reto: o arco é do ponto cruz e ainda não vale
+- ~~**Palavra em arco**~~ (feito em 26/11/2026) em ponto reto: o arco é do ponto cruz e ainda não vale
   na palavra de ponto reto.
-- **Espaço entre letras** em ponto reto: idem.
-- **Moldura de ponto reto em volta de outra coisa que não a foto** — de um
+- ~~**Espaço entre letras**~~ (feito em 26/11/2026) em ponto reto: idem.
+- ~~**Moldura de ponto reto em volta de outra coisa que não a foto**~~ (feito em 26/11/2026) — de um
   nome, de uma imagem.
 
 ---
@@ -197,27 +202,27 @@ Ficou para depois:
 Feitos em 25/11/2026 (moldura de blocos, faixa, papéis de marca-página). Ficou
 para depois:
 
-- **Vários marca-páginas numa folha só.** Hoje o PDF de um papel de 5 × 18 cm
+- ~~**Vários marca-páginas numa folha só.**~~ — feito em 26/11/2026. Hoje o PDF de um papel de 5 × 18 cm
   sai numa A4 com um marca-página só. Falta montar 3 ou 4 lado a lado na mesma
   folha, cada um com a sua moldura de recorte — o mesmo molde repetido ou
   moldes diferentes da estante.
-- **A moldura passa da borda num A4 com foto grande.** Com foto de 13 × 18 cm
+- ~~**A moldura passa da borda num A4 com foto grande.**~~ — feito em 26/11/2026. Com foto de 13 × 18 cm
   e blocos de 2,5 cm, a moldura fica mais larga que a folha. O aviso vermelho
   aparece, mas o app não sugere a saída (margem menor, menos espaço entre
   blocos, ou blocos menores). Falta um "caber no papel" que acerte isso sozinho.
-- **Cor bloco por bloco.** A paleta da moldura se distribui sozinha pelos
+- ~~**Cor bloco por bloco.**~~ — feito em 26/11/2026. A paleta da moldura se distribui sozinha pelos
   blocos; não dá para escolher à mão as cores de um bloco só sem passar pelo
   ajuste ponto a ponto.
-- **Contorno do marca-página no PDF.** A borda do papel sai como moldura de
+- ~~**Contorno do marca-página no PDF.**~~ — feito em 26/11/2026. A borda do papel sai como moldura de
   recorte reta; marca-página de canto arredondado e o furo da fita não estão
   desenhados.
-- **A aba ajuda não fala da moldura nem da faixa.** A explicação está só na
+- ~~**A aba ajuda não fala da moldura nem da faixa.**~~ — feito em 26/11/2026. A explicação está só na
   aba peças e no README.
-- **O ajuste ponto a ponto com a linha escolhida não tem teste.** A mudança
+- ~~**O ajuste ponto a ponto com a linha escolhida não tem teste.**~~ — feito em 26/11/2026. A mudança
   (acender com a linha selecionada na aba linha, e não sempre com a primeira)
   foi conferida lendo o código, não dirigindo o navegador: o teste precisaria
   converter um quadradinho da peça em pixel de tela.
-- **O nome do molde não acompanha as peças.** O molde nasce com o nome da
+- ~~**O nome do molde não acompanha as peças.**~~ — feito em 26/11/2026. O molde nasce com o nome da
   primeira palavra ("champ") e continua com ele no cabeçalho do PDF mesmo
   depois de a palavra ser apagada e só sobrar a moldura.
 
@@ -227,23 +232,23 @@ para depois:
 
 Da [REVISAO.md](REVISAO.md), o que não entrou na reforma de 25/11/2026:
 
-- **Ponto reto** (H1–H6, B5, G2): a próxima fase — tipo de ponto por peça,
+- ~~**Ponto reto**~~ (feito em 25–26/11/2026) (H1–H6, B5, G2): a próxima fase — tipo de ponto por peça,
   padrões prontos de linha (colmeia, folha com nervuras, sashiko), palavra em
   ponto atrás seguindo o traço da fonte, imagem virando contorno, furos livres,
   moldura e marca-página em ponto reto. Plano na seção 5½.
-- **"Tenho pouco" e "acabou" na caixa de linhas** (C5): hoje é só tenho / não
+- ~~**"Tenho pouco" e "acabou" na caixa de linhas**~~ — feito em 26/11/2026. (C5): hoje é só tenho / não
   tenho.
-- **Tamanho real na tela** (D5): a tela não sabe quantos pixels tem um
+- ~~**Tamanho real na tela**~~ — feito em 26/11/2026. (D5): a tela não sabe quantos pixels tem um
   milímetro. Dá para calibrar encostando um cartão de crédito (85,6 mm) na tela
   e ajustando até bater; depois disso, um botão "1:1".
-- **Menos texto na tela** (D6): a aba peças tem cinco parágrafos antes dos
+- ~~**Menos texto na tela**~~ — feito em 26/11/2026. (D6): a aba peças tem cinco parágrafos antes dos
   botões de alinhar; a aba ajuda tem 25 parágrafos corridos.
-- **Mais de uma foto por molde** (E3): cartão com duas fotos, marca-página com
+- ~~**Mais de uma foto por molde**~~ — feito em 26/11/2026, como peça de foto ("pôr mais uma foto", na aba foto). (E3): cartão com duas fotos, marca-página com
   foto embaixo e bordado em cima.
-- **No celular, a barra de cima ocupa um terço da tela** (F1).
-- **Os botões de alinhar ficam no fim da aba peças** (F2), depois dos textos.
-- **Ímã entre peças** (F3): hoje a peça só encosta em guia ligada.
-- **A janela da imagem no Instax**: a foto Instax entra pelo tamanho do cartão;
+- ~~**No celular, a barra de cima ocupa um terço da tela**~~ — feito em 26/11/2026. (F1).
+- ~~**Os botões de alinhar ficam no fim da aba peças**~~ — feito em 26/11/2026. (F2), depois dos textos.
+- ~~**Ímã entre peças**~~ — feito em 26/11/2026. (F3): hoje a peça só encosta em guia ligada.
+- ~~**A janela da imagem no Instax**~~ — feito em 26/11/2026, com a borda de cima num campo (6 mm de partida) para medir na foto de verdade.: a foto Instax entra pelo tamanho do cartão;
   o retângulo da imagem dentro dele (4,6 × 6,2 no mini) não é desenhado, porque
   a borda de cima não tem medida oficial.
 
@@ -254,36 +259,40 @@ Da [REVISAO.md](REVISAO.md), o que não entrou na reforma de 25/11/2026:
 Vieram do `BACKLOG.md` da versão React (preservado em `6ce5a7a`) e sobrevivem à
 mudança de aplicativo:
 
-- **Modo de acompanhamento:** marcar no molde o que já foi bordado.
-- **Sugestão de cor de fundo** que combine com as linhas escolhidas.
-- **PWA instalável de verdade.** O `sw.js` de hoje é o oposto disso: ele existe
-  para *desfazer* um service worker. Instalar de verdade exigiria um manifesto
-  com ícones e um service worker novo — e pensar duas vezes, porque cache de
-  service worker foi exatamente o que causou o problema que o `sw.js` conserta.
-- **Importar e exportar OXS**, o formato de intercâmbio de gráficos de ponto
-  cruz (MacStitch, WinStitch). O arquivo `.json` de hoje só o próprio app lê.
+- ~~**Modo de acompanhamento:**~~ — feito em 26/11/2026: o tique na mesa marca o que já foi bordado, e o rodapé conta.
+- ~~**Sugestão de cor de fundo**~~ — feito em 26/11/2026: a cor do papel 300g, na aba papel, com os papéis que dão mais contraste para as linhas do molde.
+- ~~**PWA instalável de verdade.**~~ — feito em 26/11/2026, com um service worker novo
+  (`app-sw.js`) que vai sempre à rede primeiro e só usa o cache sem internet — o
+  oposto do que causou o problema que o `sw.js` conserta.
+- ~~**Importar e exportar OXS**~~ — feito em 26/11/2026, na aba moldes: o formato de
+  intercâmbio de gráficos de ponto cruz (MacStitch, WinStitch, KG-Chart).
 
 ---
 
 ## 7. Sobre os testes
 
-`testes/` cobre o repartir em folhas, a posição em cada folha, a emenda, a cor
-por peça, a estante, a montagem da tela no Chromium, as setas e botões de
-alinhar, as guias e o ímã delas, o arco e o espaçamento das letras, a conta de
-fio, o ajuste à mão que sobrevive à altura, o arraste que acende quadradinho, e
-o laço que move e apaga o bloco. São dezesseis conjuntos; `testes/roda.sh` roda
-todos. O que **não** existe:
+`testes/roda.sh` roda 41 conjuntos: o repartir em folhas, a posição em cada
+folha, a emenda, a cor por peça, a estante, a tela no Chromium, alinhar, as
+guias e o ímã, as letras, a conta de fio, o ajuste à mão, o laço, o ponto reto,
+a impressão, as peças, a caixa de linhas, o acompanhamento, a cor do papel, o
+app instalável, o OXS e as fotos. A lista de cada um está em
+[testes/LEIAME.md](testes/LEIAME.md).
 
-- Nada que exercite o desenho no canvas — `textMatrix()`, que transforma o
-  traço da fonte em quadradinhos, é o coração do app e não tem teste nenhum.
-  Um teste dele não é óbvio: o resultado depende de como o navegador rasteriza
-  a fonte, então comparar com uma matriz fixa quebraria sozinho.
-- Quase nada que exercite arrastar. `guias.js` arrasta com o mouse — puxa a
-  guia da régua e leva a peça até encostar nela —, e é o único. A pinça de dois
-  dedos e o modo ponto a ponto seguem sem teste, e `posicao.js` mexe na página
-  só pelo teclado e pelos botões.
+Em 26/11/2026 entraram os que faltavam:
+
+- ~~**`textMatrix()` sem teste.**~~ — feito em 26/11/2026: `gestos.js` confere
+  as promessas dos controles (altura da maiúscula, largura, espaço, arco,
+  traço, grade sem borda vazia) em vez de uma grade fixa, que mudaria com o
+  navegador.
+- ~~**Quase nada que exercite arrastar.**~~ — feito em 26/11/2026: `gestos.js`
+  arrasta a palavra com o mouse e faz a pinça com dois dedos de verdade (pelo
+  protocolo do Chromium), e `acompanha.js` arrasta marcando pontos.
+
+O que continua sem teste, e por quê:
+
 - Nada compara o PDF com uma imagem de referência. Os testes leem coordenadas
   de dentro do arquivo, o que pega o molde no lugar errado, mas não pega feio.
-- Nada roda num navegador de celular de verdade. `tela.js` usa um Chromium de
-  mesa numa janela de 360 px, que confere o layout mas não os limites do
-  aparelho — e é exatamente um desses limites que o item 1 desta lista teme.
+  Uma comparação por imagem quebraria a cada versão do jsPDF ou do Chromium.
+- Nada roda num navegador de celular de verdade. Os testes usam um Chromium de
+  mesa com tela de celular e toque emulado, que confere o layout e os gestos,
+  mas não os limites do aparelho. Isso só dá para ver no seu celular.

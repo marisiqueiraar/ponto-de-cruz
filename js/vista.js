@@ -10,8 +10,46 @@
 var ZMIN = 0.25, ZMAX = 8;
 var stage = $("stage");
 
+/* Tamanho real na tela. A tela não sabe quantos pixels tem um milímetro —
+   isso muda de aparelho para aparelho, e o navegador não conta. Então se
+   pergunta uma vez, com um cartão de banco encostado na tela: 85,6 mm é a
+   largura de todo cartão desse tipo. A resposta fica neste aparelho, à parte
+   do molde (o mesmo molde aberto no celular pede outro número). Com ela, o
+   1:1 põe o zoom em que um milímetro do papel tem um milímetro na tela. */
+var TELA = "ponto-e-letra/tela/v1", CARTAO_MM = 85.6;
+var pxPorMm = 0;
+try { pxPorMm = +(JSON.parse(localStorage.getItem(TELA) || "{}").pxmm) || 0; } catch (e){}
+
+function tamanhoReal(){
+  if (!(pxPorMm > 0) || !(fitK > 0)) return false;
+  setZoom(pxPorMm / fitK);
+  return true;
+}
+function abreCalib(){
+  var larg = pxPorMm > 0 ? Math.round(pxPorMm * CARTAO_MM) : 323;
+  $("calibLarg").value = larg;
+  $("calibCartao").style.width = larg + "px";
+  $("calib").classList.remove("hide");
+}
+$("calibLarg").addEventListener("input", function(){ $("calibCartao").style.width = this.value + "px"; });
+$("calibNo").addEventListener("click", function(){ $("calib").classList.add("hide"); });
+$("calibSim").addEventListener("click", function(){
+  pxPorMm = parseFloat($("calibLarg").value) / CARTAO_MM;
+  try { localStorage.setItem(TELA, JSON.stringify({ pxmm: pxPorMm })); } catch (e){}
+  $("calib").classList.add("hide");
+  tamanhoReal();
+});
+// um toque vai para o tamanho real; com o zoom já nele, toque longo (ou Shift)
+// recalibra — a primeira vez sempre calibra
+$("z11").addEventListener("click", function(e){
+  if (e.shiftKey || !tamanhoReal()) abreCalib();
+});
+$("z11").addEventListener("contextmenu", function(e){ e.preventDefault(); abreCalib(); });
+
 function mostraZoom(){
   $("zVal").textContent = Math.round(zoom * 100) + "%";
+  var real = pxPorMm > 0 && fitK > 0 && Math.abs(zoom * fitK - pxPorMm) < 0.01;
+  $("z11").classList.toggle("on", real);
   $("zOut").disabled = zoom <= ZMIN + 1e-6;
   $("zIn").disabled = zoom >= ZMAX - 1e-6;
 }
@@ -40,6 +78,7 @@ $("zVal").addEventListener("click", function(){ setZoom(1); });
 /* A dica do rodapé tem três donos — a mãozinha, as guias e o arraste comum —
    e sai de um lugar só para nenhum deles apagar o aviso do outro. */
 function mostraDica(){
+  if (acompanha) return mostraProgresso();
   $("modeHint").textContent = mao
     ? "Arraste para mover a vista. Toque de novo na mãozinha para voltar a posicionar as peças."
     : guias.on
@@ -166,6 +205,20 @@ $("guias").addEventListener("pointerdown", function(e){
   var g = e.target;
   while (g && g !== this && !(g.classList && g.classList.contains("g"))) g = g.parentNode;
   if (!g || g === this) return;
+  /* A faixa de pegar a guia tem 9 px, e a peça que está embaixo dela era
+     impossível de pegar ali. Agora a guia só fica com o toque quando ele cai
+     em cima do risco (a 2 px dele) — ou quando não há peça embaixo. Com a
+     mãozinha ligada, o toque é sempre da vista. Senão ele passa para a mesa,
+     como se a guia não estivesse ali. */
+  var r = g.getBoundingClientRect();
+  var dRisco = g.dataset.eixo === "v" ? Math.abs(e.clientX - (r.left + r.width / 2))
+                                       : Math.abs(e.clientY - (r.top + r.height / 2));
+  var embaixo = hitEl(evPos(e)) >= 0;
+  if (mao || (embaixo && dRisco > 2)){
+    e.preventDefault();
+    cv.dispatchEvent(new PointerEvent("pointerdown", e));
+    return;
+  }
   e.preventDefault();
   this.setPointerCapture(e.pointerId);
   puxa = { eixo: g.dataset.eixo, i: +g.dataset.i };

@@ -9,6 +9,7 @@
 function renderFios(){
   var box = $("fios");
   if (!box) return;
+  papelCoresPainel();           // a sugestão de papel depende das mesmas linhas
   box.innerHTML = "";
   var lista = linhasUsadas();
   if (!lista.length){
@@ -16,14 +17,24 @@ function renderFios(){
     $("fiosConta").textContent = "";
     return;
   }
+  // o estado na caixa, pelo nome que a lista mostra ("Anchor 268")
+  var est = {};
+  minhas.concat(acabadas()).forEach(function(k){ est[nomeLinha(k)] = estadoLinha(k); });
   lista.forEach(function(l){
     var d = document.createElement("div");
     d.className = "fio";
+    var e = est[l.nome];
     d.title = l.pontos.toLocaleString("pt-BR") + " pontos";
     var pt = document.createElement("span");
     pt.className = "pt"; pt.style.background = l.hex;
     var nm = document.createElement("span");
     nm.className = "nm"; nm.textContent = l.nome;
+    if (e === "pouco" || e === "acabou"){
+      var av = document.createElement("span");
+      av.className = "estoque " + e;
+      av.textContent = e === "pouco" ? "tenho pouco" : "acabou";
+      nm.appendChild(document.createTextNode(" ")); nm.appendChild(av);
+    }
     var qt = document.createElement("b");
     qt.textContent = fmt(l.metros) + " m";
     d.appendChild(pt); d.appendChild(nm); d.appendChild(qt);
@@ -170,6 +181,7 @@ function mostraMedidas(){
     var lado = Math.max.apply(null, g.map(function(x){ return Math.max(x.length, x[0].length); }));
     $("patCm").textContent = "bloco " + cm(lado * p);
   } else $("patCm").textContent = "";
+  botaoCabe(el);
   $("retoCm").textContent = el && el.kind === "reto"
     ? "mm · peça " + cm(dim.w).replace(" cm", "") + " × " + cm(dim.h) : "";
   $("mmFoot").textContent = "furos a " + fmt(p) + " mm";
@@ -208,7 +220,7 @@ function syncControls(){
     $("delLaco").title = (n === 1 ? "apagar a peça laçada" : "apagar as " + n + " peças laçadas") +
       (marcaFoto ? " — a moldura da foto não é peça e fica onde está" : "") +
       ". O desfazer devolve tudo num passo.";
-    ["alinha", "ctlPhoto", "ctlPiece", "ctlActs", "ctlNone", "ctlText", "ctlSym", "ctlImg", "ctlPat", "ctlReto"]
+    ["alinha", "ctlPhoto", "ctlPiece", "ctlActs", "ctlNone", "ctlText", "ctlSym", "ctlImg", "ctlPat", "ctlReto", "ctlFoto"]
       .forEach(function(id){ $(id).classList.add("hide"); });
     return;
   }
@@ -219,7 +231,9 @@ function syncControls(){
   $("ctlPiece").classList.toggle("hide", !piece);
   $("ctlActs").classList.toggle("hide", !piece);
   // acender quadradinho não quer dizer nada numa peça sem quadradinho
-  $("edit").classList.toggle("hide", !!(el && el.kind === "reto"));
+  // no ponto reto o ajustar liga e corta pontos, em vez de acender quadradinho
+  $("edit").classList.toggle("hide", !!(el && el.kind === "foto"));
+  $("flipEl").classList.toggle("hide", !!(el && el.kind === "foto"));
   /* Um botão só para trocar de ponto, junto de ajustar, espelhar e duplicar:
      ele diz para onde a peça vai. A palavra e a imagem trocam; símbolo,
      moldura e desenho pronto, não — cada um só existe num dos dois. */
@@ -233,14 +247,19 @@ function syncControls(){
     $("ctlNone").textContent = fmt(pa.w / 10) + " × " + fmt(pa.h / 10) + " cm";
   }
   if (!piece){
-    ["ctlText", "ctlSym", "ctlImg", "ctlPat", "ctlReto"].forEach(function(id){ $(id).classList.add("hide"); });
+    ["ctlText", "ctlSym", "ctlImg", "ctlPat", "ctlReto", "ctlFoto"].forEach(function(id){ $(id).classList.add("hide"); });
     return;
   }
   // uma barra por tipo de peça: mostrar a certa é esconder as outras duas
-  var barras = { text: "ctlText", sym: "ctlSym", img: "ctlImg", pat: "ctlPat", reto: "ctlReto" };
+  var barras = { text: "ctlText", sym: "ctlSym", img: "ctlImg", pat: "ctlPat", reto: "ctlReto", foto: "ctlFoto" };
   Object.keys(barras).forEach(function(k){
     $(barras[k]).classList.toggle("hide", el.kind !== k);
   });
+  if (el.kind === "foto"){
+    montaFotoTam();
+    $("fotoTam").value = el.tam && $("fotoTam").querySelector('option[value="' + el.tam + '"]') ? el.tam : "";
+    $("fotoImg").textContent = el.img ? "trocar imagem" : "escolher imagem";
+  }
   if (el.kind === "text"){
     avisaAlturaFonte(el);
     $("txt").value = el.text;
@@ -290,6 +309,8 @@ function syncControls(){
     $("tRetoGap").classList.toggle("hide", pal || ima || arr === "solta" ||
       (arr === "moldura" && (el.desenho === "ziguezague" || el.desenho === "ondas")));
     $("tRetoMarg").classList.toggle("hide", pal || ima || arr !== "moldura");
+    $("tRetoAlvo").classList.toggle("hide", pal || ima || arr !== "moldura");
+    if (arr === "moldura") montaAlvos($("retoAlvo"), el);
     $("retoRep").value = el.rep || 6;
     $("retoGap").value = el.gap == null ? 3 : el.gap;
     $("retoMarg").value = el.margem == null ? 6 : el.margem;
@@ -328,6 +349,13 @@ function syncControls(){
     $("patDeit").classList.toggle("on", !!el.deitada);
     // a margem é da foto e a repetição é da fileira: cada arranjo mostra a sua
     $("tPatMargem").classList.toggle("hide", faixa);
+    $("tPatAlvo").classList.toggle("hide", faixa);
+    if (!faixa) montaAlvos($("patAlvo"), el);
+    // trocar o esquema de um bloco só faz sentido com mais de um esquema
+    var temEsq = (el.paleta || []).length > 3;
+    $("patBlocos").classList.toggle("hide", !temEsq);
+    if (!temEsq && modoBloco) modoBloco = false;
+    $("patBlocos").classList.toggle("on", modoBloco);
     $("tPatRep").classList.toggle("hide", !faixa);
     $("patDeit").classList.toggle("hide", !faixa);
   } else {
@@ -340,6 +368,17 @@ function syncControls(){
 /* Abaixo da altura mínima da fonte, o campo de altura fica marcado e diz por
    quê: a palavra continua sendo feita na altura pedida — quem manda é você —,
    mas sem o aviso a letra borrada parecia defeito do app, e não da altura. */
+/* O espaço entre letras depende do navegador saber espaçar o texto no
+   canvas. Quase todos sabem; o que não sabe deixava o campo na barra sem
+   fazer nada, e campo que não faz nada sem dizer por quê é pior que campo
+   nenhum. Então ele fica desligado e diz o motivo. */
+var SEM_ESPACO = !("letterSpacing" in document.createElement("canvas").getContext("2d"));
+if (SEM_ESPACO){
+  $("esp").disabled = true;
+  $("esp").parentNode.title = "Este navegador não sabe espaçar as letras do desenho, então o espaço " +
+    "entre letras fica desligado aqui. Num Chrome, Edge ou Safari atualizado ele funciona.";
+}
+
 function avisaAlturaFonte(el){
   var t = $("rows").parentNode;
   if (!t.dataset.titulo) t.dataset.titulo = t.title;
@@ -512,11 +551,13 @@ montaDesenhosReto();
    16 quadradinhos de 2,5 mm vira uma de 40 mm, e volta. */
 function trocaPonto(el){
   var b = bboxMM(el), cx = b.x + b.w / 2, cy = b.y + b.h / 2, nova, p = P();
-  var comum = { rot: el.rot || 0, flip: el.flip || 0, edits: [], manual: 0, x: 0, y: 0,
+  var comum = { uid: uidDe(el), rot: el.rot || 0, flip: el.flip || 0, edits: [], manual: 0, x: 0, y: 0,
                 color: el.color, colorName: el.colorName };
   if (el.kind === "text"){
     nova = Object.assign(comum, { kind: "reto", desenho: "palavra", texto: el.text, font: el.font,
-             medida: Math.round(el.rowsTarget * p), passo: RETO_PASSO, opts: {} });
+             medida: Math.round(el.rowsTarget * p), passo: RETO_PASSO,
+             // o espaço do ponto cruz é em quadradinhos; aqui, em milímetros
+             opts: { arco: el.arc || 0, esp: Math.round((el.esp || 0) * p) } });
   } else if (el.kind === "img"){
     nova = Object.assign(comum, { kind: "reto", desenho: "imagem", img: el.img, nome: el.nome,
              medida: Math.round(el.larg * p), passo: RETO_PASSO, inv: el.inv || 0, modo: "contorno",
@@ -524,7 +565,8 @@ function trocaPonto(el){
   } else if (el.kind === "reto" && el.desenho === "palavra"){
     nova = Object.assign(comum, { kind: "text", text: el.texto, font: el.font,
              rowsTarget: Math.max(8, Math.min(60, Math.round(el.medida / p))),
-             thick: 2, thr: 0.35, esp: 0, arc: 0, hv: 2, cells: [[0]] });
+             thick: 2, thr: 0.35, esp: Math.max(0, Math.min(8, Math.round((opcoesReto(el).esp || 0) / p))),
+             arc: opcoesReto(el).arco || 0, hv: 2, cells: [[0]] });
   } else if (el.kind === "reto" && el.desenho === "imagem"){
     nova = Object.assign(comum, { kind: "img", img: el.img, nome: el.nome || "imagem",
              larg: Math.max(IMG_LARG_MIN, Math.min(IMG_LARG_MAX, Math.round(el.medida / p))),
@@ -560,6 +602,123 @@ $("retoInv").addEventListener("click", function(){
 });
 
 // as duas casas de opção da barra, com o nome e os limites do desenho de agora
+/* Caber no papel: a moldura que passou da borda vai encolhendo pelo que
+   menos se nota — primeiro a margem até a foto, depois o espaço entre os
+   blocos, e, no ponto reto, o tamanho do desenho, até o mínimo dele — e, a
+   cada passo, se o tamanho já cabe, o arranjo anda para dentro. O
+   tamanho do bloco de ponto cruz não muda: ele é de quadradinho, e um a menos
+   já é outro desenho. Se nada disso bastar, a moldura volta como estava e o
+   aviso diz por quê. */
+function molduraCabe(el){
+  var pa = paperMM();
+  /* Do tamanho do papel, mas fora dele — a foto colada numa borda —, a saída é
+     andar: a foto e todas as peças vão juntas o que falta para a moldura
+     entrar, sem desmanchar o arranjo. Só depois disso a moldura encolhe. */
+  var dentro = function(){
+    var c = elPaperBox(el);
+    if (c.w > pa.w + 0.05 || c.h > pa.h + 0.05) return false;
+    var dx = c.x < 0 ? -c.x : (c.x + c.w > pa.w ? pa.w - c.x - c.w : 0);
+    var dy = c.y < 0 ? -c.y : (c.y + c.h > pa.h ? pa.h - c.y - c.h : 0);
+    if (dx || dy){
+      photo.x += dx; photo.y += dy;
+      els.forEach(function(o){ o.x = dec1(o.x + dx); o.y = dec1(o.y + dy); });
+    }
+    return true;
+  };
+  var refaz = function(){ rebuild(el); centraNaMira(el); };
+  var antes = { margem: el.margem, gap: el.gap, medida: el.medida };
+  refaz();
+  if (dentro()) return true;
+  var passos = [];
+  for (var m = Math.floor(el.margem) - 1; m >= 0; m--) passos.push(["margem", m]);
+  var g0 = el.kind === "pat" ? (el.gap | 0) : Math.floor(+el.gap || 0);
+  for (var g = g0 - 1; g >= 0; g--) passos.push(["gap", g]);
+  if (el.kind === "reto"){
+    var d = DESENHOS_RETO[el.desenho];
+    for (var md = Math.floor(el.medida) - 1; md >= d.min; md--) passos.push(["medida", md]);
+  }
+  for (var i = 0; i < passos.length; i++){
+    el[passos[i][0]] = passos[i][1];
+    refaz();
+    if (dentro()) return true;
+  }
+  el.margem = antes.margem; el.gap = antes.gap; el.medida = antes.medida;
+  refaz();
+  return false;
+}
+/* Cores por bloco: com o modo ligado, o toque num bloco da moldura (ou da
+   faixa) não arrasta — passa o bloco para o próximo esquema de cores. */
+var modoBloco = false;
+$("patBlocos").addEventListener("click", function(){
+  modoBloco = !modoBloco;
+  this.classList.toggle("on", modoBloco);
+  $("modeHint").textContent = modoBloco
+    ? "Toque num bloco para passar ele ao próximo esquema de cores. Toque de novo em cores por bloco para voltar a arrastar."
+    : MODO_MOVER;
+});
+function trocaEsquemaEm(el, pt){
+  if (!el || el.kind !== "pat" || !el._blocos) return false;
+  var c = celulaEm(el, pt), achou = null;
+  el._blocos.forEach(function(b){
+    if (c.r >= b.r && c.r < b.r + b.h && c.q >= b.q && c.q < b.q + b.w) achou = b;
+  });
+  if (!achou) return false;
+  el.esquemas = el.esquemas || {};
+  var n = Math.max(1, Math.ceil((el.paleta || []).length / 3));
+  el.esquemas[achou.i] = ((el.esquemas[achou.i] | 0) + 1) % n;
+  if (!el.esquemas[achou.i]) delete el.esquemas[achou.i];
+  rebuild(el);
+  renderFios(); draw(); pushHist();
+  return true;
+}
+
+// a lista do "em volta de": a foto e as outras peças que não são moldura
+function montaAlvos(sel2, el){
+  sel2.innerHTML = "";
+  var o = document.createElement("option");
+  o.value = ""; o.textContent = photo.off ? "o meio do papel" : "a foto";
+  sel2.appendChild(o);
+  els.forEach(function(x){
+    if (x === el || x.arranjo === "moldura") return;
+    var op = document.createElement("option");
+    op.value = uidDe(x); op.textContent = nomePeca(x);
+    sel2.appendChild(op);
+  });
+  sel2.value = el.alvo || "";
+  if (sel2.value !== (el.alvo || "")) sel2.value = "";
+}
+["patAlvo", "retoAlvo"].forEach(function(id){
+  $(id).addEventListener("change", function(){
+    var el = els[sel];
+    if (!el) return;
+    el.alvo = this.value || "";
+    el._alvoChave = null;
+    rebuild(el); centraNaMira(el);
+    renderChips(); draw(); pushHist();
+  });
+});
+
+function botaoCabe(el){
+  var moldura = el && el.arranjo === "moldura", fora = false;
+  if (moldura){
+    var pa = paperMM(), c = elPaperBox(el);
+    fora = c.x < -0.05 || c.y < -0.05 || c.x + c.w > pa.w + 0.05 || c.y + c.h > pa.h + 0.05;
+  }
+  $("patCabe").classList.toggle("hide", !(fora && el.kind === "pat"));
+  $("retoCabe").classList.toggle("hide", !(fora && el.kind === "reto"));
+}
+[["patCabe"], ["retoCabe"]].forEach(function(b){
+  $(b[0]).addEventListener("click", function(){
+    var el = els[sel];
+    if (!el) return;
+    var ok = molduraCabe(el);
+    $("modeHint").textContent = ok
+      ? "A moldura coube: margem " + fmt(el.margem) + " mm, espaço " + fmt(el.gap) + (el.kind === "reto" ? " mm, tamanho " + fmt(el.medida) + " mm." : ".")
+      : "Nem com margem e espaço em zero a moldura cabe neste papel. Escolha um papel maior, uma foto menor ou, no ponto cruz, um espaçamento de furos menor.";
+    syncControls(); renderChips(); draw(); pushHist();
+  });
+});
+
 function opcoesNaBarra(el){
   var d = DESENHOS_RETO[el.desenho], o = opcoesReto(el);
   ["A", "B"].forEach(function(letra, i){
@@ -652,8 +811,11 @@ $("patDeit").addEventListener("click", function(){
    feita a partir do data-url: o canvas já está decodificado, então a peça
    nasce desenhada no mesmo gesto em vez de piscar vazia esperando o
    navegador ler o que ele mesmo acabou de escrever. */
-function guardaOrigem(id, img){
-  var k = Math.min(1, IMG_MAX_PX / Math.max(img.width, img.height));
+// a foto a mais é só para ver o encaixe, mas na tela ela é grande: 512 px,
+// que bastam para virar quadradinho, ficariam borrados
+var FOTO_MAX_PX = 1000;
+function guardaOrigem(id, img, maxPx){
+  var k = Math.min(1, (maxPx || IMG_MAX_PX) / Math.max(img.width, img.height));
   var c = document.createElement("canvas");
   c.width = Math.max(1, Math.round(img.width * k));
   c.height = Math.max(1, Math.round(img.height * k));
@@ -848,6 +1010,7 @@ $("dupEl").addEventListener("click", function(){
   // e com elas os ajustes feitos ponto a ponto
   var copia = unpackEl(packEl(el));
   if (!copia) return;
+  copia.uid = novoId();      // a cópia é outra peça: a moldura não a confunde com a original
   var pa = paperMM();
   var b = bboxMM(el);
   copia.x = Math.min(el.x + 4, Math.max(0, pa.w - b.w));
@@ -1040,7 +1203,84 @@ $("mmFoot").addEventListener("click", function(){
   if (b && !b.classList.contains("on")) b.click();
 });
 
+/* A cor do papel. Os papéis 300g que se acham em papelaria, mais um campo
+   de cor livre. A sugestão olha as linhas que o molde usa e põe na frente os
+   papéis em que a linha MENOS visível ainda aparece bem: o problema real é
+   uma cor que some no papel, e uma média esconderia exatamente essa. */
+var PAPEIS_COR = [
+  { hex: "#FFFFFF", nome: "branco" }, { hex: "#F3ECDC", nome: "marfim" },
+  { hex: "#C7A47A", nome: "kraft" },  { hex: "#B9BCBF", nome: "cinza" },
+  { hex: "#2B2B2E", nome: "preto" },  { hex: "#F2D4D7", nome: "rosa" },
+  { hex: "#CFE0EC", nome: "azul" },   { hex: "#B9C7AE", nome: "sálvia" },
+  { hex: "#2F3E57", nome: "marinho" }
+];
+var POUCO_CONTRASTE = 22;     // distância em Lab abaixo da qual a linha quase some
+
+function nomePapel(hex){
+  var p = PAPEIS_COR.filter(function(x){ return x.hex === hex; })[0];
+  return p ? p.nome : hex;
+}
+
+// a linha que menos aparece num papel: { d, nome }
+function piorLinha(hex, linhas){
+  var lp = labHex(hex), pior = { d: 1e9, nome: "" };
+  linhas.forEach(function(l){
+    var d = Math.sqrt(dLab(lp, labHex(l.hex)));
+    if (d < pior.d) pior = { d: d, nome: l.nome };
+  });
+  return pior;
+}
+
+function sugerePapel(){
+  var linhas = linhasUsadas();
+  if (!linhas.length) return [];
+  return PAPEIS_COR.map(function(p){ return { hex: p.hex, nome: p.nome, pior: piorLinha(p.hex, linhas) }; })
+    .sort(function(a, b){ return b.pior.d - a.pior.d; });
+}
+
+function poeCorPapel(hex){
+  papelCor = hex.toUpperCase();
+  papelCoresPainel(); draw(); pushLater();
+}
+
+function papelCoresPainel(){
+  var box = $("papelCores");
+  if (!box) return;
+  box.innerHTML = "";
+  var boas = sugerePapel().slice(0, 3).map(function(s){ return s.hex; });
+  PAPEIS_COR.forEach(function(p){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "papel" + (p.hex === papelCor ? " on" : "") + (boas.indexOf(p.hex) >= 0 ? " boa" : "");
+    b.style.background = p.hex;
+    b.title = p.nome + (boas.indexOf(p.hex) >= 0 ? " — combina com as linhas deste molde" : "");
+    b.setAttribute("aria-label", b.title);
+    b.addEventListener("click", function(){ poeCorPapel(p.hex); });
+    box.appendChild(b);
+  });
+  var livre = document.createElement("input");
+  livre.type = "color"; livre.value = papelCor.toLowerCase();
+  livre.title = "outra cor"; livre.setAttribute("aria-label", "outra cor de papel");
+  livre.className = "papel livre" + (PAPEIS_COR.some(function(p){ return p.hex === papelCor; }) ? "" : " on");
+  livre.addEventListener("change", function(){ poeCorPapel(this.value); });
+  box.appendChild(livre);
+
+  var linhas = linhasUsadas(), aviso = "";
+  if (linhas.length){
+    var pior = piorLinha(papelCor, linhas);
+    var sug = sugerePapel().slice(0, 3).map(function(s){ return s.nome; }).join(", ");
+    aviso = (pior.d < POUCO_CONTRASTE
+      ? "No papel " + nomePapel(papelCor) + ", a linha " + pior.nome + " quase some. "
+      : "") + "Para as linhas deste molde, os papéis que dão mais contraste são: " + sug +
+      " (marcados com um ponto).";
+  }
+  $("papelSugere").textContent = aviso;
+}
+
 function papelPainel(){
+  papelCoresPainel();
+  $("cantos").value = papelCantos;
+  $("fita").checked = !!papelFita;
   var prop = $("paperSize").value === "custom";
   $("paperCustom").classList.toggle("hide", !prop);
   $("paperOrCampo").classList.toggle("dim", prop);
@@ -1058,6 +1298,10 @@ function fotoPainel(){
   $("alBase").classList.toggle("hide", sem);
   $("photoCustom").classList.toggle("hide", !prop);
   $("photoOrCampo").classList.toggle("dim", prop);
+  var instax = !!INSTAX[$("photoSize").value];
+  $("instaxCampo").classList.toggle("hide", !instax);
+  $("instaxNota").classList.toggle("hide", !instax);
+  $("instaxTopo").value = instaxTopo;
   $("photoNota").innerHTML = prop
     ? "No tamanho <b>Personalizado</b> quem manda são os dois campos acima: a " +
       "orientação fica de lado, e a foto sai com a largura e a altura que você digitou."
@@ -1107,6 +1351,85 @@ function onPaperChange(){
 // a folha só muda o PDF: nada no papel da peça sai do lugar
 $("folha").addEventListener("change", function(){
   folhaAtual = FOLHAS[this.value] || FOLHAS.a4;
+  draw(); pushLater();
+});
+
+/* Várias na mesma folha. O painel aparece quando o papel da peça cabe mais de
+   uma vez na folha da impressora, e oferece até onde cabe. A lista de outros
+   moldes mostra só os de papel do mesmo tamanho: a grade é uma só, e um
+   marca-página de 5 × 15 ao lado de um de 6 × 20 desmancharia a conta. */
+var variosChave = "";
+function papelDeGravado(d){
+  var p = d && d.paper || {}, w, h;
+  if (p.size === "custom"){ w = +p.w; h = +p.h; }
+  else { var q = String(p.size || "210x297").split("x"); w = +q[0]; h = +q[1]; if (p.or === "l"){ var t = w; w = h; h = t; } }
+  return { w: w, h: h };
+}
+function variosPainel(){
+  var pa = paperMM(), R = { x: 0, y: 0, w: pa.w, h: pa.h };
+  var g = copiasCabem(R), atual = itemAtual();
+  var mesmos = estante.itens.filter(function(it){
+    if (atual && it.id === atual.id) return false;
+    try {
+      var p = papelDeGravado(JSON.parse(localStorage.getItem(it.dados)));
+      return Math.abs(p.w - pa.w) < 0.05 && Math.abs(p.h - pa.h) < 0.05;
+    } catch (e){ return false; }
+  });
+  papelJunto = papelJunto.filter(function(id){ return mesmos.some(function(it){ return it.id === id; }); });
+  var chave = g.n + "|" + folhaAtual.id + "|" + mesmos.map(function(it){ return it.id + ":" + it.nome; }).join(",") +
+              "|" + papelCopias + "|" + papelJunto.join(",");
+  if (chave === variosChave) return;
+  variosChave = chave;
+  $("variosCampo").classList.toggle("hide", g.n < 2);
+  if (g.n < 2) return;
+  var s = $("copias");
+  s.innerHTML = "";
+  for (var i = 1; i <= g.n; i++){
+    var o = document.createElement("option");
+    o.value = i; o.textContent = i === 1 ? "1 — só este" : i + " cópias";
+    s.appendChild(o);
+  }
+  papelCopias = Math.min(papelCopias, g.n);
+  s.value = papelCopias;
+  $("juntoCampo").classList.toggle("hide", !mesmos.length);
+  var lista = $("juntoLista");
+  lista.innerHTML = "";
+  mesmos.forEach(function(it){
+    var l = document.createElement("label"), c = document.createElement("input");
+    c.type = "checkbox"; c.checked = papelJunto.indexOf(it.id) >= 0;
+    c.addEventListener("change", function(){
+      papelJunto = papelJunto.filter(function(x){ return x !== it.id; });
+      if (c.checked) papelJunto.push(it.id);
+      variosChave = ""; draw(); pushLater();
+    });
+    l.appendChild(c); l.appendChild(document.createTextNode(it.nome || "sem nome"));
+    lista.appendChild(l);
+  });
+  var total = papelCopias + papelJunto.length;
+  $("variosNota").textContent = "Cabem " + g.n + " na folha " + folhaAtual.nome + (g.land ? " deitada" : "") +
+    ". " + (total > 1 ? "O PDF sai com " + Math.min(total, g.n) + " lado a lado, cada um com a sua moldura de recorte." : "");
+}
+$("copias").addEventListener("change", function(){
+  papelCopias = Math.max(1, parseInt(this.value, 10) || 1);
+  variosChave = ""; draw(); pushLater();
+});
+$("cantos").addEventListener("input", function(){
+  var v = parseInt(this.value, 10);
+  papelCantos = isNaN(v) ? 0 : Math.max(0, Math.min(30, v));
+  draw(); pushLater();
+});
+$("instaxTopo").addEventListener("input", function(){
+  var v = parseFloat(String(this.value).replace(",", "."));
+  if (isNaN(v)) return;
+  instaxTopo = Math.max(0, Math.min(24, v));
+  draw(); pushLater();
+});
+$("numerar").addEventListener("change", function(){
+  numerarPontos = this.checked ? 1 : 0;
+  draw(); pushLater();
+});
+$("fita").addEventListener("change", function(){
+  papelFita = this.checked ? 1 : 0;
   draw(); pushLater();
 });
 ["paperW","paperH"].forEach(function(id){
@@ -1222,9 +1545,12 @@ $("edit").addEventListener("click", function(){
   $("ctlEdit").classList.toggle("hide", !editing);
   $("editLabel").textContent = editing ? "terminar" : "ajustar";
   draw();   // a grade ganha ou devolve a altura do painel
-  $("modeHint").textContent = editing
-    ? "Toque num quadradinho da peça selecionada para acender ou apagar. Arrastando sem soltar, o traço inteiro segue o primeiro."
-    : MODO_MOVER;
+  var elE = els[sel];
+  if (elE) elE._escolhido = null;
+  $("modeHint").textContent = !editing ? MODO_MOVER
+    : elE && elE.kind === "reto"
+      ? "Toque num furo e depois noutro para ligar os dois com um ponto. Toque no meio de um ponto para cortá-lo."
+      : "Toque num quadradinho da peça selecionada para acender ou apagar. Arrastando sem soltar, o traço inteiro segue o primeiro.";
 });
 
 /* Recalcular refaz as células a partir dos controles, então apaga tudo que
@@ -1260,4 +1586,72 @@ $("modalOne").addEventListener("click", function(){ fecharModal(); recalc(false)
 $("modal").addEventListener("click", function(e){ if (e.target === this) fecharModal(); });
 document.addEventListener("keydown", function(e){
   if (e.key === "Escape" && !$("modal").classList.contains("hide")) fecharModal();
+});
+
+/* ---- a foto a mais ---------------------------------------------------
+   Uma peça sem furo nenhum: o retângulo de uma foto revelada, com a imagem
+   para ver o encaixe. Os tamanhos são os mesmos da foto principal. */
+function montaFotoTam(){
+  var s = $("fotoTam");
+  if (s.options.length) return;
+  [].forEach.call($("photoSize").options, function(o){
+    if (o.value === "none" || o.value === "custom") return;
+    var n = document.createElement("option");
+    n.value = o.value; n.textContent = o.textContent.split(" (")[0];
+    s.appendChild(n);
+  });
+  var n = document.createElement("option");
+  n.value = ""; n.textContent = "outro";
+  n.disabled = true;
+  s.appendChild(n);
+}
+
+function addFoto(){
+  var v = $("photoSize").value;
+  if (v === "none" || v === "custom") v = "100x150";
+  var q = v.split("x"), w = +q[0], h = +q[1];
+  var el = { kind: "foto", tam: v, w: w, h: h, x: 0, y: 0, rot: 0, flip: 0,
+             cells: [], edits: [], manual: 0, img: "", nome: "" };
+  poeEmLugarLivre(el);
+  els.push(el); sel = els.length - 1; soUm(sel); foco = "el";
+  renderChips(); syncControls(); draw(); pushHist();
+}
+$("addFoto").addEventListener("click", addFoto);
+
+// trocar o tamanho mantém o centro onde está
+function mudaFoto(el, w, h){
+  var b = elPaperBox(el), cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+  el.w = w; el.h = h;
+  el.x = dec1(cx - w / 2); el.y = dec1(cy - h / 2);
+  renderChips(); draw(); pushHist();
+}
+$("fotoTam").addEventListener("change", function(){
+  var el = els[sel];
+  if (!el || el.kind !== "foto" || !this.value) return;
+  var q = this.value.split("x"), w = +q[0], h = +q[1];
+  if (el.w > el.h) { var t = w; w = h; h = t; }     // continua deitada se estava
+  el.tam = this.value;
+  mudaFoto(el, w, h);
+});
+$("fotoGira").addEventListener("click", function(){
+  var el = els[sel];
+  if (el && el.kind === "foto") mudaFoto(el, el.h, el.w);
+});
+$("fotoImg").addEventListener("click", function(){ $("fotoArq").click(); });
+$("fotoArq").addEventListener("change", function(e){
+  var f = e.target.files && e.target.files[0], el = els[sel];
+  e.target.value = "";
+  if (!f || !el || el.kind !== "foto") return;
+  var rd = new FileReader();
+  rd.onload = function(){
+    var img = new Image();
+    img.onload = function(){
+      var id = novoId();
+      guardaOrigem(id, img, FOTO_MAX_PX);
+      el.img = id; el.nome = f.name.replace(/\.[^.]+$/, "").slice(0, 30);
+      renderChips(); syncControls(); draw(); pushHist();
+    };
+    img.src = rd.result;
+  };
+  rd.readAsDataURL(f);
 });

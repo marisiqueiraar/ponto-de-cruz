@@ -308,7 +308,7 @@ var DESENHOS_RETO = {
      aqui para a barra e a gravação tratarem todas as peças de ponto reto do
      mesmo jeito; `especial` diz que quem as faz é refazReto. */
   palavra: { nome: "palavra", medida: "altura da maiúscula", padrao: 18, min: 8, max: 150,
-    opcoes: [], especial: true },
+    opcoes: [["arco", "arco", 0, -120, 120], ["esp", "espaço", 0, 0, 10]], especial: true },
   imagem: { nome: "imagem em linha", medida: "largura", padrao: 60, min: 15, max: 250,
     opcoes: [["sens", "sens.", 50, 5, 95]], especial: true },
 
@@ -453,6 +453,101 @@ var DESENHOS_RETO = {
           out.push({ pts: [[cx, cy - m / 2], [cx, cy + m / 2]], curva: false });
         }
       return out;
+    } },
+
+  // estrela de oito pontas, só o contorno
+  estrela8: { nome: "estrela de 8 pontas", medida: "largura", padrao: 40, min: 12, max: 200,
+    opcoes: [],
+    faz: function(w){
+      var R = w / 2, r = R * 0.58, pts = [];
+      for (var k = 0; k < 16; k++){
+        var a = -Math.PI / 2 + k * Math.PI / 8, rr = k % 2 ? r : R;
+        pts.push([R + rr * Math.cos(a), R + rr * Math.sin(a)]);
+      }
+      return [{ pts: pts, curva: false, fechada: true }];
+    } },
+
+  // espiral: a volta que abre por igual, do miolo para fora
+  espiral: { nome: "espiral", medida: "largura", padrao: 50, min: 15, max: 200,
+    opcoes: [["voltas", "voltas", 3, 1, 8]],
+    faz: function(w, o){
+      var R = w / 2, n = o.voltas || 3, r0 = Math.min(3, R * 0.12);
+      return [{ curva: true, pts: amostra(function(t){
+        var a = t * n * Math.PI * 2, r = r0 + (R - r0) * t;
+        return [R + r * Math.cos(a), R + r * Math.sin(a)];
+      }, Math.ceil(n * 120)) }];
+    } },
+
+  // ramo: um galho curvo com folhinhas alternadas dos dois lados
+  ramo: { nome: "ramo de folhinhas", medida: "comprimento", padrao: 90, min: 30, max: 300,
+    opcoes: [["folhas", "folhas", 7, 2, 20]],
+    faz: function(comp, o){
+      var n = o.folhas || 7, curva = comp * 0.08, folha = Math.max(8, comp / n * 1.1), larg = folha * 0.42;
+      var galho = function(t){ return [t * comp, comp * 0.18 - curva * Math.sin(t * Math.PI)]; };
+      var out = [{ curva: true, pts: amostra(galho, Math.ceil(comp)) }];
+      for (var i = 0; i < n; i++){
+        var t = (i + 0.7) / (n + 0.4), base = galho(t), lado = i % 2 ? 1 : -1;
+        var ang = -Math.PI / 2 * lado * 0.75 + (lado > 0 ? 0.35 : -0.35);   // inclinada para a ponta
+        var dx = Math.cos(ang), dy = Math.sin(ang) * lado * lado;
+        dy = lado * Math.abs(Math.sin(ang));
+        var nx = -dy, ny = dx;
+        out.push({ curva: true, fechada: true, pts: amostra(function(s){
+          var u = s * 2, ida = u <= 1, tt = ida ? u : 2 - u;
+          var lat = Math.sin(tt * Math.PI) * larg / 2 * (ida ? 1 : -1);
+          return [base[0] + dx * tt * folha + nx * lat, base[1] + dy * tt * folha + ny * lat];
+        }, 60).slice(0, -1) });
+      }
+      return out;
+    } },
+
+  // seigaiha: escamas de ondas — arcos concêntricos em fileiras, a de baixo
+  // cobrindo a de cima, como as ondas do mar no desenho japonês
+  seigaiha: { nome: "seigaiha (ondas em escama)", medida: "raio da escama", padrao: 12, min: 6, max: 40,
+    opcoes: [["cols", "colunas", 5, 1, 20], ["rows", "fileiras", 4, 1, 20]],
+    faz: function(R, o){
+      var cols = o.cols || 5, rows = o.rows || 4, aneis = 3, centros = [];
+      for (var r = 0; r < rows; r++)
+        for (var c = 0; c < cols + (r % 2 ? 0 : 1); c++)
+          centros.push({ x: c * 2 * R + (r % 2 ? R : 0), y: R + r * R / 2, linha: r });
+      var out = [];
+      centros.forEach(function(cc){
+        // quem cobre esta escama: as da fileira de baixo que encostam nela
+        var cobre = centros.filter(function(o2){ return o2.linha > cc.linha && Math.abs(o2.x - cc.x) < 2 * R && o2.y - cc.y <= R * 1.01; });
+        for (var a = 1; a <= aneis; a++){
+          var ra = R * a / aneis, trecho = [];
+          for (var g = 0; g <= 180; g++){
+            var ang = Math.PI + g * Math.PI / 180, p = [cc.x + ra * Math.cos(ang), cc.y + ra * Math.sin(ang)];
+            var escondido = cobre.some(function(o2){ return distR(p, [o2.x, o2.y]) < R - 0.01 && p[1] > o2.y - R; });
+            if (escondido){ if (trecho.length > 3) out.push({ curva: true, pts: trecho }); trecho = []; }
+            else trecho.push(p);
+          }
+          if (trecho.length > 3) out.push({ curva: true, pts: trecho });
+        }
+      });
+      return out;
+    } },
+
+  // asanoha: a folha de cânhamo — a grade de triângulos e, em cada um, as três
+  // linhas dos cantos até o meio
+  asanoha: { nome: "asanoha (folha de cânhamo)", medida: "lado do triângulo", padrao: 20, min: 10, max: 60,
+    opcoes: [["cols", "colunas", 4, 1, 12], ["rows", "fileiras", 3, 1, 12]],
+    faz: function(s, o){
+      var cols = o.cols || 4, rows = o.rows || 3, h = s * Math.sqrt(3) / 2, tris = [], raios = [];
+      var V = function(i, j){ return [i * s + (j % 2 ? s / 2 : 0), j * h]; };
+      for (var j = 0; j < rows; j++)
+        for (var i = 0; i < cols; i++){
+          // dois triângulos por casa, o de ponta para baixo e o de ponta para
+          // cima; a fileira ímpar começa meio lado para a direita
+          var duas = j % 2
+            ? [[V(i, j), V(i + 1, j), V(i + 1, j + 1)], [V(i, j), V(i + 1, j + 1), V(i, j + 1)]]
+            : [[V(i, j), V(i + 1, j), V(i, j + 1)], [V(i + 1, j), V(i + 1, j + 1), V(i, j + 1)]];
+          duas.forEach(function(t){
+            tris.push(t);
+            var m = [(t[0][0] + t[1][0] + t[2][0]) / 3, (t[0][1] + t[1][1] + t[2][1]) / 3];
+            t.forEach(function(v){ raios.push({ pts: [v, m], curva: false }); });
+          });
+        }
+      return arestasUnicas(tris).concat(raios);
     } }
 };
 

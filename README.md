@@ -74,6 +74,22 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   15%. O ajuste ponto a ponto é de quadradinho e não aparece nessa peça. O aviso de furos
   colados vale também dentro dela.
 
+  **Mais desenhos e ajustes.** Além dos nove primeiros há estrela de 8 pontas, espiral, ramo de
+  folhinhas, seigaiha (ondas em escama, cada fileira cobrindo a de cima) e asanoha (folha de
+  cânhamo: a grade de triângulos e as linhas dos cantos até o meio de cada um). A palavra em
+  ponto reto tem **arco** e **espaço entre letras**, como a de quadradinho, e a troca de ponto
+  leva os dois junto. O **ajustar** também vale no ponto reto: tocar num furo e noutro liga os
+  dois com um ponto, tocar no meio de um ponto o corta. O ajuste fica numa lista por cima do
+  desenho e é aplicado a cada vez que a peça é refeita, achando os furos pela posição — se o
+  desenho mudar a ponto de o furo não existir mais, ele fica sem efeito em vez de ligar furos
+  errados; o recalcular o descarta.
+
+  **A moldura em volta de uma peça.** A moldura — de retalhos ou de ponto reto — pode ir em
+  volta da foto ou de uma peça escolhida em **em volta de**: um nome, uma imagem. Ela acompanha a
+  peça quando ela anda, cresce ou muda, porque cada peça tem uma identidade que não muda quando
+  a lista muda de ordem. Na moldura de retalhos, **cores por bloco** liga um modo em que o toque
+  num bloco passa só ele para o próximo esquema de cores da paleta.
+
   **Faixa e moldura em ponto reto.** Os desenhos prontos têm um **arranjo**: solto, **faixa**
   (o desenho repetido em fileira, em pé ou deitada, com o espaço pedido — o marca-página de
   corações, de folhas, de estrelas) ou **moldura** (o desenho repetido em volta da foto, por
@@ -216,7 +232,10 @@ de uma cartela de linha e alimenta o `catalogos.js`.
     de uma vez — é comparando duas linhas lado a lado que a escolha se decide. As cores que
     estão na sua caixa têm um ponto no canto.
   - **minha caixa**: tocar numa cor diz que você tem aquela linha, ou que não tem mais — a
-    peça não muda. Aqui também se cadastram **várias de uma vez**, colando os códigos (00268
+    peça não muda. Três botões escolhem o que o toque marca: **tenho**, **tenho pouco** ou
+    **acabou**. A que acabou sai das suas linhas (não dá para bordar com ela), mas fica riscada na
+    caixa e entra, com as que estão no fim, numa **lista de compras** logo abaixo da grade; a lista
+    de fio da aba molde avisa quando o molde usa uma linha que está no fim ou acabou. Aqui também se cadastram **várias de uma vez**, colando os códigos (00268
     acha a 268 da Anchor; código que não existe é dito pelo nome), e a linha fora de cartela.
 
   Antes um toque fazia as duas coisas: experimentar uma cor na peça enchia a caixa de linhas
@@ -269,7 +288,8 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   está, pára em milímetro inteiro quando solta longe de tudo, e encaixa sozinha nas bordas e no
   meio do papel e da foto, que é onde quase toda referência cai.
   Arrastando uma peça ou a foto, os dois lados e o centro dela **encostam na guia** quando
-  passam perto — e um bloco laçado encosta pela caixa de tudo o que está nele, e não peça por
+  passam perto — e, mesmo sem guia, nas bordas e no meio das outras peças, da foto e do
+  papel, com uma linha magenta mostrando onde encostou — e um bloco laçado encosta pela caixa de tudo o que está nele, e não peça por
   peça, senão o arranjo que se acabou de laçar chegaria do outro lado desmanchado — a folga do ímã é medida em pixels de tela, então ela é sempre a mesma
   distância para o dedo, em qualquer zoom. As guias são de cada molde, ficam gravadas com ele
   e não entram no PDF: são risco de tela, como a régua da mesa.
@@ -321,12 +341,29 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   vizinhas repetem pelo menos 10 mm do desenho: é sobrepondo essa faixa até os furos coincidirem
   que se emenda, porque encostar folha com folha exige uma precisão de tesoura que ninguém tem.
   O app escolhe entre folha em pé e deitada pela que gastar menos papel.
+- **Várias na mesma folha**: quando o papel da peça cabe mais de uma vez na folha da
+  impressora — o marca-página de 5 × 18 cm cabe três vezes numa A4 —, a aba papel oferece
+  **cópias** deste molde e os **outros moldes da estante do mesmo tamanho**. O PDF sai com
+  todos lado a lado, cada um com a sua moldura de recorte, o cabeçalho do molde aberto e a
+  legenda com as linhas de todos. Para desenhar um molde que não é o aberto, o app o põe na
+  memória só durante o desenho e devolve o aberto como estava.
+- **Recorte do marca-página**: cantos arredondados (o raio, em mm) e o **furo da fita**, no
+  meio do lado de cima, aparecem na mesa e saem na moldura tracejada do PDF.
+- **Caber no papel**: a moldura que passou da borda ganha o botão **caber no papel**. Se o
+  tamanho dela cabe, o arranjo inteiro — foto e peças juntas — anda para dentro; se não, ela
+  encolhe pelo que menos se nota: a margem, depois o espaço entre os blocos e, no ponto reto,
+  o tamanho do desenho. O tamanho do bloco de ponto cruz não muda, porque um quadradinho a
+  menos já é outro desenho; se nada bastar, a moldura volta como estava e o aviso diz por quê.
+- **A ordem dos pontos numerada**: na aba molde, para o ponto reto, os furos de cada linha
+  ganham 1, 2, 3… no PDF, na ordem em que a agulha passa.
 - **PNG** da prévia, para conferir o arranjo.
 - **Zoom e deslocamento**: o papel cresce dentro da mesa, que rola. Botões no canto, Ctrl (ou ⌘)
   com a roda do mouse aproximando no ponto sob o cursor, e uma mãozinha que troca o arraste de
   "posicionar a peça" para "mover a vista" — no toque, com ela ligada, a pinça muda o zoom. A
   porcentagem é relativa ao encaixe do papel na tela: **100% é o papel inteiro visível**, não
-  tamanho físico. Tamanho real é promessa do PDF, que a tela não tem como garantir.
+  tamanho físico. Para ver no **tamanho real**, o botão **1:1**: na primeira vez ele pede um
+  cartão de banco encostado na tela (todo cartão desses tem 85,6 mm) e guarda a medida da tela
+  neste aparelho; depois, um toque vai direto para o tamanho real, e toque longo recalibra.
 - **Laço**: arrastar no vazio desenha um retângulo, e o que couber **inteiro** dentro dele —
   peças e a foto — passa a andar junto, no arraste e nas setas. É "couber inteiro" e não
   "encostar" por causa da foto: ela costuma estar embaixo de tudo, e pelo encostar um laço em
@@ -334,7 +371,8 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   tira uma peça do laço, na mesa ou nas fichas da aba peças. Quem segura o bloco é a foto: ela
   não sai do papel, e o bloco inteiro para com ela em vez de se desmanchar na borda. Com um
   bloco laçado, a barra de cima troca os campos da peça por quem está no laço e um botão que
-  **apaga as peças laçadas de uma vez** — a moldura da foto não é peça e fica onde está, e um
+  **apaga as peças laçadas de uma vez**, mais **duplicar** (as cópias saem 5 mm para o lado e
+  ficam laçadas) e **centralizar no papel** — a moldura da foto não é peça e fica onde está, e um
   desfazer devolve o bloco inteiro. Com as guias ligadas, o bloco encosta nelas inteiro.
 - **Modo ponto a ponto**: um toque acende ou apaga um quadradinho, e arrastar sem soltar
   acende ou apaga a fileira inteira por onde o dedo (ou o botão) passa — quem decide se o
@@ -356,9 +394,35 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   Ctrl+Shift+Z. Um arraste de controle deslizante vira um passo só, não dezenas.
 - **Vários moldes**: a aba **moldes** guarda quantos você quiser, cada um com nome e data, e
   troca entre eles. Antes havia um molde só: começar um desenho novo apagava o anterior sem
-  volta. O molde que já estava gravado entra na lista como está, sem nada ser copiado.
+  volta. O molde que já estava gravado entra na lista como está, sem nada ser copiado. A lista
+  fica por **ordem de uso** (o molde aberto sobe para o topo), a data é a da última mudança de
+  verdade, e **duplicar este molde** faz uma cópia com foto e tudo, que já abre.
+- **Mais de uma foto**: na aba foto, **pôr mais uma foto** cria uma peça de foto — o retângulo de
+  uma foto revelada, com a imagem para ver o encaixe e nenhum furo. Ela anda, encosta, entra no
+  laço, muda de tamanho e deita pela barra de cima, e uma moldura pode ir em volta dela (em
+  **em volta de**). No PDF sai como retângulo, igual à foto principal.
+- **Janela do Instax**: com um tamanho Instax, a mesa mostra o cartão branco e a imagem só na
+  janela dela (46 × 62 mm no mini), tracejada também no PDF. Os lados são iguais; a borda de
+  cima, que a Fujifilm não publica, é um campo da aba foto (6 mm de partida) para medir uma vez
+  numa foto sua.
+- **Marcar o que já foi bordado**: o botão de tique na mesa liga o acompanhamento. Um toque num
+  ponto (quadradinho ou ponto reto) marca que ele já foi bordado, outro desmarca, e arrastar
+  marca o traço inteiro. O que foi bordado fica esmaecido e o rodapé diz quanto falta. Fica
+  gravado com o molde, entra no desfazer e não sai no PDF.
+- **Cor do papel 300g**, na aba papel: a mesa e o PNG mostram o papel na cor escolhida (o PDF
+  continua branco, porque vai para a folha da impressora). Os papéis que dão mais contraste para
+  as linhas do molde vêm marcados com um ponto, e o app avisa quando uma linha quase some no
+  papel escolhido.
+- **OXS**: na aba moldes, exportar o molde no formato aberto que o WinStitch, o MacStitch e o
+  KG-Chart leem, e trazer um gráfico OXS para dentro do molde — o ponto cheio vira gráfico
+  colorido, o ponto atrás vira ponto reto. Meio ponto, nós e contas ficam de fora, com aviso.
+- **Instalar como app**: servido pela internet, o navegador oferece instalar o ponto & letra
+  como aplicativo (manifesto e ícones), e ele abre sem internet com a última versão que
+  funcionou. Com internet, a página vem sempre da rede — o service worker (`app-sw.js`) nunca
+  serve do cache quando a rede responde.
 - **Arquivo do molde**: salvar e abrir um `.json` com tudo dentro — papel, foto, peças, linhas e
-  os ajustes feitos ponto a ponto. É o único jeito de o trabalho ir para outro aparelho ou voltar
+  os ajustes feitos ponto a ponto. Abrir o arquivo de um molde que já está na estante, igual,
+  abre o que está lá em vez de criar outro. É o único jeito de o trabalho ir para outro aparelho ou voltar
   depois de você limpar os dados do site; o navegador, sozinho, não leva nada para lugar nenhum.
 - **Memória local**: papel, foto, peças, posições, inclinações, linha de cada peça e os ajustes
   feitos ponto a ponto ficam guardados no navegador e voltam ao reabrir. As células são gravadas como estão,
@@ -465,7 +529,7 @@ o arranjo, `…/molde/foto/v1/<id>` para a foto de fundo e `…/molde/imagens/v1
 imagens das peças, uma por id de peça e só as que alguma peça ainda usa. O molde gravado antes de existir estante
 continua nas chaves sem `<id>`, e entra no índice apontando para elas: numa cota quase cheia,
 copiar a foto para migrar é a diferença entre migrar e perdê-la. `ponto-e-letra/linhas/v1` guarda
-as linhas que você marcou como suas — inclusive as avulsas, que moram só aí, já que não vêm de
+as linhas que você marcou como suas, com o que está no fim ou acabou — inclusive as avulsas, que moram só aí, já que não vêm de
 catálogo nenhum. Não há servidor nem conta — o trabalho não acompanha você
 para outro aparelho ou outro navegador, e some se você limpar os dados do site, a menos que você
 salve o arquivo do molde. A foto é guardada reduzida (1600 px no maior lado, JPEG), porque é só guia de

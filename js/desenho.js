@@ -553,7 +553,7 @@ function motivosDe(el){
    (ou, sem foto, da caixa do meio do papel onde ela estaria), então trocar
    o tamanho da foto refaz a moldura do tamanho certo. */
 function aneldaMoldura(el, bh, bw){
-  var m = miraMM(), p = P(), g = el.gap | 0;
+  var m = alvoDaMoldura(el), p = P(), g = el.gap | 0;
   var nx = 2 + Math.max(1, Math.ceil(((m.w + 2 * el.margem) / p + g) / (bw + g)));
   var ny = 2 + Math.max(1, Math.ceil(((m.h + 2 * el.margem) / p + g) / (bh + g)));
   // no sentido do relógio a partir do canto de cima à esquerda: é a ordem em
@@ -601,15 +601,22 @@ function padraoMatriz(el){
      alternam em dois esquemas — e, com os blocos sortidos se alternando em
      outro ritmo, a moldura sai variada como a de retalhos, sem ninguém ter
      pintado bloco por bloco. */
+  /* Cada bloco pode ter o esquema de cores trocado à mão: `esquemas[i]` é
+     quantos esquemas ele anda para a frente na paleta. A caixa de cada bloco
+     fica guardada (não gravada) para o toque achar em que bloco caiu. */
+  var esquemas = el.esquemas || {};
+  el._blocos = [];
   lugares.forEach(function(lg, i){
     var gr = grades[i % grades.length];
     var r0 = lg[0] * (bh + g) + Math.floor((bh - gr.length) / 2);
     var q0 = lg[1] * (bw + g) + Math.floor((bw - gr[0].length) / 2);
+    el._blocos.push({ i: i, r: lg[0] * (bh + g), q: lg[1] * (bw + g), h: bh, w: bw });
+    var desvio = (esquemas[i] | 0) * papeis;
     for (var r = 0; r < gr.length; r++)
       for (var q = 0; q < gr[r].length; q++){
         var v = gr[r][q];
         if (!v) continue;
-        var slot = ((i * papeis + v - 1) % N) + 1;
+        var slot = ((i * papeis + desvio + v - 1) % N) + 1;
         if (el.paleta && el.paleta[slot - 1] && el.paleta[slot - 1].off) continue;
         cells[r0 + r][q0 + q] = slot;
       }
@@ -647,8 +654,38 @@ function paletaPat(el, n){
 }
 
 // a moldura fica centrada na foto: é a foto que ela emoldura
+/* Em volta de quê a moldura vai: da foto, ou de uma peça escolhida — um
+   nome, uma imagem. A peça é achada pela identidade dela (`uid`), que não
+   muda quando a lista de peças muda de ordem. Peça que sumiu devolve a
+   moldura para a foto. */
+function uidDe(el){ if (!el.uid) el.uid = novoId(); return el.uid; }
+
+// a moldura que está em volta de uma peça acompanha a peça: quando ela anda,
+// cresce ou muda, a moldura é refeita em volta dela
+function acompanhaAlvos(){
+  els.forEach(function(el){
+    if (!el.alvo || el.arranjo !== "moldura") return;
+    var alvo = null;
+    for (var i = 0; i < els.length; i++) if (els[i].uid === el.alvo && els[i] !== el) alvo = els[i];
+    var b = alvo ? elPaperBox(alvo) : null;
+    var chave = b ? [b.x, b.y, b.w, b.h].map(function(v){ return v.toFixed(2); }).join(",") : "foto";
+    if (el._alvoChave === chave) return;
+    el._alvoChave = chave;
+    if (!alvo) el.alvo = "";
+    rebuild(el); centraNaMira(el);
+  });
+}
+
+function alvoDaMoldura(el){
+  if (el && el.alvo){
+    for (var i = 0; i < els.length; i++)
+      if (els[i].uid === el.alvo && els[i] !== el) return elPaperBox(els[i]);
+  }
+  return miraMM();
+}
+
 function centraNaMira(el){
-  var m = miraMM(), b = bboxMM(el);
+  var m = alvoDaMoldura(el), b = bboxMM(el);
   el.x = Math.round((m.x + m.w / 2 - b.w / 2) * 10) / 10;
   el.y = Math.round((m.y + m.h / 2 - b.h / 2) * 10) / 10;
 }
@@ -697,7 +734,7 @@ function refazReto(el){
   var op = opcoesReto(el), cams;
   op.passo = el.passo || RETO_PASSO;   // a folha precisa saber onde caem os furos da borda
   if (el.desenho === "palavra"){
-    cams = palavraEmLinhas(el.texto || " ", el.font || FONTE_PADRAO, el.medida, 0);
+    cams = palavraEmLinhas(el.texto || " ", el.font || FONTE_PADRAO, el.medida, op.esp || 0, op.arco || 0);
   } else if (el.desenho === "imagem"){
     var img = origemPronta(el);
     // imagem que ainda não voltou da memória: os furos gravados continuam
@@ -709,7 +746,7 @@ function refazReto(el){
       cams = arranjaFaixa(cams, Math.max(1, Math.min(40, el.rep | 0 || 1)), +el.gap || 0, el.deitada);
     else if (el.arranjo === "moldura"){
       // em volta da foto, centrada nela: o retângulo é a foto mais a margem
-      var mira = miraMM(), mg = +el.margem || 0;
+      var mira = alvoDaMoldura(el), mg = +el.margem || 0;
       var ret = { x: -mira.w / 2 - mg, y: -mira.h / 2 - mg, w: mira.w + 2 * mg, h: mira.h + 2 * mg };
       cams = (el.desenho === "ziguezague" || el.desenho === "ondas")
         ? molduraContinua(el.desenho, ret, op) : arranjaMoldura(cams, ret, +el.gap || 0);
@@ -730,12 +767,57 @@ function refazReto(el){
     }) };
   });
   el.w = w; el.h = h;
-  el.edits = []; el.manual = 0;
+  el.edits = [];
+  aplicaMaos(el);
+  el.manual = (el.maos || []).length;
+}
+
+/* O ajuste à mão da peça de ponto reto: ligar dois furos com um ponto, ou
+   cortar um ponto que existe. Fica numa lista por cima do desenho, como os
+   quadradinhos do ponto cruz, e é aplicado cada vez que a peça é refeita —
+   achando os furos pela posição. Se o desenho mudar a ponto de o furo não
+   existir mais (outro tamanho, outro ponto), o ajuste não acha onde cair e
+   fica sem efeito, em vez de ligar furos que não são os que você escolheu. */
+var MAO_TOL = 0.6;   // mm: quão perto um furo precisa estar para ser "o mesmo"
+
+function furoPerto(el, p, tol){
+  var melhor = null, dm = tol;
+  (el.pontos || []).forEach(function(pt){ pt.furos.forEach(function(f){
+    var d = Math.sqrt((f[0] - p[0]) * (f[0] - p[0]) + (f[1] - p[1]) * (f[1] - p[1]));
+    if (d < dm){ dm = d; melhor = f; }
+  }); });
+  return melhor;
+}
+
+function aplicaMaos(el){
+  (el.maos || []).forEach(function(m){
+    var a = furoPerto(el, m.a, MAO_TOL), b = furoPerto(el, m.b, MAO_TOL);
+    if (!a || !b || a === b) return;
+    if (m.t === "liga"){ el.pontos.push({ fechada: false, furos: [a.slice(), b.slice()] }); return; }
+    // cortar: acha o ponto a–b numa linha e parte a linha nele
+    var mesmo = function(f, g){ return Math.abs(f[0] - g[0]) < 1e-6 && Math.abs(f[1] - g[1]) < 1e-6; };
+    for (var k = 0; k < el.pontos.length; k++){
+      var pt = el.pontos[k], f = pt.furos, n = f.length, lim = pt.fechada ? n : n - 1;
+      for (var i = 0; i < lim; i++){
+        var u = f[i], v = f[(i + 1) % n];
+        if (!((mesmo(u, a) && mesmo(v, b)) || (mesmo(u, b) && mesmo(v, a)))) continue;
+        var partes;
+        if (pt.fechada) partes = [f.slice(i + 1).concat(f.slice(0, i + 1))];
+        else partes = [f.slice(0, i + 1), f.slice(i + 1)];
+        partes = partes.filter(function(q){ return q.length > 1; })
+                       .map(function(q){ return { fechada: false, furos: q }; });
+        el.pontos.splice.apply(el.pontos, [k, 1].concat(partes));
+        return;
+      }
+    }
+  });
 }
 
 // descarta: só o Recalcular pede a peça limpa, e ele avisa antes
 function rebuild(el, descarta){
-  if (el.kind === "reto"){ refazReto(el); return; }
+  if (el.kind === "foto") return;          // a foto a mais não tem desenho a refazer
+  // o Recalcular joga fora também os pontos ligados e cortados à mão
+  if (el.kind === "reto"){ if (descarta) el.maos = []; refazReto(el); return; }
   var rowsAntes = el.cells && el.cells.length ? el.cells.length : 0;
   var colsAntes = rowsAntes && el.cells[0] ? el.cells[0].length : 0;
   var novas;

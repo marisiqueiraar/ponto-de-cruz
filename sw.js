@@ -10,7 +10,10 @@
    a vir da rede, e este arquivo deixa de ser chamado.
 
    Só pode ser removido do repositório quando não houver mais navegador por aí com
-   o service worker antigo registrado — na dúvida, é barato deixar ficar. */
+   o service worker antigo registrado — na dúvida, é barato deixar ficar.
+
+   O service worker do app instalável é outro arquivo, o app-sw.js, e vai sempre
+   à rede primeiro: o cache dele só abre o app sem internet. */
 self.addEventListener("install", function(){
   self.skipWaiting();
 });

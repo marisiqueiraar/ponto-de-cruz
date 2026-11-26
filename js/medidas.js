@@ -15,6 +15,7 @@ function P(){ return parseFloat($("mm").value); }
    se despede. */
 var propria = {};
 
+
 function limites(id){
   var el = $(id);
   return { min: parseFloat(el.min), max: parseFloat(el.max) };

@@ -266,3 +266,115 @@ posições, não seleção. Laço é para onde você está olhando, não é part
 `testes/laco.js` prova o que dá para provar num Chromium: que o bloco anda
 inteiro, que as distâncias entre as peças não mudam nem quando a foto bate na
 borda, e que o arraste do bloco é um passo só no desfazer.
+
+## 7. O backlog — o que eu decidi sozinho
+
+Em 26/11/2026 fiz os itens do [BACKLOG.md](BACKLOG.md). Onde o item deixava
+escolha, escolhi assim:
+
+**Impressão.**
+- **Várias numa folha** só oferece moldes **do mesmo tamanho de papel**. Misturar
+  tamanhos pediria um encaixe de peças de quebra-cabeça, e o caso real é o
+  marca-página: três ou quatro iguais, ou parecidos, numa A4.
+- **O furo da fita** tem 5 mm e fica a 12 mm da borda de cima, no meio (na
+  borda esquerda, se o papel estiver deitado). É a medida comum de marca-página
+  com fita de cetim de 3 mm; mude `FITA_DIAM` e `FITA_DIST` em `js/geometria.js`
+  se a sua fita for outra.
+- **Caber no papel** tenta, nessa ordem: trazer o arranjo para dentro (se o
+  tamanho já cabe), diminuir a margem, diminuir o espaço entre os desenhos e,
+  por último, diminuir o desenho. O desenho é o que você escolheu; o resto é
+  folga.
+- **A ordem numerada** vale só para o ponto reto: cada linha é numerada a partir
+  do primeiro furo dela. No ponto cruz a ordem é a da grade e não precisa de
+  número. Os números saem pequenos e cinza para não esconder o furo.
+
+**Peças.**
+- **Cores por bloco**: um toque no bloco passa para o próximo esquema da paleta;
+  não há escolha direta de esquema, porque a moldura tem poucos e girar entre
+  eles é mais rápido que abrir uma lista.
+- **Moldura em volta de uma peça**: a moldura segue a peça quando ela anda ou
+  muda. Se a peça for apagada, a moldura volta a ficar em volta da foto (ou do
+  meio do papel).
+
+**Tela e uso.**
+- **Ímã**: a peça encosta nas bordas e no meio das outras peças, da foto e do
+  papel, com a mesma força das guias (alguns pixels de tela). Uma linha magenta
+  mostra onde encostou. Não há jeito de desligar esse ímã; se ele atrapalhar um
+  ajuste fino, as setas do teclado andam sem ímã.
+- **Tamanho real**: calibra com um cartão de banco (85,6 mm), uma vez por
+  aparelho. Um toque no 1:1 vai para o tamanho real; toque longo (ou Shift)
+  recalibra.
+- **A guia e a peça debaixo dela**: o toque só pega a guia quando cai a 2 px ou
+  menos do risco e há uma peça ali; fora disso, quem recebe é a peça.
+- **O desenho guardado** é uma imagem por peça, feita de novo quando muda a peça,
+  o zoom, a cor da linha ou a tela. Gasta memória: num molde com dez peças
+  grandes, alguns MB.
+- **O laço** duplica 5 mm para o lado e para baixo, e o laço passa para as
+  cópias. **Centralizar** leva o bloco inteiro (com a foto, se ela estiver
+  laçada) para o meio do papel. Girar e espelhar o bloco ficaram de fora: girar
+  um bloco é girar cada peça em volta de um centro comum, e isso muda as
+  molduras de um jeito que eu não quis inventar.
+- **As guias continuam fora do desfazer.** São coisa de tela, como o zoom; o
+  desfazer devolve o molde. Tirar uma guia sem querer se conserta puxando outra.
+- **O espaço entre letras**, num navegador que não sabe espaçar letras no canvas,
+  fica desligado com uma explicação no próprio campo, em vez de fingir que
+  funciona.
+- **No celular**, desfazer/refazer e os botões da peça descem para a barra das
+  ferramentas: a barra de cima caiu de 185 px para 95 px num iPhone 13.
+
+**Moldes e linhas.**
+- **Tenho pouco e acabou**: o toque na caixa marca o estado escolhido em três
+  botões, e tocar de novo tira a linha. Pensei num toque que gira entre os
+  quatro estados, mas aí tirar uma linha da caixa pediria três toques. "Acabou"
+  tira a linha das suas (o gráfico feito só com as minhas não a usa mais) e a
+  põe na lista de compras; "tenho pouco" continua valendo como tenho.
+- **Ordem da estante**: por uso — o molde que você abre sobe. Não fiz arrastar
+  para reordenar à mão: com a ordem de uso, o de todo dia já fica no topo.
+- **O mesmo arquivo duas vezes**: se um molde da estante tem exatamente o mesmo
+  desenho, ele abre e o aviso diz isso. Se você mexeu no molde depois de salvar
+  o arquivo, o arquivo entra como molde novo (é outra versão, e pode ser a que
+  você quer de volta).
+- **Duplicar** dá o nome "… (cópia)" e abre a cópia, para que a próxima mudança
+  não caia no original sem querer.
+- **O nome** grava meio segundo depois da última tecla, ou ao sair do campo.
+
+**Ideias antigas.**
+- **Acompanhamento** marca por ponto, não por linha de cor nem por região: é
+  o gesto de quem borda ("fiz até aqui"). A marca do ponto reto é pela posição
+  dos dois furos, então refazer a peça igual não perde nada; a do ponto cruz é
+  por linha e coluna, e recomeça se a grade da peça mudar de tamanho.
+- **Cor do papel**: escolhi nove cores de papel 300g comuns em papelaria e
+  uma livre. A sugestão olha a linha que **menos** aparece em cada papel, e
+  não a média — uma linha que some estraga a peça mesmo que as outras
+  apareçam. O PDF continua branco, porque sai na folha da impressora.
+- **App instalável**: o service worker novo se chama `app-sw.js`, e o `sw.js`
+  continua só desfazendo o antigo. Ele vai sempre à rede primeiro e só usa o
+  cache sem internet, então não pode prender versão velha como o do app React
+  prendia. Os ícones de 192 e 512 px foram gerados da marca do app.
+- **OXS**: exportar recorta a grade no que tem ponto e põe cada quadradinho
+  no quadradinho do papel em que o centro dele cai (peça girada sai
+  endireitada). O ponto reto vira ponto atrás com os furos no meio quadradinho
+  mais perto, que é a precisão do formato. Trazer um OXS **acrescenta** as
+  peças ao molde aberto, em vez de criar um molde novo: assim dá para juntar o
+  gráfico com a foto e as palavras. O gráfico que vem do arquivo não tem
+  imagem de origem, então largura e sensibilidade ficam paradas nele. Mais de
+  35 linhas (o limite de uma letra por quadradinho) junta as que sobram na mais
+  parecida, com aviso.
+
+**Fotos.**
+- **A foto a mais é uma peça**, e não uma segunda "foto principal". A
+  principal continua sendo a referência de tudo (onde as peças novas nascem,
+  em volta de quem a moldura nasce, o que o PDF manda colar onde). A foto a
+  mais ganha de graça o que as peças já têm: ímã, laço, alinhar, duplicar,
+  desfazer e moldura em volta. O que ela não tem: girar a imagem dentro do
+  retângulo, a janela do Instax (só a principal desenha) e a frase "cole a
+  foto a X mm" no PDF. A imagem dela é guardada com até 1000 px no lado maior.
+- **A borda de cima do Instax** começa em 6 mm. É um chute com base na conta
+  (sobram 24 mm entre cima e embaixo, e a de baixo é a grossa); por isso virou
+  campo, e não número fixo. Deitada, a borda de cima fica à esquerda.
+
+**Testes.** O `textMatrix` é testado pelas promessas dos controles, e não por
+uma grade fixa: a forma exata das letras depende de como cada navegador
+desenha a fonte, e um teste que quebra sozinho a cada versão do Chromium
+acaba ignorado. A pinça usa dedos de verdade, pelo protocolo do Chromium,
+porque o evento de ponteiro sintético não deixa o app capturar o dedo.

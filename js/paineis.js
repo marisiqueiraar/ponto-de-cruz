@@ -31,6 +31,16 @@ $("catGrade").addEventListener("click", function(e){
   else aplicaNaPeca(b.dataset.k);
 });
 
+[].forEach.call(document.querySelectorAll("#toqueCaixa button"), function(b){
+  b.addEventListener("click", function(){
+    toqueCaixa = b.dataset.est;
+    [].forEach.call(document.querySelectorAll("#toqueCaixa button"), function(x){
+      x.classList.toggle("on", x === b);
+      x.setAttribute("aria-pressed", x === b ? "true" : "false");
+    });
+  });
+});
+
 [].forEach.call(document.querySelectorAll("#linhaModo button"), function(b){
   b.addEventListener("click", function(){ mudaModoLinha(b.dataset.modo); });
 });
@@ -54,6 +64,7 @@ $("catLimpar").addEventListener("click", function(){
     return;
   }
   minhas = [];
+  estoque = {};
   salvaLinhas();
   montaMarcas();
   listaCatalogo();
@@ -175,12 +186,50 @@ function abreItem(it){
   restorePhoto(); restoreOrigens(); mostraFonte(); draw(); mostraZoom(); guiasSync(); resetHist();
 }
 
+/* A estante fica por ordem de uso: o molde aberto sobe para o topo. Antes era
+   por ordem de criação, e o molde de todo dia afundava debaixo dos testes. */
+function sobeNaEstante(it){
+  var i = estante.itens.indexOf(it);
+  if (i > 0){ estante.itens.splice(i, 1); estante.itens.unshift(it); }
+}
+
 function abreMolde(id){
   if (id === estante.atual) return;
   saveState();
   estante.atual = id;
+  sobeNaEstante(itemAtual());
   salvaEstante();
   abreItem(itemAtual());
+}
+
+/* Duplicar é copiar as três chaves do molde (desenho, foto e imagens das
+   peças) para um molde novo, que já abre. A foto é a que estoura a cota:
+   sem espaço para ela, a cópia sai sem foto e diz isso. */
+function duplicaMolde(){
+  saveState();
+  var de = itemAtual();
+  if (!de) return;
+  var dados = null, foto = null, imgs = null;
+  try { dados = localStorage.getItem(de.dados); } catch (e){}
+  try { foto = localStorage.getItem(de.foto); } catch (e){}
+  try { imgs = localStorage.getItem(IMG_STORE + "/" + de.id); } catch (e){}
+  if (!dados) return avisaArquivo("Não há nada gravado para duplicar.");
+  var it = criaMolde((de.nome || "sem nome") + " (cópia)");
+  it.auto = 0;
+  try { localStorage.setItem(it.dados, dados); }
+  catch (e){
+    estante.itens = estante.itens.filter(function(x){ return x.id !== it.id; });
+    estante.atual = de.id;
+    salvaEstante(); renderMoldes();
+    return avisaArquivo("Não coube na memória do navegador. Apague um molde antigo e tente de novo.");
+  }
+  var semFoto = false;
+  if (foto){ try { localStorage.setItem(it.foto, foto); } catch (e2){ semFoto = true; } }
+  if (imgs){ try { localStorage.setItem(IMG_STORE + "/" + it.id, imgs); } catch (e3){} }
+  salvaEstante();
+  abreItem(it);
+  avisaArquivo(semFoto ? "Cópia feita, mas sem a foto: ela não coube na memória do navegador."
+                       : "Cópia feita: “" + it.nome + "”. É ela que está aberta agora.");
 }
 
 function moldeEmBranco(){
@@ -265,6 +314,19 @@ function importaMolde(arquivo){
     if (!a || a.app !== "ponto-e-letra" || !a.molde || !a.molde.els || !a.molde.els.length)
       return avisaArquivo("Esse arquivo não é um molde do ponto & letra.");
     saveState();                     // o que está aberto continua guardado
+    /* O mesmo arquivo aberto duas vezes criava dois moldes iguais. Agora,
+       se algum molde da estante tem exatamente o mesmo desenho, ele é que
+       abre — quem quiser mesmo uma cópia tem o botão duplicar. */
+    var igual = null, corpo = JSON.stringify(a.molde);
+    estante.itens.forEach(function(x){
+      if (igual) return;
+      try { if (localStorage.getItem(x.dados) === corpo) igual = x; } catch (e0){}
+    });
+    if (igual){
+      if (igual.id !== estante.atual){ estante.atual = igual.id; sobeNaEstante(igual); salvaEstante(); abreItem(igual); }
+      return avisaArquivo("Esse molde já estava na estante, como “" + (igual.nome || "sem nome") +
+                          "”: abri ele em vez de criar outro igual. Para ter uma cópia, use duplicar.");
+    }
     var it = criaMolde(a.nome || "molde aberto de arquivo");
     try { localStorage.setItem(it.dados, JSON.stringify(a.molde)); }
     catch (e){
@@ -296,17 +358,25 @@ $("moldeNovo").addEventListener("click", function(){
   avisaArquivo("");
 });
 
+/* O nome muda na lista a cada tecla, mas só é gravado quando a digitação
+   para por meio segundo (ou o campo perde o foco): antes era uma escrita
+   no navegador por tecla. */
+var nomeTimer = 0;
+function gravaNome(){ clearTimeout(nomeTimer); nomeTimer = 0; salvaEstante(); }
+$("moldeNome").addEventListener("blur", function(){ if (nomeTimer) gravaNome(); });
 $("moldeNome").addEventListener("input", function(){
   var it = itemAtual();
   if (!it) return;
   it.nome = this.value.trim();
   it.auto = it.nome ? 0 : 1;   // campo vazio devolve o nome para o app
-  salvaEstante();
+  clearTimeout(nomeTimer);
+  nomeTimer = setTimeout(gravaNome, 500);
   var alvo = $("moldeLista").querySelector(".mold.on .nm");
   if (alvo) alvo.textContent = it.nome || "sem nome";
 });
 
 $("moldeSalvar").addEventListener("click", exportaMolde);
+$("moldeDup").addEventListener("click", duplicaMolde);
 $("moldeAbrir").addEventListener("click", function(){ $("moldeArq").click(); });
 $("moldeArq").addEventListener("change", function(e){
   var f = e.target.files && e.target.files[0];
@@ -362,7 +432,31 @@ function migraAltura(){
   Promise.all(cargas).then(converte)["catch"](converte);
 }
 
+/* No celular a barra de cima tinha três linhas — o aviso e o PDF, depois
+   desfazer e as ações da peça, depois os campos — e comia quase um terço da
+   tela. As ações e o desfazer passam para dentro da fileira de campos, que já
+   rola de lado, e a barra fica com duas. No computador voltam para a direita. */
+var celular = window.matchMedia ? window.matchMedia("(max-width:860px)") : null;
+function arrumaBarra(){
+  var tools = document.querySelector(".tools"), right = document.querySelector(".right");
+  if (!tools || !right) return;
+  if (celular && celular.matches){
+    if ($("hist").parentNode !== tools){
+      tools.insertBefore($("ctlActs"), tools.firstChild);
+      tools.insertBefore($("hist"), tools.firstChild);
+    }
+  } else if ($("hist").parentNode !== right){
+    right.insertBefore($("ctlActs"), $("fitHint"));
+    right.insertBefore($("hist"), $("ctlActs"));
+  }
+}
+if (celular){
+  if (celular.addEventListener) celular.addEventListener("change", function(){ arrumaBarra(); draw(); });
+  else if (celular.addListener) celular.addListener(function(){ arrumaBarra(); draw(); });
+}
+
 function boot(){
+  arrumaBarra();
   ["paperW","paperH","photoWmm","photoHmm"].forEach(propriaIni);
   carregaLinhas();          // antes de restaurar: a caixa é a primeira marca
   carregaEstante();         // e antes do molde: é ela que diz qual abrir
@@ -408,3 +502,10 @@ setTimeout(function(){
     draw(); resetHist();
   }
 }, 1400);
+
+/* Instalar o app (app-sw.js): só existe servido por http(s) — aberto do
+   disco, como nos testes, o navegador não aceita service worker, e o app
+   funciona igual sem ele. */
+if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)){
+  navigator.serviceWorker.register("app-sw.js").catch(function(){});
+}
