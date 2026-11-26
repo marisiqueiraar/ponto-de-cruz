@@ -238,12 +238,12 @@ Da [REVISAO.md](REVISAO.md), o que não entrou na reforma de 25/11/2026:
   e ajustando até bater; depois disso, um botão "1:1".
 - ~~**Menos texto na tela**~~ — feito em 26/11/2026. (D6): a aba peças tem cinco parágrafos antes dos
   botões de alinhar; a aba ajuda tem 25 parágrafos corridos.
-- **Mais de uma foto por molde** (E3): cartão com duas fotos, marca-página com
+- ~~**Mais de uma foto por molde**~~ — feito em 26/11/2026, como peça de foto ("pôr mais uma foto", na aba foto). (E3): cartão com duas fotos, marca-página com
   foto embaixo e bordado em cima.
 - ~~**No celular, a barra de cima ocupa um terço da tela**~~ — feito em 26/11/2026. (F1).
 - ~~**Os botões de alinhar ficam no fim da aba peças**~~ — feito em 26/11/2026. (F2), depois dos textos.
 - ~~**Ímã entre peças**~~ — feito em 26/11/2026. (F3): hoje a peça só encosta em guia ligada.
-- **A janela da imagem no Instax**: a foto Instax entra pelo tamanho do cartão;
+- ~~**A janela da imagem no Instax**~~ — feito em 26/11/2026, com a borda de cima num campo (6 mm de partida) para medir na foto de verdade.: a foto Instax entra pelo tamanho do cartão;
   o retângulo da imagem dentro dele (4,6 × 6,2 no mini) não é desenhado, porque
   a borda de cima não tem medida oficial.
 

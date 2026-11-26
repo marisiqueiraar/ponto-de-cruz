@@ -7,10 +7,17 @@ function drawPhoto(ctx, k, region, alpha){
   if (photo.off) return;
   var X = (photo.x - region.x) * k, Y = (photo.y - region.y) * k;
   var W = photo.w * k, H = photo.h * k;
+  // no Instax, o cartão é branco e a imagem fica só na janela dela
+  var jan = janelaInstax(), cX = X, cY = Y, cW = W, cH = H;
+  if (jan){
+    ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = "#FBFBF8"; ctx.fillRect(X, Y, W, H); ctx.restore();
+    X = (jan.x - region.x) * k; Y = (jan.y - region.y) * k; W = jan.w * k; H = jan.h * k;
+  }
+  var tr = jan ? jan.w / jan.h : photo.w / photo.h;
   ctx.save();
   ctx.globalAlpha = alpha;
   if (photoImg){
-    var ir = photoImg.width / photoImg.height, tr = photo.w / photo.h;
+    var ir = photoImg.width / photoImg.height;
     var sw, sh, sx, sy;
     if (ir > tr){ sh = photoImg.height; sw = sh * tr; sx = (photoImg.width - sw) / 2; sy = 0; }
     else { sw = photoImg.width; sh = sw / tr; sx = 0; sy = (photoImg.height - sh) / 2; }
@@ -27,7 +34,42 @@ function drawPhoto(ctx, k, region, alpha){
   ctx.restore();
   ctx.strokeStyle = "#1E2A26";
   ctx.lineWidth = 1;
-  ctx.strokeRect(X + .5, Y + .5, W - 1, H - 1);
+  ctx.strokeRect(cX + .5, cY + .5, cW - 1, cH - 1);
+  if (jan){
+    ctx.save();
+    ctx.strokeStyle = "rgba(30,42,38,.45)"; ctx.setLineDash([3, 3]);
+    ctx.strokeRect(X + .5, Y + .5, W - 1, H - 1);
+    ctx.restore();
+  }
+}
+
+/* A foto a mais: a imagem recortada para encher o retângulo, ou o
+   retângulo cinza com a medida enquanto não há imagem. */
+function drawFotoPeca(ctx, el, k, region, alpha){
+  var b = bboxMM(el), img = origemPronta(el);
+  ctx.save();
+  ctx.translate((b.x - region.x + b.w / 2) * k, (b.y - region.y + b.h / 2) * k);
+  ctx.rotate(el.rot * Math.PI / 180);
+  var W = b.w * k, H = b.h * k;
+  ctx.globalAlpha = alpha;
+  if (img){
+    var ir = img.width / img.height, tr = b.w / b.h, sw, sh, sx, sy;
+    if (ir > tr){ sh = img.height; sw = sh * tr; sx = (img.width - sw) / 2; sy = 0; }
+    else { sw = img.width; sh = sw / tr; sx = 0; sy = (img.height - sh) / 2; }
+    ctx.drawImage(img, sx, sy, sw, sh, -W / 2, -H / 2, W, H);
+  } else {
+    ctx.fillStyle = "#DDD8CC";
+    ctx.fillRect(-W / 2, -H / 2, W, H);
+    ctx.fillStyle = "#9A948A";
+    ctx.font = "12px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(fmt(b.w) + " × " + fmt(b.h) + " mm", 0, 4);
+  }
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = "#1E2A26";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(-W / 2 + .5, -H / 2 + .5, W - 1, H - 1);
+  ctx.restore();
 }
 
 /* Na mesa, o ponto reto é o risco do fio de furo a furo, na cor da linha, e
@@ -164,7 +206,14 @@ function paint(ctx, k, region, opts){
   ctx.fillRect(0, 0, region.w * k, region.h * k);
   drawPhoto(ctx, k, region, opts.photoAlpha);
   totalCount = 0; totalHoles = 0;
+  // as fotos a mais vão por baixo de todas as peças, como a foto principal
   els.forEach(function(el, i){
+    if (el.kind !== "foto") return;
+    drawFotoPeca(ctx, el, k, region, opts.photoAlpha);
+    if (opts.outline && marcado(i)) drawOutline(ctx, el, k, region);
+  });
+  els.forEach(function(el, i){
+    if (el.kind === "foto") return;
     totalCount += countOf(el);
     var cor = corDe(el).hex, lw = Math.max(1.3, P() * k * 0.15);
     // só a mesa usa o guardado; o PNG e a miniatura desenham direto

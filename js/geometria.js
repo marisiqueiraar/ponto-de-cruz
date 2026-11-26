@@ -4,7 +4,7 @@
    usa ao carregar tem de estar num arquivo anterior. */
 
 function bboxMM(el){
-  if (el.kind === "reto") return { x: el.x, y: el.y, w: el.w || 1, h: el.h || 1 };
+  if (el.kind === "reto" || el.kind === "foto") return { x: el.x, y: el.y, w: el.w || 1, h: el.h || 1 };
   var p = P();
   return { x: el.x, y: el.y, w: el.cells[0].length * p, h: el.cells.length * p };
 }
@@ -58,6 +58,7 @@ function pontosReto(el){
 
 function holesOf(el){
   if (el.kind === "reto") return furosReto(el);
+  if (el.kind === "foto") return [];
   var p = P(), seen = {}, list = [];
   for (var r = 0; r < el.cells.length; r++){
     for (var q = 0; q < el.cells[r].length; q++){
@@ -95,6 +96,7 @@ function temGrafico(){
 
 function countOf(el){
   if (el.kind === "reto") return pontosReto(el).n;
+  if (el.kind === "foto") return 0;
   var n = 0;
   for (var r = 0; r < el.cells.length; r++)
     for (var q = 0; q < el.cells[r].length; q++) if (el.cells[r][q]) n++;
@@ -338,6 +340,25 @@ var papelCopias = 1, papelJunto = [], papelCantos = 0, papelFita = 0;
 // a cor do papel 300g em que a peça vai ser bordada: só a mesa e o PNG a
 // mostram — o molde do PDF sai na folha comum da impressora, que é branca
 var papelCor = "#FFFFFF";
+
+/* A janela da imagem no Instax. A Fujifilm publica o tamanho do cartão e o
+   da imagem, mas não como a sobra se divide em cima e embaixo — a borda de
+   baixo, a grossa, é onde se segura. Os lados são iguais (a conta fecha), e a
+   borda de cima é um campo da aba foto, com 6 mm de partida, para medir uma
+   vez com a régua na foto de verdade. Deitada, a borda de cima fica à esquerda. */
+var INSTAX = { "54x86": [46, 62], "72x86": [62, 62], "108x86": [99, 62] };
+var instaxTopo = 6;
+
+function janelaInstax(){
+  if (photo.off) return null;
+  var v = ($("photoSize") || {}).value, j = INSTAX[v];
+  if (!j) return null;
+  var q = v.split("x"), W0 = +q[0], H0 = +q[1];
+  var lado = (W0 - j[0]) / 2, topo = Math.max(0, Math.min(H0 - j[1], instaxTopo));
+  if ($("photoOr").value === "l") return { x: photo.x + topo, y: photo.y + lado, w: j[1], h: j[0] };
+  return { x: photo.x + lado, y: photo.y + topo, w: j[0], h: j[1] };
+}
+
 var numerarPontos = 0;   // a ordem dos pontos de ponto reto, numerada no PDF
 var FITA_DIAM = 5, FITA_DIST = 12;   // mm: o furo da fita e a distância dele à borda
 

@@ -340,6 +340,21 @@ function moldeNaFolha(pdf, vw, ox, oy){
   pdf.setDrawColor(20);
   pdf.setLineWidth(0.4);
   if (!photo.off) pdf.rect(ox + (photo.x - vw.x), oy + (photo.y - vw.y), photo.w, photo.h);
+  els.forEach(function(el){
+    if (el.kind !== "foto") return;
+    // o retângulo da foto a mais, girado como está na mesa
+    var b = bboxMM(el), cs = [[0, 0], [b.w, 0], [b.w, b.h], [0, b.h]].map(function(c){
+      var q = localToPaper(el, c[0], c[1]); return [ox + (q.x - vw.x), oy + (q.y - vw.y)];
+    });
+    pdf.lines(cs.slice(1).map(function(c, i){ return [c[0] - cs[i][0], c[1] - cs[i][1]]; }), cs[0][0], cs[0][1], [1, 1], "S", true);
+  });
+  var jan = janelaInstax();
+  if (jan){
+    // a janela da imagem do Instax, fina e clara: referência, não corte
+    pdf.setDrawColor(170); pdf.setLineWidth(0.12);
+    pdf.rect(ox + (jan.x - vw.x), oy + (jan.y - vw.y), jan.w, jan.h);
+    pdf.setDrawColor(0);
+  }
 
   /* A linha da borda do papel, onde esta folha alcança a borda. Com a
      moldura tracejada valendo o papel inteiro as duas cairiam uma em cima da

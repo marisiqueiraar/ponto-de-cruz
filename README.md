@@ -397,6 +397,14 @@ de uma cartela de linha e alimenta o `catalogos.js`.
   volta. O molde que já estava gravado entra na lista como está, sem nada ser copiado. A lista
   fica por **ordem de uso** (o molde aberto sobe para o topo), a data é a da última mudança de
   verdade, e **duplicar este molde** faz uma cópia com foto e tudo, que já abre.
+- **Mais de uma foto**: na aba foto, **pôr mais uma foto** cria uma peça de foto — o retângulo de
+  uma foto revelada, com a imagem para ver o encaixe e nenhum furo. Ela anda, encosta, entra no
+  laço, muda de tamanho e deita pela barra de cima, e uma moldura pode ir em volta dela (em
+  **em volta de**). No PDF sai como retângulo, igual à foto principal.
+- **Janela do Instax**: com um tamanho Instax, a mesa mostra o cartão branco e a imagem só na
+  janela dela (46 × 62 mm no mini), tracejada também no PDF. Os lados são iguais; a borda de
+  cima, que a Fujifilm não publica, é um campo da aba foto (6 mm de partida) para medir uma vez
+  numa foto sua.
 - **Marcar o que já foi bordado**: o botão de tique na mesa liga o acompanhamento. Um toque num
   ponto (quadradinho ou ponto reto) marca que ele já foi bordado, outro desmarca, e arrastar
   marca o traço inteiro. O que foi bordado fica esmaecido e o rodapé diz quanto falta. Fica

@@ -95,6 +95,9 @@ function unpackReto(r){
 
 function packEl(el){
   if (el.kind === "reto") return packReto(el);
+  if (el.kind === "foto")
+    return { kind: "foto", uid: uidDe(el), alvo: "", x: el.x, y: el.y, rot: el.rot || 0,
+             w: el.w, h: el.h, tam: el.tam || "", img: el.img || "", nome: el.nome || "" };
   var r = { kind: el.kind, uid: uidDe(el), alvo: el.alvo || "", x: el.x, y: el.y, rot: el.rot, manual: el.manual || 0,
             color: el.color || "", colorName: el.colorName || "",
             // a lista dos ajustes à mão vai junto com as células, e não no
@@ -146,6 +149,14 @@ function packEl(el){
 
 function unpackEl(r){
   if (r && r.kind === "reto") return unpackReto(r);
+  if (r && r.kind === "foto"){
+    if (!(+r.w > 0) || !(+r.h > 0)) return null;
+    return { kind: "foto", uid: typeof r.uid === "string" && r.uid ? r.uid : novoId(), alvo: "",
+             x: +r.x || 0, y: +r.y || 0, rot: +r.rot || 0, flip: 0, cells: [], edits: [], manual: 0,
+             w: Math.max(10, Math.min(500, +r.w)), h: Math.max(10, Math.min(500, +r.h)),
+             tam: typeof r.tam === "string" ? r.tam : "", img: typeof r.img === "string" ? r.img : "",
+             nome: typeof r.nome === "string" ? r.nome : "" };
+  }
   if (!r || !r.cells || !r.cells.length) return null;
   var cells = r.cells.map(function(row){
     var line = [];
@@ -274,7 +285,7 @@ function saveState(){
                w: $("paperW").value, h: $("paperH").value, folha: folhaAtual.id,
                copias: papelCopias, junto: papelJunto, cantos: papelCantos, fita: papelFita ? 1 : 0,
                cor: papelCor },
-      photoBox: { size: $("photoSize").value, or: $("photoOr").value,
+      photoBox: { size: $("photoSize").value, or: $("photoOr").value, topo: instaxTopo,
                   w: $("photoWmm").value, h: $("photoHmm").value,
                   x: Math.round(photo.x * 10) / 10, y: Math.round(photo.y * 10) / 10 },
       mm: $("mm").value, thread: thread, sel: sel, numerar: numerarPontos ? 1 : 0,
@@ -359,6 +370,7 @@ function restoreState(chave){
   }
   if (s.photoBox){
     if (s.photoBox.size) $("photoSize").value = s.photoBox.size;
+    instaxTopo = s.photoBox.topo == null ? 6 : Math.max(0, Math.min(24, +s.photoBox.topo || 0));
     if (s.photoBox.or) $("photoOr").value = s.photoBox.or;
     if (s.photoBox.w) $("photoWmm").value = s.photoBox.w;
     if (s.photoBox.h) $("photoHmm").value = s.photoBox.h;
@@ -483,6 +495,7 @@ function restoreOrigens(){
          desenho, e desligou a largura e a sensibilidade. Agora há. */
       var el = els[sel];
       if (el && el.kind === "img" && el.img === id) syncControls();
+      if (els.some(function(e){ return e.kind === "foto" && e.img === id; })) draw();
     };
     img.src = url;
   });

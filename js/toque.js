@@ -40,12 +40,13 @@ function tamanhoDe(el){
   if (el.kind === "text") return el.rowsTarget;
   if (el.kind === "img") return el.larg;
   if (el.kind === "reto") return el.medida;
+  if (el.kind === "foto") return 0;
   return el.scale;   // símbolo e padrão: o tamanho de cada motivo
 }
 
 function resizeSelected(steps){
   var el = els[sel];
-  if (!el) return;
+  if (!el || el.kind === "foto") return;   // a foto tem o tamanho da revelação
   var b = bboxMM(el);
   var cx = b.x + b.w / 2, cy = b.y + b.h / 2;
   if (el.kind === "text"){

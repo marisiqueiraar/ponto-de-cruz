@@ -99,6 +99,7 @@ function chavesDaVista(){
 }
 
 function nomePeca(el){
+  if (el.kind === "foto") return "foto " + (el.nome || fmt(el.w / 10) + " × " + fmt(el.h / 10) + " cm");
   if (el.kind === "text") return el.text || "texto";
   if (el.kind === "img") return el.nome || "imagem";
   if (el.kind === "pat") return (el.arranjo === "faixa" ? "faixa de " : "moldura de ") + nomeMotivo(el.motivo);

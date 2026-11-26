@@ -220,7 +220,7 @@ function syncControls(){
     $("delLaco").title = (n === 1 ? "apagar a peça laçada" : "apagar as " + n + " peças laçadas") +
       (marcaFoto ? " — a moldura da foto não é peça e fica onde está" : "") +
       ". O desfazer devolve tudo num passo.";
-    ["alinha", "ctlPhoto", "ctlPiece", "ctlActs", "ctlNone", "ctlText", "ctlSym", "ctlImg", "ctlPat", "ctlReto"]
+    ["alinha", "ctlPhoto", "ctlPiece", "ctlActs", "ctlNone", "ctlText", "ctlSym", "ctlImg", "ctlPat", "ctlReto", "ctlFoto"]
       .forEach(function(id){ $(id).classList.add("hide"); });
     return;
   }
@@ -232,7 +232,8 @@ function syncControls(){
   $("ctlActs").classList.toggle("hide", !piece);
   // acender quadradinho não quer dizer nada numa peça sem quadradinho
   // no ponto reto o ajustar liga e corta pontos, em vez de acender quadradinho
-  $("edit").classList.toggle("hide", false);
+  $("edit").classList.toggle("hide", !!(el && el.kind === "foto"));
+  $("flipEl").classList.toggle("hide", !!(el && el.kind === "foto"));
   /* Um botão só para trocar de ponto, junto de ajustar, espelhar e duplicar:
      ele diz para onde a peça vai. A palavra e a imagem trocam; símbolo,
      moldura e desenho pronto, não — cada um só existe num dos dois. */
@@ -246,14 +247,19 @@ function syncControls(){
     $("ctlNone").textContent = fmt(pa.w / 10) + " × " + fmt(pa.h / 10) + " cm";
   }
   if (!piece){
-    ["ctlText", "ctlSym", "ctlImg", "ctlPat", "ctlReto"].forEach(function(id){ $(id).classList.add("hide"); });
+    ["ctlText", "ctlSym", "ctlImg", "ctlPat", "ctlReto", "ctlFoto"].forEach(function(id){ $(id).classList.add("hide"); });
     return;
   }
   // uma barra por tipo de peça: mostrar a certa é esconder as outras duas
-  var barras = { text: "ctlText", sym: "ctlSym", img: "ctlImg", pat: "ctlPat", reto: "ctlReto" };
+  var barras = { text: "ctlText", sym: "ctlSym", img: "ctlImg", pat: "ctlPat", reto: "ctlReto", foto: "ctlFoto" };
   Object.keys(barras).forEach(function(k){
     $(barras[k]).classList.toggle("hide", el.kind !== k);
   });
+  if (el.kind === "foto"){
+    montaFotoTam();
+    $("fotoTam").value = el.tam && $("fotoTam").querySelector('option[value="' + el.tam + '"]') ? el.tam : "";
+    $("fotoImg").textContent = el.img ? "trocar imagem" : "escolher imagem";
+  }
   if (el.kind === "text"){
     avisaAlturaFonte(el);
     $("txt").value = el.text;
@@ -805,8 +811,11 @@ $("patDeit").addEventListener("click", function(){
    feita a partir do data-url: o canvas já está decodificado, então a peça
    nasce desenhada no mesmo gesto em vez de piscar vazia esperando o
    navegador ler o que ele mesmo acabou de escrever. */
-function guardaOrigem(id, img){
-  var k = Math.min(1, IMG_MAX_PX / Math.max(img.width, img.height));
+// a foto a mais é só para ver o encaixe, mas na tela ela é grande: 512 px,
+// que bastam para virar quadradinho, ficariam borrados
+var FOTO_MAX_PX = 1000;
+function guardaOrigem(id, img, maxPx){
+  var k = Math.min(1, (maxPx || IMG_MAX_PX) / Math.max(img.width, img.height));
   var c = document.createElement("canvas");
   c.width = Math.max(1, Math.round(img.width * k));
   c.height = Math.max(1, Math.round(img.height * k));
@@ -1289,6 +1298,10 @@ function fotoPainel(){
   $("alBase").classList.toggle("hide", sem);
   $("photoCustom").classList.toggle("hide", !prop);
   $("photoOrCampo").classList.toggle("dim", prop);
+  var instax = !!INSTAX[$("photoSize").value];
+  $("instaxCampo").classList.toggle("hide", !instax);
+  $("instaxNota").classList.toggle("hide", !instax);
+  $("instaxTopo").value = instaxTopo;
   $("photoNota").innerHTML = prop
     ? "No tamanho <b>Personalizado</b> quem manda são os dois campos acima: a " +
       "orientação fica de lado, e a foto sai com a largura e a altura que você digitou."
@@ -1403,6 +1416,12 @@ $("copias").addEventListener("change", function(){
 $("cantos").addEventListener("input", function(){
   var v = parseInt(this.value, 10);
   papelCantos = isNaN(v) ? 0 : Math.max(0, Math.min(30, v));
+  draw(); pushLater();
+});
+$("instaxTopo").addEventListener("input", function(){
+  var v = parseFloat(String(this.value).replace(",", "."));
+  if (isNaN(v)) return;
+  instaxTopo = Math.max(0, Math.min(24, v));
   draw(); pushLater();
 });
 $("numerar").addEventListener("change", function(){
@@ -1567,4 +1586,72 @@ $("modalOne").addEventListener("click", function(){ fecharModal(); recalc(false)
 $("modal").addEventListener("click", function(e){ if (e.target === this) fecharModal(); });
 document.addEventListener("keydown", function(e){
   if (e.key === "Escape" && !$("modal").classList.contains("hide")) fecharModal();
+});
+
+/* ---- a foto a mais ---------------------------------------------------
+   Uma peça sem furo nenhum: o retângulo de uma foto revelada, com a imagem
+   para ver o encaixe. Os tamanhos são os mesmos da foto principal. */
+function montaFotoTam(){
+  var s = $("fotoTam");
+  if (s.options.length) return;
+  [].forEach.call($("photoSize").options, function(o){
+    if (o.value === "none" || o.value === "custom") return;
+    var n = document.createElement("option");
+    n.value = o.value; n.textContent = o.textContent.split(" (")[0];
+    s.appendChild(n);
+  });
+  var n = document.createElement("option");
+  n.value = ""; n.textContent = "outro";
+  n.disabled = true;
+  s.appendChild(n);
+}
+
+function addFoto(){
+  var v = $("photoSize").value;
+  if (v === "none" || v === "custom") v = "100x150";
+  var q = v.split("x"), w = +q[0], h = +q[1];
+  var el = { kind: "foto", tam: v, w: w, h: h, x: 0, y: 0, rot: 0, flip: 0,
+             cells: [], edits: [], manual: 0, img: "", nome: "" };
+  poeEmLugarLivre(el);
+  els.push(el); sel = els.length - 1; soUm(sel); foco = "el";
+  renderChips(); syncControls(); draw(); pushHist();
+}
+$("addFoto").addEventListener("click", addFoto);
+
+// trocar o tamanho mantém o centro onde está
+function mudaFoto(el, w, h){
+  var b = elPaperBox(el), cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+  el.w = w; el.h = h;
+  el.x = dec1(cx - w / 2); el.y = dec1(cy - h / 2);
+  renderChips(); draw(); pushHist();
+}
+$("fotoTam").addEventListener("change", function(){
+  var el = els[sel];
+  if (!el || el.kind !== "foto" || !this.value) return;
+  var q = this.value.split("x"), w = +q[0], h = +q[1];
+  if (el.w > el.h) { var t = w; w = h; h = t; }     // continua deitada se estava
+  el.tam = this.value;
+  mudaFoto(el, w, h);
+});
+$("fotoGira").addEventListener("click", function(){
+  var el = els[sel];
+  if (el && el.kind === "foto") mudaFoto(el, el.h, el.w);
+});
+$("fotoImg").addEventListener("click", function(){ $("fotoArq").click(); });
+$("fotoArq").addEventListener("change", function(e){
+  var f = e.target.files && e.target.files[0], el = els[sel];
+  e.target.value = "";
+  if (!f || !el || el.kind !== "foto") return;
+  var rd = new FileReader();
+  rd.onload = function(){
+    var img = new Image();
+    img.onload = function(){
+      var id = novoId();
+      guardaOrigem(id, img, FOTO_MAX_PX);
+      el.img = id; el.nome = f.name.replace(/\.[^.]+$/, "").slice(0, 30);
+      renderChips(); syncControls(); draw(); pushHist();
+    };
+    img.src = rd.result;
+  };
+  rd.readAsDataURL(f);
 });

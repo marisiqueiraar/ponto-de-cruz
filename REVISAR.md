@@ -360,3 +360,15 @@ escolha, escolhi assim:
   imagem de origem, então largura e sensibilidade ficam paradas nele. Mais de
   35 linhas (o limite de uma letra por quadradinho) junta as que sobram na mais
   parecida, com aviso.
+
+**Fotos.**
+- **A foto a mais é uma peça**, e não uma segunda "foto principal". A
+  principal continua sendo a referência de tudo (onde as peças novas nascem,
+  em volta de quem a moldura nasce, o que o PDF manda colar onde). A foto a
+  mais ganha de graça o que as peças já têm: ímã, laço, alinhar, duplicar,
+  desfazer e moldura em volta. O que ela não tem: girar a imagem dentro do
+  retângulo, a janela do Instax (só a principal desenha) e a frase "cole a
+  foto a X mm" no PDF. A imagem dela é guardada com até 1000 px no lado maior.
+- **A borda de cima do Instax** começa em 6 mm. É um chute com base na conta
+  (sobram 24 mm entre cima e embaixo, e a de baixo é a grossa); por isso virou
+  campo, e não número fixo. Deitada, a borda de cima fica à esquerda.

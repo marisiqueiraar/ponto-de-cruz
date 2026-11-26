@@ -160,6 +160,13 @@
       <button type="button" id="retoInv" class="tbtn hide" title="Troca o claro pelo escuro — para desenho claro sobre fundo escuro.">inverter</button>
     </fieldset>
 
+    <fieldset id="ctlFoto" class="hide">
+      <span class="t"><span>tamanho</span><select id="fotoTam"></select></span>
+      <button type="button" id="fotoGira" class="tbtn" title="Troca a largura pela altura.">deitar</button>
+      <button type="button" id="fotoImg" class="tbtn">escolher imagem</button>
+      <input id="fotoArq" type="file" accept="image/*" class="hide">
+    </fieldset>
+
     <span class="grp hide" id="ctlPiece">
       <span class="t"><span>inclinação</span><input id="rot" type="number" min="-45" max="45" step="1" value="0"><b id="rotOut" class="hide">0</b></span>
     </span>
@@ -305,6 +312,12 @@
       <div class="field"><label for="photoWmm">Largura em mm</label><input id="photoWmm" type="number" min="20" max="500" value="100"></div>
       <div class="field"><label for="photoHmm">Altura em mm</label><input id="photoHmm" type="number" min="20" max="500" value="150"></div>
     </div>
+    <div class="field hide" id="instaxCampo">
+      <label for="instaxTopo">Borda de cima do Instax, em mm</label>
+      <input id="instaxTopo" type="number" min="0" max="24" step="0.5" value="6">
+    </div>
+    <p class="note hide" id="instaxNota">A janela tracejada é onde a imagem sai no cartão. A
+      Fujifilm não publica a borda de cima: meça uma vez com a régua numa foto sua e corrija aqui.</p>
     <p class="note" id="photoAviso"></p>
     <p class="note" id="photoNota"></p>
     <p class="note" id="photoCabe"></p>
@@ -317,6 +330,11 @@
     tela e no PDF, e não vira furo. Para mover, girar ou centralizar, toque na foto no papel —
     os botões aparecem na barra de cima.</p>
     </div>
+    <div class="rule"></div>
+    <button id="addFoto" class="wide">pôr mais uma foto</button>
+    <p class="note">Para o cartão com duas fotos, ou a foto pequena no marca-página. A foto a mais
+    é uma peça: anda, encosta, entra no laço e pode ter uma moldura em volta (escolha ela em
+    <b>em volta de</b>, na barra da moldura). Ela sai no PDF como um retângulo, como a principal.</p>
   </section>
 
   <section class="pane on" data-pane="pecas">

@@ -815,6 +815,7 @@ function aplicaMaos(el){
 
 // descarta: só o Recalcular pede a peça limpa, e ele avisa antes
 function rebuild(el, descarta){
+  if (el.kind === "foto") return;          // a foto a mais não tem desenho a refazer
   // o Recalcular joga fora também os pontos ligados e cortados à mão
   if (el.kind === "reto"){ if (descarta) el.maos = []; refazReto(el); return; }
   var rowsAntes = el.cells && el.cells.length ? el.cells.length : 0;
