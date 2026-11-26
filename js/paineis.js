@@ -156,6 +156,14 @@ function renderMoldes(){
     a.appendChild(nm); a.appendChild(qd);
     a.addEventListener("click", function(){ abreMolde(it.id); });
 
+    var f = document.createElement("button");
+    f.type = "button"; f.className = "fixa" + (it.fixo ? " on" : "");
+    f.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3l7 7-2 2-1-1-4 4 1 4-2 2-4-4-5 5-1-1 5-5-4-4 2-2 4 1 4-4-1-1z"/></svg>';
+    f.title = it.fixo ? "soltar do topo" : "fixar no topo da lista";
+    f.setAttribute("aria-label", (it.fixo ? "soltar do topo o molde " : "fixar no topo o molde ") + (it.nome || "sem nome"));
+    f.setAttribute("aria-pressed", it.fixo ? "true" : "false");
+    f.addEventListener("click", function(){ fixaMolde(it); });
+
     var x = document.createElement("button");
     x.type = "button"; x.className = "apaga";
     x.textContent = "×";
@@ -163,7 +171,7 @@ function renderMoldes(){
     x.setAttribute("aria-label", "apagar o molde " + (it.nome || "sem nome"));
     x.addEventListener("click", function(){ apagaMolde(it.id); });
 
-    l.appendChild(a); l.appendChild(x);
+    l.appendChild(a); l.appendChild(f); l.appendChild(x);
     box.appendChild(l);
   });
   // o campo do nome não é reescrito enquanto estão digitando nele
@@ -187,10 +195,23 @@ function abreItem(it){
 }
 
 /* A estante fica por ordem de uso: o molde aberto sobe para o topo. Antes era
-   por ordem de criação, e o molde de todo dia afundava debaixo dos testes. */
+   por ordem de criação, e o molde de todo dia afundava debaixo dos testes.
+   O molde fixado (o alfinete) fica sempre em cima dos outros; entre os
+   fixados, vale também a ordem de uso. */
 function sobeNaEstante(it){
   var i = estante.itens.indexOf(it);
-  if (i > 0){ estante.itens.splice(i, 1); estante.itens.unshift(it); }
+  if (i < 0) return;
+  estante.itens.splice(i, 1);
+  var topo = 0;
+  if (!it.fixo) while (topo < estante.itens.length && estante.itens[topo].fixo) topo++;
+  estante.itens.splice(topo, 0, it);
+}
+
+function fixaMolde(it){
+  it.fixo = it.fixo ? 0 : 1;
+  sobeNaEstante(it);
+  salvaEstante();
+  renderMoldes();
 }
 
 function abreMolde(id){

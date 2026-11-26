@@ -50,8 +50,16 @@ function drawFotoPeca(ctx, el, k, region, alpha){
   ctx.save();
   ctx.translate((b.x - region.x + b.w / 2) * k, (b.y - region.y + b.h / 2) * k);
   ctx.rotate(el.rot * Math.PI / 180);
-  var W = b.w * k, H = b.h * k;
+  var W = b.w * k, H = b.h * k, jan = janelaDaFoto(el);
   ctx.globalAlpha = alpha;
+  if (jan){
+    // no Instax, o cartão branco, e a imagem só na janela dela
+    ctx.fillStyle = "#FBFBF8"; ctx.fillRect(-W / 2, -H / 2, W, H);
+    ctx.save();
+    ctx.translate((jan.x + jan.w / 2 - b.w / 2) * k, (jan.y + jan.h / 2 - b.h / 2) * k);
+    W = jan.w * k; H = jan.h * k;
+    b = { w: jan.w, h: jan.h };
+  }
   if (img){
     var ir = img.width / img.height, tr = b.w / b.h, sw, sh, sx, sy;
     if (ir > tr){ sh = img.height; sw = sh * tr; sx = (img.width - sw) / 2; sy = 0; }
@@ -63,9 +71,16 @@ function drawFotoPeca(ctx, el, k, region, alpha){
     ctx.fillStyle = "#9A948A";
     ctx.font = "12px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText(fmt(b.w) + " × " + fmt(b.h) + " mm", 0, 4);
+    ctx.fillText(fmt(el.w) + " × " + fmt(el.h) + " mm", 0, 4);
   }
   ctx.globalAlpha = 1;
+  if (jan){
+    ctx.strokeStyle = "rgba(30,42,38,.45)"; ctx.setLineDash([3, 3]); ctx.lineWidth = 1;
+    ctx.strokeRect(-W / 2 + .5, -H / 2 + .5, W - 1, H - 1);
+    ctx.setLineDash([]);
+    ctx.restore();
+    W = el.w * k; H = el.h * k;
+  }
   ctx.strokeStyle = "#1E2A26";
   ctx.lineWidth = 1;
   ctx.strokeRect(-W / 2 + .5, -H / 2 + .5, W - 1, H - 1);

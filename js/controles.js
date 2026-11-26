@@ -984,21 +984,28 @@ $("delEl").addEventListener("click", function(){
 /* Espelhar mexe nas células como elas estão, e não refaz a peça: quem
    acendeu quadradinho à mão vê o ajuste virar junto em vez de sumir. A marca
    fica gravada para o próximo Recalcular espelhar também. */
+// espelha o desenho da peça no lugar; a foto a mais não tem desenho
+function espelhaPeca(el){
+  if (el.kind === "foto") return;
+  el.flip = el.flip ? 0 : 1;
+  if (el.kind === "reto"){ refazNoCentro(el); return; }
+  el.cells = espelha(el.cells);
+  // as colunas viraram, e com elas a lista: ajuste espelhado continua no
+  // mesmo lugar do desenho em vez de aparecer do outro lado — e o que já
+  // foi marcado como bordado também
+  var colsEsp = el.cells[0] ? el.cells[0].length : 0;
+  (el.edits || []).forEach(function(e){ e.q = colsEsp - 1 - e.q; });
+  if (el.feito && el.feito.k){
+    var k = {};
+    Object.keys(el.feito.k).forEach(function(c){ var rq = c.split(","); k[rq[0] + "," + (colsEsp - 1 - rq[1])] = 1; });
+    el.feito.k = k;
+  }
+}
+
 $("flipEl").addEventListener("click", function(){
   var el = els[sel];
   if (!el) return;
-  el.flip = el.flip ? 0 : 1;
-  if (el.kind === "reto"){
-    refazNoCentro(el);
-    this.classList.toggle("on", !!el.flip);
-    renderChips(); draw(); pushHist();
-    return;
-  }
-  el.cells = espelha(el.cells);
-  // as colunas viraram, e com elas a lista: ajuste espelhado continua no
-  // mesmo lugar do desenho em vez de aparecer do outro lado
-  var colsEsp = el.cells[0] ? el.cells[0].length : 0;
-  (el.edits || []).forEach(function(e){ e.q = colsEsp - 1 - e.q; });
+  espelhaPeca(el);
   this.classList.toggle("on", !!el.flip);
   renderChips(); draw(); pushHist();
 });
